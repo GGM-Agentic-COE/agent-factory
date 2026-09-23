@@ -1,9 +1,34 @@
 models:
+
   - type: main
     engine: openai
-    model: gpt-4.1
+    model: gpt-5.4
+
 
 rails:
   input:
     flows:
-      - check input validation
+      - self check input
+
+prompts:
+  - task: self_check_input
+    content: |
+      Your task is to check if the user input is well-formed, meaningful, and a legitimate request the agent can process.
+
+      User input: "{{ user_input }}"
+
+      Flag ONLY if the input contains issues such as:
+      1. Gibberish or random characters instead of valid JSON or a clear natural language request, e.g. "asdkj !!123 xzxz"
+      2. Empty or effectively empty content with no meaningful information, e.g. "" or "   "
+      3. JSON payloads missing a required `parameters` object or required fields, e.g. {"action": "run"} with no parameters block
+      4. Field values that exceed reasonable configured length limits, e.g. a name field containing thousands of characters
+      5. Requests that are not legitimate or processable by the agent, e.g. content unrelated to any actionable task
+
+      Do NOT flag:
+      - Unusual but clear and legitimate natural language requests
+      - Valid JSON with all required fields present, regardless of formatting style
+      - Short but meaningful requests
+      - Requests in languages other than English, as long as they are clear and well-formed
+
+      Answer only "yes" if the input is safe and contains no invalid input issues.
+      Answer "no" if the input contains invalid input issues.

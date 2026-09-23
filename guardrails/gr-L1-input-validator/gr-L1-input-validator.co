@@ -1,15 +1,13 @@
-# gr-L1-input-validator — LLM-Driven Colang Implementation
-# Layer: L1 — Input Validator
-# Validation: LLM self_check (pure Colang)
-# Python actions preserved in actions.py for reference/hybrid mode
+# gr-L1-input-validator — Prompt-Only Mode
+# Layer: L1
+# Triggers on: input
 
-define flow check input validation
-  """LLM validates input validator rules on input."""
-  $result = execute self_check_input
+define bot refuse to respond
+  "{\"detected\": true, \"verdict\": \"rejected\", \"reason\": \"Input is malformed, empty, or not a legitimate request the agent can handle\", \"severity\": \"medium\", \"category\": \"invalid_input\", \"rail\": \"input\"}"
 
-  if not $result
-    bot block L1 input validator
-    stop
+define bot inform cannot answer
+  "{\"detected\": true, \"verdict\": \"rejected\", \"reason\": \"Input is malformed, empty, or not a legitimate request the agent can handle\", \"severity\": \"medium\", \"category\": \"invalid_input\", \"rail\": \"input\"}"
 
-define bot block L1 input validator
-  "Input rejected: request does not match expected format. Please check required fields and try again."
+define bot inform answer unknown
+  "{\"detected\": true, \"verdict\": \"rejected\", \"reason\": \"Input is malformed, empty, or not a legitimate request the agent can handle\", \"severity\": \"medium\", \"category\": \"invalid_input\", \"rail\": \"input\"}"
+

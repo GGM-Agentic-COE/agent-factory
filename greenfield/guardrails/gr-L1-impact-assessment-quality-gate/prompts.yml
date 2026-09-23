@@ -1,57 +1,43 @@
+models:
+
+  - type: main
+    engine: openai
+    model: gpt-5.4
+
+
+rails:
+  output:
+    flows:
+      - self check output
+
 prompts:
   - task: self_check_output
     content: |
-      L1-planning-impact-assessor's original input (prd_output, service_catalog,
-      cmdb_export): {{ original_input }}
-      L1-planning-impact-assessor's original output (items): {{ generator_output }}
-      L1-planning-impact-assessor-evaluator's verdict (fixes_applied, final_decision): {{ bot_response }}
+      Your task is to check if the bot response (resultant impact-assessment content) passes every Quality Gate checklist item and every rubric score threshold below.
 
-      Reconstruct the RESULTANT output: L1-planning-impact-assessor's items
-      with every fixes_applied[].before → after substitution resolved in.
-      Check that resultant content — not the evaluator's own scoring
-      bookkeeping — against L1-planning-impact-assessor/output_schema.json
-      and its evaluation.md rubric:
+      Bot response: "{{ bot_response }}"
 
-      1. Schema compliance: does capability_check have summary (>=20 chars),
-         matched_service_id (SVC- pattern or null), is_duplicate, and
-         rationale (>=20 chars)? Does every existing_system_impact[] entry
-         have ci_id (CI- pattern), system_name, touched, how_or_why_not
-         (>=10 chars), related_components? Does every components[] entry
-         have requirement_id (FR- pattern), component_name, is_new,
-         blast_radius, rationale (>=10 chars)? Does every
-         external_dependencies[] entry have name, description (>=20 chars),
-         related_components, newly_surfaced?
-      2. Blast-radius validity: is every components[].blast_radius exactly
-         Low, Medium, or High?
-      3. Capability check not vacuous: if service_catalog has real
-         entries, does matched_service_id name a real SVC- id actually
-         present in that catalog (never null, never invented) unless the
-         catalog is genuinely empty?
-      4. Technical-touch check not skipped: if service_catalog and
-         cmdb_export both have real entries, is existing_system_impact[]
-         non-empty (something was actually checked)?
-      5. CI id validity: does every existing_system_impact[].ci_id actually
-         exist in cmdb_export's configuration_items (no invented CI id),
-         unless cmdb_export is genuinely empty?
-      6. Full FR coverage: does the set of components[].requirement_id
-         values exactly equal the set of FR ids in
-         prd_output.content.items.requirements[].id — no FR unmapped, no
-         invented FR id?
-      7. CMDB/KB mismatch flagged: where a plausible mismatch exists
-         between what the CMDB shows and what kb-L1-enterprise-architecture
-         would claim for a CI, is it stated as a finding in that
-         how_or_why_not, not silently reconciled?
-      8. Reasoning quality: does every how_or_why_not/rationale field
-         genuinely explain the decision, not just restate the finding?
-      9. Newly-surfaced dependency completeness: is anything newly
-         surfaced by the capability/technical-touch checks (e.g. an
-         identity-provider gap) reflected in external_dependencies with
-         newly_surfaced=true?
-      10. Empty-source explicit statement: when service_catalog/cmdb_export
-          are genuinely empty, does capability_check/existing_system_impact
-          say so explicitly, rather than reading as an unchecked or
-          skipped catalog/CMDB?
+      Flag ONLY if the response fails any of these Quality Gates:
+      1. Capability check genuinely run against service_catalog, not skipped — names the closest candidate service even when it is not a duplicate, never "no similar service found" with nothing checked.
+      2. Every CMDB CI relevant to a proposed component is checked and cross-referenced against kb-L1-enterprise-architecture's narrative — a mismatch between what the CMDB shows and what the KB claims is flagged as a finding, never silently resolved by picking one source.
+      3. Every FR in prd.md is mapped to a component with a stated blast-radius rationale (Low/Medium/High) — no FR silently unmapped.
+      4. external_dependencies includes anything newly surfaced by the capability/technical-touch checks, not just what the PRD already named.
+      5. A genuinely empty service_catalog/cmdb_export (no parent enterprise) is stated explicitly as such, never confused with an unchecked or skipped catalog/CMDB.
+      6. Faithfulness below 0.90 — an item does not trace to a real prd.md requirement, service_catalog entry, or CMDB CI.
+      7. Hallucination above 0.10 — an invented service, CI, or dependency absent from the input sources.
+      8. Consistency below 0.90 — existing_system_impact disagrees with kb-L1-enterprise-architecture, or two components contradict on the same requirement.
+      9. Relevance below 0.85 — the output is not usable as-is by L1-planning-dependency-mapper and L1-planning-backlog-prioritizer.
+      10. Reasoning quality below 0.80 — a rationale or how_or_why_not merely restates the finding instead of explaining it.
+      11. Any service in service_catalog.services[] not genuinely checked, or assumed clear without checking.
+      12. Any relevant CI in cmdb_export skipped as "probably not relevant" instead of genuinely checked.
+      13. Any CMDB/KB disagreement silently reconciled instead of flagged.
+      14. "No existing internal systems affected" conflated with "no external dependencies" instead of both sections being independently populated.
 
-      Answer "yes" if ALL checks pass on the RESULTANT content. Answer "no"
-      if ANY check fails — this gates what actually flows to
-      L1-planning-dependency-mapper and L1-planning-backlog-prioritizer.
+      Do NOT flag:
+      - status "failed" with reason "INSUFFICIENT_CONTEXT" — this is a legitimate refusal, not a defect.
+      - matched_service_id being null when service_catalog is genuinely empty and stated as such.
+      - existing_system_impact[] being empty when service_catalog and cmdb_export are both genuinely empty and stated as such.
+      - blast_radius values that are exactly "Low", "Medium", or "High" with a stated rationale.
+
+      Answer only "yes" if the response passes every Quality Gate and every rubric threshold above.
+      Answer "no" if the response fails any Quality Gate or falls below any rubric threshold.

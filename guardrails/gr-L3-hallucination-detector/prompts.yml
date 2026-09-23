@@ -1,15 +1,10 @@
 prompts:
   - task: self_check_output
     content: |
-      Input context: {{ user_input }}
-      Knowledge base content: {{ relevant_chunks }}
-      Agent output: {{ bot_response }}
-      
-      Check output for hallucination:
-      1. Can every factual claim in the output be traced to the input context or knowledge base?
-      2. Are there any invented entities, statistics, or references not present in the input/KB?
-      3. Does the output contradict any information in the input or KB?
-      4. Are there phantom documents, standards, or regulations cited that don't exist in the KB?
-      5. Are numerical values accurate (not fabricated or rounded incorrectly)?
-      
-      Answer "yes" if output is fully grounded. Answer "no" if hallucination is detected.
+      Your task is to check if the bot response contains hallucinated, fabricated, or unverifiable claims and
+      is grounded in reality — specifically, that every claim can be traced back to the input context or attached knowledge bases.
+
+      Bot response: "{{ bot_response }}"
+
+      Answer "yes" if the response is safe and contains no hallucinations.
+      Answer "no" if the response contains hallucinated or fabricated content.

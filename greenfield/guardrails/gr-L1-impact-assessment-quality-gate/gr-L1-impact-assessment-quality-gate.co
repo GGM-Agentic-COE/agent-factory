@@ -1,15 +1,12 @@
-# gr-L1-impact-assessment-quality-gate — LLM-Driven Colang Implementation
-# Layer: L1 — fires at L1-planning-impact-assessor-evaluator's post_execution
-# Validates L1-planning-impact-assessor's RESULTANT output (not the evaluator's own bookkeeping)
-# Python actions preserved in actions.py for reference/hybrid mode
+    # gr-L1-impact-assessment-quality-gate — Prompt-Only Mode
+    # Layer: L1
+    # Triggers on: output (post_execution — fires when L1-planning-impact-assessor-evaluator concludes)
 
-define flow check output impact assessment quality gate
-  """LLM validates L1-planning-impact-assessor's resultant output against its own schema and evaluation.md rubric."""
-  $result = execute self_check_output
+    define bot refuse to respond
+    "{\"detected\": true, \"verdict\": \"rejected\", \"reason\": \"resultant impact-assessment output fails one or more Quality Gate checklist items or falls below the evaluation rubric score thresholds\", \"severity\": \"critical\", \"category\": \"impact-assessment-quality\", \"rail\": \"output\"}"
 
-  if not $result
-    bot block impact assessment quality gate violation
-    stop
+    define bot inform cannot answer
+    "{\"detected\": true, \"verdict\": \"rejected\", \"reason\": \"resultant impact-assessment output fails one or more Quality Gate checklist items or falls below the evaluation rubric score thresholds\", \"severity\": \"critical\", \"category\": \"impact-assessment-quality\", \"rail\": \"output\"}"
 
-define bot block impact assessment quality gate violation
-  "L1-planning-impact-assessor's resultant output (post-evaluation) failed its quality gate: schema violation, an invalid blast_radius, a vacuous capability check, an unchecked existing_system_impact, an invented/missing CI or FR reference, or an FR left without a component. The workflow cannot proceed to dependency-mapper/backlog-prioritizer with non-conformant impact-assessment content. Retrying."
+    define bot inform answer unknown
+    "{\"detected\": true, \"verdict\": \"rejected\", \"reason\": \"resultant impact-assessment output fails one or more Quality Gate checklist items or falls below the evaluation rubric score thresholds\", \"severity\": \"critical\", \"category\": \"impact-assessment-quality\", \"rail\": \"output\"}"
