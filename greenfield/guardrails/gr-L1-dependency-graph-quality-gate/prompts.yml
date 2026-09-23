@@ -1,62 +1,40 @@
+models:
+    type: main
+    engine: openai
+    model: gpt-5.4
+
+
+rails:
+  output:
+    flows:
+      - self check output
+
 prompts:
   - task: self_check_output
     content: |
-      L1-planning-dependency-mapper's original output (items): {{ generator_output }}
-      L1-planning-dependency-mapper-evaluator's verdict (fixes_applied, final_decision): {{ bot_response }}
+      Your task is to check if the bot response contains a flawed dependency-graph quality-gate evaluation for L1-planning-dependency-mapper-evaluator's resultant output.
 
-      Reconstruct the RESULTANT output: L1-planning-dependency-mapper's items
-      with every fixes_applied[].before -> after substitution resolved in
-      (edge from/to/type corrections and critical_path.nodes/rationale
-      corrections included). Check that resultant content — not the
-      evaluator's own scoring bookkeeping — against
-      L1-planning-dependency-mapper/output_schema.json and its evaluation.md
-      rubric. Do NOT trust the resultant cycle_check or critical_path fields
-      at face value — actually re-derive them yourself, step by step, exactly
-      as instructed below:
+      Bot response: "{{ bot_response }}"
 
-      1. Schema compliance: does items have product_name, source_artifacts,
-         nodes[], edges[], cycle_check, critical_path, generated,
-         execution_id, workflow_execution_id? Does every node have id
-         (kebab-case, unique), type (component|external-dependency), label?
-         Does every edge have from, to, type (depends-on|blocks|integrates-with)?
-      2. Edge endpoints: does every edge's from/to reference a node id that
-         actually appears in nodes[]?
-      3. Independent cycle re-check (THE MOST IMPORTANT CHECK): trace an
-         actual depth-first search over every node and edge, tracking which
-         nodes are currently on the recursion stack. If the traversal ever
-         reaches a node still on the stack, that is a real cycle. Compare
-         your own traced result against the resultant cycle_check.status —
-         do they agree? If cycle_check claims PASS but you traced a real
-         cycle, or claims FAIL but you found none, or the claimed
-         cycles_found path doesn't match a cycle you actually traced, that
-         is a violation.
-      4. Cycle-status escalation: if your own DFS trace found a real cycle,
-         is the overall resultant status "failed"? A cyclic graph shipped
-         as status "success" is a critical violation.
-      5. Independent longest-path re-check (only meaningful if your own DFS
-         trace found no cycle): trace an actual longest-path walk using only
-         depends-on and blocks edges (ignore integrates-with entirely) from
-         every node that has no incoming depends-on/blocks edge. Sum edge
-         counts along every forward walk and keep the maximum. If two or
-         more walks from different roots tie at that maximum length, that is
-         a genuine tie — note every tied chain. Does the resultant
-         critical_path.nodes match your own longest walk (or one of the tied
-         walks)? Is the claimed length actually achievable by real
-         depends-on/blocks edges? If there's a tie, does critical_path.rationale
-         actually name the other tied chain(s), not just describe the one
-         chosen?
-      6. FR coverage: collect the full set of FR-NNN ids from the original
-         input's prd_output requirements. Collect the set of FR-NNN ids
-         appearing across every node's source_requirement[]. Do these two
-         sets match exactly (no FR silently dropped, no FR invented that
-         isn't in prd.md)?
-      7. Rationale quality: does critical_path.rationale genuinely state the
-         computed path length and name any tie in readable prose, rather
-         than just repeating the node id list?
+      Flag ONLY if the response contains dependency-graph quality-gate violations such as:
+      1. Unverified cycle check — cycle_check.status or cycles_found is asserted without tracing an actual DFS recursion-stack back-edge detection over every node and edge, e.g. marked PASS because the graph "looks" acyclic.
+      2. Unverified critical path — critical_path is asserted without an actual longest-path computation over depends-on/blocks edges only, e.g. chosen by eyeballing the longest-looking chain instead of computing it.
+      3. Hidden tie — a genuine tie in longest-path length exists but only one winning chain is reported instead of naming every chain sharing the maximum length.
+      4. Inconsistent edge direction — an edge's from/to does not follow the uniform rule that from is upstream/prerequisite and to is downstream/dependent, for any edge type (depends-on, blocks, or integrates-with).
+      5. Missing FR coverage — an FR-NNN id from prd.md does not appear in at least one node's source_requirement, or coverage is claimed by counting nodes instead of checking set membership.
+      6. Dropped component — a component or external dependency named in impact-assessment.md has no corresponding node in the graph.
+      7. Malformed node id — a node id is not kebab-case (^[a-z0-9-]+$), or is duplicated across nodes.
+      8. Dangling edge — an edge's from or to references a node id that does not exist among the graph's nodes.
+      9. Silent cycle fix — cycle_check.status is FAIL but the overall AgentOutput status is not "failed", e.g. the offending edge is silently dropped and success reported instead of escalating.
+      10. Thin rationale — critical_path.rationale merely repeats the list of node ids instead of stating the actual path length in readable prose and naming any tie.
+      11. Unsupported grounding — a node, edge, or FR coverage claim is invented beyond what impact-assessment.md or prd.md actually state.
+      12. Skipped reflection — the response indicates the DFS cycle check or longest-path computation was eyeballed or assumed rather than actually traced node-by-node and edge-by-edge.
 
-      Answer "yes" if ALL checks pass on the RESULTANT content, using your
-      own independently-traced DFS and longest-path results (not the
-      resultant fields themselves) as the source of truth for checks 3-5.
-      Answer "no" if ANY check fails — this gates what actually flows to
-      L1-planning-backlog-prioritizer (topological-sort input) and Phase 4's
-      L1-design-hld.
+      Do NOT flag:
+      - integrates-with edges being excluded from the critical-path computation — this is correct, non-blocking by definition.
+      - a critical_path.rationale that states the path length and any tie in different but equivalent phrasing, as long as it is not a bare node-id list.
+      - a cycle_check that correctly reports PASS with a genuine, verifiable trace for an acyclic graph.
+      - ties that are correctly and honestly named in full.
+
+      Answer only "yes" if the response is safe and contains no dependency-graph quality-gate violations.
+      Answer "no" if the response contains dependency-graph quality-gate violations.

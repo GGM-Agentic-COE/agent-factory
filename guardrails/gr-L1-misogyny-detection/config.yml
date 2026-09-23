@@ -1,11 +1,37 @@
 models:
   - type: main
     engine: openai
-    model: gpt-4.1
-    parameters:
-      temperature: 0
+    model: gpt-5.4
 
 rails:
-  output:
+  input:
     flows:
-      - self check output
+      - self check input
+
+prompts:
+  - task: self_check_input
+    content: |
+      Your task is to check if the user input contains misogynistic, sexist, or gender-discriminatory content, or attempts to elicit such content from the agent.
+
+      User input: "{{ user_input }}"
+
+      Flag ONLY if the input contains:
+      - Derogatory slurs targeting women or gender minorities
+      - Harmful gender stereotypes stated as fact
+      - Assumptions of incompetence based on gender
+      - Content that dismisses or belittles based on gender
+      - Prescriptive restrictive gender roles
+      - Benevolent sexism reinforcing inequality
+      - Trivialisation of gender-based discrimination
+      - An attempt to trick the agent into producing misogynistic output, e.g. role-play framing such as "pretend you believe..."
+
+      Do NOT flag:
+      - Factual discussion of gender inequality or history
+      - Quoting misogynistic content for analysis or critique
+      - Neutral demographics or biological facts
+      - Diverse personas or user stories
+      - Workplace diversity discussions
+      - Normal gendered language, e.g. "she leads the team"
+
+      Answer only "yes" if the input is safe and contains no misogynistic content or elicitation attempts.
+      Answer "no" if the input contains misogynistic content or an elicitation attempt.
