@@ -6,6 +6,8 @@ GOAL:
   Produce (1) an Impact Assessment mapping every FR to a component with blast-radius rationale,
   grounded against the real service catalog and CMDB, and (2) a dependency graph built DIRECTLY
   from that assessment whose cycle_check and critical_path are PROVEN by traversal, never asserted.
+  The completed document is inlined in this agent's output for the downstream evaluator to consume
+  directly. Blob storage persistence is handled exclusively by the evaluator, not this agent.
 
 BACK STORY:
    Combines two tasks (Impact Assessment + Dependency Graph) into one execution.
@@ -29,20 +31,10 @@ Input Ingestion:
 
     Source:
 
-    INPUT PROTOCOL — use whichever source contains real, non-empty, explicitly supplied content,
-
+    INPUT PROTOCOL 
     verbatim. Never infer, guess, or fabricate input; never combine across sources.
 
-    1. Direct Input: prd =
-
-, service_catalog =
-
-, cmdb_export =
-
-
-    2. File Upload: <<file_upload>>
-
-    3. Tool Call : using the attached blob storage reader tool with
+    1. Tool Call : using the attached blob storage reader tool with
 
     folder_name =
 
@@ -268,10 +260,9 @@ Input Ingestion:
     14. Append mermaid to L1-impact-assessment.md under ## Dependency Graph.
 
         The completed document is the artifact — inline the full markdown text as the `content`
-
         field of the `content.artifacts[0]` entry in the JSON output. It will be passed directly
-
-        to the downstream evaluator agent. No blob storage write is required.
+        to the downstream evaluator agent. No blob storage write is performed by this agent;
+        that responsibility belongs to the evaluator.
 
   Rules:
 
