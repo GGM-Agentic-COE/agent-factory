@@ -1,0 +1,55 @@
+{
+  "delta_id": "PLT-HLD-D01",
+  "target_document": "platform/egress-gateway/hld.md",
+  "component": "egress-gateway",
+  "component_kind": "platform",
+  "produced_by": "L1-design-platform-architect@1.0.0",
+  "execution_id": "exec-pltd-0c1d2e3b",
+  "workflow_execution_id": "wf-hl-pi1-3c4d5e6f",
+  "cycle": "C1-producer-registration",
+
+  "from_version": "0.0.0",
+  "to_version": "1.0.0",
+  "creates_document": true,
+  "type": "additive",
+  "version_bump": "major",
+  "structural": false,
+  "adr_required": false,
+
+  "changes": [
+    {
+      "section": "C4-2 Container",
+      "operation": "add",
+      "content": "egress-gateway — managed egress gateway fronting the private application network. Default-deny outbound. Not a deployable the product team releases; a platform component the platform team owns.",
+      "derived_from": ["plt PLTD-01", "plt PLT-8"]
+    },
+    {
+      "section": "HLD-5 Integrations",
+      "operation": "add",
+      "content": "One allowlist entry at Cycle 1: the competent authority's FBO register, consumed by identity-service via INT-4.7. Every allowlist entry carries a destination, a named owner and a stated reason — PLT-C5 checks all three.",
+      "derived_from": ["int INT-4.7", "plt PLTD-06"]
+    },
+    {
+      "section": "HLD-6 NFR allocation",
+      "operation": "add",
+      "content": "Timeout posture is PENDING (PLT-PEND-04): the gateway fronts a call whose latency budget is itself PENDING (INT-PEND-04), and setting one now would make the gateway's timeout the de facto budget by accident — established by an infrastructure default rather than by a decision. Ships with the platform default, recorded as a default rather than a decision.",
+      "derived_from": ["plt PLT-17", "int INT-PEND-04"],
+      "finding_ref": "PLTD-F02"
+    },
+    {
+      "section": "HLD-11 Observability",
+      "operation": "add",
+      "content": "Emits per-destination metrics and denied-attempt logs to the observability platform (PLT-12). A denied attempt is a signal, not a silent drop — an unlisted destination someone is trying to reach is exactly what PLT-C5 exists to surface.",
+      "derived_from": ["plt PLT-12"]
+    },
+    {
+      "section": "HLD-12 Security posture",
+      "operation": "add",
+      "content": "The gateway authorises the DESTINATION and holds no caller credentials. Caller authentication is the vault's, read at runtime by wi-identity. TLS is not terminated here — no inspection, no re-encryption.",
+      "derived_from": ["plt PLTD-03", "plt PLTD-04", "kb-L1-enterprise-security ES10"]
+    }
+  ],
+
+  "findings_raised": ["PLTD-F02"],
+  "guardrails": { "gr-L1-consistency-check": "pass", "gr-L1-secret-scanner": "pass" }
+}

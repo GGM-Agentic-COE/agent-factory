@@ -1,0 +1,35 @@
+{
+  "delta_id": "LLD-D03",
+  "target_document": "services/notifications-worker/lld.md",
+  "component": "notifications-worker",
+  "produced_by": "L1-design-lld@1.0.0",
+  "execution_id": "exec-lld-7f8a9b0d",
+  "workflow_execution_id": "wf-hl-pi1-3c4d5e6f",
+  "cycle": "C1-producer-registration",
+
+  "from_version": "0.0.0",
+  "to_version": "1.0.0",
+  "creates_document": true,
+  "type": "additive",
+  "version_bump": "major",
+  "structural": false,
+  "adr_required": false,
+
+  "changes": [
+    {
+      "section": "LLD-1 Classes",
+      "operation": "add",
+      "content": "VerificationOutcomeNotifier — handle(event) with a DedupStore lookup on (producer_id, fbo_number, verified_on) before any send. TemplateRenderer — renders from the event payload only; has no read path to identity_schema, which would breach DAT-1.b.",
+      "derived_from": ["hld HLD-D03", "dat DAT-1.b"]
+    },
+    {
+      "section": "LLD-4 Error handling",
+      "operation": "add",
+      "content": "Duplicate delivery -> DedupStore hit, no send, acknowledged. Render failure -> dead-letter with the named owner, never discarded: the verification really happened, and a dropped evidence-derived notification is a producer who was never told their livelihood is blocked. Mail transport failure -> bounded retry, then dead-letter. No replay path exists — the source event is Evidence kind and a replay would re-assert the fact.",
+      "derived_from": ["int INT-6", "kb-L2-food-domain FD3, FD7"]
+    }
+  ],
+
+  "findings_raised": [],
+  "guardrails": { "gr-L1-consistency-check": "pass" }
+}

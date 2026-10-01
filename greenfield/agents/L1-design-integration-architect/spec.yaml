@@ -1,0 +1,86 @@
+# Agent Specification Document
+spec_version: "1.0"
+artifact_type: agent
+metadata:
+  name: L1-design-integration-architect
+  version: "1.0.0"
+  layer: L1
+  phase: design
+  owner: agentic-ai-coe
+  created: "2026-09-22"
+  bom_phase: "2.25 — Platform & Data Foundation (Cycle 0)"
+  bom_status: "NEW"
+  invocation: "foundational (runs once per project). A delta invocation exists in BOM Phase 4 and is NOT built here — see README."
+
+purpose:
+  description: "Owns the integration viewpoint (INT-*) for the whole product — sync/async decision rules, edge and gateway policy, event/topic taxonomy, contract versioning rules, the canonical register of cross-context flows, and the reliability, trust-boundary and observability obligations every integration owes."
+  input: "foundational-solution-architecture.md (APP-2 component map and its edges, CON-*, REQ-INT-*, SEC-* trust boundaries, § 4 PRIN rows) from L1-design-foundational-architect, and nfr_classifications from L1-requirements-nfr-classifier — both fetched from blob storage. Optionally data-architecture.md (DAT-1 ownership, DAT-2 envelope) and binding-principles.json."
+  output: "integration-architecture.md (INT-1 principles · INT-2 styles · INT-3 contract and topic rules · INT-4 canonical flow register, plus INT-5..INT-13) written back to blob storage, plus structured items carrying the flow register, contract register, event taxonomy, demand traceability, conformance checks and pending decisions."
+  business_value: "Integration is not a deployable, so it cannot live in a per-service document — which is exactly why cross-context integration rules used to be re-invented per service, inconsistently, by whoever needed an answer first. Complements L1-design-api-spec, which produces contracts but not topology: api-spec answers 'what does this endpoint look like?', this agent answers 'should this edge exist at all, in which direction, synchronous or not, and what happens when it fails?'. The costly failure it prevents is a synchronous cross-context call with no stated degraded mode — which behaves perfectly until the callee is down, and then fails in whatever way the first implementer happened to choose."
+
+prompt:
+  ref: "prompts/L1-design-integration-architect/instructions.md"
+  version: "1.0.0"
+  description: >
+    Enumerates every edge in the FSA's APP-2 component map and governs each
+    one: style (async by default per PRIN-03, sync only where the caller
+    cannot complete its current transaction without the answer), contract
+    owner, latency budget taken from the matching nfr-spec.md Performance
+    boundary condition, timeout, and a real degraded mode. Classifies every
+    event by kind — which, not the name, decides ordering, retention and
+    replay policy. Carries every TBD boundary condition through as PENDING
+    with a trigger rather than a plausible latency number. The full
+    integration-architecture.md template is embedded literally per S4.
+
+contract:
+  input_schema: "$ref: schemas/agent-input-contract-schema.json"
+  output_schema: "$ref: schemas/agent-output-schema.json"
+
+  input:
+    accepts_from_agents: [L1-design-foundational-architect, L1-requirements-nfr-classifier, L1-design-data-architect]
+    accepts_direct_input: false
+    accepts_file_upload:
+      enabled: true
+      formats: [".md", ".json"]
+    required_parameters:
+      folder_name: { type: string, description: "Blob storage folder holding the Cycle 0 input artifacts; also the folder integration-architecture.md is written back to" }
+      foundational_architecture_output: { type: object, description: "foundational-solution-architecture.md — must contain an APP-2 component map WITH EDGES. Without edges there are no integrations to govern and the document has no content. Hard precondition: missing or edge-less is INSUFFICIENT_CONTEXT" }
+      nfr_spec_output: { type: object, description: "L1-requirements-nfr-classifier's agent_output — supplies the Performance, Availability and Security boundary conditions that latency budgets come from. Hard precondition: an integration architecture with no boundary conditions is exactly the 'start inventing latency numbers' failure this agent must not commit" }
+    optional_parameters:
+      data_architecture_output: { type: object, description: "data-architecture.md from L1-design-data-architect. Enriching, not authoritative: supplies DAT-1 entity ownership (so no registered flow implies a second writer) and DAT-2's event envelope (so this document extends it rather than defining a second one). Frequently absent at first pass — the BOM's Phase 2.25 chain order is platform -> data -> integration, so data has usually run, but a re-run or a parallel invocation may not have it. When absent, the envelope is defined here and the reconciliation is recorded as owed before Cycle 0 closes" }
+      binding_principles_json: { type: object, description: "The per-product principle resolution authored against binding-principles.template.json. Read per kb-L1-enterprise-architecture BP11. When absent, the FSA § 4 PRIN rows are the documented fallback and the document must say so" }
+
+  output:
+    $ref: "output_schema.json"
+
+context:
+  knowledge_bases:
+    - kb-L1-enterprise-architecture     # binding-principles.md PRIN-03 (governed interfaces) and PRIN-08 (observability); BP11 resolution contract; landscape EA2/EA3/EA4 for the estate's integration boundaries
+    - kb-L2-food-domain-api-patterns    # the swappable domain half: FD3 event taxonomy by kind, FD4 the flows that genuinely cannot be async and their degraded modes, FD5 versioning under regulatory change, FD7 duplicate/idempotency rules, FD8 domain-specific observability signals
+  guardrails:
+    - gr-L1-output-schema-validator
+    - gr-L1-consistency-check           # per BOM Phase 2.25 row. NOTE: repo has gr-L3-consistency-checker, not an L1 build — see README open item 1
+    - gr-L1-schema-validator            # per BOM Phase 2.25 row. NOTE: not built — see README open item 1
+  tools:
+    - tool-L1-azure-blob-reader         # fetches the FSA, nfr-spec.md, data-architecture.md and binding-principles.json in ONE call
+    - tool-L1-azure-blob-writer         # writes integration-architecture.md back to the same folder
+  # The BOM row lists no tools for this agent. Blob read/write are added because the
+  # foundational architecture arrives from blob storage and the output returns to it —
+  # the same pattern L1-vision-statement-generator already uses.
+
+quality:
+  evaluation_ref: "evaluation.md"
+  min_score: 7.0        # self-check bar; no L1-design-integration-architect-evaluator exists.
+                        # The Cycle 0 human gate and gr-L1-architecture-conformance are the
+                        # real downstream checks.
+  hallucination_check: true
+  consistency_check: true
+
+performance:
+  target_latency_seconds: 45
+  max_token_budget: 20000
+
+versioning:
+  input_version: "1.0"
+  output_version: "1.0"
+  instruction_hash: "sha256:pending"

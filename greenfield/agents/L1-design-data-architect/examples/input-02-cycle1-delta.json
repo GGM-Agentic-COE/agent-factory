@@ -1,0 +1,67 @@
+{
+  "_comment": "Input to L1-design-data-architect, DELTA INVOCATION (BOM Phase 4), as distinct from the foundational invocation at Phase 2.25. Per the BOM row: the LLD deltas, functional_requirements, and the CURRENT data-architecture.md. Unlike the HLD and LLD deltas this cycle, the canonical document exists — v1.0 from Cycle 0 — so this is a genuine amendment rather than a creating delta. The foundational invocation decided ownership, classification and planes; this invocation is constrained by those decisions rather than inventing them.",
+  "folder_name": "harvestlink/pi-2026-q2/cycle-1",
+  "cycle": { "pi_id": "PI-2026-Q2", "cycle": 1, "slug": "producer-registration" },
+
+  "current_canonical_document": {
+    "document": "data-architecture.md",
+    "version": "1.0",
+    "status": "APPROVED",
+    "content_hash": "sha256:2b8d…41ac",
+    "sections_relevant": {
+      "DAT-1.1": "Identity is sole writer of Producer, Buyer, Session, FoodSafetyRegistration. 13 entities, 4 owning contexts.",
+      "DAT-2.2": "4 events registered, all Planned: catalogue.listing.published, orders.order.placed, identity.registration.verified, billing.payout.scheduled",
+      "DAT-3.2": "FoodSafetyRegistration — Regulated Evidence, 6 years from creation (ES3), approved PII region (ES9), append-only",
+      "DAT-4.3": "Analytical plane NOT PRESENT; three trigger conditions; DAT-PEND-01",
+      "DAT-6": "Read models: None at Cycle 0. Any future replicated attribute must be entered here with a staleness budget before use.",
+      "DAT-8": "DAT-PEND-01 analytical plane, DAT-PEND-02 order retention, DAT-PEND-03 session retention",
+      "DAT-9": "DAT-C1 one writer per entity, DAT-C2 no unregistered replication, DAT-C3 protected data governed"
+    },
+    "boundary_rule": "The data architecture states WHAT and WHY. Physical tables, indexes, column types and SQL belong to db-schema.sql and the service LLD — never to this document."
+  },
+
+  "lld_deltas_output": {
+    "agent_id": "L1-design-lld",
+    "execution_id": "exec-lld-7f8a9b0d",
+    "workflow_execution_id": "wf-hl-pi1-3c4d5e6f",
+    "status": "success",
+    "content": {
+      "type": "lld_deltas",
+      "schema_version": "1.0",
+      "items": {
+        "deltas": [
+          {
+            "delta_id": "LLD-D01",
+            "component": "identity-service",
+            "access_patterns": [
+              { "operation": "resolveStatus(producerId)", "pattern": "latest non-superseded FoodSafetyRegistration row per producer, ordered by appended_at", "budget": "p95 <= 250 ms", "source": "int INT-4.3" },
+              { "operation": "submit(command)", "pattern": "append Producer + FoodSafetyRegistration, status pending-verification", "budget": "none stated" }
+            ],
+            "new_stored_values": [
+              { "entity": "FoodSafetyRegistration", "field": "register_reason", "description": "The competent authority's rejection reason string, stored verbatim so it can be passed through unparaphrased", "classification_assigned_by_lld": null }
+            ],
+            "write_discipline": "append-only; ProducerRepository exposes supersede() and no update()"
+          }
+        ],
+        "findings": [
+          { "id": "LLD-F01", "severity": "MEDIUM", "summary": "Append-only evidence plus a 250 ms status read implies an index, and possibly a current-status projection.", "resolution": "ESCALATED_TO_DATA_ARCHITECT" },
+          { "id": "LLD-F02", "severity": "LOW", "summary": "The register's reason string is a newly stored value on a Regulated Evidence entity and no classification covers it.", "resolution": "ESCALATED_TO_DATA_ARCHITECT" }
+        ]
+      },
+      "artifacts": [
+        { "id": "artifact-lld-7f8a9b0d-01", "type": "delta", "name": "lld-identity-service.delta.json", "format": "json", "storage": { "provider": "s3", "location": "s3://adlc-artifacts/wf-hl-pi1-3c4d5e6f/cycle-1/deltas/lld-identity-service.delta.json" }, "description": "Creating delta", "produced_by": "L1-design-lld" }
+      ],
+      "execution_summary": "• 3 creating LLD deltas; 2 findings escalated to the data architect."
+    }
+  },
+
+  "functional_requirements": [
+    { "id": "FR-001", "title": "Facilitation-only role attestation at onboarding", "statement": "The system shall require every onboarding producer or distributor to explicitly attest that they, not HarvestLink, hold Food Business Operator status." },
+    { "id": "FR-003", "title": "FBO status verification", "statement": "The system shall verify a producer's declared Food Business Operator registration against the competent authority's register before permitting that producer to publish a listing." },
+    { "id": "FR-005", "title": "External-party authentication", "statement": "The system shall authenticate external parties through a group-approved external identity provider." }
+  ],
+
+  "tool_availability": {
+    "tool-L1-db-schema-diff": { "available": true, "invoked": false, "reason": "Optional per the BOM row and used to diff a proposed schema against an existing production database. Cycle 1 is pre-production for identity-service — there is no deployed schema to diff against, and the application baseline records identity-service as DECLARED with no deployed_version. Running it would compare a proposal against nothing and return a diff that looks like a full creation." }
+  }
+}

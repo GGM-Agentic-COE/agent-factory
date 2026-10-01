@@ -51,13 +51,36 @@ landscape rather than duplicating it. Grounds L1-requirements-nfr-classifier
 - Onboarding an external party (producer, distributor, buyer) as a platform user requires a lightweight identity/eligibility check before granting write access to compliance-relevant workflows — this is a security requirement independently of any food-regulatory attestation requirement (kb-L2-domain-regulatory), the two obligations happen to point at the same onboarding step but come from different policy sources
 - A vetting check MUST be logged (who, when, what was checked) even when the outcome is "approved" — an approval with no record is indistinguishable from no check having happened
 
+## ES9: Data Residency & Sovereignty (added v1.1.0 — required by PRIN-06-C1)
+> Classification (ES2) and retention (ES3) alone do not satisfy PRIN-06-C1, which checks that every
+> PII/Financial/Regulated-evidence entity has classification **and** retention **and** residency.
+> Before v1.1.0 no group standard answered the third, which forced every residency cell to `PENDING`.
+- Every persisted entity MUST carry a residency decision expressed as an **approved operating region**, never as a specific datacentre, availability zone or cloud region id — the region name is a standard, the residency rule is the policy
+- Personal data of UK/EU data subjects: MUST remain within the UK or an adequacy-decision jurisdiction. Transfer outside requires a documented transfer mechanism (adequacy, SCCs, or an approved derogation) recorded against the entity, not assumed
+- Financial and tax-evidence records (ES3's 6-year population): MUST reside in the approved financial-data region and MUST NOT be replicated outside it, including into an analytical plane, without an approved exception
+- Backups, disaster-recovery copies, log exports and analytical replicas inherit the residency of the source entity — a copy is not a new decision, and a residency rule that the backup breaks was never in force
+- Where the regulatory requirement genuinely has not been supplied, the residency value is recorded as `PENDING` **with a trigger**, never guessed and never silently defaulted to the platform's home region (PRIN-01-C1)
+
+## ES10: Encryption & Key Management (added v1.1.0)
+- Data classified `Confidential`, `PII`, `Financial` or `Restricted` (ES2) MUST be encrypted **at rest and in transit** — the data viewpoint states the requirement, the platform viewpoint selects the realisation
+- Every encrypted store MUST use the group managed key/secret capability — never an application-held key, never a key committed to a repository (ES5)
+- Keys MUST be rotatable without redeploying unrelated consumers; a rotation that requires a coordinated multi-service release is a design defect, not an operational inconvenience
+- Access to `PII`, `Financial` and `Regulated-evidence` data MUST be **attributable to a principal** — a shared service account reading a PII store satisfies encryption and fails attribution (ES1)
+- A workload identity MUST be per deployable component; two bounded contexts MUST NOT share an application credential (PRIN-06-C2)
+
 ## ES8: Glossary
 - PII — Personally Identifiable Information
 - DPIA — Data Protection Impact Assessment (required for high-risk processing under UK GDPR Art. 35)
 - ICO — Information Commissioner's Office (UK data protection regulator)
 - Server-side enforced — a rule the client cannot bypass by altering its own request
+- Approved operating region — the policy-level name for where data may live; the concrete region id that realises it is a platform decision, not a security one
+- Attributable access — a read or write traceable to one named principal, not to a shared account
+- Adequacy jurisdiction — a country the UK/EU has found to provide an equivalent level of data protection, permitting transfer without additional safeguards
 
 ---
-*Last reviewed: 2026-08-07 · Review cadence: quarterly (regulatory guidance
+*Last reviewed: 2026-09-22 · Review cadence: quarterly (regulatory guidance
 and incident-response practice evolve faster than core identity/data
-classification structure).*
+classification structure). v1.1.0 added ES9 (residency) and ES10
+(encryption/key management), both required by the Phase 2.25 viewpoint
+architects: without ES9 every residency cell in DAT-3 was PENDING, and
+without ES10 PLT-10 had no group standard to cite.*

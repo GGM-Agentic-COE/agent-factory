@@ -1,0 +1,576 @@
+{
+  "$schema_version": "1.0.0",
+  "$doc": {
+    "purpose": "Machine-readable enterprise architecture principles, resolved to one product, consumed by the Foundational Solution Architecture (FSA) authoring agent and by the conformance checker. Two layers: (1) the L1 enterprise catalogue entry, written to the standard nine-field template — statement, business rationale, architectural implications, scope, evidence of compliance, trade-offs/exceptions, owner, review cadence; (2) the product resolution, which says whether and how each principle binds THIS product, what FSA sections it seeds, and which exceptions are already approved.",
+    "how_to_use": [
+      "Fields whose value starts with '[' are placeholders. Fields prefixed '_example_' are illustrative and are deleted in a real file.",
+      "Keep the catalogue small. 8-15 principles is usable in a live decision; detailed controls belong in standards, not here.",
+      "Every principle must be testable: at least one conformance_check with a machine-evaluable 'check' expression, or it is a slogan.",
+      "Every principle must map to at least one FSA hook, or the FSA agent cannot apply it and will ignore it.",
+      "Brownfield: a principle the running system already violates is still binding. Record the violation in 'exceptions' (transitional or accepted) so the conformance checker reports it as known drift with an owner rather than new drift."
+    ],
+    "consumed_by": [
+      "L1-design-foundational-architect (reads resolution + fsa_hooks; writes PRIN and DEV rows in the FSA §4)",
+      "gr-L1-architecture-conformance (reads conformance_checks + exceptions)",
+      "impact-assessor (reads review_questions + precedence_rules for option analysis)",
+      "arch-delta-merger (appends exceptions when an FSA deviation DEV-xx is approved)"
+    ]
+  },
+
+  "metadata": {
+    "document_id": "binding-principles-[product-slug]",
+    "_example_document_id": "binding-principles-harvestlink",
+    "product": {
+      "name": "[product name]",
+      "slug": "[product-slug]",
+      "portfolio": "[portfolio or business unit]",
+      "mode": "GREENFIELD | BROWNFIELD",
+      "criticality": "business-critical | important | standard",
+      "regulatory_regimes": ["[regime id from vision Regulatory Posture]"],
+      "_example_regulatory_regimes": ["national-tax-records", "food-safety-registration", "psd2-payments"]
+    },
+    "catalogue_source": {
+      "name": "[enterprise L1 principles catalogue]",
+      "version": "[catalogue version resolved against]",
+      "owner": "Enterprise Architecture",
+      "review_cadence": "annual + event-driven (M&A, regulatory shift, platform strategy change)"
+    },
+    "resolution": {
+      "version": "[MAJOR.MINOR.PATCH]",
+      "status": "DRAFT | APPROVED | SUPERSEDED",
+      "resolved_by": "[role / agent id]",
+      "approved_by": "[Enterprise Architect name]",
+      "approved_on": "[YYYY-MM-DD]",
+      "valid_until": "[YYYY-MM-DD — forces re-resolution]",
+      "inputs_read": {
+        "vision": "vision.md @ [version]",
+        "prd": "prd.md @ [version]",
+        "application_baseline": "application-baseline.md @ [version] | NONE (greenfield)",
+        "adr_register": "/architecture/adr @ [commit]"
+      }
+    },
+    "version_history": [
+      {
+        "version": "1.0.0",
+        "date": "[YYYY-MM-DD]",
+        "change": "Initial resolution against catalogue [version]",
+        "adr": null
+      }
+    ]
+  },
+
+  "vocabulary": {
+    "domains": ["business", "data", "application", "technology", "security", "integration"],
+    "binding_levels": {
+      "MANDATORY": "Must be satisfied. Non-conformance requires a formal exception with compensating controls and an exit plan. Blocks the EA gate if violated without an exception.",
+      "DIRECTIONAL": "Strong default. Deviation is recorded as a DEV entry in the FSA with rationale; no formal exception workflow.",
+      "ADVISORY": "Guidance. Considered in option analysis; not checked by conformance."
+    },
+    "applicability_levels": {
+      "APPLIES": "Binds this product at the stated binding level.",
+      "PARTIAL": "Binds only the scope named in resolution.resolved_scope.",
+      "NOT_APPLICABLE": "Does not bind at the FSA level; reason recorded. It may still bind a viewpoint document."
+    },
+    "exception_types": {
+      "TRANSITIONAL": "Time-bound. Has an exit plan and a remediation owner. Appears in conformance as DRIFTED with a due date.",
+      "ACCEPTED": "Permanent, risk-accepted by the named authority. Appears in conformance as CONFORMANT-BY-EXCEPTION.",
+      "LEGACY_CONTAINMENT": "The violating component is frozen: no extension, no new consumers. Appears as DRIFTED; any change that extends it is a DIVERGES verdict."
+    },
+    "fsa_hook_targets": ["APP-1", "APP-2", "APP-3", "CON", "REQ-DAT", "REQ-INT", "REQ-PLT", "SEC", "OPEN"]
+  },
+
+  "principles": [
+    {
+      "id": "PRIN-01",
+      "name": "[Short memorable name]",
+      "domain": "business | data | application | technology | security | integration",
+      "catalogue": {
+        "statement": "[One sentence. The rule or preference. If it needs a conditional clause, split it into two principles.]",
+        "business_rationale": "[Why this exists; which enterprise outcome it protects — cost, resilience, compliance, speed, customer experience, simplicity.]",
+        "architectural_implications": [
+          "[What this makes teams do differently next quarter — design, selection, funding, delivery.]",
+          "[Second implication.]"
+        ],
+        "scope": {
+          "default": "enterprise-wide | regulated-domains | business-critical | greenfield-only | post-merger",
+          "heightened_rigour_when": ["[condition, e.g. customer-facing, regulated data]"]
+        },
+        "evidence_of_compliance": [
+          "[Observable evidence a reviewer can point at.]"
+        ],
+        "trade_offs": [
+          {"tension_with": "[other principle id or concern]", "description": "[how they conflict]"}
+        ],
+        "exception_conditions": [
+          "[Situation in which deviation is expected to be granted, e.g. regulatory deadline with exit plan.]"
+        ],
+        "owner": "[role, e.g. Head of Enterprise Architecture]",
+        "review_cadence": "annual | semi-annual | event-driven",
+        "last_reviewed": "[YYYY-MM-DD]",
+        "abstraction_check": "Names no product, vendor or protocol. If it does, it is a standard and belongs in the standards catalogue with a reference here."
+      },
+      "resolution": {
+        "applicability": "APPLIES | PARTIAL | NOT_APPLICABLE",
+        "binding_level": "MANDATORY | DIRECTIONAL | ADVISORY",
+        "resolved_scope": "[when PARTIAL: the contexts, data classes or components it binds]",
+        "reason": "[Why this level for this product — cite vision, PRD, regulatory regime.]",
+        "program_guardrail": "[The product-specific one-line expression of the principle, e.g. 'API-mediated integration only'.]"
+      },
+      "review_questions": [
+        "[Question an impact assessor asks of every change, answerable yes/no.]"
+      ],
+      "conformance_checks": [
+        {
+          "id": "PRIN-01-C1",
+          "description": "[What is being tested]",
+          "check": "[Machine-evaluable expression over baseline/target artifacts, e.g. count(entities where writers > 1) == 0]",
+          "evidence_source": "[artifact the checker reads: data-model-overview.md | api-surface.yaml | component-inventory.json | fsa APP-2.3]",
+          "severity": "BLOCKING | MAJOR | MINOR"
+        }
+      ],
+      "fsa_hooks": [
+        {
+          "target": "APP-1 | APP-2 | APP-3 | CON | REQ-DAT | REQ-INT | REQ-PLT | SEC | OPEN",
+          "effect": "SEEDS_CONSTRAINT | SHAPES_DECOMPOSITION | SEEDS_DEMAND | SEEDS_CONTROL | SEEDS_DEFERRAL",
+          "seed_text": "[The normative text the FSA agent lifts, adapting IDs. Written as a rule, technology-free.]",
+          "binds_viewpoints": ["APP", "DAT", "INT", "PLT"]
+        }
+      ],
+      "related_standards": ["[STD-xx — where the technology-specific realisation lives]"],
+      "related_adrs": ["[ADR-xx]"],
+      "exceptions": []
+    },
+
+    {
+      "id": "PRIN-02",
+      "name": "One accountable owner and one authoritative source per data domain",
+      "domain": "data",
+      "_example_note": "Fully worked example. Delete in a real file or keep as the real entry if it fits.",
+      "catalogue": {
+        "statement": "Every critical data entity has one accountable owner and exactly one system of record.",
+        "business_rationale": "Two sources of truth create conflicting definitions, reconciliation effort and untrustworthy reporting; for financial and regulated data there is no 'correct' value to restore once they diverge.",
+        "architectural_implications": [
+          "Every solution design identifies where each critical entity is created, maintained and consumed before it is persisted.",
+          "Uncontrolled replication of customer, product, employee or financial data is challenged; replication is permitted only as a registered read model with lineage and staleness rules.",
+          "Ownership is assigned to a business capability (bounded context), not to a team or a database."
+        ],
+        "scope": {
+          "default": "enterprise-wide",
+          "heightened_rigour_when": ["Financial data", "PII", "regulated-evidence data"]
+        },
+        "evidence_of_compliance": [
+          "A system-of-record register exists and covers 100% of critical entities.",
+          "No entity has more than one writing component.",
+          "Every replicated attribute is a registered read model with a declared staleness budget."
+        ],
+        "trade_offs": [
+          {"tension_with": "PRIN-analytics / local performance", "description": "Reporting and low-latency reads pull towards replication; resolved by permitting replication only as governed read models or an analytical plane, never as a second writer."}
+        ],
+        "exception_conditions": [
+          "Transitional replication during a migration, with lineage, synchronisation rules and a decommission date."
+        ],
+        "owner": "Chief Data Officer",
+        "review_cadence": "annual",
+        "last_reviewed": "2026-03-01",
+        "abstraction_check": "PASS"
+      },
+      "resolution": {
+        "applicability": "APPLIES",
+        "binding_level": "MANDATORY",
+        "resolved_scope": "All entities in FSA APP-3.1; heightened for Transaction, Fee, Payout, Producer, Buyer",
+        "reason": "Fee records are tax-audit evidence (regime national-tax-records); a duplicated fee is an audit finding, not a bug.",
+        "program_guardrail": "No new system of record without data-governance approval; no cross-context table access."
+      },
+      "review_questions": [
+        "Does this change write an entity owned by another bounded context?",
+        "Does this change copy an attribute owned elsewhere without registering a read model?"
+      ],
+      "conformance_checks": [
+        {
+          "id": "PRIN-02-C1",
+          "description": "Exactly one writer per entity",
+          "check": "for each entity in data-model-overview: count(writing_components) == 1",
+          "evidence_source": "data-model-overview.md",
+          "severity": "BLOCKING"
+        },
+        {
+          "id": "PRIN-02-C2",
+          "description": "Replicated attributes are registered read models",
+          "check": "for each column mirroring an attribute owned by another context: exists read_model_registration with staleness_budget",
+          "evidence_source": "data-architecture.md § read models",
+          "severity": "MAJOR"
+        }
+      ],
+      "fsa_hooks": [
+        {
+          "target": "CON",
+          "effect": "SEEDS_CONSTRAINT",
+          "seed_text": "Exactly one system of record per entity. No exceptions.",
+          "binds_viewpoints": ["DAT"]
+        },
+        {
+          "target": "CON",
+          "effect": "SEEDS_CONSTRAINT",
+          "seed_text": "Non-owning contexts hold references to another context's entities by identifier only, never replicated attributes, except in an explicitly registered read model.",
+          "binds_viewpoints": ["DAT"]
+        },
+        {
+          "target": "REQ-DAT",
+          "effect": "SEEDS_DEMAND",
+          "seed_text": "Every entity in APP-3.1 has exactly one system of record recorded in a register available before the first feature cycle.",
+          "binds_viewpoints": ["DAT"]
+        }
+      ],
+      "related_standards": ["STD-DATA-04 read-model registration"],
+      "related_adrs": ["ADR-001", "ADR-003"],
+      "exceptions": [
+        {
+          "id": "EXC-PRIN-02-001",
+          "type": "TRANSITIONAL",
+          "where": "reporting-service reads orders and catalogue tables directly; payout totals duplicated into orders schema",
+          "why": "Pre-dates the target; dashboards depend on it",
+          "risk": "Payout figures on dashboards can disagree with statements",
+          "compensating_controls": ["Nightly reconciliation job with alert on variance"],
+          "remediation_owner": "squad-orders",
+          "exit_plan": "Replace with analytical-plane read model when OPEN-01 fires",
+          "due": "2027-03-31",
+          "approved_by": "Enterprise Architect",
+          "approved_on": "2026-04-10",
+          "conformance_ref": "REMEDIATION-001, REMEDIATION-002"
+        }
+      ]
+    },
+
+    {
+      "id": "PRIN-03",
+      "name": "Integrate through governed, reusable interfaces",
+      "domain": "integration",
+      "_example_note": "Second worked example, showing a DIRECTIONAL principle with an FSA deviation.",
+      "catalogue": {
+        "statement": "Systems exchange information through governed, versioned interfaces — never through database-level or point-to-point coupling.",
+        "business_rationale": "Direct coupling makes both sides unversionable, slows change and raises replacement cost; governed interfaces make staleness and dependency explicit.",
+        "architectural_implications": [
+          "Capabilities are exposed through contracts (APIs or events) that are owned, versioned and discoverable.",
+          "Asynchronous exchange is the default; synchronous dependencies are deliberate, budgeted and named.",
+          "Direct database access and one-off file transfers are transitional and carry an exit plan."
+        ],
+        "scope": {
+          "default": "enterprise-wide",
+          "heightened_rigour_when": ["cross-domain integration", "ecosystem / partner integration"]
+        },
+        "evidence_of_compliance": [
+          "Every cross-context dependency has a published, versioned contract.",
+          "Count of point-to-point and database-level integrations trends to zero.",
+          "Breaking changes follow an expand-and-contract path."
+        ],
+        "trade_offs": [
+          {"tension_with": "user-facing latency budgets", "description": "Some values must be correct at display time; eventual consistency is not acceptable and a synchronous read is required."}
+        ],
+        "exception_conditions": [
+          "Legacy containment: an existing direct integration may remain if frozen and scheduled for removal."
+        ],
+        "owner": "Head of Integration Architecture",
+        "review_cadence": "annual",
+        "last_reviewed": "2026-01-15",
+        "abstraction_check": "PASS — names no bus, gateway or protocol"
+      },
+      "resolution": {
+        "applicability": "APPLIES",
+        "binding_level": "DIRECTIONAL",
+        "resolved_scope": "All edges in FSA APP-2.3",
+        "reason": "Marketplace has five contexts with many cross-context reads; but fee display at checkout must be exact, so sync is expected on one edge.",
+        "program_guardrail": "Contract-mediated integration only; sync requires a REQ-INT budget and degraded mode."
+      },
+      "review_questions": [
+        "Does this change introduce a cross-context dependency without a published contract?",
+        "Is any new synchronous call backed by a REQ-INT latency budget and a degraded-mode behaviour?"
+      ],
+      "conformance_checks": [
+        {
+          "id": "PRIN-03-C1",
+          "description": "Every APP-2.3 edge has a contract",
+          "check": "for each edge in fsa.APP-2.3: exists contract in api-surface.yaml or event catalogue with owner and version",
+          "evidence_source": "api-surface.yaml, integration-architecture.md",
+          "severity": "MAJOR"
+        },
+        {
+          "id": "PRIN-03-C2",
+          "description": "No cross-context direct data access",
+          "check": "count(cross_context_db_grants) == 0 excluding exceptions[type=LEGACY_CONTAINMENT]",
+          "evidence_source": "platform-architecture.md § credentials; schema grants",
+          "severity": "BLOCKING"
+        }
+      ],
+      "fsa_hooks": [
+        {
+          "target": "CON",
+          "effect": "SEEDS_CONSTRAINT",
+          "seed_text": "No context reads or writes another context's persistent state directly.",
+          "binds_viewpoints": ["DAT", "INT", "PLT"]
+        },
+        {
+          "target": "CON",
+          "effect": "SEEDS_CONSTRAINT",
+          "seed_text": "Every cross-context interaction is asynchronous unless a REQ-INT demand states a synchronous need with a latency budget and a degraded-mode behaviour.",
+          "binds_viewpoints": ["INT"]
+        },
+        {
+          "target": "REQ-INT",
+          "effect": "SEEDS_DEMAND",
+          "seed_text": "Cross-context contracts are versioned; a breaking change requires an expand-and-contract path so no consumer breaks on a provider release.",
+          "binds_viewpoints": ["INT"]
+        }
+      ],
+      "related_standards": ["STD-INT-02 contract versioning"],
+      "related_adrs": ["ADR-002", "ADR-005"],
+      "exceptions": [],
+      "fsa_deviations": [
+        {
+          "dev_id": "DEV-01",
+          "fsa_ref": "REQ-INT-06",
+          "summary": "Orders→Billing fee read expected synchronous",
+          "reason": "Fee must be correct at confirmation time",
+          "review_trigger": "If confirmation-time fee changes become impossible by policy"
+        }
+      ]
+    },
+
+    {
+      "id": "PRIN-04",
+      "name": "Decompose by business capability (bounded contexts)",
+      "domain": "application",
+      "catalogue": {
+        "statement": "Systems are decomposed into bounded contexts aligned to business capabilities; each context has one ubiquitous language, one owning team and independent deployability.",
+        "business_rationale": "Boundaries drawn on technical layers couple things that change for different reasons; capability boundaries let each part change at its own cadence under its own approval.",
+        "architectural_implications": [
+          "Context boundaries are justified by a stated heuristic — different clock, language, regulator or consistency need.",
+          "Technical layers (UI, API, database) are never contexts.",
+          "One epic per context; the dependency graph is derived from the context interaction map."
+        ],
+        "scope": {"default": "enterprise-wide", "heightened_rigour_when": ["greenfield products", "modernisation programmes"]},
+        "evidence_of_compliance": ["Each context has a rationale citing a boundary heuristic", "No component writes entities owned by two contexts", "3-9 contexts per product"],
+        "trade_offs": [{"tension_with": "PRIN-05 reuse", "description": "A shared kernel looks like reuse but couples every consumer to a schema."}],
+        "exception_conditions": ["Generic subdomains may be realised by a shared enterprise service (e.g. identity) consumed conformist-style."],
+        "owner": "Head of Enterprise Architecture",
+        "review_cadence": "annual",
+        "last_reviewed": "2026-03-01",
+        "abstraction_check": "PASS"
+      },
+      "resolution": {
+        "applicability": "APPLIES",
+        "binding_level": "MANDATORY",
+        "resolved_scope": "Whole product",
+        "reason": "Vision names three business clocks (catalogue daily, orders hourly, commercial policy quarterly).",
+        "program_guardrail": "One context per capability; one deployable per context minimum."
+      },
+      "review_questions": ["Which single bounded context owns this change?", "Does this change make one component write entities of two contexts?"],
+      "conformance_checks": [
+        {"id": "PRIN-04-C1", "description": "No component spans two contexts", "check": "for each component in component-inventory: count(distinct owning_context of entities_written) <= 1", "evidence_source": "component-inventory.json, data-model-overview.md", "severity": "BLOCKING"}
+      ],
+      "fsa_hooks": [
+        {"target": "APP-1", "effect": "SHAPES_DECOMPOSITION", "seed_text": "Contexts are cut by boundary heuristics; every card cites at least one.", "binds_viewpoints": ["APP"]},
+        {"target": "CON", "effect": "SEEDS_CONSTRAINT", "seed_text": "Every bounded context is realised by at least one independently deployable component; no component spans two contexts.", "binds_viewpoints": ["APP", "PLT"]}
+      ],
+      "related_standards": [],
+      "related_adrs": ["ADR-001"],
+      "exceptions": []
+    },
+
+    {
+      "id": "PRIN-05",
+      "name": "Reuse before buy before build",
+      "domain": "application",
+      "catalogue": {
+        "statement": "New requirements first evaluate reuse or extension of existing enterprise capabilities before introducing new products or bespoke solutions.",
+        "business_rationale": "Application sprawl raises licence, integration and support cost and fragments the user experience.",
+        "architectural_implications": ["Option analysis includes capability mapping and fit-gap", "A new tool needs explicit justification if an existing platform can meet the need with reasonable configuration"],
+        "scope": {"default": "enterprise-wide", "heightened_rigour_when": ["SaaS procurement"]},
+        "evidence_of_compliance": ["Capability reuse analysis in business cases", "Fewer overlapping tools per capability"],
+        "trade_offs": [{"tension_with": "speed / niche functionality", "description": "A new product may be faster; the enterprise impact must be made explicit."}],
+        "exception_conditions": ["Strategic differentiation with recorded enterprise impact"],
+        "owner": "Head of Portfolio Architecture",
+        "review_cadence": "annual",
+        "last_reviewed": "[YYYY-MM-DD]",
+        "abstraction_check": "PASS"
+      },
+      "resolution": {
+        "applicability": "PARTIAL",
+        "binding_level": "DIRECTIONAL",
+        "resolved_scope": "Generic subdomains only (identity, notifications) — core contexts are built by design",
+        "reason": "Core marketplace contexts are the differentiator; generic ones should reuse enterprise services.",
+        "program_guardrail": "Identity and notification delivery consume enterprise services unless a REQ budget cannot be met."
+      },
+      "review_questions": ["Does this change introduce a capability an enterprise service already provides?"],
+      "conformance_checks": [
+        {"id": "PRIN-05-C1", "description": "Generic contexts consume enterprise services", "check": "for each context with type == Generic: realised_by in enterprise-service-catalogue or exists exception", "evidence_source": "fsa APP-1.1, component-inventory.json", "severity": "MINOR"}
+      ],
+      "fsa_hooks": [
+        {"target": "APP-1", "effect": "SHAPES_DECOMPOSITION", "seed_text": "Generic subdomains are marked as such and default to enterprise-service reuse via a Conformist relationship.", "binds_viewpoints": ["APP"]}
+      ],
+      "related_standards": [],
+      "related_adrs": [],
+      "exceptions": []
+    },
+
+    {
+      "id": "PRIN-06",
+      "name": "Security and privacy are designed in",
+      "domain": "security",
+      "catalogue": {
+        "statement": "Security, privacy and control requirements are addressed at design time and visible in design artifacts, never deferred to test or operations.",
+        "business_rationale": "Retrofitted controls cost more, work less well and disrupt delivery; early controls support compliance, resilience and trust.",
+        "architectural_implications": ["Trust boundaries, data classification and controls appear in the target architecture before the first component is built", "Every classified entity has retention and residency decided before it is first persisted", "Secrets are per component and rotated without redeploying dependants"],
+        "scope": {"default": "enterprise-wide", "heightened_rigour_when": ["customer-facing", "regulated data", "business-critical"]},
+        "evidence_of_compliance": ["Threat model and classification present at EA gate", "Automated control checks in pipeline", "Zero shared secrets across contexts"],
+        "trade_offs": [{"tension_with": "delivery urgency", "description": "Deferral requires compensating controls and formal risk acceptance."}],
+        "exception_conditions": ["Time-boxed deferral with risk acceptance by the CISO delegate"],
+        "owner": "Chief Information Security Officer",
+        "review_cadence": "semi-annual",
+        "last_reviewed": "[YYYY-MM-DD]",
+        "abstraction_check": "PASS"
+      },
+      "resolution": {
+        "applicability": "APPLIES",
+        "binding_level": "MANDATORY",
+        "resolved_scope": "Whole product; heightened for Billing and Identity",
+        "reason": "Regimes psd2-payments and national-tax-records in scope; PII for producers and buyers.",
+        "program_guardrail": "Classification and retention declared before first persistence; central identity from day one."
+      },
+      "review_questions": ["Does this change persist a new entity without a classification row?", "Does this change cross a trust boundary without re-establishing identity?"],
+      "conformance_checks": [
+        {"id": "PRIN-06-C1", "description": "Classified entities have retention and residency", "check": "for each entity where class in [PII, Financial, Regulated-evidence]: exists retention_policy and residency_policy", "evidence_source": "data-architecture.md § classification", "severity": "BLOCKING"}
+      ],
+      "fsa_hooks": [
+        {"target": "SEC", "effect": "SEEDS_CONTROL", "seed_text": "Every PII and Financial entity is encrypted at rest and its access is attributable to a principal.", "binds_viewpoints": ["DAT"]},
+        {"target": "CON", "effect": "SEEDS_CONSTRAINT", "seed_text": "Every entity classified Financial or PII carries a retention and residency policy before it is first persisted.", "binds_viewpoints": ["DAT", "PLT"]}
+      ],
+      "related_standards": ["STD-SEC-01 secrets management"],
+      "related_adrs": ["ADR-004"],
+      "exceptions": []
+    },
+
+    {
+      "id": "PRIN-07",
+      "name": "Prefer strategically approved platforms and managed services",
+      "domain": "technology",
+      "catalogue": {
+        "statement": "Technology choices align with the enterprise platform strategy; standardised, managed services are preferred over bespoke infrastructure.",
+        "business_rationale": "Platform consistency improves supportability, resilience, automation and cost transparency and reduces the skills the organisation must maintain.",
+        "architectural_implications": ["Default to approved hosting, identity, observability and data services", "Products in 'contain' or 'retire' lifecycle status are not adopted by new solutions"],
+        "scope": {"default": "enterprise-wide", "heightened_rigour_when": ["business-critical", "regulated workloads"]},
+        "evidence_of_compliance": ["Adoption of approved platform services", "Reduced bespoke infrastructure", "No new use of retire-status products"],
+        "trade_offs": [{"tension_with": "specialised performance / sovereignty", "description": "May require alternatives, governed as exceptions."}],
+        "exception_conditions": ["Sovereignty or workload-specific need with approved exception"],
+        "owner": "Head of Technology Strategy",
+        "review_cadence": "annual",
+        "last_reviewed": "[YYYY-MM-DD]",
+        "abstraction_check": "PASS"
+      },
+      "resolution": {
+        "applicability": "NOT_APPLICABLE",
+        "binding_level": "MANDATORY",
+        "resolved_scope": "Binds the Platform and Data viewpoint documents, not the FSA",
+        "reason": "The FSA names no technology; this principle is applied by viewpoint architects when satisfying REQ-PLT and REQ-DAT demands.",
+        "program_guardrail": "Approved platform services by default; lifecycle status checked at every REQ-PLT satisfaction."
+      },
+      "review_questions": ["Does the proposed realisation use a product in contain/retire status?"],
+      "conformance_checks": [
+        {"id": "PRIN-07-C1", "description": "No retire-status products", "check": "for each technology in platform-architecture.md: lifecycle_status not in [contain, retire] or exists exception", "evidence_source": "platform-architecture.md, technology-lifecycle-register", "severity": "MAJOR"}
+      ],
+      "fsa_hooks": [
+        {"target": "REQ-PLT", "effect": "SEEDS_DEMAND", "seed_text": "Platform demands are stated as capability classes so approved-platform lookup is possible; the FSA does not name products.", "binds_viewpoints": ["PLT"]}
+      ],
+      "related_standards": ["STD-TECH-01 approved platform catalogue"],
+      "related_adrs": [],
+      "exceptions": []
+    }
+  ],
+
+  "precedence_rules": [
+    {
+      "id": "PREC-01",
+      "when": "[predictable conflict]",
+      "prevails": "[principle id]",
+      "over": "[principle id]",
+      "condition": "[qualifier]",
+      "recorded_in_fsa": "CON.1 rule precedence"
+    },
+    {
+      "id": "PREC-02",
+      "when": "A regulated control requirement conflicts with standardisation or speed",
+      "prevails": "PRIN-06",
+      "over": "PRIN-05, PRIN-07",
+      "condition": "Always; the standardisation exception is time-bound with an exit plan",
+      "recorded_in_fsa": "CON.1"
+    },
+    {
+      "id": "PREC-03",
+      "when": "A display-time correctness need conflicts with async-by-default integration",
+      "prevails": "the REQ-INT budget",
+      "over": "PRIN-03 async default",
+      "condition": "Only with a stated latency budget and degraded-mode behaviour (FSA DEV entry)",
+      "recorded_in_fsa": "CON-6, §4.1"
+    }
+  ],
+
+  "brownfield": {
+    "_doc": "Populated only when metadata.product.mode == BROWNFIELD. Tells the FSA agent and conformance checker how the running system already stands against the principles, so retrofit does not encode known violations as intent.",
+    "baseline_assessed": "application-baseline.md @ [version]",
+    "assessed_on": "[YYYY-MM-DD]",
+    "principle_posture": [
+      {
+        "principle_id": "PRIN-02",
+        "current_state": "VIOLATED | CONFORMANT | PARTIALLY_CONFORMANT | UNKNOWN",
+        "findings": ["[finding with evidence pointer]"],
+        "_example_findings": ["reporting-service reads orders.* and catalogue.* directly (schema grants 2024-11)", "payout_total duplicated into orders.producer_summary"],
+        "disposition": "EXCEPTION_RECORDED | REMEDIATE_IN_TARGET | TARGET_CORRECTED_VIA_ADR",
+        "exception_refs": ["EXC-PRIN-02-001"],
+        "adr_refs": []
+      }
+    ],
+    "exception_pattern_signals": {
+      "_doc": "Repeated exceptions against one principle signal either weak enterprise capability or a principle that no longer fits. Reviewed at catalogue cadence.",
+      "principles_with_3_or_more_exceptions": [],
+      "action": "[none | catalogue review requested on YYYY-MM-DD]"
+    },
+    "legacy_containment_register": [
+      {
+        "component": "[component id]",
+        "frozen_since": "[YYYY-MM-DD]",
+        "violates": ["[principle ids]"],
+        "any_extension_is": "DIVERGES",
+        "decommission_target": "[YYYY-MM-DD or epic id]"
+      }
+    ]
+  },
+
+  "governance_integration": {
+    "review_forums": ["Architecture Review Board", "Design Authority", "Investment Board (business-case template § reuse)"],
+    "fsa_gate_rule": "The Enterprise Architect gate rejects an FSA in which any MANDATORY principle with applicability APPLIES has no matching PRIN row in §4 and no fsa_hook realised, or any conformance_check of severity BLOCKING fails without a recorded exception.",
+    "exception_workflow": {
+      "request_fields": ["principle_id", "where", "why", "risk", "compensating_controls", "type", "exit_plan", "remediation_owner", "due"],
+      "approver_by_binding_level": {"MANDATORY": "Enterprise Architect + risk owner", "DIRECTIONAL": "Solution Architect (recorded as FSA DEV)", "ADVISORY": "none"},
+      "sink": "principles[].exceptions and FSA §4.1"
+    },
+    "outcome_metrics": [
+      {"metric": "Entities with more than one writer", "principle": "PRIN-02", "target": 0},
+      {"metric": "Cross-context dependencies without a published contract", "principle": "PRIN-03", "target": 0},
+      {"metric": "Open TRANSITIONAL exceptions past due", "principle": "all", "target": 0},
+      {"metric": "[metric]", "principle": "[id]", "target": "[value]"}
+    ]
+  },
+
+  "validation_rules": {
+    "_doc": "Checks the FSA agent runs on this file before consuming it. A failing rule means the input is unusable, not that the product is non-conformant.",
+    "rules": [
+      "metadata.resolution.status == APPROVED and today <= metadata.resolution.valid_until",
+      "principles.length between 5 and 15",
+      "every principle has >= 1 conformance_checks with a non-placeholder 'check'",
+      "every principle with applicability in [APPLIES, PARTIAL] has >= 1 fsa_hooks",
+      "every principle.catalogue.abstraction_check == PASS (no product, vendor or protocol names in statement or seed_text)",
+      "every exception of type TRANSITIONAL has due, exit_plan and remediation_owner",
+      "every precedence_rules[].prevails and .over reference existing principle ids",
+      "if metadata.product.mode == BROWNFIELD then brownfield.principle_posture covers every MANDATORY principle"
+    ]
+  }
+}

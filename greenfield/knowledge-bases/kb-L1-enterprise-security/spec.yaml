@@ -2,34 +2,37 @@ spec_version: "1.0"
 artifact_type: knowledge_base
 metadata:
   name: kb-L1-enterprise-security
-  version: "1.0.0"
+  version: "1.1.0"
   layer: L1
   owner: agentic-ai-coe
-  content_hash: "sha256:6a2d07f2092c396f79ebb2a58020f8c9d642eb4fb9db3daa98534f8ccb495452"
-  last_reviewed: "2026-08-07"
+  content_hash: "sha256:pending"   # recompute after the v1.1.0 ES9/ES10 additions
+  last_reviewed: "2026-09-22"
   review_cadence: quarterly
 
 purpose:
   description: >
     Thornbury Foods Group's established security standards — identity/access
-    boundaries, data classification, GDPR retention/erasure, audit-logging
-    tiering, secure-SDLC pre-launch requirements, incident response, and
-    third-party/external-user risk — which HarvestLink, as a new digital
-    product built within an already-established enterprise, must satisfy.
-    Grounds L1-requirements-nfr-classifier's Security/Compliance/
-    Availability boundary conditions with real, citable standards instead
-    of "TBD" where a group policy already answers the question (e.g. a
-    6-year compliance-record retention period, or a minimum uptime tier for
-    a legally-relevant audit log). Cross-references
-    kb-L1-enterprise-architecture for system landscape rather than
-    duplicating it.
+    boundaries, data classification, GDPR retention/erasure, data residency,
+    encryption and key management, audit-logging tiering, secure-SDLC
+    pre-launch requirements, incident response, and third-party/external-user
+    risk — which HarvestLink, as a new digital product built within an
+    already-established enterprise, must satisfy. Grounds
+    L1-requirements-nfr-classifier's Security/Compliance/Availability
+    boundary conditions with real, citable standards instead of "TBD" where
+    a group policy already answers the question (e.g. a 6-year
+    compliance-record retention period, or a minimum uptime tier for a
+    legally-relevant audit log), and grounds the Phase 2.25 viewpoint
+    architects' classification, retention, residency and encryption
+    decisions. Cross-references kb-L1-enterprise-architecture for system
+    landscape and for the PRIN-06 principle these standards realise, rather
+    than duplicating either.
 
 content:
   format: markdown
   documents:
     - path: content/enterprise-security.md
-      sections: [identity-access, data-classification, retention-erasure, audit-logging-availability, secure-sdlc, incident-response, third-party-risk, glossary]
-  total_tokens_estimate: 1350
+      sections: [identity-access, data-classification, retention-erasure, audit-logging-availability, secure-sdlc, incident-response, third-party-risk, data-residency, encryption-key-management, glossary]
+  total_tokens_estimate: 1950   # was 1350; +~600 for ES9/ES10
   chunking: by-section
   embedding_model: text-embedding-3-small
 
@@ -37,6 +40,9 @@ consumers:
   agents:
     - L1-requirements-nfr-classifier
     - L1-planning-impact-assessor
+    - L1-design-data-architect            # ES2 classification, ES3 retention, ES9 residency, ES10 encryption requirement
+    - L1-design-platform-architect        # ES1 identity, ES5 secure SDLC, ES10 encryption/key realisation, ES4 availability tiering
+    - L1-design-integration-architect     # ES1 trust boundaries and identity propagation, ES4 tiering for integration observability
   usage: >
     nfr-classifier checks ES3/ES4 before marking a Compliance or
     Availability boundary condition "TBD" — if this KB already states a
@@ -44,17 +50,41 @@ consumers:
     grounded value (per nfr-spec.template.md's own rule: a KB-stated policy
     is a real source, not a guess), not an invented number. impact-assessor
     checks ES1 when assessing any new external-identity integration.
+    data-architect fills DAT-3's classification / retention / residency
+    columns from ES2 / ES3 / ES9 — the three together are what PRIN-06-C1
+    checks, and a cell this KB answers must never be written PENDING.
+    platform-architect realises ES10's encryption and key-management
+    requirement and ES1's identity boundary as concrete platform
+    capabilities; integration-architect applies ES1 at every trust boundary.
+    The split of duty is constant: this KB and the data viewpoint state the
+    REQUIREMENT, the platform viewpoint selects the REALISATION.
 
 grounding_rules:
-  accessed_by: [L1-requirements-nfr-classifier, L1-planning-impact-assessor]
+  accessed_by: [L1-requirements-nfr-classifier, L1-planning-impact-assessor, L1-design-data-architect, L1-design-platform-architect, L1-design-integration-architect]
   visibility: "L1 — visible to all layers (L1/L2/L3/L4); enterprise-wide and cross-phase, not owned by any single phase directory"
 
 freshness:
-  trigger_for_update: "a group security policy changes, a new regulatory notification requirement applies, or a new external-user category is introduced"
+  trigger_for_update: "a group security policy changes, a new regulatory notification requirement applies, a new external-user category is introduced, or a residency/adequacy determination changes"
   note: >
     Illustrative content for this reference scenario, not a real
     organisation's actual security posture. If this framework is deployed
     against a real enterprise, this file is replaced with that
     organisation's real policies — the shape (identity boundary, data
-    classification, retention rule, tiering rule, pre-launch checklist) is
-    the reusable part, not this specific company's numbers.
+    classification, retention rule, residency rule, encryption/key rule,
+    tiering rule, pre-launch checklist) is the reusable part, not this
+    specific company's numbers.
+
+version_history:
+  - version: "1.1.0"
+    date: "2026-09-22"
+    change: >
+      Added ES9 (data residency & sovereignty) and ES10 (encryption & key
+      management); extended ES8 glossary. Both were gaps the Phase 2.25
+      viewpoint architects exposed: PRIN-06-C1 checks classification AND
+      retention AND residency, and before ES9 no group standard answered the
+      third, so every DAT-3 residency cell was forced to PENDING; PLT-10
+      likewise had no group encryption standard to cite. Registered the three
+      viewpoint architects as consumers.
+  - version: "1.0.0"
+    date: "2026-08-07"
+    change: "Initial ES1-ES8 standards for the reference scenario."

@@ -1,0 +1,209 @@
+{
+  "agent_id": "L1-design-hld",
+  "agent_version": "1.0.0",
+  "execution_id": "exec-hld-6e7f8a9c",
+  "workflow_execution_id": "wf-hl-pi1-3c4d5e6f",
+  "status": "success",
+  "content": {
+    "type": "hld_deltas",
+    "schema_version": "1.0",
+    "items": {
+      "delta_control": {
+        "cycle": "C1-producer-registration",
+        "mode": "delta",
+        "fdp_location": "deltas/",
+        "components_affected": ["identity-service", "producer-portal", "notifications-worker"],
+        "components_considered_not_affected": [
+          { "component": "catalogue-service", "reason": "INT-4.3 declares Catalogue as a consumer of identity.registration-status, but Catalogue does not consume it in Cycle 1 — no listing publication exists yet to gate. Named as NONE rather than omitted: a component silently absent from a design package is indistinguishable from one nobody considered." },
+          { "component": "orders-service", "reason": "NONE — no Cycle 1 Work Unit touches it." },
+          { "component": "billing-service", "reason": "NONE — no Cycle 1 Work Unit touches it." },
+          { "component": "buyer-web", "reason": "NONE — the public landing is unchanged (wireframes WF coverage note)." }
+        ],
+        "creating_delta_note": "All three affected components are being built for the first time, so each delta is taken against an empty document: from_version 0.0.0, creates_document true, resulting version 1.0.0. The BOM's rule is 'never a blank template', and this honours it in the way that matters — the first HLD still arrives as a reviewable diff produced by the same mechanism as every later amendment, rather than as a hand-authored document that later deltas have to chase."
+      },
+
+      "deltas": [
+        {
+          "delta_id": "HLD-D01",
+          "target_document": "services/identity-service/hld.md",
+          "component": "identity-service",
+          "bounded_context": "Identity (APP-1.04)",
+          "from_version": "0.0.0",
+          "to_version": "1.0.0",
+          "creates_document": true,
+          "type": "additive",
+          "version_bump": "major",
+          "structural": false,
+          "adr_required": false,
+          "structural_assessment": "Not structural. The component, its bounded context and its ownership of Producer and FoodSafetyRegistration are all already declared in the FSA (APP-1.04, APP-2.04) and the data architecture (DAT-1.1). This delta describes how a declared component is built, not what the decomposition is. Nothing propagates to foundational-solution-architecture.md, so no ADR and no Enterprise Architect gate.",
+          "changes": [
+            {
+              "section": "C4-2 Container",
+              "operation": "add",
+              "content": "identity-service — containerised service behind the group API gateway, own schema (identity_schema), own workload identity (wi-identity). Realises three operations: createProducerRegistration, getProducerRegistration, getRegistrationStatus.",
+              "derived_from": ["fsa APP-2.04", "plt PLT-1", "openapi.yaml"]
+            },
+            {
+              "section": "C4-3 Component",
+              "operation": "add",
+              "content": "Four internal components: TokenValidator (WU-F5.1-02), RoleProvisioner (WU-F5.1-03), RegistrationService (WU-F1.1-02, WU-F1.1-04), FboRegisterClient (WU-F1.1-05). Persistence via ProducerRepository over identity_schema (WU-F1.1-01).",
+              "derived_from": ["tasks.json work_units"]
+            },
+            {
+              "section": "HLD-4 Data flow",
+              "operation": "add",
+              "content": "Registration submitted -> RegistrationService validates format and attestation server-side -> Producer and FoodSafetyRegistration written with status pending-verification -> FboRegisterClient queries the competent-authority register asynchronously -> outcome written, identity.registration.verified emitted.",
+              "derived_from": ["stories.json S-F1.1-a, S-F1.1-b", "dat DAT-1.1"]
+            },
+            {
+              "section": "HLD-5 Integrations",
+              "operation": "add",
+              "content": "Two outbound integrations: the group-approved external IdP (inbound authentication, WU-F5.1-01) and the competent-authority FBO register (outbound lookup, WU-F1.1-05). One outbound event: identity.registration.verified, Evidence kind, never replayed.",
+              "derived_from": ["dependency-graph.json", "int INT-3.2"]
+            },
+            {
+              "section": "HLD-6 NFR allocation",
+              "operation": "add",
+              "content": "Availability 99.9% (ES4 — FBO-status dispute is a regulatory-defence case). getRegistrationStatus p95 <= 250 ms, the budget INT-4.3 holds it to. FoodSafetyRegistration append-only, 6-year retention (ES3), approved PII region (ES9).",
+              "derived_from": ["nfr_classifications", "plt PLT-14", "dat DAT-3.2"]
+            },
+            {
+              "section": "HLD-7 Eligibility decision boundary",
+              "operation": "add",
+              "content": "identity-service owns the eligibility DECISION and exposes it through identity.registration-status@v1. Enforcement at the point of publication is catalogue-service's and is not built this cycle. WU-F1.1-04's title says 'publication gate', which reads as Catalogue work; the decision belongs to Identity because DAT-1.1 gives Identity sole ownership of FoodSafetyRegistration, and a gate that reads someone else's entity would breach CON-2.",
+              "derived_from": ["dat DAT-1.1", "fsa CON-2", "int INT-4.3"],
+              "finding_ref": "HLD-F01"
+            }
+          ]
+        },
+        {
+          "delta_id": "HLD-D02",
+          "target_document": "frontend/producer-portal/hld.md",
+          "component": "producer-portal",
+          "bounded_context": "experience (Catalogue, Billing)",
+          "from_version": "0.0.0",
+          "to_version": "1.0.0",
+          "creates_document": true,
+          "type": "additive",
+          "version_bump": "major",
+          "structural": false,
+          "adr_required": false,
+          "changes": [
+            {
+              "section": "C4-2 Container",
+              "operation": "add",
+              "content": "producer-portal — statically hosted SPA behind the group API gateway, own workload identity (wi-producer-portal), no persistence of its own.",
+              "derived_from": ["fsa APP-2.07", "plt PLT-1", "plt PLT-8"]
+            },
+            {
+              "section": "C4-3 Component",
+              "operation": "add",
+              "content": "RegistrationForm (WU-F1.1-03) and RegistrationStatusView. The status view has no Work Unit — see HLD-F02.",
+              "derived_from": ["tasks.json", "wireframes.md WF-01, WF-02"],
+              "finding_ref": "HLD-F02"
+            },
+            {
+              "section": "HLD-5 Integrations",
+              "operation": "add",
+              "content": "Consumes identity.registration-status@v1 and createProducerRegistration through the group gateway. Reaches no service endpoint directly and no store at all.",
+              "derived_from": ["dependency-graph.json", "plt PLT-8"]
+            },
+            {
+              "section": "HLD-8 Client-side validation posture",
+              "operation": "add",
+              "content": "Client-side FBO format checking and the attestation guard are affordances, not controls. The server refuses independently, and TC-ADV-S-F1.1-a-01 proves a forged client-side attestation flag is ignored.",
+              "derived_from": ["stories.json S-F1.1-a-AC3", "kb-L1-enterprise-security ES1"]
+            }
+          ]
+        },
+        {
+          "delta_id": "HLD-D03",
+          "target_document": "services/notifications-worker/hld.md",
+          "component": "notifications-worker",
+          "bounded_context": "Notifications (APP-1.05)",
+          "from_version": "0.0.0",
+          "to_version": "1.0.0",
+          "creates_document": true,
+          "type": "additive",
+          "version_bump": "major",
+          "structural": false,
+          "adr_required": false,
+          "changes": [
+            {
+              "section": "C4-2 Container",
+              "operation": "add",
+              "content": "notifications-worker — event-driven worker, no public ingress, no schema. Owns no entities (DAT-1.1).",
+              "derived_from": ["fsa APP-2.05", "plt PLT-1", "dat DAT-1.1"]
+            },
+            {
+              "section": "C4-3 Component",
+              "operation": "add",
+              "content": "VerificationOutcomeNotifier (WU-F1.1-06), consuming identity.registration.verified@1.0.0.",
+              "derived_from": ["tasks.json", "int INT-5"]
+            },
+            {
+              "section": "HLD-9 Consumer obligations",
+              "operation": "add",
+              "content": "Declares all five async consumer obligations. Deduplication key derived from the business act (producer, registration number, verified-on date), not the message id. Idempotency: a producer is never emailed twice for one verification outcome. Bounded retry with backoff. Dead-letter path with a named owner. Replay policy: none — the source event is Evidence kind.",
+              "derived_from": ["int INT-6", "kb-L2-food-domain FD7"]
+            },
+            {
+              "section": "HLD-10 Notification content boundary",
+              "operation": "add",
+              "content": "Outbound email carries no FBO number, no business identifier and no personal data beyond the addressee. The rejection reason is passed through from the register verbatim, never paraphrased — a rewritten regulatory reason is a new assertion about a legal status.",
+              "derived_from": ["wireframes.md WF-03", "kb-L1-enterprise-security ES2"]
+            }
+          ]
+        }
+      ],
+
+      "viewpoint_assertions_contributed": {
+        "note": "Contributed to 00-overview.md's viewpoint assertion table, which gr-L1-viewpoint-completeness checks. A NONE with a stated reason passes; silence fails.",
+        "application": "DELTA — 3 component HLD deltas, all additive, all creating",
+        "data": "Asserted by L1-design-data-architect (delta invocation), not here",
+        "integration": "Asserted by L1-design-integration-architect (delta invocation), not here",
+        "platform": "Asserted by L1-design-platform-architect, which fires only on a NOT PRESENT capability"
+      },
+
+      "findings": [
+        {
+          "id": "HLD-F01",
+          "severity": "LOW",
+          "summary": "WU-F1.1-04's title attributes work to the wrong component.",
+          "detail": "'Publication gate on pending-verification' reads as catalogue-service work. The decision belongs to identity-service, which owns FoodSafetyRegistration (DAT-1.1); a gate implemented in Catalogue reading Identity's entity would breach CON-2. The HLD assigns it to Identity and exposes it through the existing contract.",
+          "resolution": "RESOLVED_IN_DESIGN",
+          "resolution_note": "No Work Unit was re-cut — the unit's scope is unchanged, only its owning component is now explicit. Flagged so the title is corrected at the next task-generator run rather than misleading whoever picks it up."
+        },
+        {
+          "id": "HLD-F02",
+          "severity": "MEDIUM",
+          "summary": "producer-portal's RegistrationStatusView is in the HLD and has no Work Unit.",
+          "detail": "UJ-F01 and WF-F01 raised this at journey and wireframe stage. It now has a named component in a component HLD, which means the next cycle's baseline will index a component the design declares and nothing built.",
+          "resolution": "NOT_RESOLVED_BY_AGENT",
+          "resolution_note": "Carried into the HLD rather than dropped. Omitting it would make the design agree with tasks.json and disagree with the journey, which is the harder error to find later."
+        },
+        {
+          "id": "HLD-F03",
+          "severity": "MEDIUM",
+          "summary": "The outbound FBO register call is a new egress path with no platform capability behind it.",
+          "detail": "dependency-graph.json marks identity-service -> competent-authority FBO register as new outbound third-party egress. PLT-6 has no capability row for third-party egress: the five AVAILABLE capabilities are persistence, messaging, object storage, external identity and secrets. This is the condition that fires L1-design-platform-architect.",
+          "resolution": "ESCALATED",
+          "resolution_note": "Raised to the impact assessor, which owns the capability-gap list the platform architect fires from. Not resolved here — this agent describes components, and provisioning an egress path is a platform decision."
+        }
+      ],
+
+      "guardrail_evidence": {
+        "consistency_check": { "result": "pass", "note": "Every component named exists in fsa APP-2; every entity named is owned by that component's context in DAT-1.1; every contract named exists in INT-5; every NFR value carries a source." },
+        "hallucination_check": { "result": "pass", "note": "No technology is named that the platform architecture does not already record as AVAILABLE, with one exception: the competent-authority FBO register is named as an external system because the requirement names it, and it is flagged as an unprovisioned egress path (HLD-F03) rather than assumed reachable. No latency budget, retention period or availability target appears that an input did not supply." }
+      }
+    },
+
+    "artifacts": [
+      { "id": "artifact-hld-6e7f8a9c-01", "type": "delta", "name": "hld-identity-service.delta.json", "format": "json", "storage": { "provider": "s3", "location": "s3://adlc-artifacts/wf-hl-pi1-3c4d5e6f/cycle-1/deltas/hld-identity-service.delta.json" }, "description": "Creating delta 0.0.0 -> 1.0.0, additive, 6 sections", "produced_by": "L1-design-hld" },
+      { "id": "artifact-hld-6e7f8a9c-02", "type": "delta", "name": "hld-producer-portal.delta.json", "format": "json", "storage": { "provider": "s3", "location": "s3://adlc-artifacts/wf-hl-pi1-3c4d5e6f/cycle-1/deltas/hld-producer-portal.delta.json" }, "description": "Creating delta 0.0.0 -> 1.0.0, additive, 4 sections", "produced_by": "L1-design-hld" },
+      { "id": "artifact-hld-6e7f8a9c-03", "type": "delta", "name": "hld-notifications-worker.delta.json", "format": "json", "storage": { "provider": "s3", "location": "s3://adlc-artifacts/wf-hl-pi1-3c4d5e6f/cycle-1/deltas/hld-notifications-worker.delta.json" }, "description": "Creating delta 0.0.0 -> 1.0.0, additive, 4 sections", "produced_by": "L1-design-hld" }
+    ],
+
+    "execution_summary": "• Emitted 3 HLD deltas — identity-service, producer-portal, notifications-worker — all additive, all non-structural, none requiring an ADR. Four further components were named as NONE with reasons rather than omitted.\n• All three are CREATING deltas: 0.0.0 -> 1.0.0 with creates_document true. Cycle 1 is the first cycle for every component, so there is no current hld.md to diff against, and the BOM's 'never a blank template' rule has no stated answer for that case. Resolved by taking the delta against an empty document, so the first HLD still arrives as a reviewable diff from the same mechanism as every later amendment rather than as a hand-authored document later deltas must chase.\n• The structural test was applied and came back negative for all three. Every component, its context and its entity ownership were already declared in the FSA and the data architecture; these deltas say how a declared component is built, not what the decomposition is. Nothing propagates to foundational-solution-architecture.md.\n• Three findings. HLD-F01: WU-F1.1-04's title attributes the publication gate to Catalogue, but the decision belongs to Identity, which owns FoodSafetyRegistration — a gate in Catalogue reading Identity's entity would breach CON-2. Resolved in design, flagged for the title. HLD-F02: producer-portal's status view is now in a component HLD and still has no Work Unit, carried forward from UJ-F01 and WF-F01. HLD-F03 is the consequential one: the outbound call to the competent-authority FBO register is a new third-party egress path, and PLT-6 has no capability row for it — which is exactly the condition that fires the platform architect's delta invocation.\n• Contributed the APPLICATION row to 00-overview.md's viewpoint assertion table. The other three rows are the viewpoint agents' to assert; gr-L1-viewpoint-completeness fails on silence, not on a stated NONE.\n• Knowledge bases consulted: kb-L1-enterprise-architecture (EA4 own-datastore rule, BP-catalogue check ids for the constraint references).\n• Guardrails evaluated: gr-L1-consistency-check (pass), gr-L1-hallucination-check (pass — the one externally named system, the competent-authority register, is named because the requirement names it and is flagged as unprovisioned rather than assumed reachable)."
+  }
+}

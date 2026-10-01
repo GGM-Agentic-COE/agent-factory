@@ -34,7 +34,11 @@ draft output from `L1-vision-statement-generator`, and produces:
 2. Reads `vision.md`, `regulatory-feasibility.md`, `idea-brief.json` and
    (optionally) `market-analysis.md` in a single blob-storage call. The brief
    is **JSON**, parsed by key path
-3. Loads `L1-vision-statement-generator/evaluation.md` as the scoring source of truth
+3. Reads `L1-vision-statement-generator/evaluation.md` from GitHub with
+   `tool-L1-github-reader-using-app` as the scoring source of truth, plus this
+   evaluator's `examples/` folder for shape — repo, branch and folders all from
+   the request. An unreadable rubric fails with `REFERENCE_UNAVAILABLE` rather
+   than scoring against a remembered bar; corrections go back to blob storage
 4. Computes the coverage-gap set (Amber/Red constraint_ids minus covered ids)
 5. Checks each executive_summary sentence for grounding elsewhere in the document
 6. Checks viability_score wasn't silently altered — against

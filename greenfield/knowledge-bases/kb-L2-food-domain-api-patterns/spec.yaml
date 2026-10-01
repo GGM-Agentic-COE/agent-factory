@@ -1,0 +1,75 @@
+spec_version: "1.0"
+artifact_type: knowledge_base
+metadata:
+  name: kb-L2-food-domain-api-patterns
+  version: "1.0.0"
+  layer: L2
+  owner: agentic-ai-coe
+  content_hash: "sha256:pending"
+  last_reviewed: "2026-09-22"
+  review_cadence: quarterly
+
+purpose:
+  description: >
+    Integration patterns specific to the food supply chain / producer
+    marketplace domain: the participant model and its trust boundaries, the
+    four-kind event taxonomy (lifecycle / evidence / movement /
+    notification) and why conflating them is the domain's most common
+    modelling error, the flows where async-by-default is genuinely wrong and
+    what their degraded mode must be, what regulatory change does to
+    contract versioning, the governed pattern for unavoidable file exchange,
+    and the duplicate/idempotency/replay rules that evidence records impose.
+    This is the swappable domain half of L1-design-integration-architect:
+    the agent is domain-agnostic, this KB is what makes its output
+    domain-aware. States patterns and their rationale only — it names no
+    bus, gateway or broker product, which belong to the platform viewpoint.
+
+content:
+  format: markdown
+  documents:
+    - path: content/food-domain-api-patterns.md
+      sections: [domain-distinctives, participant-model-trust-boundaries, event-taxonomy, sync-async-decision-table, contract-versioning-regulatory-change, partner-file-integration, duplicate-idempotency-recovery, integration-observability, glossary]
+  total_tokens_estimate: 2100
+  chunking: by-section
+  embedding_model: text-embedding-3-small
+
+consumers:
+  agents:
+    - L1-design-integration-architect
+  usage: >
+    integration-architect reads FD3 when building the INT-3 event taxonomy
+    and naming rules — specifically to classify each event by kind, because
+    the kind (not the name) decides ordering, retention and replay policy;
+    FD4 when justifying every synchronous edge in the INT-4 flow register,
+    including the domain's standing rule that an unknown availability, fee or
+    eligibility is a refusal rather than an optimistic assumption; FD5 when
+    writing the INT-9 contract-change policy, where regulatory change arrives
+    as new mandatory fields on existing evidence records rather than as new
+    endpoints; FD7 when stating the INT-6 reliability obligations each
+    asynchronous consumer owes; FD8 for the two domain-specific
+    observability signals (evidence-chain completeness, external-party
+    contract-version distribution) that a generic observability list misses.
+    FD6 is read only when a file-based exchange is actually proposed — it is
+    the governed transitional pattern, never an approved style.
+
+grounding_rules:
+  accessed_by: [L1-design-integration-architect]
+  visibility: "L2 — visible to L2/L3/L4 within the food supply chain domain; not an enterprise-wide standard"
+  boundary: >
+    Domain patterns only. Enterprise integration principles (PRIN-03,
+    PRIN-08) live in kb-L1-enterprise-architecture § binding-principles;
+    identity, residency and classification rules live in
+    kb-L1-enterprise-security. This KB cites both rather than restating
+    them — a rule stated in two places drifts in one of them.
+
+freshness:
+  trigger_for_update: >
+    A new mandatory regulatory field applies to an evidence record, a new
+    participant category joins the platform, or a partner integration
+    capability shifts (e.g. a distributor segment moves off EDI).
+  note: >
+    Illustrative content for this reference scenario, not a real
+    organisation's or a real regulator's requirements. Replace this file
+    wholesale when deploying the framework against a different domain — the
+    consuming agent does not change, which is the point of the L1-agent /
+    L2-KB split.

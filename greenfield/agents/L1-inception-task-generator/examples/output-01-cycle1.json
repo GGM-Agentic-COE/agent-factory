@@ -1,0 +1,251 @@
+{
+  "agent_id": "L1-inception-task-generator",
+  "agent_version": "1.0.0",
+  "execution_id": "exec-tg-0e1f2a3b",
+  "workflow_execution_id": "wf-hl-pi1-3c4d5e6f",
+  "status": "success",
+  "content": {
+    "type": "tasks",
+    "schema_version": "1.0",
+    "items": {
+      "decomposition_control": {
+        "pi_id": "PI-2026-Q2",
+        "cycle": 1,
+        "features_elaborated": ["F5.1", "F1.1"],
+        "governing_rule": "Decompose to the coarsest level at which each unit is still independently verifiable and context-bounded — and no finer. Over-decomposition is a named failure mode, which is why T5 exists alongside T1 and T2.",
+        "thresholds_applied": { "T2_max_files_read": 12, "T2_max_context_tokens": 100000, "T5_max_hard_dependency_count": 2 },
+        "thresholds_source": "kb-L1-decomposition-standard (defaults; not overridden for this run)",
+        "terminology_note": "A 'task' record is a Work Unit. tasks.json retains its name for tooling continuity; the ids use the WU- prefix."
+      },
+
+      "work_units": [
+        {
+          "work_unit_id": "WU-F5.1-01",
+          "feature_id": "F5.1",
+          "slice_id": null,
+          "title": "Producer registration via external IdP",
+          "layer": "integration",
+          "unit_points": 5,
+          "depends_on_unit": [],
+          "verification_ref": ["TC-F5.1-01"],
+          "rightsizing": { "T1": "PASS", "T2": "PASS", "T3": "PASS", "T4": "PASS", "T5": "PASS", "est_files_read": 7, "est_context_tokens": 41000, "hard_dependency_count": 0, "title_primary_verb": "register", "title_object": "producer via external IdP" },
+          "reads": ["external IdP integration spec", "kb-L1-enterprise-security ES1"],
+          "reads_note": "Does not load the producer entity spec or the UI wireframe — neither is needed to stand up authentication. That restraint is what T2 measures."
+        },
+        {
+          "work_unit_id": "WU-F5.1-02",
+          "feature_id": "F5.1",
+          "slice_id": null,
+          "title": "OIDC token validation",
+          "layer": "business-logic",
+          "unit_points": 3,
+          "depends_on_unit": ["WU-F5.1-01"],
+          "verification_ref": ["TC-F5.1-03", "TC-ADV-F5.1-01"],
+          "rightsizing": { "T1": "PASS", "T2": "PASS", "T3": "PASS", "T4": "PASS", "T5": "PASS", "est_files_read": 5, "est_context_tokens": 28000, "hard_dependency_count": 1, "title_primary_verb": "validate", "title_object": "OIDC token" },
+          "origin": "split from draft DRAFT-F5.1-02 by the T1 block below",
+          "reads": ["external IdP integration spec", "token validation rules"]
+        },
+        {
+          "work_unit_id": "WU-F5.1-03",
+          "feature_id": "F5.1",
+          "slice_id": null,
+          "title": "Role provisioning from the onboarding record",
+          "layer": "business-logic",
+          "unit_points": 5,
+          "depends_on_unit": ["WU-F5.1-02"],
+          "verification_ref": ["TC-F5.1-02"],
+          "rightsizing": { "T1": "PASS", "T2": "PASS", "T3": "PASS", "T4": "PASS", "T5": "PASS", "est_files_read": 6, "est_context_tokens": 33000, "hard_dependency_count": 1, "title_primary_verb": "provision", "title_object": "role from the onboarding record" },
+          "origin": "merged from the T1 split remainder and draft DRAFT-F5.1-03 by the T5 merge below",
+          "reads": ["onboarding record spec", "role model"]
+        },
+        {
+          "work_unit_id": "WU-F1.1-01",
+          "feature_id": "F1.1",
+          "slice_id": "S-F1.1-a",
+          "title": "Producer entity schema migration",
+          "layer": "data",
+          "unit_points": 3,
+          "depends_on_unit": [],
+          "verification_ref": ["TC-S-F1.1-a-05"],
+          "rightsizing": { "T1": "PASS", "T2": "PASS", "T3": "PASS", "T4": "PASS", "T5": "PASS", "est_files_read": 4, "est_context_tokens": 19000, "hard_dependency_count": 0, "title_primary_verb": "migrate", "title_object": "producer entity schema" },
+          "origin": "split from draft DRAFT-F1.1-01 by the T2 block below",
+          "reads": ["data-architecture.md DAT-1.1 Producer ownership", "entity spec"],
+          "reads_note": "Never loads the FBO rules KB. The schema unit has no business asking how a Food Business Operator number is validated."
+        },
+        {
+          "work_unit_id": "WU-F1.1-02",
+          "feature_id": "F1.1",
+          "slice_id": "S-F1.1-a",
+          "title": "FBO number capture endpoint",
+          "layer": "api",
+          "unit_points": 5,
+          "depends_on_unit": ["WU-F1.1-01", "WU-F5.1-02"],
+          "verification_ref": ["TC-S-F1.1-a-01", "TC-S-F1.1-a-02", "TC-S-F1.1-a-03", "TC-ADV-S-F1.1-a-01"],
+          "rightsizing": { "T1": "PASS", "T2": "PASS", "T3": "PASS", "T4": "PASS", "T5": "PASS", "est_files_read": 9, "est_context_tokens": 52000, "hard_dependency_count": 2, "title_primary_verb": "capture", "title_object": "FBO number" },
+          "origin": "split from draft DRAFT-F1.1-01 by the T2 block below",
+          "reads": ["OpenAPI contract", "validation rules", "kb-L2-food-domain FBO format"],
+          "note": "hard_dependency_count is exactly at the T5 ceiling of 2. A third hard dependency would make this a merge candidate rather than a unit."
+        },
+        {
+          "work_unit_id": "WU-F1.1-03",
+          "feature_id": "F1.1",
+          "slice_id": "S-F1.1-a",
+          "title": "Registration submission form",
+          "layer": "ui",
+          "unit_points": 3,
+          "depends_on_unit": ["WU-F1.1-02"],
+          "verification_ref": ["TC-S-F1.1-a-02"],
+          "rightsizing": { "T1": "PASS", "T2": "PASS", "T3": "PASS", "T4": "WARN", "T5": "PASS", "est_files_read": 5, "est_context_tokens": 24000, "hard_dependency_count": 1, "title_primary_verb": "submit", "title_object": "registration form" },
+          "reads": ["wireframe", "API contract"],
+          "note": "T4 WARN carried, not actioned — see the rightsizing log."
+        },
+        {
+          "work_unit_id": "WU-F1.1-04",
+          "feature_id": "F1.1",
+          "slice_id": "S-F1.1-a",
+          "title": "Publication gate on pending-verification",
+          "layer": "business-logic",
+          "unit_points": 3,
+          "depends_on_unit": ["WU-F1.1-01"],
+          "verification_ref": ["TC-S-F1.1-a-04"],
+          "rightsizing": { "T1": "PASS", "T2": "PASS", "T3": "PASS", "T4": "PASS", "T5": "PASS", "est_files_read": 4, "est_context_tokens": 21000, "hard_dependency_count": 1, "title_primary_verb": "gate", "title_object": "publication on pending-verification" },
+          "reads": ["slice AC", "registration state model"]
+        },
+        {
+          "work_unit_id": "WU-F1.1-05",
+          "feature_id": "F1.1",
+          "slice_id": "S-F1.1-b",
+          "title": "FBO register lookup integration",
+          "layer": "integration",
+          "unit_points": 5,
+          "depends_on_unit": ["WU-F1.1-01"],
+          "verification_ref": ["TC-S-F1.1-b-01", "TC-S-F1.1-b-03", "TC-ADV-S-F1.1-b-01"],
+          "rightsizing": { "T1": "PASS", "T2": "PASS", "T3": "PASS", "T4": "PASS", "T5": "PASS", "est_files_read": 8, "est_context_tokens": 44000, "hard_dependency_count": 1, "title_primary_verb": "look up", "title_object": "FBO register" },
+          "origin": "emitted only after the two T3 blocks below were cleared",
+          "reads": ["kb-L2-food-domain FBO rules", "integration spec", "stub register contract"]
+        },
+        {
+          "work_unit_id": "WU-F1.1-06",
+          "feature_id": "F1.1",
+          "slice_id": "S-F1.1-b",
+          "title": "Rejected-verification notification",
+          "layer": "business-logic",
+          "unit_points": 3,
+          "depends_on_unit": ["WU-F1.1-05"],
+          "verification_ref": ["TC-S-F1.1-b-02"],
+          "rightsizing": { "T1": "PASS", "T2": "PASS", "T3": "PASS", "T4": "PASS", "T5": "PASS", "est_files_read": 3, "est_context_tokens": 16000, "hard_dependency_count": 1, "title_primary_verb": "notify", "title_object": "rejected verification" },
+          "reads": ["slice AC only"]
+        }
+      ],
+
+      "rightsizing_log": [
+        {
+          "event": "T1_BLOCK",
+          "test": "T1 — one coherent thing per session",
+          "draft_unit": "DRAFT-F5.1-02",
+          "draft_title": "OIDC token validation & role provisioning",
+          "finding": "Title contains a coordinating conjunction ('&') joining two primary verbs — validation and provisioning. Two nameable objectives, one unit.",
+          "verdict": "BLOCK -> split",
+          "resolution": "Split into WU-F5.1-02 (OIDC token validation, 3 pts) and a role-provisioning remainder (2 pts). Points preserved at 5.",
+          "note": "Appendix B.2 of the BOM offers this exact title as a T1-compliant example. The encoded check disagrees with the illustration; the check is what runs."
+        },
+        {
+          "event": "T5_WARN_MERGE",
+          "test": "T5 — not over-split",
+          "draft_units": ["role-provisioning remainder from the T1 split (2 pts)", "DRAFT-F5.1-03 Distributor/buyer role mapping (3 pts)"],
+          "finding": "Both units resolve a role from the same onboarding record and neither is verifiable in isolation — the mapping unit has no observable behaviour until provisioning writes a role, and provisioning has nothing to write until the mapping exists. Each named the other as a hard dependency.",
+          "verdict": "WARN -> merge",
+          "resolution": "Merged into WU-F5.1-03 (Role provisioning from the onboarding record, 5 pts), verified by TC-F5.1-02.",
+          "note": "The T1 split produced a fragment too small to stand alone. T1 and T5 pull against each other by design, and the resolution is a unit that is one coherent thing AND independently verifiable — not the smallest possible piece."
+        },
+        {
+          "event": "T2_BLOCK",
+          "test": "T2 — context-bounded",
+          "draft_unit": "DRAFT-F1.1-01",
+          "draft_title": "FBO number capture endpoint + validation",
+          "finding": "est_files_read 17 against a ceiling of 12; est_context_tokens 108,000 against a ceiling of 100,000 (0.5 x a 200k window). The unit needed the producer schema, the OpenAPI contract, the validation rules and the UI wireframe simultaneously.",
+          "verdict": "BLOCK -> split",
+          "resolution": "Split on the natural data/api seam into WU-F1.1-01 (Producer entity schema migration, data, 3 pts) and WU-F1.1-02 (FBO number capture endpoint, api, 5 pts). Post-split: 4 and 9 files read, 19k and 52k tokens. Points preserved at 8.",
+          "note": "T2 counts files READ, not files changed. The draft changed few files and read many, which is the case the test exists to catch."
+        },
+        {
+          "event": "T3_BLOCK",
+          "test": "T3 — independently verifiable",
+          "draft_unit": "DRAFT-F1.1-05",
+          "draft_title": "FBO register lookup integration",
+          "finding": "verification_ref was empty. No unit ships without a named verifier.",
+          "verdict": "BLOCK -> add verifier",
+          "resolution": "Bound to TC-S-F1.1-b-01 (valid lookup against a stubbed register) and TC-S-F1.1-b-03 (timeout leaves the registration pending).",
+          "note": "The verifier existed already — case-writer minted it before this agent ran. T3 failing here was a binding omission, not a missing test."
+        },
+        {
+          "event": "T3_BLOCK",
+          "test": "T3 — independently verifiable (reference resolution)",
+          "draft_unit": "DRAFT-F1.1-05",
+          "draft_title": "FBO register lookup integration",
+          "finding": "On the re-run, verification_ref named TC-S-F1.1-b-99 for the duplicate-delivery behaviour. No such case_id exists in the minted set. gr-L1-verification-ref-resolvable blocked the unit.",
+          "verdict": "BLOCK -> add verifier",
+          "resolution": "Corrected to TC-ADV-S-F1.1-b-01, the adversarial case that actually covers duplicate verification delivery.",
+          "note": "A non-empty verification_ref is not the same as a resolvable one. A plausible-looking case id is the failure mode this guardrail exists for — it would have shipped a Work Unit whose verifier nobody could run."
+        },
+        {
+          "event": "T4_WARN",
+          "test": "T4 — layer-aligned",
+          "unit": "WU-F1.1-03",
+          "finding": "Registration submission form spans ui and api: client-side validation mirrors the contract WU-F1.1-02 owns.",
+          "verdict": "WARN -> prefer split",
+          "resolution": "NOT SPLIT. Carried as a warning in reflection_notes for the evaluator.",
+          "rationale": "Splitting would produce a form unit with no validation and a validation unit with no form, neither independently demonstrable. The mirroring is intentional — the server remains authoritative (TC-ADV-S-F1.1-a-01 proves a forged client-side flag is ignored), and the client copy is a usability affordance, not a second enforcement point. T4 is WARN precisely because some layer-spanning units are legitimate."
+        }
+      ],
+
+      "verifier_coverage": [
+        { "case_id": "TC-F5.1-01", "claimed_by": ["WU-F5.1-01"] },
+        { "case_id": "TC-F5.1-02", "claimed_by": ["WU-F5.1-03"] },
+        { "case_id": "TC-F5.1-03", "claimed_by": ["WU-F5.1-02"] },
+        { "case_id": "TC-ADV-F5.1-01", "claimed_by": ["WU-F5.1-02"] },
+        { "case_id": "TC-S-F1.1-a-01", "claimed_by": ["WU-F1.1-02"] },
+        { "case_id": "TC-S-F1.1-a-02", "claimed_by": ["WU-F1.1-02", "WU-F1.1-03"] },
+        { "case_id": "TC-S-F1.1-a-03", "claimed_by": ["WU-F1.1-02"] },
+        { "case_id": "TC-ADV-S-F1.1-a-01", "claimed_by": ["WU-F1.1-02"] },
+        { "case_id": "TC-S-F1.1-a-04", "claimed_by": ["WU-F1.1-04"] },
+        { "case_id": "TC-S-F1.1-a-05", "claimed_by": ["WU-F1.1-01"] },
+        { "case_id": "TC-S-F1.1-b-01", "claimed_by": ["WU-F1.1-05"] },
+        { "case_id": "TC-S-F1.1-b-02", "claimed_by": ["WU-F1.1-06"] },
+        { "case_id": "TC-S-F1.1-b-03", "claimed_by": ["WU-F1.1-05"] },
+        { "case_id": "TC-ADV-S-F1.1-b-01", "claimed_by": ["WU-F1.1-05"] }
+      ],
+
+      "capacity_signal": {
+        "cycle": 1,
+        "capacity_points": 30,
+        "emitted_points": 35,
+        "fits": false,
+        "over_by": 5,
+        "breakdown": [{ "feature_id": "F5.1", "points": 13 }, { "feature_id": "F1.1", "points": 22 }],
+        "action": "FLAGGED_TO_PLANNER",
+        "note": "This agent does not assign cycle or disposition — those are L1-planning-feature-cycle-planner's fields. The signal is raised because the fit invariant (sum of committed unit_points <= capacity) is the planner's to enforce and gr-L1-consistency-check will reject an over-committed cycle. Overflow units must carry disposition=overflow with a reflow_band, never be silently dropped. The natural candidate is S-F1.1-b (WU-F1.1-05, WU-F1.1-06, 8 pts), since the slice sequencing already places it after S-F1.1-a."
+      },
+
+      "reflection_notes": [
+        "T4 WARN on WU-F1.1-03 carried unactioned with rationale — for the evaluator, not silently swallowed.",
+        "WU-F1.1-02 sits exactly at the T5 hard-dependency ceiling of 2. Worth watching if the endpoint grows.",
+        "OQ-01 and OQ-02 from story-generator remain open. Neither blocks a Cycle 1 Work Unit: OQ-02 (live register vs cached copy) shapes WU-F1.1-05's implementation but not its existence or its verifier, and the unit is written against a stubbed register either way."
+      ]
+    },
+
+    "artifacts": [
+      {
+        "id": "artifact-tg-0e1f2a3b",
+        "type": "document",
+        "name": "tasks.json",
+        "format": "json",
+        "storage": { "provider": "s3", "location": "s3://adlc-artifacts/wf-hl-pi1-3c4d5e6f/cycle-1/tasks.json" },
+        "description": "9 Work Units across 2 features and 2 story slices; every unit layer-tagged and bound to a resolvable verification_ref; 35 points against a 30-point cycle, flagged to the planner",
+        "produced_by": "L1-inception-task-generator"
+      }
+    ],
+
+    "execution_summary": "• Emitted 9 Work Units across F5.1 (3 units, 13 pts) and F1.1 (6 units across 2 slices, 22 pts). Every unit carries a layer from the enum and at least one verification_ref that resolves to a minted case_id.\n• Right-sizing did real work: 6 events, 4 of them blocking. T1 blocked 'OIDC token validation & role provisioning' on its conjunction and split it; T5 then merged the 2-point remainder back with the role-mapping draft, because the split had produced a fragment nothing could verify alone. T2 blocked a unit reading 17 files and 108k tokens, splitting it on the data/api seam. T3 blocked the FBO lookup unit twice — once for an empty verification_ref, once for TC-S-F1.1-b-99, a plausible-looking case id that does not exist.\n• The second T3 block is the one worth reading: a non-empty verifier reference is not a resolvable one, and gr-L1-verification-ref-resolvable is what stands between a Work Unit and a verifier nobody can run.\n• T4 WARN on WU-F1.1-03 was carried, not actioned. Splitting the registration form from its client-side validation would leave neither half demonstrable, and the server stays authoritative — TC-ADV-S-F1.1-a-01 proves a forged client flag is ignored. T4 is WARN because some layer-spanning units are legitimate.\n• Verifier coverage: all 14 minted case_ids are claimed by at least one Work Unit; no unit claims a case id that does not exist.\n• Capacity: 35 points emitted against 30. Flagged to L1-planning-feature-cycle-planner rather than resolved here — cycle and disposition are the planner's fields, and overflow units must carry disposition=overflow with a reflow_band rather than being dropped. S-F1.1-b (8 pts) is the natural overflow candidate on the existing slice sequencing.\n• Knowledge bases consulted: kb-L1-decomposition-standard (T1–T5, the layer enum, N=12 and 0.5 x window defaults — not overridden); kb-L1-sdlc-templates (Work Unit record shape).\n• Guardrails evaluated: gr-L1-schema-validator (pass), gr-L1-decomposition-rightsizing (pass after 4 blocking corrections; 2 warnings carried), gr-L1-verification-ref-resolvable (pass after 1 correction).\n• Over-decomposition was actively resisted: the governing rule is the coarsest level that is still independently verifiable and context-bounded, and the T5 merge is the evidence that the rule was applied in both directions rather than only downward."
+  }
+}

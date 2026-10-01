@@ -1,0 +1,41 @@
+{
+  "delta_id": "LLD-D02",
+  "target_document": "frontend/producer-portal/lld.md",
+  "component": "producer-portal",
+  "produced_by": "L1-design-lld@1.0.0",
+  "execution_id": "exec-lld-7f8a9b0d",
+  "workflow_execution_id": "wf-hl-pi1-3c4d5e6f",
+  "cycle": "C1-producer-registration",
+
+  "from_version": "0.0.0",
+  "to_version": "1.0.0",
+  "creates_document": true,
+  "type": "additive",
+  "version_bump": "major",
+  "structural": false,
+  "adr_required": false,
+
+  "changes": [
+    {
+      "section": "LLD-1 Classes",
+      "operation": "add",
+      "content": "RegistrationForm — local field validation, submit handler. RegistrationStatusView — polls getRegistrationStatus; no Work Unit builds it (HLD-F02). ApiClient — gateway-only, carries the session correlation id on every call.",
+      "derived_from": ["hld HLD-D02", "wireframes.md WF-01, WF-02"]
+    },
+    {
+      "section": "LLD-4 Error handling",
+      "operation": "add",
+      "content": "400 -> render the field-level problem detail against the FBO field and preserve the entered value. 422 -> render the attestation requirement; the client guard is re-shown but is not treated as the control. Network failure on submit -> the form is not cleared and the submission is not retried automatically; a silent retry could create a second registration the producer never intended.",
+      "derived_from": ["openapi.yaml responses", "stories.json S-F1.1-a"]
+    },
+    {
+      "section": "LLD-7 Status polling",
+      "operation": "add",
+      "content": "RegistrationStatusView polls at a fixed interval with no countdown and no progress indication. The view cannot distinguish a slow lookup from a timed-out one and must not imply it can (S-F1.1-b-AC3, wireframes WF-02).",
+      "derived_from": ["wireframes.md WF-02"]
+    }
+  ],
+
+  "findings_raised": [],
+  "guardrails": { "gr-L1-consistency-check": "pass" }
+}

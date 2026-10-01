@@ -1,0 +1,54 @@
+{
+  "delta_id": "PLT-LLD-D01",
+  "target_document": "platform/egress-gateway/lld.md",
+  "component": "egress-gateway",
+  "component_kind": "platform",
+  "produced_by": "L1-design-platform-architect@1.0.0",
+  "execution_id": "exec-pltd-0c1d2e3b",
+  "workflow_execution_id": "wf-hl-pi1-3c4d5e6f",
+  "cycle": "C1-producer-registration",
+
+  "from_version": "0.0.0",
+  "to_version": "1.0.0",
+  "creates_document": true,
+  "type": "additive",
+  "version_bump": "major",
+  "structural": false,
+  "adr_required": false,
+
+  "changes": [
+    {
+      "section": "LLD-1 Configuration model",
+      "operation": "add",
+      "content": "The allowlist is declarative configuration held in the platform repository as environments/{env}/egress-allowlist.auto.tfvars. It is NOT editable at runtime. An allowlist that can be changed without a commit is an allowlist with no audit trail, and the entry that matters is always the one nobody remembers adding.",
+      "derived_from": ["plt PLTD-02", "plt PLT-11"]
+    },
+    {
+      "section": "LLD-2 Allowlist entry shape",
+      "operation": "add",
+      "content": "```text\nentry {\n  destination  = \"<host>\"      # the only field the gateway enforces on\n  owner        = \"<team>\"      # PLT-C5 requires a named owner\n  reason       = \"<why>\"       # PLT-C5 requires a stated reason\n  adr          = \"<ADR id>\"    # the decision that authorised it\n}\n```\nCycle 1 holds exactly one entry, owned by the HarvestLink product unit, reason 'FR-003 FBO verification', authorised by ADR-012.",
+      "derived_from": ["plt PLTD-06", "adr ADR-012"]
+    },
+    {
+      "section": "LLD-4 Error handling",
+      "operation": "add",
+      "content": "A denied attempt logs the destination and the calling workload identity and does NOT log the request body — the body of an FBO lookup carries a producer's registration number, and a denial log is the last place that should acquire one. The caller receives a connection refusal it cannot distinguish from the destination being down, which is correct: from identity-service's side both are NoAnswer, and NoAnswer has one defined behaviour.",
+      "derived_from": ["lld LLD-D01 LLD-4", "dat DAT-3.2", "plt PLT-12"]
+    },
+    {
+      "section": "LLD-5 TLS handling",
+      "operation": "add",
+      "content": "No TLS interception. The gateway forwards the encrypted stream; it does not hold the destination's certificate chain for inspection purposes and cannot read the payload.",
+      "derived_from": ["plt PLTD-04"]
+    },
+    {
+      "section": "LLD-6 Secrets",
+      "operation": "add",
+      "content": "The gateway holds no secrets. It authorises by destination only. Any credential required by a destination is resolved at runtime by the calling workload from the group vault — the gateway never sees it and never proxies authentication.",
+      "derived_from": ["plt PLTD-03", "kb-L1-enterprise-security ES5"]
+    }
+  ],
+
+  "findings_raised": [],
+  "guardrails": { "gr-L1-consistency-check": "pass", "gr-L1-secret-scanner": "pass — 0 findings; the component holds no secrets by design" }
+}

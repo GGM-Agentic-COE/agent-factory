@@ -1,0 +1,96 @@
+{
+  "_comment": "Input to L1-design-lld, BOM Phase 4, DELTA MODE. Per the BOM row: the HLD deltas from design-hld, openapi.yaml from design-api-spec, and the current lld.md per affected component. As with the HLD, Cycle 1 is the first cycle for every component, so every current lld.md is absent and each delta is a creating one.",
+  "folder_name": "harvestlink/pi-2026-q2/cycle-1",
+  "cycle": { "pi_id": "PI-2026-Q2", "cycle": 1, "slug": "producer-registration" },
+
+  "current_component_documents": [
+    { "component": "identity-service", "document": "services/identity-service/lld.md", "current_version": null, "exists": false, "first_cycle_for_component": true },
+    { "component": "producer-portal", "document": "frontend/producer-portal/lld.md", "current_version": null, "exists": false, "first_cycle_for_component": true },
+    { "component": "notifications-worker", "document": "services/notifications-worker/lld.md", "current_version": null, "exists": false, "first_cycle_for_component": true }
+  ],
+
+  "hld_deltas_output": {
+    "agent_id": "L1-design-hld",
+    "execution_id": "exec-hld-6e7f8a9c",
+    "workflow_execution_id": "wf-hl-pi1-3c4d5e6f",
+    "status": "success",
+    "content": {
+      "type": "hld_deltas",
+      "schema_version": "1.0",
+      "items": {
+        "deltas": [
+          {
+            "delta_id": "HLD-D01",
+            "component": "identity-service",
+            "to_version": "1.0.0",
+            "type": "additive",
+            "structural": false,
+            "components_declared": ["TokenValidator (WU-F5.1-02)", "RoleProvisioner (WU-F5.1-03)", "RegistrationService (WU-F1.1-02, WU-F1.1-04)", "FboRegisterClient (WU-F1.1-05)", "ProducerRepository (WU-F1.1-01)"],
+            "data_flow": "Registration submitted -> RegistrationService validates format and attestation server-side -> Producer and FoodSafetyRegistration written with status pending-verification -> FboRegisterClient queries the competent-authority register asynchronously -> outcome written, identity.registration.verified emitted.",
+            "nfr_allocation": "Availability 99.9%; getRegistrationStatus p95 <= 250 ms; FoodSafetyRegistration append-only, 6-year retention, approved PII region.",
+            "eligibility_boundary": "identity-service owns the eligibility DECISION and exposes it through identity.registration-status@v1. Enforcement at publication is catalogue-service's, not built this cycle."
+          },
+          {
+            "delta_id": "HLD-D02",
+            "component": "producer-portal",
+            "to_version": "1.0.0",
+            "type": "additive",
+            "structural": false,
+            "components_declared": ["RegistrationForm (WU-F1.1-03)", "RegistrationStatusView (no Work Unit — HLD-F02)"],
+            "client_validation_posture": "Client-side FBO format checking and the attestation guard are affordances, not controls. The server refuses independently."
+          },
+          {
+            "delta_id": "HLD-D03",
+            "component": "notifications-worker",
+            "to_version": "1.0.0",
+            "type": "additive",
+            "structural": false,
+            "components_declared": ["VerificationOutcomeNotifier (WU-F1.1-06)"],
+            "consumer_obligations": "Deduplication key from the business act (producer, registration number, verified-on date), not the message id. Idempotent. Bounded retry with backoff. Dead-letter path with a named owner. Replay policy: none — source event is Evidence kind.",
+            "content_boundary": "No FBO number, no business identifier, no personal data beyond the addressee. Rejection reason passed through verbatim."
+          }
+        ],
+        "findings": [
+          { "id": "HLD-F02", "severity": "MEDIUM", "summary": "producer-portal's RegistrationStatusView is in the HLD and has no Work Unit." },
+          { "id": "HLD-F03", "severity": "MEDIUM", "summary": "The outbound FBO register call is a new egress path with no PLT-6 capability behind it." }
+        ]
+      },
+      "artifacts": [
+        { "id": "artifact-hld-6e7f8a9c-01", "type": "delta", "name": "hld-identity-service.delta.json", "format": "json", "storage": { "provider": "s3", "location": "s3://adlc-artifacts/wf-hl-pi1-3c4d5e6f/cycle-1/deltas/hld-identity-service.delta.json" }, "description": "Creating delta", "produced_by": "L1-design-hld" }
+      ],
+      "execution_summary": "• 3 creating HLD deltas, all additive, none structural."
+    }
+  },
+
+  "api_spec_output": {
+    "agent_id": "L1-design-api-spec",
+    "execution_id": "exec-as-5d6e7f8b",
+    "workflow_execution_id": "wf-hl-pi1-3c4d5e6f",
+    "status": "success",
+    "content": {
+      "type": "api_spec",
+      "schema_version": "1.0",
+      "items": {
+        "endpoints": [
+          { "operation_id": "createProducerRegistration", "method": "post", "path": "/v1/producers/registrations", "owning_component": "identity-service", "request_fields": ["business_name", "fbo_number", "fbo_attestation"], "responses": ["201 Created", "400 Bad Request (field-level)", "422 Unprocessable (attestation missing)"] },
+          { "operation_id": "getProducerRegistration", "method": "get", "path": "/v1/producers/registrations/{registrationId}", "owning_component": "identity-service", "responses": ["200 OK", "404 Not Found"] },
+          { "operation_id": "getRegistrationStatus", "method": "get", "path": "/v1/producers/{producerId}/registration", "owning_component": "identity-service", "responses": ["200 OK"], "latency_budget": "p95 <= 250 ms" }
+        ]
+      },
+      "artifacts": [
+        { "id": "artifact-as-5d6e7f8b", "type": "api_spec", "name": "openapi.yaml", "format": "yaml", "storage": { "provider": "s3", "location": "s3://adlc-artifacts/wf-hl-pi1-3c4d5e6f/cycle-1/deltas/openapi.yaml" }, "description": "3 operations on identity-service", "produced_by": "L1-design-api-spec" }
+      ],
+      "execution_summary": "• 3 operations."
+    }
+  },
+
+  "data_architecture_constraints": {
+    "source": "data-architecture.md@1.0",
+    "constraints": [
+      { "id": "DAT-1.1", "rule": "Identity is the sole writer of Producer, Buyer, Session and FoodSafetyRegistration" },
+      { "id": "DAT-3.2", "rule": "FoodSafetyRegistration is Regulated Evidence, append-only, 6-year retention, approved PII region. A lapsed registration is superseded, never overwritten, because a dispute asks what was true on the day of sale" },
+      { "id": "DAT-1.b", "rule": "No cross-context direct database access" }
+    ],
+    "note": "The LLD may name classes and error handling. It may not change entity ownership, classification or retention — those are the data viewpoint's, and a change there is a data-architecture delta, not an LLD one."
+  }
+}

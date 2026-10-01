@@ -1,0 +1,77 @@
+{
+  "_comment": "Input to L1-design-integration-architect, DELTA INVOCATION (BOM Phase 4). Per the BOM row: 00-overview.md's cross-component sequence, openapi.yaml from design-api-spec, and the current integration-architecture.md. This invocation also merges the cycle's cross-component sequence into INT-4 as a canonical flow — an end-to-end sequence crossing several services is an integration flow, and no single component HLD can hold it.",
+  "_bom_gap": "00-overview.md is an input here and is committed by L1-github-orchestrator, but no Phase 4 agent row names the agent that AUTHORS it — and the BOM describes it as 'the only original content in the package'. This example takes it as assembled from the HLD and LLD deltas by design-hld, and flags the unassigned ownership rather than assuming it.",
+
+  "folder_name": "harvestlink/pi-2026-q2/cycle-1",
+  "cycle": { "pi_id": "PI-2026-Q2", "cycle": 1, "slug": "producer-registration" },
+
+  "current_canonical_document": {
+    "document": "integration-architecture.md",
+    "version": "1.0",
+    "status": "APPROVED",
+    "content_hash": "sha256:9f40…c7b2",
+    "sections_relevant": {
+      "INT-2": "Approved styles: synchronous request/response via the group gateway; asynchronous domain event; asynchronous evidence event; outbound one-way feed; read-only time-scoped evidence access. Not approved: direct database access, shared mutable tables, undocumented point-to-point calls, file exchange as a permanent style.",
+      "INT-3.1": "{context}.{entity}.{event}, lowercase, dot-separated, past tense. The context segment is a bounded context name.",
+      "INT-3.2": "Event kinds: Lifecycle, Evidence, Movement, Notification. identity.registration.verified is Evidence — strict per-producer ordering, ES3 retention, never replayed.",
+      "INT-4": "6 registered flows, INT-4.1 through INT-4.6, covering all 6 APP-2.3 edges",
+      "INT-5": "6 contracts, all owned by a HarvestLink bounded context, all Planned",
+      "INT-7": "Trust boundaries: producers/buyers/distributors on the external IdP; certification body read-only time-scoped; group DW outbound-only; SMDS read-only check",
+      "INT-11": "INT-C1 every cross-context edge has a contract; INT-C2 no cross-context DB grants; INT-C3 synchronous calls are budgeted",
+      "INT-12": "INT-PEND-01 partner file exchange, INT-PEND-02 notification latency budget, INT-PEND-03 certification-body evidence API"
+    }
+  },
+
+  "foundational_architecture_ref": {
+    "document": "foundational-solution-architecture.md",
+    "version": "1.0.0",
+    "status": "APPROVED",
+    "app_2_3_edges": [
+      { "id": "APP-2.3-e1", "from": "Orders", "to": "Catalogue" },
+      { "id": "APP-2.3-e2", "from": "Orders", "to": "Billing" },
+      { "id": "APP-2.3-e3", "from": "Catalogue", "to": "Identity" },
+      { "id": "APP-2.3-e4", "from": "Orders", "to": "Billing" },
+      { "id": "APP-2.3-e5", "from": "Billing", "to": "Notifications" },
+      { "id": "APP-2.3-e6", "from": "All contexts", "to": "Group data warehouse" }
+    ],
+    "note": "No edge exists from Identity to any competent-authority register. An edge added to APP-2.3 is a change to the FSA's component interaction map, which is what makes a delta structural.",
+    "structural_rule": "Structural deltas propagate to foundational-solution-architecture.md and require an ADR plus Enterprise Architect approval. Additive and extending deltas touch component documents only. That asymmetry is what keeps the target stable enough to conform against."
+  },
+
+  "fdp_overview_input": {
+    "document": "00-overview.md",
+    "authored_by": "L1-design-hld (assumed — see _bom_gap)",
+    "cross_component_sequence": "```text\nproducer -> external IdP            : authenticate\nproducer -> producer-portal         : submit registration\nproducer-portal -> identity-service : POST /v1/producers/registrations\nidentity-service -> identity_schema : append pending-verification\nidentity-service --> producer-portal: 201 Created\n\n[out of band]\nidentity-service -> COMPETENT-AUTHORITY FBO REGISTER : lookup(fbo_number)\n                    ^^^^ crosses the product boundary — no APP-2.3 edge exists\nidentity-service -> identity_schema : append outcome (supersedes)\nidentity-service -> event broker    : identity.registration.verified\nevent broker -> notifications-worker: consume\nnotifications-worker -> producer    : outcome email\n```",
+    "nfr_budget_allocation": [
+      { "hop": "getRegistrationStatus", "budget": "p95 <= 250 ms", "source": "INT-4.3" },
+      { "hop": "FBO register lookup", "budget": "none supplied", "source": "—" }
+    ]
+  },
+
+  "api_spec_output": {
+    "agent_id": "L1-design-api-spec",
+    "execution_id": "exec-as-5d6e7f8b",
+    "workflow_execution_id": "wf-hl-pi1-3c4d5e6f",
+    "status": "success",
+    "content": {
+      "type": "api_spec",
+      "schema_version": "1.0",
+      "items": {
+        "endpoints": [
+          { "operation_id": "createProducerRegistration", "method": "post", "path": "/v1/producers/registrations", "owning_component": "identity-service" },
+          { "operation_id": "getProducerRegistration", "method": "get", "path": "/v1/producers/registrations/{registrationId}", "owning_component": "identity-service" },
+          { "operation_id": "getRegistrationStatus", "method": "get", "path": "/v1/producers/{producerId}/registration", "owning_component": "identity-service", "realises_contract": "identity.registration-status@v1" }
+        ]
+      },
+      "artifacts": [
+        { "id": "artifact-as-5d6e7f8b", "type": "api_spec", "name": "openapi.yaml", "format": "yaml", "storage": { "provider": "s3", "location": "s3://adlc-artifacts/wf-hl-pi1-3c4d5e6f/cycle-1/deltas/openapi.yaml" }, "description": "3 operations on identity-service", "produced_by": "L1-design-api-spec" }
+      ],
+      "execution_summary": "• 3 operations, all inbound to identity-service. None describes the outbound register call — an outbound dependency on a contract this product does not own has no place in this product's OpenAPI document."
+    }
+  },
+
+  "upstream_findings": [
+    { "id": "HLD-F03", "from": "L1-design-hld", "severity": "MEDIUM", "summary": "The outbound FBO register call is a new egress path with no PLT-6 capability behind it.", "resolution": "ESCALATED" },
+    { "id": "LLD-F03", "from": "L1-design-lld", "severity": "LOW", "summary": "The 'no assume-valid branch' rule has no test that can prove the absence of the branch." }
+  ]
+}

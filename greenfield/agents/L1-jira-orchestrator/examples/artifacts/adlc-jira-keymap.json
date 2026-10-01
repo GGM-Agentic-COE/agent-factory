@@ -1,0 +1,55 @@
+{
+  "$comment": "Bidirectional ADLC id <-> Jira key map. Read by every later agent that needs to reference delivery state without guessing a key. Regenerated on every sync; a key that disappears from Jira surfaces here as a stale entry rather than as a silent miss.",
+  "schema_version": "1.0",
+  "produced_by": "L1-jira-orchestrator@1.0.0",
+  "execution_id": "exec-jo-1f2a3b4c",
+  "workflow_execution_id": "wf-hl-pi1-3c4d5e6f",
+  "project_key": "HL",
+  "site": "thornbury.atlassian.net",
+  "pi_id": "PI-2026-Q2",
+  "cycle": 1,
+  "synced_at": "2026-04-28T11:32:07Z",
+
+  "adlc_to_jira": {
+    "EPIC-1": { "jira_key": "HL-8", "issue_type": "Epic", "adlc_level": "Epic" },
+    "EPIC-5": { "jira_key": "HL-12", "issue_type": "Epic", "adlc_level": "Epic" },
+    "F5.1": { "jira_key": "HL-84", "issue_type": "Story", "adlc_level": "Feature (unsliced — occupies the Story level)" },
+    "F1.1": { "jira_key": null, "issue_type": null, "adlc_level": "Feature (sliced — contributes no issue of its own)", "represented_by": ["HL-85", "HL-86"], "note": "Deliberately null. F1.1 was sliced, so its slices occupy the Story level and the feature is carried as the label feature:F1.1. An issue here as well would double-count 22 points in every velocity and burn-up report drawn from this project." },
+    "S-F1.1-a": { "jira_key": "HL-85", "issue_type": "Story", "adlc_level": "Story slice" },
+    "S-F1.1-b": { "jira_key": "HL-86", "issue_type": "Story", "adlc_level": "Story slice" },
+    "WU-F5.1-01": { "jira_key": "HL-87", "issue_type": "Sub-task", "adlc_level": "Work Unit" },
+    "WU-F5.1-02": { "jira_key": "HL-88", "issue_type": "Sub-task", "adlc_level": "Work Unit" },
+    "WU-F5.1-03": { "jira_key": "HL-89", "issue_type": "Sub-task", "adlc_level": "Work Unit" },
+    "WU-F1.1-01": { "jira_key": "HL-90", "issue_type": "Sub-task", "adlc_level": "Work Unit" },
+    "WU-F1.1-02": { "jira_key": "HL-91", "issue_type": "Sub-task", "adlc_level": "Work Unit" },
+    "WU-F1.1-03": { "jira_key": "HL-92", "issue_type": "Sub-task", "adlc_level": "Work Unit" },
+    "WU-F1.1-04": { "jira_key": "HL-93", "issue_type": "Sub-task", "adlc_level": "Work Unit" },
+    "WU-F1.1-05": { "jira_key": "HL-94", "issue_type": "Sub-task", "adlc_level": "Work Unit" },
+    "WU-F1.1-06": { "jira_key": "HL-95", "issue_type": "Sub-task", "adlc_level": "Work Unit" }
+  },
+
+  "jira_to_adlc": {
+    "HL-8": "EPIC-1",
+    "HL-12": "EPIC-5",
+    "HL-84": "F5.1",
+    "HL-85": "S-F1.1-a",
+    "HL-86": "S-F1.1-b",
+    "HL-87": "WU-F5.1-01",
+    "HL-88": "WU-F5.1-02",
+    "HL-89": "WU-F5.1-03",
+    "HL-90": "WU-F1.1-01",
+    "HL-91": "WU-F1.1-02",
+    "HL-92": "WU-F1.1-03",
+    "HL-93": "WU-F1.1-04",
+    "HL-94": "WU-F1.1-05",
+    "HL-95": "WU-F1.1-06"
+  },
+
+  "unmapped": [
+    { "adlc_id": "F1.1", "reason": "sliced feature; represented by HL-85 and HL-86", "intentional": true },
+    { "adlc_id": "F3.2", "reason": "on the roadmap, not committed to Cycle 1; not elaborated and not synced", "intentional": true },
+    { "adlc_id": "F2.1", "reason": "same", "intentional": true },
+    { "adlc_id": "OQ-01", "reason": "an open question is not a unit of work until someone decides it is", "intentional": true },
+    { "adlc_id": "OQ-02", "reason": "same", "intentional": true }
+  ]
+}

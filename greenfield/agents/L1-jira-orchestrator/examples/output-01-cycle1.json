@@ -1,0 +1,211 @@
+{
+  "agent_id": "L1-jira-orchestrator",
+  "agent_version": "1.0.0",
+  "execution_id": "exec-jo-1f2a3b4c",
+  "workflow_execution_id": "wf-hl-pi1-3c4d5e6f",
+  "status": "success",
+  "content": {
+    "type": "jira_sync",
+    "schema_version": "1.0",
+    "items": {
+      "sync_control": {
+        "project_key": "HL",
+        "site": "thornbury.atlassian.net",
+        "pi_id": "PI-2026-Q2",
+        "cycle": 1,
+        "synced_at": "2026-04-28T11:32:07Z",
+        "adlc_run_id": "wf-hl-pi1-3c4d5e6f",
+        "levels_in": 4,
+        "levels_in_jira": 3,
+        "collision_resolution": "The collapsible-story rule. F5.1 was unsliced, so the feature itself took the Story level. F1.1 was sliced, so it contributed no issue of its own and its two slices took the Story level, with F1.1 carried as the label feature:F1.1 and through the shared Epic link. No issue represents two ADLC levels at once."
+      },
+
+      "issues": [
+        {
+          "adlc_id": "EPIC-5",
+          "adlc_level": "Epic",
+          "jira_key": "HL-12",
+          "issue_type": "Epic",
+          "summary": "Identity & Access",
+          "action": "FETCHED",
+          "action_note": "Already existed from the PI-planning run. Fetched by ADLC Id, not created. A second Epic here would have silently forked the hierarchy and every feature created afterwards would have hung off the wrong parent.",
+          "parent": null,
+          "labels": ["adlc", "pi:PI-2026-Q2"],
+          "url": "https://thornbury.atlassian.net/browse/HL-12"
+        },
+        {
+          "adlc_id": "EPIC-1",
+          "adlc_level": "Epic",
+          "jira_key": "HL-8",
+          "issue_type": "Epic",
+          "summary": "Producer Onboarding & Catalog",
+          "action": "FETCHED",
+          "parent": null,
+          "labels": ["adlc", "pi:PI-2026-Q2"],
+          "url": "https://thornbury.atlassian.net/browse/HL-8"
+        },
+        {
+          "adlc_id": "F5.1",
+          "adlc_level": "Feature (unsliced — occupies the Story level)",
+          "jira_key": "HL-84",
+          "issue_type": "Story",
+          "summary": "External identity-provider integration",
+          "action": "CREATED",
+          "parent": "HL-12",
+          "story_points": 13,
+          "labels": ["adlc", "feature:F5.1", "band:1", "wsjf:1"],
+          "description_contains": "3 acceptance criteria in Given/When/Then, carried verbatim with their F5.1-AC ids",
+          "url": "https://thornbury.atlassian.net/browse/HL-84"
+        },
+        {
+          "adlc_id": "S-F1.1-a",
+          "adlc_level": "Story slice",
+          "jira_key": "HL-85",
+          "issue_type": "Story",
+          "summary": "Happy-path producer registration",
+          "action": "CREATED",
+          "parent": "HL-8",
+          "story_points": 14,
+          "labels": ["adlc", "feature:F1.1", "slice", "band:1"],
+          "description_contains": "Narrative plus 4 acceptance criteria (S-F1.1-a-AC1..AC4)",
+          "url": "https://thornbury.atlassian.net/browse/HL-85"
+        },
+        {
+          "adlc_id": "S-F1.1-b",
+          "adlc_level": "Story slice",
+          "jira_key": "HL-86",
+          "issue_type": "Story",
+          "summary": "Asynchronous FBO verification and its outcomes",
+          "action": "CREATED",
+          "parent": "HL-8",
+          "story_points": 8,
+          "labels": ["adlc", "feature:F1.1", "slice", "band:1"],
+          "description_contains": "Narrative plus 4 acceptance criteria (S-F1.1-b-AC1..AC4)",
+          "url": "https://thornbury.atlassian.net/browse/HL-86"
+        },
+        { "adlc_id": "WU-F5.1-01", "adlc_level": "Work Unit", "jira_key": "HL-87", "issue_type": "Sub-task", "summary": "Producer registration via external IdP", "action": "CREATED", "parent": "HL-84", "story_points": 5, "labels": ["adlc", "layer:integration", "feature:F5.1"], "verification_ref": "TC-F5.1-01", "url": "https://thornbury.atlassian.net/browse/HL-87" },
+        { "adlc_id": "WU-F5.1-02", "adlc_level": "Work Unit", "jira_key": "HL-88", "issue_type": "Sub-task", "summary": "OIDC token validation", "action": "CREATED", "parent": "HL-84", "story_points": 3, "labels": ["adlc", "layer:business-logic", "feature:F5.1"], "verification_ref": "TC-F5.1-03,TC-ADV-F5.1-01", "url": "https://thornbury.atlassian.net/browse/HL-88" },
+        { "adlc_id": "WU-F5.1-03", "adlc_level": "Work Unit", "jira_key": "HL-89", "issue_type": "Sub-task", "summary": "Role provisioning from the onboarding record", "action": "CREATED", "parent": "HL-84", "story_points": 5, "labels": ["adlc", "layer:business-logic", "feature:F5.1"], "verification_ref": "TC-F5.1-02", "url": "https://thornbury.atlassian.net/browse/HL-89" },
+        { "adlc_id": "WU-F1.1-01", "adlc_level": "Work Unit", "jira_key": "HL-90", "issue_type": "Sub-task", "summary": "Producer entity schema migration", "action": "CREATED", "parent": "HL-85", "story_points": 3, "labels": ["adlc", "layer:data", "feature:F1.1"], "verification_ref": "TC-S-F1.1-a-05", "url": "https://thornbury.atlassian.net/browse/HL-90" },
+        { "adlc_id": "WU-F1.1-02", "adlc_level": "Work Unit", "jira_key": "HL-91", "issue_type": "Sub-task", "summary": "FBO number capture endpoint", "action": "CREATED", "parent": "HL-85", "story_points": 5, "labels": ["adlc", "layer:api", "feature:F1.1"], "verification_ref": "TC-S-F1.1-a-01,TC-S-F1.1-a-02,TC-S-F1.1-a-03,TC-ADV-S-F1.1-a-01", "url": "https://thornbury.atlassian.net/browse/HL-91" },
+        { "adlc_id": "WU-F1.1-03", "adlc_level": "Work Unit", "jira_key": "HL-92", "issue_type": "Sub-task", "summary": "Registration submission form", "action": "CREATED", "parent": "HL-85", "story_points": 3, "labels": ["adlc", "layer:ui", "feature:F1.1"], "verification_ref": "TC-S-F1.1-a-02", "url": "https://thornbury.atlassian.net/browse/HL-92" },
+        { "adlc_id": "WU-F1.1-04", "adlc_level": "Work Unit", "jira_key": "HL-93", "issue_type": "Sub-task", "summary": "Publication gate on pending-verification", "action": "CREATED", "parent": "HL-85", "story_points": 3, "labels": ["adlc", "layer:business-logic", "feature:F1.1"], "verification_ref": "TC-S-F1.1-a-04", "url": "https://thornbury.atlassian.net/browse/HL-93" },
+        { "adlc_id": "WU-F1.1-05", "adlc_level": "Work Unit", "jira_key": "HL-94", "issue_type": "Sub-task", "summary": "FBO register lookup integration", "action": "CREATED", "parent": "HL-86", "story_points": 5, "labels": ["adlc", "layer:integration", "feature:F1.1"], "verification_ref": "TC-S-F1.1-b-01,TC-S-F1.1-b-03,TC-ADV-S-F1.1-b-01", "url": "https://thornbury.atlassian.net/browse/HL-94" },
+        { "adlc_id": "WU-F1.1-06", "adlc_level": "Work Unit", "jira_key": "HL-95", "issue_type": "Sub-task", "summary": "Rejected-verification notification", "action": "CREATED", "parent": "HL-86", "story_points": 3, "labels": ["adlc", "layer:business-logic", "feature:F1.1"], "verification_ref": "TC-S-F1.1-b-02", "url": "https://thornbury.atlassian.net/browse/HL-95" }
+      ],
+
+      "issue_links": [
+        { "from": "HL-88", "type": "is blocked by", "to": "HL-87", "derived_from": "WU-F5.1-02.depends_on_unit" },
+        { "from": "HL-89", "type": "is blocked by", "to": "HL-88", "derived_from": "WU-F5.1-03.depends_on_unit" },
+        { "from": "HL-91", "type": "is blocked by", "to": "HL-90", "derived_from": "WU-F1.1-02.depends_on_unit" },
+        { "from": "HL-91", "type": "is blocked by", "to": "HL-88", "derived_from": "WU-F1.1-02.depends_on_unit — a cross-feature link, F1.1 to F5.1" },
+        { "from": "HL-92", "type": "is blocked by", "to": "HL-91", "derived_from": "WU-F1.1-03.depends_on_unit" },
+        { "from": "HL-93", "type": "is blocked by", "to": "HL-90", "derived_from": "WU-F1.1-04.depends_on_unit" },
+        { "from": "HL-94", "type": "is blocked by", "to": "HL-90", "derived_from": "WU-F1.1-05.depends_on_unit" },
+        { "from": "HL-95", "type": "is blocked by", "to": "HL-94", "derived_from": "WU-F1.1-06.depends_on_unit" },
+        { "from": "HL-86", "type": "is blocked by", "to": "HL-85", "derived_from": "S-F1.1-b.depends_on_slices" },
+        { "from": "HL-85", "type": "is blocked by", "to": "HL-84", "derived_from": "S-F1.1-a.depends_on_features — F1.1 depends on F5.1; carried at the slice that actually needs the identity" }
+      ],
+
+      "updates_applied": [
+        {
+          "jira_key": "HL-8",
+          "adlc_id": "EPIC-1",
+          "action": "UPDATED",
+          "fields_changed": ["customfield_10500 (ADLC Run Id)"],
+          "before": "wf-hl-pi0-1a2b3c4d",
+          "after": "wf-hl-pi1-3c4d5e6f",
+          "rationale": "The epic is carried into this PI. Its run id is re-stamped so the whole hierarchy traces to one run; nothing else about a human-authored epic is touched by this agent."
+        },
+        {
+          "jira_key": "HL-12",
+          "adlc_id": "EPIC-5",
+          "action": "UPDATED",
+          "fields_changed": ["customfield_10500 (ADLC Run Id)"],
+          "before": "wf-hl-pi0-1a2b3c4d",
+          "after": "wf-hl-pi1-3c4d5e6f",
+          "rationale": "Same."
+        }
+      ],
+
+      "hierarchy_verification": {
+        "expected_issues": 14,
+        "created": 12,
+        "fetched": 2,
+        "updated": 2,
+        "orphans": 0,
+        "orphan_check": "Every Sub-task resolves to a Story parent, and every Story resolves to an Epic parent. A Sub-task whose parent create failed would be an orphan, which is why parents are created and confirmed before any child is attempted.",
+        "level_occupancy": [
+          { "jira_level": "Epic", "occupied_by": ["EPIC-5", "EPIC-1"], "count": 2 },
+          { "jira_level": "Story", "occupied_by": ["F5.1 (unsliced feature)", "S-F1.1-a (slice)", "S-F1.1-b (slice)"], "count": 3 },
+          { "jira_level": "Sub-task", "occupied_by": ["9 Work Units"], "count": 9 }
+        ],
+        "double_representation_check": "PASS — F1.1 has no issue of its own. Its 22 points appear once, split across HL-85 (14) and HL-86 (8). Creating a Story for F1.1 as well as for its slices would have double-counted the feature in every velocity and burn-up report drawn from this project."
+      },
+
+      "api_call_log": {
+        "total_calls": 30,
+        "by_tool": [
+          { "tool": "tool-L1-jira-fetch-issue", "calls": 14, "note": "fetch-before-create on every ADLC id — 2 hits (the epics), 12 misses" },
+          { "tool": "tool-L1-jira-create-issue", "calls": 13, "note": "12 successes, 1 retried — see retries" },
+          { "tool": "tool-L1-jira-update-issue", "calls": 3, "note": "2 epic run-id stamps, 1 link batch" }
+        ],
+        "retries": [
+          {
+            "adlc_id": "WU-F1.1-02",
+            "attempt": 1,
+            "result": "HTTP 429 rate limited",
+            "attempt_2": "success — HL-91",
+            "idempotency": "The retry re-ran fetch-before-create first. Had attempt 1 actually committed server-side before the 429, the fetch would have returned the existing issue and the retry would have been a no-op rather than a duplicate. A blind retry here is how a backlog acquires two of everything."
+          }
+        ]
+      },
+
+      "not_pushed": [
+        { "item": "rightsizing_log (6 events, 4 blocking)", "reason": "Evaluator material, not delivery state. The Work Units that reached Jira are the ones that passed; a Jira comment narrating the drafts that did not would put superseded decisions in front of the squad as if they were current." },
+        { "item": "capacity_signal (35 points against 30)", "reason": "Reported in this run's summary and left for L1-planning-feature-cycle-planner. cycle and disposition are the planner's fields. Writing disposition=overflow onto HL-94 and HL-95 now would make Jira assert a commitment decision that cycle-plan.md has not made, and the two would disagree until someone noticed." },
+        { "item": "open questions OQ-01, OQ-02", "reason": "Carried on the story records and surfaced by story-generator. Not minted as Jira issues: an open question is not a unit of work until someone decides it is, and auto-creating tickets for every unknown is how a backlog stops meaning anything." }
+      ],
+
+      "warnings": [
+        {
+          "id": "JO-W01",
+          "severity": "MEDIUM",
+          "summary": "Cycle 1 is over capacity in Jira as it now stands.",
+          "detail": "All 9 Work Units were created, totalling 35 points against a 30-point cycle. This is faithful to tasks.json and is the correct sync, but a reader of the Jira board will see a committed cycle that does not fit until the planner reflows it.",
+          "action": "Flagged. The planner's reflow will move S-F1.1-b (HL-86, HL-94, HL-95 — 8 points) to a later cycle, at which point this agent re-runs and the affected issues are updated, not recreated."
+        },
+        {
+          "id": "JO-W02",
+          "severity": "LOW",
+          "summary": "Sub-task story points are not rolled up by this Jira project's configuration.",
+          "detail": "Story points were written to both Stories and Sub-tasks. HL-84's 13 points are the sum of its three Sub-tasks, set explicitly rather than computed by Jira. If someone edits a Sub-task's points directly in Jira, the parent will be stale until the next sync.",
+          "action": "Recorded, not worked around. The next sync recomputes parent points from tasks.json, which remains the source of truth."
+        }
+      ]
+    },
+
+    "artifacts": [
+      {
+        "id": "artifact-jo-1f2a3b4c",
+        "type": "document",
+        "name": "jira-sync-report.json",
+        "format": "json",
+        "storage": { "provider": "s3", "location": "s3://adlc-artifacts/wf-hl-pi1-3c4d5e6f/cycle-1/jira-sync-report.json" },
+        "description": "14 issues reconciled (12 created, 2 fetched), 10 issue links, 2 updates; ADLC id to Jira key mapping for the whole Cycle 1 hierarchy",
+        "produced_by": "L1-jira-orchestrator"
+      },
+      {
+        "id": "artifact-jo-1f2a3b4c-map",
+        "type": "mapping",
+        "name": "adlc-jira-keymap.json",
+        "format": "json",
+        "storage": { "provider": "s3", "location": "s3://adlc-artifacts/wf-hl-pi1-3c4d5e6f/cycle-1/adlc-jira-keymap.json" },
+        "description": "Bidirectional ADLC id <-> Jira key map. Read by every later agent that needs to reference delivery state without guessing a key.",
+        "produced_by": "L1-jira-orchestrator"
+      }
+    ],
+
+    "execution_summary": "• Reconciled the full Cycle 1 hierarchy into project HL: 14 issues — 2 Epics fetched, 3 Stories created, 9 Sub-tasks created — plus 10 issue links and 2 updates.\n• Four ADLC levels into three Jira levels, resolved by the collapsible-story rule rather than by improvisation. F5.1 was unsliced, so the feature itself took the Story level (HL-84). F1.1 was sliced, so it got no issue of its own and its two slices took the Story level (HL-85, HL-86), with F1.1 carried as a label. Exactly one of Feature or Slice occupies the Story level on any branch.\n• The double-representation check is the one that matters: F1.1's 22 points appear once, split 14/8 across its two slices. A Story for F1.1 as well as for its slices would have double-counted the feature in every velocity and burn-up report drawn from this project, and nobody would have noticed until the numbers were used.\n• Idempotency: fetch-before-create on every ADLC id, 2 hits and 12 misses. Both Epics are human-authored and already existed from PI planning; creating them again would have forked the hierarchy and hung every new feature off the wrong parent. One create hit a 429 and was retried — the retry re-ran the fetch first, so a call that had committed server-side before the error would have been a no-op rather than a duplicate.\n• Dependencies: 10 links derived from depends_on_unit and depends_on_slices, including the cross-feature HL-91 -> HL-88 (F1.1's endpoint is blocked by F5.1's token validation) and the slice ordering HL-86 -> HL-85.\n• Deliberately not pushed: the rightsizing log (evaluator material — superseded drafts shown as current would mislead the squad), the capacity disposition (35 points against 30 — the planner owns cycle and disposition, and asserting overflow in Jira before the planner decides would make the two sources disagree), and the two open questions (an unknown is not a unit of work until someone decides it is).\n• Warnings: 2. JO-W01 — the board now shows a cycle that does not fit until the planner reflows; the sync is faithful to tasks.json and the discrepancy belongs upstream. JO-W02 — this project does not roll up Sub-task points, so parent totals are written explicitly and a direct Jira edit will go stale until the next sync.\n• Tools invoked: tool-L1-jira-fetch-issue (14), tool-L1-jira-create-issue (13, one retried), tool-L1-jira-update-issue (3). 30 calls total.\n• Guardrails evaluated: gr-L1-output-schema-validator (pass).\n• No knowledge base is attached to this agent, and none is needed: it maps records to issues and asserts nothing about the domain."
+  }
+}

@@ -1,0 +1,45 @@
+{
+  "_comment": "Input to L1-github-orchestrator, DESIGN-PUBLISH INVOCATION (BOM Phase 4). Takes the outputs of every Phase 4 design agent and commits the whole Feature Design Package to the design branch, then publishes to Confluence. It commits the package; it does not merge it. Merge happens at Phase 7.5, after the PR lands, so the canonical documents only move once the change is real.",
+  "folder_name": "harvestlink/pi-2026-q2/cycle-1",
+  "cycle": { "pi_id": "PI-2026-Q2", "cycle": 1, "slug": "producer-registration", "features": ["F5.1", "F1.1"] },
+
+  "fdp_manifest": {
+    "structure_rule": "00-overview.md is the only original content in the package. deltas/ holds files that each have a named canonical destination. additive/ holds journeys and wireframes, which are additive by nature and never merged. Nothing is authored twice, so nothing can drift.",
+    "overview": {
+      "file": "00-overview.md",
+      "authored_by": "L1-design-hld (assumed — no Phase 4 agent row names the author of 00-overview.md; flagged as a BOM gap by the integration architect)",
+      "contents": ["slice narrative", "cross-component sequence diagram", "viewpoint assertion table", "NFR budget allocation"],
+      "viewpoint_assertion_table": [
+        { "viewpoint": "APPLICATION", "assertion": "DELTA", "detail": "3 creating HLD deltas + 3 creating LLD deltas; catalogue-service, orders-service, billing-service, buyer-web asserted NONE with reasons" },
+        { "viewpoint": "DATA", "assertion": "DELTA", "detail": "extending 1.0 -> 1.1; register_reason classified; DAT-PEND-04 added; db-schema.sql emitted separately" },
+        { "viewpoint": "INTEGRATION", "assertion": "DELTA (STRUCTURAL)", "detail": "1.0 -> 2.0; new external edge; ADR-012 required; EA approval pending" },
+        { "viewpoint": "PLATFORM", "assertion": "DELTA", "detail": "extending 1.0 -> 1.1; PLT-6 outbound third-party egress NOT PRESENT -> AVAILABLE; new egress-gateway component" }
+      ]
+    }
+  },
+
+  "phase4_agent_outputs": [
+    { "agent": "L1-design-user-journey-mapper", "execution_id": "exec-ujm-2a3b4c5e", "artifacts": ["user-journeys.md"], "destination": "additive/", "findings": ["UJ-F01", "UJ-F02", "UJ-F03"] },
+    { "agent": "L1-design-ux-wireframe", "execution_id": "exec-uxw-3b4c5d6f", "artifacts": ["wireframes.md"], "destination": "additive/", "findings": ["WF-F01", "WF-F02", "WF-F03"] },
+    { "agent": "L1-design-api-spec", "execution_id": "exec-as-5d6e7f8b", "artifacts": ["openapi.yaml"], "destination": "deltas/", "canonical_destination": "services/identity-service/openapi.yaml" },
+    { "agent": "L1-design-hld", "execution_id": "exec-hld-6e7f8a9c", "artifacts": ["hld-identity-service.delta.json", "hld-producer-portal.delta.json", "hld-notifications-worker.delta.json"], "destination": "deltas/", "structural": false, "findings": ["HLD-F01", "HLD-F02", "HLD-F03"] },
+    { "agent": "L1-design-lld", "execution_id": "exec-lld-7f8a9b0d", "artifacts": ["lld-identity-service.delta.json", "lld-producer-portal.delta.json", "lld-notifications-worker.delta.json"], "destination": "deltas/", "structural": false, "findings": ["LLD-F01", "LLD-F02", "LLD-F03"] },
+    { "agent": "L1-design-data-architect", "execution_id": "exec-datd-8a9b0c1e", "artifacts": ["data-architecture.delta.json", "db-schema.sql"], "destination": "deltas/", "structural": false, "findings": ["DATD-F01"] },
+    { "agent": "L1-design-integration-architect", "execution_id": "exec-intd-9b0c1d2f", "artifacts": ["integration-architecture.delta.json", "ADR-012-fbo-register-direct-consumption.md"], "destination": "deltas/", "structural": true, "adr_id": "ADR-012", "adr_status": "PROPOSED", "findings": ["INTD-F01", "INTD-F02"] },
+    { "agent": "L1-design-platform-architect", "execution_id": "exec-pltd-0c1d2e3b", "artifacts": ["platform-architecture.delta.json", "hld-egress-gateway.delta.json", "lld-egress-gateway.delta.json"], "destination": "deltas/", "structural": false, "iac_branch": "aava/platform-c1-egress", "iac_applied": false, "findings": ["PLTD-F01", "PLTD-F02"] }
+  ],
+
+  "target_config": {
+    "github": {
+      "repository": "thornbury/harvestlink-architecture",
+      "branch_pattern": "aava/design-{pi}-{cycle}-{slug}",
+      "package_path": "/cycles/C{n}-{slug}/",
+      "merge_policy": "This invocation COMMITS only. Merge of deltas into their canonical destinations happens at Phase 7.5, after the PR lands."
+    },
+    "confluence": {
+      "space": "HLARCH",
+      "parent_page": "HarvestLink Architecture / Feature Design Packages",
+      "publish": ["00-overview.md", "additive/user-journeys.md", "additive/wireframes.md", "ADR-012"]
+    }
+  }
+}

@@ -1,0 +1,164 @@
+{
+  "agent_id": "L1-design-platform-architect",
+  "agent_version": "1.0.0",
+  "execution_id": "exec-pltd-0c1d2e3b",
+  "workflow_execution_id": "wf-hl-pi1-3c4d5e6f",
+  "status": "success",
+  "content": {
+    "type": "platform_architecture_delta",
+    "schema_version": "1.0",
+    "items": {
+      "delta_control": {
+        "invocation": "delta (conditional)",
+        "fired": true,
+        "firing_reason": "1 NOT PRESENT capability on the impact assessment's gap list: outbound third-party egress",
+        "cycle": "C1-producer-registration",
+        "target_document": "platform-architecture.md",
+        "from_version": "1.0",
+        "to_version": "1.1",
+        "type": "extending",
+        "version_bump": "minor",
+        "structural": false,
+        "adr_required": false,
+        "structural_assessment": "Not structural at the platform viewpoint. The decomposition does not change and no bounded context moves; a capability transitions NOT PRESENT -> AVAILABLE and the network posture gains an outbound half it did not previously state. The structural change this cycle belongs to the integration viewpoint — ADR-012 adds the APP-2.3 edge — and this delta realises it rather than declaring it.",
+        "merge_dependency": {
+          "blocked_by": "ADR-012 (Enterprise Architect approval pending)",
+          "note": "This delta provisions the path that ADR-012 authorises. Merging it before the ADR is approved would provision egress to a third party the Enterprise Architect has not yet agreed this product should talk to. The IaC is committed to the design branch; it is not applied."
+        }
+      },
+
+      "changes": [
+        {
+          "change_id": "PLTD-01",
+          "section": "PLT-6",
+          "operation": "capability_transition",
+          "capability": "Outbound third-party egress",
+          "from_status": "NOT PRESENT",
+          "to_status": "AVAILABLE",
+          "realization": "Managed egress gateway with a destination allowlist, fronting the private application network. One allowlist entry this cycle: the competent authority's FBO register.",
+          "lifecycle_check": "approved catalogue entry; lifecycle status invest — outside contain/retire, passes PRIN-07-C1",
+          "consumer": "identity-service (INT-4.7, WU-F1.1-05)",
+          "status_caveat": "AVAILABLE is written only because the capability will be provisioned and consumable when this cycle's IaC is applied. Until then the row carries provisioned_on_merge: true. Marking a capability AVAILABLE before it is reachable would put a false lookup into PLT-6, and the impact assessor reads that table mechanically — a false AVAILABLE silently deletes platform work from a later cycle's estimate.",
+          "provisioned_on_merge": true
+        },
+        {
+          "change_id": "PLTD-02",
+          "section": "PLT-8",
+          "operation": "extend",
+          "content": "Network architecture gains an outbound half. Egress from the private application network to any destination outside the product boundary is denied by default and permitted only through the managed egress gateway against a named allowlist entry. No workload holds a direct route to the internet.",
+          "rationale": "PLT-8 as written addressed ingress only — public ingress through the group gateway, internal capabilities not publicly routable. It said nothing about outbound, because until this cycle nothing went outbound except the group data warehouse feed, which is a group-internal destination. An unstated egress posture is how the second third-party integration gets added without anyone deciding.",
+          "source": ["plt PLT-8", "int INTD-02"]
+        },
+        {
+          "change_id": "PLTD-03",
+          "section": "PLT-9",
+          "operation": "extend",
+          "content": "The credential the register issues to HarvestLink is held in the group secrets vault and read at runtime by wi-identity only. It is not held by the egress gateway, which authorises the destination, not the caller.",
+          "rationale": "Keeping destination authorisation and caller authentication in separate places means a misconfigured allowlist cannot leak a credential and a leaked credential cannot reach an unlisted destination. Two independent controls for what is otherwise one failure.",
+          "source": ["plt PLT-9", "kb-L1-enterprise-security ES5", "ES10"]
+        },
+        {
+          "change_id": "PLTD-04",
+          "section": "PLT-10",
+          "operation": "extend",
+          "content": "TLS is terminated at the competent authority, not at the egress gateway. The gateway does not inspect or re-encrypt the payload: an FBO lookup carries a producer's registration number, and a decrypted copy transiting a shared gateway would create a PII-bearing log surface nobody classified.",
+          "source": ["plt PLT-10", "dat DAT-3.2", "kb-L1-enterprise-security ES10"]
+        },
+        {
+          "change_id": "PLTD-05",
+          "section": "PLT-14",
+          "operation": "extend",
+          "content": "identity-service's 99.9% target explicitly does NOT extend to the competent authority's register. The register's availability is outside this product's control and outside its SLA; the product absorbs a register outage through INT-4.7's degraded mode — registrations stay pending — rather than by reporting its own availability as degraded.",
+          "rationale": "Stated because the alternative is discovered during an incident. An availability target that silently includes a third party's uptime is a target nobody can meet and an on-call rota nobody can act on.",
+          "source": ["plt PLT-14", "kb-L1-enterprise-security ES4", "int INT-4.7"]
+        },
+        {
+          "change_id": "PLTD-06",
+          "section": "PLT-16",
+          "operation": "add",
+          "content": "PLT-C5 — egress is allowlisted. Expression: for each outbound destination outside the product boundary: exists allowlist_entry and exists named_owner and exists reason. Severity MAJOR.",
+          "rationale": "PLT-C1 through C4 check isolation, lifecycle, deployability and classified-data protection. None of them can see an unlisted outbound destination, because until this cycle there were none to see.",
+          "source": ["plt PLT-16"]
+        },
+        {
+          "change_id": "PLTD-07",
+          "section": "PLT-17",
+          "operation": "add",
+          "content": "PLT-PEND-04 — egress gateway capacity and timeout posture. Trigger: INT-PEND-04 resolves, supplying a latency budget for the register call; the gateway's timeout cannot sensibly be set before the call it fronts has one.",
+          "source": ["plt PLT-17", "int INT-PEND-04"]
+        }
+      ],
+
+      "new_platform_components": [
+        {
+          "component": "egress-gateway",
+          "kind": "platform",
+          "documents_created": [
+            { "document": "platform/egress-gateway/hld.md", "from_version": "0.0.0", "to_version": "1.0.0", "creates_document": true },
+            { "document": "platform/egress-gateway/lld.md", "from_version": "0.0.0", "to_version": "1.0.0", "creates_document": true }
+          ],
+          "hld_summary": "Managed egress gateway fronting the private application network. Default-deny outbound. Allowlist entries carry a destination, a named owner and a stated reason. Emits per-destination metrics and denied-attempt logs to the observability platform (PLT-12).",
+          "lld_summary": "Allowlist as declarative configuration held in the platform repository, not editable at runtime. A denied attempt logs the destination and the calling workload identity and does not log the request body. No TLS interception.",
+          "note": "A platform component gets its own HLD and LLD like any other deployable. It is a component of the platform, not a paragraph in the platform document."
+        }
+      ],
+
+      "iac_committed": {
+        "repository": "thornbury/harvestlink-platform",
+        "branch": "aava/platform-c1-egress",
+        "files": [
+          "modules/egress-gateway/main.tf",
+          "modules/egress-gateway/variables.tf",
+          "environments/dev/egress-allowlist.auto.tfvars",
+          "environments/test/egress-allowlist.auto.tfvars",
+          "environments/staging/egress-allowlist.auto.tfvars",
+          "environments/production/egress-allowlist.auto.tfvars"
+        ],
+        "applied": false,
+        "applied_note": "Committed, not applied. Application waits on ADR-012's approval and on the Phase 7.5 merge — the canonical documents and the estate move together or the baseline starts lying.",
+        "environment_parity": "All four environments get the gateway with the same allowlist entry. PLT-13's rule is that environments differ by configuration and capacity, not by architecture — a test environment calling the register directly while production goes through a gateway would test a system that does not exist."
+      },
+
+      "guardrail_evidence": {
+        "secret_scanner": {
+          "result": "pass_after_correction",
+          "finding": "The first draft of environments/dev/egress-allowlist.auto.tfvars carried register_api_key = \"REPLACE_ME\" as a placeholder, to document the variable's existence.",
+          "correction": "Removed. The variable is declared in variables.tf with no default and is resolved at runtime from the group vault by wi-identity. A placeholder credential in a committed tfvars file is a real credential to everything downstream — a linter, a future contributor copying the pattern, and a scanner that stops flagging the file once someone allowlists it.",
+          "post_correction": "0 findings across 6 files."
+        },
+        "consistency_check": {
+          "result": "pass",
+          "note": "PLT-6's transition matches the impact assessment's gap list exactly. The one added allowlist entry matches INT-4.7's one destination. No capability was marked AVAILABLE that this cycle does not provision."
+        }
+      },
+
+      "findings": [
+        {
+          "id": "PLTD-F01",
+          "severity": "MEDIUM",
+          "summary": "This capability has no Cycle 0 exit-proof equivalent.",
+          "detail": "PLT-19's six proofs — build, deploy, run, observe, emit, consume — were defined for the platform as it stood at Cycle 0 and contain nothing that exercises egress. A trivial service could pass all six today and still be unable to reach anything outside the product boundary.",
+          "resolution": "NOT_RESOLVED_BY_AGENT",
+          "resolution_note": "Proposed as a seventh proof — 'a trivial service can reach an allowlisted external destination and cannot reach an unlisted one' — but not added unilaterally. PLT-19 is the Platform Lead's signed gate, and amending a signed proof set is their decision, not this agent's."
+        },
+        {
+          "id": "PLTD-F02",
+          "severity": "LOW",
+          "summary": "The egress gateway's timeout cannot be set this cycle.",
+          "detail": "The gateway needs a timeout, and INT-PEND-04 means the call it fronts has no latency budget. Setting one now would make the gateway's timeout the de facto budget by accident, established by an infrastructure default rather than by a decision.",
+          "resolution": "DEFERRED_WITH_TRIGGER",
+          "resolution_note": "PLT-PEND-04, triggered on INT-PEND-04 resolving. The gateway ships with the platform default and the fact that it is a default, not a decision, is recorded."
+        }
+      ]
+    },
+
+    "artifacts": [
+      { "id": "artifact-pltd-0c1d2e3b", "type": "delta", "name": "platform-architecture.delta.json", "format": "json", "storage": { "provider": "s3", "location": "s3://adlc-artifacts/wf-hl-pi1-3c4d5e6f/cycle-1/deltas/platform-architecture.delta.json" }, "description": "Extending delta 1.0 -> 1.1, 7 changes, PLT-6 capability transition NOT PRESENT -> AVAILABLE", "produced_by": "L1-design-platform-architect" },
+      { "id": "artifact-pltd-0c1d2e3b-hld", "type": "delta", "name": "hld-egress-gateway.delta.json", "format": "json", "storage": { "provider": "s3", "location": "s3://adlc-artifacts/wf-hl-pi1-3c4d5e6f/cycle-1/deltas/hld-egress-gateway.delta.json" }, "description": "Creating delta 0.0.0 -> 1.0.0 for a new platform component", "produced_by": "L1-design-platform-architect" },
+      { "id": "artifact-pltd-0c1d2e3b-lld", "type": "delta", "name": "lld-egress-gateway.delta.json", "format": "json", "storage": { "provider": "s3", "location": "s3://adlc-artifacts/wf-hl-pi1-3c4d5e6f/cycle-1/deltas/lld-egress-gateway.delta.json" }, "description": "Creating delta 0.0.0 -> 1.0.0", "produced_by": "L1-design-platform-architect" },
+      { "id": "artifact-pltd-0c1d2e3b-iac", "type": "commit", "name": "aava/platform-c1-egress", "format": "git", "storage": { "provider": "github", "location": "https://github.com/thornbury/harvestlink-platform/tree/aava/platform-c1-egress" }, "description": "6 IaC files committed, not applied", "produced_by": "L1-design-platform-architect" }
+    ],
+
+    "execution_summary": "• FIRED this cycle, which is the exception rather than the rule. One NOT PRESENT capability on the impact assessment's gap list — outbound third-party egress — and that is the only condition under which this agent runs. In a cycle where every required capability is AVAILABLE and topology is unchanged, the verdict is PLT = NONE and nothing here executes.\n• Emitted an extending delta, platform-architecture.md 1.0 -> 1.1, with 7 changes and one PLT-6 capability transition: outbound third-party egress NOT PRESENT -> AVAILABLE, realised by a managed egress gateway with a destination allowlist, lifecycle status invest, passing PRIN-07-C1.\n• The AVAILABLE row carries provisioned_on_merge: true rather than being written as plainly available. The impact assessor reads PLT-6 mechanically, and a capability marked AVAILABLE before it is reachable silently deletes platform work from a later cycle's estimate — the specific failure the register exists to prevent.\n• Not structural at this viewpoint. The structural change this cycle is the integration one: ADR-012 adds the APP-2.3 edge. This delta realises that decision rather than declaring it, and it cannot merge until the ADR is approved — provisioning egress to a third party the Enterprise Architect has not yet agreed to would be doing the thing the gate exists to authorise.\n• PLT-8 gained an outbound half it never had. It described ingress only, because until this cycle nothing went outbound except the group data warehouse feed, which is group-internal. Egress is now default-deny with a named allowlist, and PLT-C5 was added so the conformance set can see an unlisted destination — PLT-C1 through C4 cannot, having been written when there were none to see.\n• Two controls kept deliberately apart: the egress gateway authorises the destination and the vault authenticates the caller. A misconfigured allowlist cannot leak a credential and a leaked credential cannot reach an unlisted destination.\n• TLS is not terminated at the gateway. An FBO lookup carries a producer's registration number, and a decrypted copy transiting a shared gateway would create a PII-bearing log surface nobody classified.\n• PLT-14 now states that identity-service's 99.9% does not extend to the register. An availability target that silently includes a third party's uptime is one nobody can meet and no on-call rota can act on — and the alternative to stating it is discovering it during an incident.\n• New platform component egress-gateway gets its own creating HLD and LLD. A platform component is a component, not a paragraph in the platform document.\n• gr-L1-secret-scanner caught a real one: the first draft of the dev tfvars carried register_api_key = \"REPLACE_ME\" to document the variable. Removed — a placeholder credential in a committed file is a real credential to a linter, to the next contributor copying the pattern, and to a scanner after someone allowlists the file. Declared in variables.tf with no default, resolved at runtime from the vault. 0 findings across 6 files after correction.\n• IaC committed to aava/platform-c1-egress and NOT applied, for all four environments with the same allowlist entry — PLT-13's rule is that environments differ by configuration and capacity, not architecture, and a test environment calling the register directly would test a system that does not exist.\n• PLTD-F01 is worth the Platform Lead's attention: PLT-19's six exit proofs contain nothing that exercises egress, so a trivial service could pass all six and still be unable to reach anything outside the product boundary. A seventh proof is proposed and deliberately not added — amending a signed gate is the Platform Lead's call.\n• Knowledge bases consulted: kb-L1-enterprise-architecture (EA2 gateway scope, PRIN-07 lifecycle check); kb-L1-enterprise-security (ES4 availability tiering, ES5 vault-managed secrets, ES10 encryption and key handling).\n• Guardrails evaluated: gr-L1-consistency-check (pass), gr-L1-secret-scanner (pass after one correction)."
+  }
+}

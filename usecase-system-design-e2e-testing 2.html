@@ -1,0 +1,1306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SFI Agentic — System Design: End-to-End Testing</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: #f4f6f9; padding: 40px 20px; }
+  .container { max-width: 1400px; margin: 0 auto; }
+  h1 { text-align: center; color: #0d1b2a; font-size: 22px; margin-bottom: 6px; }
+  .subtitle { text-align: center; color: #5a6a7a; font-size: 13px; margin-bottom: 24px; }
+
+  /* --- SYSTEM DESIGN STYLES (from the template) --- */
+  .sd-doc { background: #fff; border: 1px solid #dde3ea; border-radius: 10px; padding: 32px; }
+  .sd-doc .doc-header { border-bottom: 2px solid #0d1b2a; padding-bottom: 16px; margin-bottom: 24px; }
+  .sd-doc .doc-header h2 { font-size: 18px; color: #0d1b2a; margin-bottom: 4px; }
+  .sd-doc .doc-header p { font-size: 11px; color: #5a6a7a; }
+  .sd-section { margin-bottom: 30px; }
+  .sd-section h3 { font-size: 14px; color: #0d1b2a; margin-bottom: 4px; padding-bottom: 6px; border-bottom: 1px solid #eef1f5; }
+  .sd-section h4 { font-size: 12.5px; color: #0d1b2a; margin: 18px 0 6px; }
+  .sd-section .section-desc { font-size: 10.5px; color: #7a8a9a; font-style: italic; margin-bottom: 12px; }
+  .sd-section p, .sd-section li { font-size: 12px; color: #3a4a5a; line-height: 1.7; }
+  .sd-section ul, .sd-section ol { padding-left: 20px; margin-bottom: 10px; }
+  .sd-section li { margin-bottom: 4px; }
+  .sd-table { width: 100%; border-collapse: collapse; font-size: 11.5px; margin: 12px 0; }
+  .sd-table th { background: #f0f4f8; color: #0d1b2a; font-weight: 600; text-align: left; padding: 8px 12px; border: 1px solid #dde3ea; font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.03em; }
+  .sd-table td { padding: 8px 12px; border: 1px solid #dde3ea; color: #3a4a5a; vertical-align: top; }
+  .sd-code { background: #1a2030; color: #c8d6e5; border-radius: 8px; padding: 16px 20px; font-family: 'JetBrains Mono','Fira Code',monospace; font-size: 11px; line-height: 1.6; overflow-x: auto; margin: 12px 0; white-space: pre; }
+  .sd-code .comment { color: #5a7a5a; } .sd-code .keyword { color: #4DA8DA; }
+  .sd-code .string { color: #81B29A; } .sd-code .arrow { color: #E07A5F; }
+  .agent-spec-card { background: #f8f9fb; border: 1px solid #dde3ea; border-radius: 8px; padding: 16px 20px; margin-bottom: 14px; }
+  .agent-spec-card h4 { font-size: 12.5px; color: #0d1b2a; margin: 0 0 8px; }
+  .agent-spec-card .spec-row { display: flex; gap: 12px; margin-bottom: 6px; font-size: 11px; }
+  .agent-spec-card .spec-label { font-weight: 600; color: #5a6a7a; min-width: 140px; flex: 0 0 140px; }
+  .agent-spec-card .spec-value { color: #1a2030; }
+  .dod-table { width: 100%; border-collapse: collapse; font-size: 11.5px; }
+  .dod-table th { background: #0d1b2a; color: #fff; font-weight: 600; text-align: left; padding: 8px 12px; font-size: 10.5px; text-transform: uppercase; }
+  .dod-table td { padding: 8px 12px; border: 1px solid #dde3ea; color: #3a4a5a; }
+  .dod-table tr:nth-child(even) { background: #f8f9fb; }
+  .signoff-box { background: #f8f9fb; border: 1px solid #dde3ea; border-radius: 8px; padding: 16px 20px; margin-top: 12px; }
+  .signoff-row { display: flex; gap: 20px; margin-bottom: 10px; align-items: center; }
+  .signoff-row label { font-size: 11px; font-weight: 600; color: #1a2030; min-width: 140px; }
+  .signoff-row .line { flex: 1; border-bottom: 1px dotted #aab4c0; height: 16px; }
+  .signoff-row .date-line { flex: 0 0 140px; border-bottom: 1px dotted #aab4c0; height: 16px; }
+  .guidance { background: #f0f7ff; border: 1px solid #c8e0f4; border-radius: 8px; padding: 14px 18px; margin-bottom: 18px; }
+  .guidance p { font-size: 11.5px; color: #2a5a8a; line-height: 1.65; }
+  .guidance strong { color: #0d1b2a; }
+  .warn { background: #fdf3ee; border-color: #f0c9b8; }
+  .warn p { color: #8a4020; }
+
+  /* --- LIFECYCLE DIAGRAM (new component for this design) --- */
+  .lc { border: 1px solid #dde3ea; border-radius: 10px; background: #fbfcfd; padding: 4px 0 14px; margin: 14px 0 22px; }
+  .lc-title { background: #0d1b2a; color: #fff; font-size: 12px; font-weight: 700; padding: 9px 18px; border-radius: 9px 9px 0 0; letter-spacing: .03em; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .lc-title .cad { background: rgba(255,255,255,.16); font-size: 9.5px; font-weight: 600; padding: 2px 9px; border-radius: 10px; letter-spacing: .04em; }
+  .lc-note { font-size: 10.5px; color: #5a6a7a; padding: 10px 18px 0; line-height: 1.6; }
+  .lc-stage { margin: 14px 14px 0; border: 1px solid #e2e8ef; border-radius: 8px; background: #fff; overflow: hidden; }
+  .lc-stage-hd { background: #eef3f8; border-bottom: 1px solid #e2e8ef; padding: 7px 14px; font-size: 11px; font-weight: 700; color: #0d1b2a; display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; }
+  .lc-stage-hd .st { background: #0d1b2a; color: #fff; border-radius: 4px; padding: 1px 8px; font-size: 10px; }
+  .lc-stage-hd .meta { font-weight: 400; color: #6a7a8a; font-size: 10px; }
+  .lc-stage-hd .gate { margin-left: auto; background: #fdeeea; color: #9a3412; border: 1px solid #f0c9b8; border-radius: 10px; padding: 1px 9px; font-size: 9.5px; font-weight: 700; }
+  .lc-agents { display: flex; gap: 10px; padding: 12px 14px; overflow-x: auto; align-items: stretch; }
+  .lc-agent { flex: 1 1 210px; min-width: 210px; display: flex; flex-direction: column; gap: 5px; }
+  .lc-hd { background: #0d1b2a; color: #fff; border-radius: 6px; padding: 7px 10px; font-size: 10.5px; font-weight: 700; line-height: 1.35; }
+  .lc-hd code { font-family: 'JetBrains Mono','Fira Code',monospace; font-size: 9.5px; color: #9fd2ef; font-weight: 400; display: block; margin-top: 2px; word-break: break-all; }
+  .lc-hd .mode { display: inline-block; background: #E07A5F; color: #fff; font-size: 8.5px; border-radius: 8px; padding: 0 6px; margin-left: 4px; vertical-align: middle; }
+  .lc-hd .mode.new { background: #2d6b4a; }
+  .band { border-radius: 5px; padding: 5px 8px; font-size: 9.5px; line-height: 1.45; border: 1px solid; }
+  .band b { display: block; font-size: 8.5px; letter-spacing: .06em; text-transform: uppercase; margin-bottom: 2px; font-weight: 700; }
+  .band code { font-family: 'JetBrains Mono','Fira Code',monospace; font-size: 9px; word-break: break-all; }
+  .b-in   { background:#e8f4fd; border-color:#a9d3ef; color:#1d4e73; }
+  .b-out  { background:#e8f7ee; border-color:#a9d9bf; color:#1f5c3d; }
+  .b-kb   { background:#f3eefb; border-color:#cdbce4; color:#4a3570; }
+  .b-tool { background:#fff6e0; border-color:#eed89a; color:#7a5800; }
+  .b-gr   { background:#fdeeea; border-color:#f0c2ae; color:#8a3418; }
+  .lc-key { display: flex; gap: 12px; flex-wrap: wrap; padding: 12px 18px 0; }
+  .lc-key span { font-size: 9.5px; border-radius: 4px; padding: 3px 9px; border: 1px solid; font-weight: 700; letter-spacing: .04em; }
+  .lc-flowline { text-align: center; color: #4DA8DA; font-size: 15px; font-weight: 700; margin: 4px 0 -4px; }
+
+  /* --- DATA-FLOW BOXES --- */
+  .df { background:#fbfcfd; border:1px solid #dde3ea; border-radius:10px; padding:16px 14px 18px; margin:12px 0 20px; }
+  .df-h { background:#0d1b2a; color:#fff; font-size:11.5px; font-weight:700; padding:8px 16px; border-radius:8px; margin:-16px -14px 14px; display:flex; gap:10px; align-items:center; flex-wrap:wrap; letter-spacing:.03em; }
+  .df-h .tag { background:rgba(255,255,255,.16); font-size:9.5px; padding:2px 9px; border-radius:10px; font-weight:600; }
+  .df-row { display:flex; gap:8px; align-items:stretch; justify-content:center; flex-wrap:wrap; margin:0 0 6px; }
+  .df-row.left { justify-content:flex-start; }
+  .df-n { border-radius:7px; padding:7px 11px; font-size:10px; line-height:1.4; border:1.5px solid; min-width:132px; max-width:210px; text-align:center; display:flex; flex-direction:column; justify-content:center; }
+  .df-n b { display:block; font-size:10.5px; font-weight:700; margin-bottom:1px; }
+  .df-n span { display:block; font-size:9px; opacity:.85; margin-top:2px; }
+  .df-n code { font-family:'JetBrains Mono','Fira Code',monospace; font-size:8.5px; word-break:break-all; }
+  .n-agent { background:#0d1b2a; border-color:#0d1b2a; color:#fff; }
+  .n-agent code { color:#9fd2ef; }
+  .n-art   { background:#e8f4fd; border-color:#4DA8DA; border-style:dashed; color:#1d4e73; }
+  .n-gate  { background:#fdeeea; border-color:#E07A5F; color:#8a3418; }
+  .n-human { background:#f3eefb; border-color:#9B8AA6; color:#4a3570; }
+  .n-ok    { background:#e8f7ee; border-color:#81B29A; color:#1f5c3d; }
+  .n-stop  { background:#fbe3e0; border-color:#c0392b; color:#8a1f12; }
+  .n-ext   { background:#fff6e0; border-color:#eed89a; color:#7a5800; }
+  .df-a { align-self:center; color:#4DA8DA; font-size:15px; font-weight:700; padding:0 1px; }
+  .df-v { text-align:center; color:#4DA8DA; font-size:15px; font-weight:700; line-height:1; margin:1px 0 5px; }
+  .df-lbl { text-align:center; font-size:9px; color:#7a8a9a; margin:-3px 0 5px; font-style:italic; }
+  .df-fan { display:flex; gap:7px; flex-wrap:wrap; justify-content:center; margin:4px 0 6px; }
+  .df-fan .df-n { min-width:150px; max-width:240px; text-align:left; }
+  .df-key { display:flex; gap:9px; flex-wrap:wrap; margin-top:12px; padding-top:10px; border-top:1px dashed #dde3ea; }
+  .df-key span { font-size:9px; border-radius:4px; padding:2px 8px; border:1.5px solid; font-weight:700; letter-spacing:.03em; }
+
+  .doc-nav { display:flex; align-items:center; gap:10px; flex-wrap:wrap; font-size:11.5px; margin-bottom:26px; padding-bottom:14px; border-bottom:1px solid #dde3ea; }
+  .doc-nav .step { font-weight:700; color:#0d1b2a; background:#eef1f5; border:1px solid #dde3ea; border-radius:20px; padding:3px 12px; }
+  .doc-nav a { color:#2b7cb0; text-decoration:none; border:1px solid #cfe0ec; background:#f4fafd; border-radius:6px; padding:4px 11px; font-weight:600; }
+  .doc-nav .spacer { flex:1; } .doc-nav .set { color:#7a8a9a; }
+  @media print { .doc-nav { display:none !important; } .container { max-width:none; }
+    .sd-section, .agent-spec-card, .lc-stage { break-inside: avoid; } h1 { font-size:20px; } }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <h1>Agent / Workflow System Design Spec — End-to-End Testing</h1>
+  <p class="subtitle">Produced by the Agentic Engineer after requirements sign-off and before implementation begins</p>
+
+  <div class="doc-nav">
+    <span class="step">Step 3 of 3</span>
+    <a href="usecase-requirements-template.html">&larr; Requirements Document</a>
+    <a href="usecase-system-design-template.html">Blank template</a>
+    <span class="spacer"></span>
+    <span class="set">SFI Agentic use-case document set</span>
+  </div>
+
+  <div class="sd-doc">
+    <div class="doc-header">
+      <h2>End-to-End Testing — Agentic System Design</h2>
+      <p>A 19-agent orchestrated workflow that authors, builds, executes, triages and curates the test estate
+         across three development scenarios. This document is the implementation contract: every agent's inputs,
+         outputs, knowledge bases, tools and guardrails are specified here, per stage, per scenario.</p>
+    </div>
+
+    <!-- 1 -->
+    <div class="sd-section">
+      <h3>1. Overview</h3>
+      <table class="sd-table">
+        <tr><th style="width:170px;">Attribute</th><th>Detail</th></tr>
+        <tr><td><strong>Use Case ID</strong></td><td>SFI-AG-QA-001</td></tr>
+        <tr><td><strong>Use Case</strong></td><td>End-to-end testing across the delivery lifecycle — authoring, building, executing, triaging and curating the test estate</td></tr>
+        <tr><td><strong>Tower</strong></td><td>Quality Engineering (primary) · Engineering and Platform (consuming)</td></tr>
+        <tr><td><strong>Pattern</strong></td><td><strong>Orchestrated multi-agent workflow</strong> — <strong>19 agents</strong> (16 LLM, 3 code-only) across 6 stages, on <strong>three independent cadences</strong>. Contains one generator–evaluator pair (<code>case-writer</code> ↔ <code>defect-triager</code>) and one adversarial pair (<code>scenario-writer</code> → <code>adversarial-case-writer</code>). It is <em>not</em> a single pipeline: stages T-A/T-B run once per PI, T-C–T-E once per feature cycle, T-F on a band/fortnight/release clock.</td></tr>
+        <tr><td><strong>Trigger</strong></td><td>Three distinct triggers, deliberately not merged:<br>① <strong>Event</strong> — <code>cycle.committed</code> from the feature-cycle planner (starts T-C)<br>② <strong>Event</strong> — <code>pr.merged</code> (starts the T-E close and the cycle-close chain)<br>③ <strong>Scheduled</strong> — band boundary, fortnightly beat, release gate (starts T-F)</td></tr>
+        <tr><td><strong>Target Latency</strong></td><td>T-C ≤ 12 min per feature · T-D ≤ 18 min · T-E execution bounded by the suite, triage ≤ 4 min per failure · T-F risk-selected run ≤ 40 min p95 (the cadence window is the hard constraint — a pack that outgrows it is the failure mode this design exists to prevent)</td></tr>
+        <tr><td><strong>Target Accuracy</strong></td><td><code>verification_ref</code> resolvability <strong>100%</strong> (blocking) · triage verdict precision <strong>≥0.90</strong> against QA-labelled failures · AC-to-case coverage <strong>≥8/10</strong> · adversarial case yield <strong>≥1 per compliance-tagged AC clause</strong> · <strong>0</strong> real PII in any fixture, log or screenshot (critical)</td></tr>
+        <tr><td><strong>Scenarios in scope</strong></td><td><strong>Greenfield</strong> (§2.1) · <strong>Brownfield</strong> (§2.2) · <strong>Bugfix</strong> (§2.3). The four test tiers are identical in all three; what changes is which agents run, in what mode, and which tier is load-bearing.</td></tr>
+      </table>
+
+      <div class="guidance">
+        <p><strong>The one design constraint everything else follows from.</strong> The test estate must be an
+        <em>oracle</em> — an independent statement of what correct means. That independence is not a policy
+        anyone has to remember; it is a consequence of <strong>which document each agent is given</strong>.
+        Scenario and case agents read acceptance criteria and architecture rules and are <strong>denied the
+        contract, the HLD and the source</strong>. Script agents read the contract because they cannot function
+        without it, and a later blocking stage proves what they produced against the running service. Every
+        input list in §2 and §3 is enforcing that line.</p>
+      </div>
+    </div>
+
+    <!-- 2 -->
+    <div class="sd-section">
+      <h3>2. Architecture</h3>
+      <p class="section-desc">One lifecycle diagram per development scenario. Each agent column shows, in order: what goes in, what comes out, the knowledge bases it loads, the tools it calls, and the guardrails that apply to it.</p>
+
+      <div class="lc-key">
+        <span class="b-in">▸ INPUT</span>
+        <span class="b-out">▸ OUTPUT</span>
+        <span class="b-kb">▸ KNOWLEDGE BASE</span>
+        <span class="b-tool">▸ TOOLS</span>
+        <span class="b-gr">▸ GUARDRAILS</span>
+      </div>
+      <p style="font-size:10.5px;color:#7a8a9a;margin-top:8px;">Guardrails marked <strong>BLOCKING</strong> stop
+      the workflow; the rest report and route. A guardrail that only ever warns is documentation, not a control —
+      each one below states which it is.</p>
+    </div>
+
+    <div class="sd-section">
+      <h4>2.1 Greenfield — authoring an oracle from nothing</h4>
+      <p style="font-size:11.5px;">All four tiers run at full weight. There is no incumbent suite, no behaviour to
+      protect and no production consumer, so the whole regime is forward-looking. <strong>The pack starts
+      empty</strong> — early cycles get little regression value, and that is expected rather than a defect.</p>
+
+      <div class="lc">
+        <div class="lc-title">GREENFIELD LIFECYCLE <span class="cad">18 AGENTS · 6 STAGES · 3 CADENCES</span></div>
+        <p class="lc-note">Stages <strong>T-A</strong> and <strong>T-B</strong> run <strong>once per PI</strong>,
+        before the first feature cycle. They read the architecture <em>declaration</em> produced by Cycle 0 —
+        the declared component map, entity register, classification policy, trust boundaries and budgets.
+        <strong>No component HLD exists yet and none can</strong>: an HLD is created by the first cycle that
+        builds that component. A stub registry derived from what exists could never stub anything, because a
+        stub exists precisely for a component that does not yet exist.</p>
+
+        <!-- T-A -->
+        <div class="lc-stage">
+          <div class="lc-stage-hd"><span class="st">T-A</span> Strategy <span class="meta">once per PI · after Cycle 0 platform is live</span><span class="gate">👤 QA Expert sign-off</span></div>
+          <div class="lc-agents">
+            <div class="lc-agent">
+              <div class="lc-hd">Test Strategy Architect<code>L1-testing-strategy-architect</code></div>
+              <div class="band b-in"><b>Input</b><code>prd.md</code> · <code>nfr_classifications</code> · <code>roadmap.md</code> (cadence, bands) · <strong>Cycle 0 declaration</strong>: <code>APP-2</code> component map, <code>PLT-1…5</code> topology, <code>DAT-1/DAT-3</code>, <code>SEC-*</code>, <code>REQ-*</code> budgets</div>
+              <div class="band b-out"><b>Output</b><code>test-strategy.md</code> — tier policy, entry/exit criteria per tier, coverage targets, tool selection, environment <em>topology</em>, NFR approach, pack governance (flake threshold, staleness ceiling, per-tier runtime budgets). <strong>Authors no test cases</strong></div>
+              <div class="band b-kb"><b>KB</b><code>kb-L1-testing-standards</code> · <code>kb-L1-enterprise-architecture</code> · <code>kb-L2-food-regulatory</code></div>
+              <div class="band b-tool"><b>Tools</b><code>tool-L1-confluence-create-page</code></div>
+              <div class="band b-gr"><b>Guardrails</b><code>gr-L1-consistency-check</code> · <code>gr-L1-output-schema-validator</code> · <strong>qg-L1-test-strategy-quality ≥7</strong> — <strong>BLOCKING</strong>, plus the human gate</div>
+            </div>
+          </div>
+        </div>
+        <div class="lc-flowline">▼</div>
+
+        <!-- T-B -->
+        <div class="lc-stage">
+          <div class="lc-stage-hd"><span class="st">T-B</span> Foundation <span class="meta">policy once per PI · registers re-run at every cycle close</span><span class="gate">gr-L1-pii-detection CRITICAL</span></div>
+          <div class="lc-agents">
+            <div class="lc-agent">
+              <div class="lc-hd">Env Provisioner <span class="mode">seed</span><code>L1-testing-env-provisioner</code></div>
+              <div class="band b-in"><b>Input</b><code>test-strategy.md</code> · <strong><code>APP-2</code> — the <em>declared</em> component map</strong> · <code>INT-1</code> protocol rules · <code>INT-3</code> topic taxonomy · <code>PLT-1…5</code> · <code>dependency-graph.json</code></div>
+              <div class="band b-out"><b>Output</b><code>env-manifest.yaml</code> · <code>stub-registry.json</code> — <strong>one entry per declared component</strong>, each <code>stub</code> or <code>real</code>. Satisfies the DoR clause &ldquo;dependencies stubbed&rdquo;</div>
+              <div class="band b-kb"><b>KB</b><code>kb-L1-enterprise-architecture</code> · <code>kb-L1-testing-standards</code></div>
+              <div class="band b-tool"><b>Tools</b><code>tool-L1-env-apply-manifest</code></div>
+              <div class="band b-gr"><b>Guardrails</b><code>gr-L1-schema-validator</code> · <code>gr-L1-secret-scanner</code> — <strong>BLOCKING: no live credential may appear in a manifest</strong></div>
+            </div>
+            <div class="lc-agent">
+              <div class="lc-hd">Synthetic Data Generator <span class="mode">base</span><code>L1-testing-synthetic-data-generator</code></div>
+              <div class="band b-in"><b>Input</b><strong><code>DAT-1</code></strong> entity register, owners, <code>RULE DAT-1.b</code> references-by-id · <strong><code>DAT-3</code></strong> classification &amp; retention matrix · <code>test-strategy.md</code>. <strong>Not a physical schema — none exists yet</strong></div>
+              <div class="band b-out"><b>Output</b><code>synthetic-data.base.json</code> — PII-safe corpus for every <em>declared</em> entity, referentially consistent across context boundaries</div>
+              <div class="band b-kb"><b>KB</b><code>kb-L1-testing-standards</code></div>
+              <div class="band b-tool"><b>Tools</b>None — deterministic generation from the classification rules</div>
+              <div class="band b-gr"><b>Guardrails</b><code>gr-L1-pii-detection</code> — <strong>CRITICAL, BLOCKING.</strong> Any real PII blocks the build outright, not a warning</div>
+            </div>
+            <div class="lc-agent">
+              <div class="lc-hd">Regression Pack Curator <span class="mode">init</span><code>L1-testing-regression-pack-curator</code></div>
+              <div class="band b-in"><b>Input</b><code>test-strategy.md</code> pack-governance rules · tag taxonomy</div>
+              <div class="band b-out"><b>Output</b><code>regression-pack.json</code> — <strong>empty and schema-valid</strong> · XRay test-set skeleton. <strong>Sole writer of the pack for the life of the product</strong></div>
+              <div class="band b-kb"><b>KB</b><code>kb-L1-testing-standards</code></div>
+              <div class="band b-tool"><b>Tools</b><code>tool-L1-xray-create-test</code></div>
+              <div class="band b-gr"><b>Guardrails</b><code>gr-L1-output-schema-validator</code> · <strong>pack invariant</strong>: a case may leave only with <code>superseded_by</code> or a named <code>retirement_rationale</code></div>
+            </div>
+          </div>
+        </div>
+        <div class="lc-flowline">▼ &nbsp;per feature cycle from here&nbsp; ▼</div>
+
+        <!-- T-C -->
+        <div class="lc-stage">
+          <div class="lc-stage-hd"><span class="st">T-C</span> Behaviour design <span class="meta">every cycle · Day 1 · before Work Units</span><span class="gate">qg-L1-verification-ref-integrity 100% — BLOCKING</span></div>
+          <div class="lc-agents">
+            <div class="lc-agent">
+              <div class="lc-hd">Scenario Writer<code>L1-testing-scenario-writer</code></div>
+              <div class="band b-in"><b>Input</b>Feature AC from <code>features.json</code> · <code>stories.json</code> · <code>prd.md</code> · <code>APP-3</code> <code>INV-*</code> invariants.<br><strong>DENIED: source code · <code>openapi.yaml</code> · any HLD/LLD</strong></div>
+              <div class="band b-out"><b>Output</b><code>test-scenarios.md</code> — happy paths, scoped to committed features only</div>
+              <div class="band b-kb"><b>KB</b><code>kb-L1-testing-standards</code> · <code>kb-L2-food-domain-model</code></div>
+              <div class="band b-tool"><b>Tools</b>None — authoring only</div>
+              <div class="band b-gr"><b>Guardrails</b><code>gr-L1-citation-verifier</code> — every scenario cites an AC clause · <code>gr-L1-consistency-check</code></div>
+            </div>
+            <div class="lc-agent">
+              <div class="lc-hd">Adversarial Case Writer<code>L1-testing-adversarial-case-writer</code></div>
+              <div class="band b-in"><b>Input</b><code>test-scenarios.md</code> · <code>nfr_classifications</code> · regulatory posture from <code>vision.md</code> · <code>impact-assessment.md</code> blast radius · <strong>read directly: <code>APP-3 INV-*</code>, <code>CON-*</code>, <code>SEC-*</code>, <code>REQ-*</code> budgets</strong> · <code>conformance-report.md</code> drift register</div>
+              <div class="band b-out"><b>Output</b><code>test-scenarios.adversarial.md</code> — negative, boundary, abuse and NFR failure modes; regression-risk cases near known drift</div>
+              <div class="band b-kb"><b>KB</b><code>kb-L1-testing-standards</code> · <code>kb-L1-enterprise-security</code> · <code>kb-L2-food-regulatory</code></div>
+              <div class="band b-tool"><b>Tools</b>None</div>
+              <div class="band b-gr"><b>Guardrails</b><code>gr-L1-citation-verifier</code> · <code>gr-L1-hallucination-check</code> — an asserted rule must exist in a cited section</div>
+            </div>
+            <div class="lc-agent">
+              <div class="lc-hd">Case Writer<code>L1-testing-case-writer</code></div>
+              <div class="band b-in"><b>Input</b>Both scenario sets · feature AC. <strong>Reads the scenarios, not the sources they were derived from</strong></div>
+              <div class="band b-out"><b>Output</b><code>test-cases.feature</code> (Gherkin) · <code>case-index.json</code> — <strong>mints the stable <code>case_id</code>s</strong> that Work Units bind as <code>verification_ref</code></div>
+              <div class="band b-kb"><b>KB</b><code>kb-L1-testing-standards</code></div>
+              <div class="band b-tool"><b>Tools</b>None</div>
+              <div class="band b-gr"><b>Guardrails</b><code>gr-L1-schema-validator</code> · <code>gr-L1-test-immutability</code> — <strong>the only agent permitted to amend a case, and only on a <code>test_defect</code> verdict citing the contradicted AC clause</strong> · <strong>qg-L1-test-case-ac-coverage ≥8</strong></div>
+            </div>
+          </div>
+        </div>
+        <div class="lc-flowline">▼</div>
+
+        <!-- T-D -->
+        <div class="lc-stage">
+          <div class="lc-stage-hd"><span class="st">T-D</span> Executable build <span class="meta">every cycle · Day 2 · after design, NOT after merge</span><span class="gate">gr-L1-secret-scanner</span></div>
+          <div class="lc-agents">
+            <div class="lc-agent">
+              <div class="lc-hd">Contract Resolver <span class="mode new">CODE-ONLY</span><code>L1-testing-contract-resolver</code></div>
+              <div class="band b-in"><b>Input</b>The cycle's <code>openapi-&lt;svc&gt;.delta.yaml</code> — which carries <code>target_document</code> and <code>from_version</code> · the canonical <code>services/&lt;svc&gt;/openapi.yaml</code> at that version, fetched from the architecture repo</div>
+              <div class="band b-out"><b>Output</b><code>&lt;cycle&gt;/resolved/openapi-&lt;svc&gt;.resolved.yaml</code> — <strong>a generated build artifact, not a source of truth.</strong> Marked disposable; nothing reads it after the cycle closes</div>
+              <div class="band b-kb"><b>KB</b>None — <strong>code-only. No model, no temperature, no prompt.</strong> Composition is a deterministic overlay, not a judgement</div>
+              <div class="band b-tool"><b>Tools</b><code>tool-L1-github-fetch-file</code> — to read the canonical file at the declared version</div>
+              <div class="band b-gr"><b>Guardrails</b><strong><code>gr-L1-from-version-match</code> — BLOCKING.</strong> If the canonical document has moved past <code>from_version</code>, the resolution is <strong>refused</strong>, not composed. · <code>gr-L1-schema-validator</code> — the result must parse as valid OpenAPI</div>
+            </div>
+            <div class="lc-agent">
+              <div class="lc-hd">Script Generator<code>L1-testing-script-generator</code></div>
+              <div class="band b-in"><b>Input</b><code>test-cases.feature</code> · <strong>the resolved view, already composed</strong> — handed over by <code>contract-resolver</code>, never assembled here · <code>wireframes.md</code> (additive) · <code>stub-registry.json</code></div>
+              <div class="band b-out"><b>Output</b>Playwright / REST Assured source, tagged by tier and <code>case_id</code></div>
+              <div class="band b-kb"><b>KB</b><code>kb-L1-testing-standards</code></div>
+              <div class="band b-tool"><b>Tools</b>None — emits source, does not execute</div>
+              <div class="band b-gr"><b>Guardrails</b><code>gr-L1-schema-validator</code> · <code>gr-L1-secret-scanner</code> — <strong>BLOCKING</strong> · every emitted test must carry a resolvable <code>case_id</code> and target an endpoint present in the resolved view</div>
+            </div>
+            <div class="lc-agent">
+              <div class="lc-hd">Synthetic Data Generator <span class="mode">delta</span><code>L1-testing-synthetic-data-generator</code></div>
+              <div class="band b-in"><b>Input</b>The cycle's physical DDL from <code>lld.md</code> + migration · the entities <code>DAT-1</code> now marks realised · <code>test-cases.feature</code></div>
+              <div class="band b-out"><b>Output</b><code>synthetic-data.&lt;cycle&gt;.json</code> — appended to the base corpus. Delta scoping keeps generation bounded as the schema grows</div>
+              <div class="band b-kb"><b>KB</b><code>kb-L1-testing-standards</code></div>
+              <div class="band b-tool"><b>Tools</b>None</div>
+              <div class="band b-gr"><b>Guardrails</b><code>gr-L1-pii-detection</code> — <strong>CRITICAL, BLOCKING</strong></div>
+            </div>
+            <div class="lc-agent">
+              <div class="lc-hd">XRay Orchestrator<code>L1-testing-xray-orchestrator</code></div>
+              <div class="band b-in"><b>Input</b><code>case-index.json</code> · <code>tasks.json</code> Work Units and their <code>verification_ref</code>s</div>
+              <div class="band b-out"><b>Output</b>XRay entries linked to features <em>and</em> Work Units — makes the binding visible in tooling, not only in JSON</div>
+              <div class="band b-kb"><b>KB</b>None — mechanical projection</div>
+              <div class="band b-tool"><b>Tools</b><code>tool-L1-xray-create-test</code></div>
+              <div class="band b-gr"><b>Guardrails</b><code>gr-L1-output-schema-validator</code></div>
+            </div>
+          </div>
+        </div>
+        <div class="lc-flowline">▼ &nbsp;pack handed to construction as a <strong>read-only</strong> oracle&nbsp; ▼</div>
+
+        <!-- T-E -->
+        <div class="lc-stage">
+          <div class="lc-stage-hd"><span class="st">T-E</span> Execute · triage · verify contracts <span class="meta">every cycle · Days 3–4</span><span class="gate">2× 100% — feature-test-pass · contract-conformance</span></div>
+          <div class="lc-agents">
+            <div class="lc-agent">
+              <div class="lc-hd">Testing Executor<code>L1-testing-executor</code></div>
+              <div class="band b-in"><b>Input</b>Scripts · fixtures · <code>env-manifest.yaml</code> · <code>selection-manifest.json</code> (T-F invocations only)</div>
+              <div class="band b-out"><b>Output</b><code>test-execution-report.json</code> — per-case pass/fail, duration, flake signal; written back to XRay</div>
+              <div class="band b-kb"><b>KB</b><code>kb-L1-testing-standards</code></div>
+              <div class="band b-tool"><b>Tools</b><code>tool-L1-ci-run-suite</code> · <code>tool-L1-xray-update-execution</code></div>
+              <div class="band b-gr"><b>Guardrails</b><code>gr-L1-output-schema-validator</code> · <code>gr-L1-pii-detection</code> — <strong>on captured logs and screenshots</strong>, which is where PII most often escapes</div>
+            </div>
+            <div class="lc-agent">
+              <div class="lc-hd">Defect Triager<code>L1-testing-defect-triager</code></div>
+              <div class="band b-in"><b>Input</b><code>test-execution-report.json</code> failures · the implicated source · <code>case-index.json</code></div>
+              <div class="band b-out"><b>Output</b><code>triage-verdict.json</code> — one of <code>code_defect</code> · <code>test_defect</code> · <code>data_defect</code> · <code>env_defect</code> · <code>flake</code>, each routed to a named agent; Jira Bug for code defects</div>
+              <div class="band b-kb"><b>KB</b><code>kb-L1-testing-standards</code></div>
+              <div class="band b-tool"><b>Tools</b><code>tool-L1-jira-create-issue</code> · <code>tool-L1-github-fetch-file</code></div>
+              <div class="band b-gr"><b>Guardrails</b><code>gr-L1-consistency-check</code> · <code>gr-L1-test-immutability</code> — <strong>a <code>test_defect</code> verdict must cite the contradicted AC clause; an uncited amendment is rejected</strong></div>
+            </div>
+            <div class="lc-agent">
+              <div class="lc-hd">Contract Verifier<code>L1-testing-contract-verifier</code></div>
+              <div class="band b-in"><b>Input</b>The <strong>running service</strong> · consumers' published pact files · <code>INT-2</code> registered contracts · <code>dependency-graph.json</code></div>
+              <div class="band b-out"><b>Output</b><code>contract-verification-report.json</code> · published pacts — <strong>including against consumers that do not yet exist</strong></div>
+              <div class="band b-kb"><b>KB</b><code>kb-L1-enterprise-architecture</code> · <code>kb-L1-testing-standards</code></div>
+              <div class="band b-tool"><b>Tools</b><code>tool-L1-pact-publish-results</code> · <code>tool-L1-pact-fetch-pacts</code> · <code>tool-L1-ci-run-suite</code></div>
+              <div class="band b-gr"><b>Guardrails</b><code>gr-L1-schema-validator</code> · <code>gr-L1-consistency-check</code> · <strong>qg-L1-contract-conformance 100% — BLOCKING.</strong> This is the stage that <em>proves</em> the resolved view T-D built from</div>
+            </div>
+            <div class="lc-agent">
+              <div class="lc-hd">Regression Pack Curator <span class="mode">promote</span><code>L1-testing-regression-pack-curator</code></div>
+              <div class="band b-in"><b>Input</b>The cycle's stable cases · execution history · existing pack · governance rules</div>
+              <div class="band b-out"><b>Output</b>Augmented <code>regression-pack.json</code> · <code>pack-changelog.md</code> (added / re-tiered / quarantined / retired)</div>
+              <div class="band b-kb"><b>KB</b><code>kb-L1-testing-standards</code></div>
+              <div class="band b-tool"><b>Tools</b><code>tool-L1-xray-create-test</code></div>
+              <div class="band b-gr"><b>Guardrails</b><code>gr-L1-output-schema-validator</code> · <code>gr-L1-consistency-check</code> — <strong>no coverage regression without <code>superseded_by</code></strong>. Runs only after both exit gates pass</div>
+            </div>
+          </div>
+        </div>
+        <div class="lc-flowline">▼ &nbsp;PR lands → registers regenerate → conformance&nbsp; ▼</div>
+
+        <!-- T-F -->
+        <div class="lc-stage">
+          <div class="lc-stage-hd"><span class="st">T-F</span> The cadence loop <span class="meta">band boundary · every 2 cycles · release — three independent clocks</span><span class="gate">👤 Release Manager at the release gate</span></div>
+          <div class="lc-agents">
+            <div class="lc-agent">
+              <div class="lc-hd">Integration Orchestrator<code>L1-testing-integration-orchestrator</code></div>
+              <div class="band b-in"><b>Input</b><code>user-journeys.md</code> (additive, per cycle) · <code>roadmap.md</code> features with band ≤ current · <code>dependency-graph.json</code> · <code>INT-4</code> canonical flows · <code>env-manifest.yaml</code></div>
+              <div class="band b-out"><b>Output</b>Cross-feature E2E runs over the journeys touched by newly landed features</div>
+              <div class="band b-kb"><b>KB</b><code>kb-L1-enterprise-architecture</code> · <code>kb-L1-testing-standards</code></div>
+              <div class="band b-tool"><b>Tools</b><code>tool-L1-ci-run-suite</code> · <code>tool-L1-env-apply-manifest</code></div>
+              <div class="band b-gr"><b>Guardrails</b><code>gr-L1-consistency-check</code> · <code>gr-L1-output-schema-validator</code>. <strong>An empty band is correct until the first journey lands; a skipped band is not</strong></div>
+            </div>
+            <div class="lc-agent">
+              <div class="lc-hd">Risk Selector<code>L1-testing-risk-selector</code></div>
+              <div class="band b-in"><b>Input</b><code>regression-pack.json</code> · <code>impact-assessment.md</code> · <code>dependency-graph.json</code> · commit diff since the last regression run</div>
+              <div class="band b-out"><b>Output</b><code>selection-manifest.json</code> — everything touching scope, everything downstream, <strong>and every <code>risk:high</code> case regardless of scope</strong></div>
+              <div class="band b-kb"><b>KB</b><code>kb-L1-testing-standards</code> · <code>kb-L1-enterprise-architecture</code></div>
+              <div class="band b-tool"><b>Tools</b><code>tool-L1-github-fetch-file</code></div>
+              <div class="band b-gr"><b>Guardrails</b><code>gr-L1-consistency-check</code> — <strong>the staleness ceiling is honoured, so selection can never become silent deletion</strong> · <code>gr-L1-output-schema-validator</code></div>
+            </div>
+            <div class="lc-agent">
+              <div class="lc-hd">NFR Suite Generator<code>L1-testing-nfr-suite-generator</code></div>
+              <div class="band b-in"><b>Input</b><code>nfr_classifications</code> · <code>REQ-*</code> budgets · <code>SEC-*</code> trust boundaries · <code>PLT-4</code> SLO policy · <code>hld.md</code> load paths <em>(available from the first cycle close)</em></div>
+              <div class="band b-out"><b>Output</b>Perf, security and accessibility suites bound to the stated budgets</div>
+              <div class="band b-kb"><b>KB</b><code>kb-L1-enterprise-security</code> · <code>kb-L1-testing-standards</code> · <code>kb-L1-nfr-classification-taxonomy</code></div>
+              <div class="band b-tool"><b>Tools</b><code>tool-L1-ci-run-load</code> · <code>tool-L1-dast-run-scan</code></div>
+              <div class="band b-gr"><b>Guardrails</b><code>gr-L1-schema-validator</code> · <code>gr-L1-secret-scanner</code> — DAST configuration is a common credential leak</div>
+            </div>
+            <div class="lc-agent">
+              <div class="lc-hd">Coverage Reporter<code>L1-testing-coverage-reporter</code></div>
+              <div class="band b-in"><b>Input</b><code>regression-pack.json</code> · <code>case-index.json</code> · requirements and AC set · execution history</div>
+              <div class="band b-out"><b>Output</b><code>traceability-matrix.md</code> · coverage drift report</div>
+              <div class="band b-kb"><b>KB</b><code>kb-L1-testing-standards</code> · <code>kb-L2-food-regulatory</code></div>
+              <div class="band b-tool"><b>Tools</b><code>tool-L1-confluence-create-page</code></div>
+              <div class="band b-gr"><b>Guardrails</b><code>gr-L1-consistency-check</code> · <code>gr-L1-output-schema-validator</code></div>
+            </div>
+            <div class="lc-agent">
+              <div class="lc-hd">Release Orchestrator<code>L1-testing-release-orchestrator</code></div>
+              <div class="band b-in"><b>Input</b>Outputs of executor, nfr-suite-generator, integration-orchestrator, coverage-reporter · <code>conformance-report.md</code> · open drift items</div>
+              <div class="band b-out"><b>Output</b><code>release-readiness-report.md</code> — evidence assembled, <strong>residual risk stated, blockers named</strong>. Issues go / no-go</div>
+              <div class="band b-kb"><b>KB</b><code>kb-L1-testing-standards</code> · <code>kb-L2-food-regulatory</code></div>
+              <div class="band b-tool"><b>Tools</b><code>tool-L1-jira-update-issue</code> · <code>tool-L1-confluence-create-page</code></div>
+              <div class="band b-gr"><b>Guardrails</b><code>gr-L1-consistency-check</code> · <code>gr-L1-output-schema-validator</code> · <strong>qg-L1-release-readiness ≥8</strong> and <strong>👤 the ship decision stays human</strong></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sd-section">
+      <h4>2.2 Brownfield — the inverted regime</h4>
+      <p style="font-size:11.5px;"><strong>T-A and T-B do not re-run</strong> — the strategy, environments and
+      pack are inherited. Two stages exist that greenfield has no analogue for, and both run
+      <strong>before a single existing line is modified</strong>. Greenfield asks <em>&ldquo;does the new thing
+      work?&rdquo;</em>; brownfield asks first <em>&ldquo;what does the existing thing already do, and what
+      currently protects it?&rdquo;</em> — because the regression pack covers only what someone previously
+      <em>chose</em> to cover, and <strong>the code most likely to be changed is frequently the code least
+      covered</strong>.</p>
+
+      <div class="lc">
+        <div class="lc-title">BROWNFIELD LIFECYCLE <span class="cad">INHERITS T-A / T-B · ADDS 2 STAGES · 2 MODE CHANGES</span></div>
+        <p class="lc-note">Only the <strong>differences</strong> from §2.1 are drawn. Everything not shown here
+        runs exactly as in greenfield. <span style="color:#2d6b4a;font-weight:700;">NEW</span> = a stage
+        greenfield does not have. <span style="color:#E07A5F;font-weight:700;">MODE</span> = the same agent,
+        different invocation.</p>
+
+        <!-- pre-stage -->
+        <div class="lc-stage">
+          <div class="lc-stage-hd"><span class="st">B-0</span> Inherited, not re-run <span class="meta">strategy · environments · base fixtures · the pack</span><span class="gate">no QA sign-off — already given</span></div>
+          <div class="lc-agents">
+            <div class="lc-agent" style="flex:1 1 100%;">
+              <div class="band b-in" style="margin-top:0"><b>What is inherited</b><code>test-strategy.md</code> at the PI's approved version · <code>env-manifest.yaml</code> and <code>stub-registry.json</code> <strong>as regenerated at the last cycle close</strong> · <code>synthetic-data.base.json</code> plus every accumulated delta · <code>regression-pack.json</code>, which is now large</div>
+              <div class="band b-gr"><b>The one that matters</b><strong><code>application-baseline.md</code> must be current.</strong> A change that shipped without merging its design deltas has silently invalidated it — and the next change's gap analysis, characterisation pinning and regression selection are <em>all</em> computed against it. <strong>A stale baseline is not untidiness here; it is three later stages confidently computed against fiction</strong></div>
+            </div>
+          </div>
+        </div>
+        <div class="lc-flowline">▼</div>
+
+        <!-- coverage gap -->
+        <div class="lc-stage">
+          <div class="lc-stage-hd"><span class="st">B-1</span> Coverage-gap analysis <span class="meta">every change · before test design</span><span class="gate">brownfield only</span></div>
+          <div class="lc-agents">
+            <div class="lc-agent">
+              <div class="lc-hd">Coverage Reporter <span class="mode">gap mode</span><code>L1-testing-coverage-reporter</code></div>
+              <div class="band b-in"><b>Input</b><strong><code>application-baseline.md</code></strong> — the current built state · <code>regression-pack.json</code> · <code>impact-assessment.md</code> blast radius · <code>conformance-report.md</code> open drift</div>
+              <div class="band b-out"><b>Output</b><code>coverage-gap.json</code> — every behaviour in the blast radius classified <code>GAP</code> or <code>COVERED</code>, each with <code>asserted_by</code> and a <code>why</code>, plus the pins required</div>
+              <div class="band b-kb"><b>KB</b><code>kb-L1-testing-standards</code> · <code>kb-L2-food-regulatory</code></div>
+              <div class="band b-tool"><b>Tools</b><code>tool-L1-confluence-create-page</code></div>
+              <div class="band b-gr"><b>Guardrails</b><code>gr-L1-consistency-check</code> · <code>gr-L1-output-schema-validator</code> · <strong>the analysis records its own <code>caveat</code> field naming the baseline version it was computed against</strong> — an analysis that cannot say what it trusted is not evidence</div>
+            </div>
+          </div>
+        </div>
+        <div class="lc-flowline">▼</div>
+
+        <!-- characterisation -->
+        <div class="lc-stage">
+          <div class="lc-stage-hd"><span class="st">B-2</span> Characterisation pinning <span class="meta">every change · pre-construction</span><span class="gate">qg-L1-characterisation-coverage — BLOCKING</span></div>
+          <div class="lc-agents">
+            <div class="lc-agent">
+              <div class="lc-hd">Characterization Writer <span class="mode new">NEW</span><code>L1-testing-characterization-writer</code></div>
+              <div class="band b-in"><b>Input</b><code>coverage-gap.json</code> · <code>impact-assessment.md</code> · <strong>the existing source</strong> — the one testing agent permitted to read it, because recording what the system does is its entire job</div>
+              <div class="band b-out"><b>Output</b><code>characterization-tests.feature</code> — <strong>green against unmodified code</strong> · pins tagged <code>characterization:suspect</code> with a linked defect where current behaviour is itself wrong</div>
+              <div class="band b-kb"><b>KB</b><code>kb-L1-testing-standards</code></div>
+              <div class="band b-tool"><b>Tools</b><code>tool-L1-github-fetch-file</code></div>
+              <div class="band b-gr"><b>Guardrails</b><code>gr-L1-schema-validator</code> · <code>gr-L1-hallucination-check</code> · <strong>qg-L1-characterisation-coverage — BLOCKING, pre-construction.</strong> A pin breaking other than by design is a <code>characterisation_break</code>, routed to the Feature Owner and <strong>never auto-resolvable by an agent</strong></div>
+            </div>
+            <div class="lc-agent" style="flex:1 1 260px;">
+              <div class="lc-hd" style="background:#7a3418;">Why a wrong behaviour is pinned anyway</div>
+              <div class="band b-gr" style="height:100%"><b>Design rule</b>A pin records what the system <em>does</em>, not what it should. Where current behaviour <strong>is</strong> the defect, the pin is written and tagged <code>characterization:suspect</code> — otherwise the change has no baseline against which to demonstrate it fixed anything, and &ldquo;it works now&rdquo; rests on nobody having written down what &ldquo;before&rdquo; looked like.<br><br><strong>An agent cannot distinguish an accidental fix from an accidental break.</strong> That is why the untagged case blocks and the tagged case is checked against its linked defect.</div>
+            </div>
+          </div>
+        </div>
+        <div class="lc-flowline">▼ &nbsp;T-C and T-D then run as in §2.1, with two additions&nbsp; ▼</div>
+
+        <!-- deltas in T-C/T-D -->
+        <div class="lc-stage">
+          <div class="lc-stage-hd"><span class="st">T-C′ / T-D′</span> What changes inside the shared stages <span class="meta">same agents, extra inputs</span></div>
+          <div class="lc-agents">
+            <div class="lc-agent">
+              <div class="lc-hd">Adversarial Case Writer <span class="mode">+ regression-risk</span><code>L1-testing-adversarial-case-writer</code></div>
+              <div class="band b-in"><b>Added input</b><code>coverage-gap.json</code> · the <strong>drift register</strong> from <code>conformance-report.md</code></div>
+              <div class="band b-out"><b>Added output</b><strong>Regression-risk cases</strong> derived from the impact assessment — the class greenfield has no need for, because there is nothing yet to regress</div>
+              <div class="band b-gr"><b>Guardrails</b>Unchanged. The citation verifier now also accepts a <code>REMEDIATION-*</code> id as a valid citation source</div>
+            </div>
+            <div class="lc-agent">
+              <div class="lc-hd">Synthetic Data Generator <span class="mode">anonymised</span><code>L1-testing-synthetic-data-generator</code></div>
+              <div class="band b-in"><b>Changed input</b><strong>Anonymised production data</strong> rather than generated fixtures, because the shapes that break a live system are not the shapes a generator invents</div>
+              <div class="band b-out"><b>Output</b>Fixture sets that <strong>preserve referential integrity across context boundaries</strong> — anonymisation that breaks a foreign key produces a test that fails for the wrong reason</div>
+              <div class="band b-gr"><b>Guardrails</b><code>gr-L1-pii-detection</code> — <strong>CRITICAL and materially harder here</strong>: the input genuinely contains PII, so the guardrail is verifying a transformation rather than rejecting a source</div>
+            </div>
+            <div class="lc-agent">
+              <div class="lc-hd">Contract Verifier <span class="mode">PROVIDER mode</span><code>L1-testing-contract-verifier</code></div>
+              <div class="band b-in"><b>Changed input</b><strong>Enumerates from the consumers' published pact files</strong>, not from the <code>INT-2</code> register. In brownfield the register records what <em>we</em> published; the pacts record what <em>is being consumed</em>, and where they disagree the pacts are the fact</div>
+              <div class="band b-out"><b>Output</b>Breaking-change list <strong>per consumer</strong>. A <code>contract_break</code> is a <strong>versioning decision, not a code fix</strong>, and it re-opens the integration delta rather than failing the build</div>
+              <div class="band b-gr"><b>Guardrails</b>As greenfield, plus: <strong>the absence of a break is a result that had to be established</strong> and is recorded explicitly rather than omitted. An unregistered contract found here is a <code>CON-4</code> finding in its own right</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sd-section">
+      <h4>2.3 Bugfix — two testing steps, and a mandatory exit</h4>
+      <p style="font-size:11.5px;">Four agents, not eighteen. The track is <strong>defined by what it
+      omits</strong> — no PRD, no elaboration, no impact assessment, no coverage-gap analysis, no
+      characterisation pinning, no delta set, no baseline regeneration. Every one of those omissions rests on a
+      single bet: <strong>the defect is confined to a handful of files inside an existing capability</strong>.
+      So the track's most important element is not a stage at all — it is the test that decides whether the bet
+      still holds, and the exit it takes when it does not.</p>
+
+      <div class="lc">
+        <div class="lc-title">BUGFIX LIFECYCLE <span class="cad">4 AGENTS · 1 MANDATORY EXIT</span></div>
+        <p class="lc-note">A <strong>Task</strong>-level defect produces no cycle folder, no deltas and no
+        baseline regeneration. Forcing those per defect would make the track too expensive to use, and teams
+        would route defects around it — <strong>and a track nobody uses records nothing</strong>.</p>
+
+        <div class="lc-stage">
+          <div class="lc-stage-hd"><span class="st">X-1</span> Reproduction first <span class="meta">before anything else</span><span class="gate">qg-L1-repro-test-validity — BLOCKING boolean</span></div>
+          <div class="lc-agents">
+            <div class="lc-agent">
+              <div class="lc-hd">Case Writer <span class="mode">repro mode</span><code>L1-testing-case-writer</code></div>
+              <div class="band b-in"><b>Input</b>The defect report · the observed vs expected behaviour. <strong>No PRD, no AC, no story</strong></div>
+              <div class="band b-out"><b>Output</b>A failing reproduction test that <strong>fails for the stated reason</strong>, and its <code>case_id</code> — which becomes the fix's <code>verification_ref</code></div>
+              <div class="band b-kb"><b>KB</b><code>kb-L1-testing-standards</code></div>
+              <div class="band b-tool"><b>Tools</b><code>tool-L1-ci-run-suite</code> — the test must be <em>observed</em> failing, not assumed to</div>
+              <div class="band b-gr"><b>Guardrails</b><code>gr-L1-test-immutability</code> · <strong>qg-L1-repro-test-validity — a hard boolean.</strong> A reproduction test that does not fail is not a weak specification, it is <em>no</em> specification</div>
+            </div>
+            <div class="lc-agent" style="flex:1 1 280px;">
+              <div class="lc-hd" style="background:#7a3418;">X-2 · The scope test — the exit</div>
+              <div class="band b-gr" style="height:100%"><b>Three checks, any one ends the track</b>
+                <strong>T2 scope</strong> — confinable to a handful of files inside an existing capability? A migration has no boundary.<br>
+                <strong>Contract change</strong> — does a published contract's shape change, or a live consumer's pact break? That is a versioning decision, and this track has <strong>no stage at which one is made or approved</strong>.<br>
+                <strong>Missing capability</strong> — does the fix need something not <code>AVAILABLE</code>? Provisioning has lead time; discovering it at construction is five stages too late.<br><br>
+                <strong>→ ESCALATE to brownfield.</strong> Suppressing the escalation is this track's one catastrophic failure mode: it produces a change that skipped impact assessment, coverage-gap analysis and characterisation entirely — and nothing about it looks wrong in review.</div>
+            </div>
+          </div>
+        </div>
+        <div class="lc-flowline">▼ &nbsp;if the three checks pass&nbsp; ▼</div>
+
+        <div class="lc-stage">
+          <div class="lc-stage-hd"><span class="st">X-3</span> Select the slice, run it, promote the evidence <span class="meta">the only two testing steps</span><span class="gate">risk:low auto-merges on green</span></div>
+          <div class="lc-agents">
+            <div class="lc-agent">
+              <div class="lc-hd">Risk Selector<code>L1-testing-risk-selector</code></div>
+              <div class="band b-in"><b>Input</b><code>regression-pack.json</code> · the defect's declared <code>scope</code> · <code>dependency-graph.json</code> · commit diff</div>
+              <div class="band b-out"><b>Output</b><code>selection-manifest.json</code> — everything touching <code>scope</code>, everything downstream of it, <strong>and every <code>risk:high</code> case regardless of scope</strong>. The full pack is not run</div>
+              <div class="band b-kb"><b>KB</b><code>kb-L1-testing-standards</code> · <code>kb-L1-enterprise-architecture</code></div>
+              <div class="band b-tool"><b>Tools</b><code>tool-L1-github-fetch-file</code></div>
+              <div class="band b-gr"><b>Guardrails</b><code>gr-L1-consistency-check</code> — <strong>compliance-tagged cases are never excluded by selection, on any track.</strong> A price-formatting fix has no business breaking food-safety validation, but the cost of confirming that is a handful of cases and the cost of not confirming it is a regulatory incident</div>
+            </div>
+            <div class="lc-agent">
+              <div class="lc-hd">Testing Executor<code>L1-testing-executor</code></div>
+              <div class="band b-in"><b>Input</b>The repro test · <code>selection-manifest.json</code> · boundary cases added around the fix</div>
+              <div class="band b-out"><b>Output</b><code>test-execution-report.json</code> — repro green, slice green, no regression</div>
+              <div class="band b-kb"><b>KB</b><code>kb-L1-testing-standards</code></div>
+              <div class="band b-tool"><b>Tools</b><code>tool-L1-ci-run-suite</code> · <code>tool-L1-xray-update-execution</code></div>
+              <div class="band b-gr"><b>Guardrails</b><code>gr-L1-output-schema-validator</code> · <code>gr-L1-pii-detection</code> · <strong><code>gr-L1-test-immutability</code>: the verify agent may <em>never</em> edit the reproduction test to make it pass.</strong> If it cannot be made to pass, it escalates</div>
+            </div>
+            <div class="lc-agent">
+              <div class="lc-hd">Regression Pack Curator <span class="mode">promote</span><code>L1-testing-regression-pack-curator</code></div>
+              <div class="band b-in"><b>Input</b>The reproduction test · its provenance (the defect id) · the boundary cases</div>
+              <div class="band b-out"><b>Output</b>The repro promoted into the pack, tagged <code>polarity:negative</code> with a <code>provenance</code> reference to the defect</div>
+              <div class="band b-kb"><b>KB</b><code>kb-L1-testing-standards</code></div>
+              <div class="band b-tool"><b>Tools</b><code>tool-L1-xray-create-test</code></div>
+              <div class="band b-gr"><b>Guardrails</b><code>gr-L1-output-schema-validator</code> · the pack invariant applies unchanged</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="lc-stage">
+          <div class="lc-stage-hd"><span class="st">X-4</span> The architecture stage <span class="meta">decided mechanically — normally skipped</span></div>
+          <div class="lc-agents">
+            <div class="lc-agent" style="flex:1 1 100%;">
+              <div class="band b-in" style="margin-top:0"><b>Three yes/no questions</b>Did <code>openapi.yaml</code> or an event schema change? &nbsp;·&nbsp; Did a migration appear? &nbsp;·&nbsp; Did IaC / config / alerting change?</div>
+              <div class="band b-out"><b>All three negative →</b>no architecture delta, no baseline regeneration, <strong>no cycle folder</strong>. The absence <em>is</em> the record of the decision</div>
+              <div class="band b-gr"><b>Why mechanical and not a judgement</b>A judgement call here is answered differently under deadline pressure than on a quiet Tuesday. <strong>Three questions about files that either changed or did not are answered the same way on both days.</strong></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="guidance warn">
+        <p><strong>Step 8 — promoting the reproduction test — is the step that pays for this track.</strong>
+        A defect that happened once is the best evidence you will ever get about where this system is fragile,
+        and the reproduction test is that evidence in executable form. Without promotion it lives only in the fix
+        commit and protects nothing after the branch merges — which is exactly how the same defect class returns
+        two quarters later in a neighbouring code path.</p>
+      </div>
+    </div>
+
+    <!-- 3 -->
+    <div class="sd-section">
+      <h3>3. Agent Specifications</h3>
+      <p class="section-desc">Full cards for the seven agents whose design decisions are load-bearing. The remaining twelve are specified in the same shape in <code>agents/&lt;id&gt;/spec.yaml</code>; §2 gives their inputs, outputs, KBs, tools and guardrails, which is the reviewable surface.</p>
+
+      <div class="agent-spec-card">
+        <h4>Agent 1: Test Strategy Architect — LLM</h4>
+        <div class="spec-row"><span class="spec-label">Role:</span><span class="spec-value">Settle the testing regime for a whole PI — tiers, criteria, targets, topology, governance. <strong>Authors no test cases.</strong></span></div>
+        <div class="spec-row"><span class="spec-label">Input:</span><span class="spec-value"><code>prd.md</code>, <code>nfr_classifications</code>, <code>roadmap.md</code>, and the four Cycle 0 viewpoint documents. Never <code>hld.md</code> — it does not exist at this point.</span></div>
+        <div class="spec-row"><span class="spec-label">Output:</span><span class="spec-value"><code>test-strategy.md</code> — fields: <code>tiers[]</code>, <code>entry_exit[tier]</code>, <code>coverage_targets</code>, <code>tooling</code>, <code>env_topology</code>, <code>nfr_approach</code>, <code>pack_governance{flake_threshold, staleness_ceiling, runtime_budget_per_tier}</code>.</span></div>
+        <div class="spec-row"><span class="spec-label">Knowledge Bases:</span><span class="spec-value"><code>kb-L1-testing-standards</code> (~6k) · <code>kb-L1-enterprise-architecture</code> (~8k) · <code>kb-L2-food-regulatory</code> (~5k)</span></div>
+        <div class="spec-row"><span class="spec-label">Prompt Strategy:</span><span class="spec-value">CoT with structured-JSON output for the governance block, prose for the rationale sections. Few-shot with 2 prior approved strategies.</span></div>
+        <div class="spec-row"><span class="spec-label">Model:</span><span class="spec-value"><strong>Claude Opus 5</strong> — runs once per PI and its output constrains 18 agents for months; the highest-leverage, lowest-frequency decision in the workflow.</span></div>
+        <div class="spec-row"><span class="spec-label">Token Budget:</span><span class="spec-value">Instructions 3k + KB 19k + Input 14k + Output 6k = <strong>42k · 21% of 200k</strong></span></div>
+        <div class="spec-row"><span class="spec-label">Temperature:</span><span class="spec-value">0.2 — policy authoring; consistency across revisions matters more than variety.</span></div>
+        <div class="spec-row"><span class="spec-label">Inline Quality Gates:</span><span class="spec-value">Every tier must declare entry <em>and</em> exit criteria; every governance threshold must be a number. A prose threshold fails schema validation.</span></div>
+        <div class="spec-row"><span class="spec-label">Error Handling:</span><span class="spec-value">Schema failure → one retry with the validator output appended. Second failure → <strong>halt the PI's testing setup and route to the QA Expert</strong>. There is no safe default strategy; guessing one would silently constrain every later agent.</span></div>
+      </div>
+
+      <div class="agent-spec-card">
+        <h4>Agent 2: Adversarial Case Writer — LLM</h4>
+        <div class="spec-row"><span class="spec-label">Role:</span><span class="spec-value">Generate the failure modes acceptance criteria do not describe — negative, boundary, abuse and NFR — by reading the architecture rules directly.</span></div>
+        <div class="spec-row"><span class="spec-label">Input:</span><span class="spec-value"><code>test-scenarios.md</code>, <code>nfr_classifications</code>, regulatory posture, <code>impact-assessment.md</code>, and <code>APP-3 INV-*</code> / <code>CON-*</code> / <code>SEC-*</code> / <code>REQ-*</code> read live from the canonical documents. Brownfield adds <code>coverage-gap.json</code> and the drift register.</span></div>
+        <div class="spec-row"><span class="spec-label">Output:</span><span class="spec-value"><code>test-scenarios.adversarial.md</code> — each entry: <code>{id, polarity, derived_from, rule_citation, tier_hint, risk}</code>. <code>rule_citation</code> is mandatory.</span></div>
+        <div class="spec-row"><span class="spec-label">Knowledge Bases:</span><span class="spec-value"><code>kb-L1-testing-standards</code> (~6k) · <code>kb-L1-enterprise-security</code> (~7k) · <code>kb-L2-food-regulatory</code> (~5k)</span></div>
+        <div class="spec-row"><span class="spec-label">Prompt Strategy:</span><span class="spec-value">CoT, structured JSON. Few-shot with 4 examples chosen to demonstrate the <em>invariant-vs-validation</em> distinction, which is the error this agent exists to prevent.</span></div>
+        <div class="spec-row"><span class="spec-label">Model:</span><span class="spec-value"><strong>Claude Opus 5</strong> — accuracy-critical. A missed compliance failure mode is not caught downstream by anything; it simply never gets tested.</span></div>
+        <div class="spec-row"><span class="spec-label">Token Budget:</span><span class="spec-value">Instructions 4k + KB 18k + Input 22k + Output 9k = <strong>53k · 27% of 200k</strong></span></div>
+        <div class="spec-row"><span class="spec-label">Temperature:</span><span class="spec-value">0.6 — deliberately higher than any other agent. Adversarial generation is the one place in this workflow where coverage of the unexpected beats determinism.</span></div>
+        <div class="spec-row"><span class="spec-label">Inline Quality Gates:</span><span class="spec-value"><strong>At least one adversarial case per compliance-tagged AC clause.</strong> Shortfall is a hard fail, not a warning.</span></div>
+        <div class="spec-row"><span class="spec-label">Error Handling:</span><span class="spec-value">A case citing a rule that does not exist is dropped by <code>gr-L1-hallucination-check</code> and logged with the fabricated citation. If more than 20% are dropped, the whole output is rejected and routed to the QA Expert — a high fabrication rate means the KBs are stale, and no retry fixes that.</span></div>
+      </div>
+
+      <div class="agent-spec-card">
+        <h4>Agent 3: Case Writer — LLM · <em>the only agent permitted to amend a case</em></h4>
+        <div class="spec-row"><span class="spec-label">Role:</span><span class="spec-value">Convert both scenario sets into executable Gherkin and mint the stable <code>case_id</code>s that Work Units bind as <code>verification_ref</code>.</span></div>
+        <div class="spec-row"><span class="spec-label">Input:</span><span class="spec-value"><code>test-scenarios.md</code> + <code>test-scenarios.adversarial.md</code> + feature AC. On the rework path: <code>triage-verdict.json</code> with a <code>test_defect</code> verdict.</span></div>
+        <div class="spec-row"><span class="spec-label">Output:</span><span class="spec-value"><code>test-cases.feature</code> · <code>case-index.json</code> — <code>{case_id, title, tier, polarity, risk, ac_ref, provenance}</code>. <code>case_id</code> is immutable once minted.</span></div>
+        <div class="spec-row"><span class="spec-label">Knowledge Bases:</span><span class="spec-value"><code>kb-L1-testing-standards</code> (~6k)</span></div>
+        <div class="spec-row"><span class="spec-label">Prompt Strategy:</span><span class="spec-value">Few-shot (6 Gherkin exemplars), structured output. Zero CoT — this is transcription with identity assignment, not reasoning.</span></div>
+        <div class="spec-row"><span class="spec-label">Model:</span><span class="spec-value"><strong>Claude Sonnet 5</strong> — high volume, mechanical transformation, no judgement call that Opus would make better.</span></div>
+        <div class="spec-row"><span class="spec-label">Token Budget:</span><span class="spec-value">Instructions 3k + KB 6k + Input 18k + Output 14k = <strong>41k · 21% of 200k</strong></span></div>
+        <div class="spec-row"><span class="spec-label">Temperature:</span><span class="spec-value">0.1 — near-deterministic. Two runs over the same scenarios must produce the same cases.</span></div>
+        <div class="spec-row"><span class="spec-label">Inline Quality Gates:</span><span class="spec-value"><code>qg-L1-test-case-ac-coverage ≥8</code> — every AC clause maps to at least one case.</span></div>
+        <div class="spec-row"><span class="spec-label">Error Handling:</span><span class="spec-value">An amendment without a cited AC clause is rejected by <code>gr-L1-test-immutability</code> before it is written. <strong>A characterisation pin can never be amended by this path at all</strong> — an agent cannot distinguish an accidental fix from an accidental break.</span></div>
+      </div>
+
+      <div class="agent-spec-card">
+        <h4>Agent 4: Contract Resolver — <strong>code-only</strong> · <em>runs immediately before the script generator</em></h4>
+        <div class="spec-row"><span class="spec-label">Role:</span><span class="spec-value">Compose the <strong>resolved contract view</strong> that T-D generates against, and refuse to compose it when the base has moved.</span></div>
+        <div class="spec-row"><span class="spec-label">Input:</span><span class="spec-value">The cycle's <code>openapi-&lt;svc&gt;.delta.yaml</code> (carrying <code>target_document</code> and <code>from_version</code>) and the canonical <code>services/&lt;svc&gt;/openapi.yaml</code> read at that exact version.</span></div>
+        <div class="spec-row"><span class="spec-label">Output:</span><span class="spec-value"><code>&lt;cycle&gt;/resolved/openapi-&lt;svc&gt;.resolved.yaml</code>, headed <code>GENERATED — NOT A SOURCE OF TRUTH</code> with its provenance and the versions it composed. Three resolution shapes: <strong>creating</strong> (<code>from_version: null</code> → the delta <em>is</em> the contract), <strong>extending</strong> (base ⊕ new paths), <strong>modifying</strong> (overlay at operation level — not concatenation).</span></div>
+        <div class="spec-row"><span class="spec-label">Knowledge Bases:</span><span class="spec-value"><strong>N/A (code-only agent)</strong></span></div>
+        <div class="spec-row"><span class="spec-label">Prompt Strategy:</span><span class="spec-value"><strong>N/A (code-only agent)</strong></span></div>
+        <div class="spec-row"><span class="spec-label">Model:</span><span class="spec-value"><strong>N/A (code-only agent) — and this is the design decision, not an omission.</strong> A YAML overlay is deterministic. Handing it to a model would (a) let it invent an endpoint that is in neither the base nor the delta, (b) turn a hard <code>from_version</code> boolean into a judgement a model can be argued out of, and (c) double the script generator's input by passing both halves in. <strong>Composition is arithmetic; only the code that does it can be trusted to be exact.</strong></span></div>
+        <div class="spec-row"><span class="spec-label">Token Budget:</span><span class="spec-value"><strong>N/A (code-only agent).</strong> It <em>reduces</em> the script generator's budget by handing over one composed document instead of two.</span></div>
+        <div class="spec-row"><span class="spec-label">Temperature:</span><span class="spec-value"><strong>N/A (code-only agent)</strong></span></div>
+        <div class="spec-row"><span class="spec-label">Inline Quality Gates:</span><span class="spec-value"><code>gr-L1-from-version-match</code> — <strong>BLOCKING</strong>. The result must also parse as valid OpenAPI; an overlay that produces a duplicate path key or an invalid operation fails here, not three stages later in a script that will not run.</span></div>
+        <div class="spec-row"><span class="spec-label">Error Handling:</span><span class="spec-value"><strong>Refusal is the designed outcome, not an exception.</strong> A <code>from_version</code> mismatch emits <code>resolution-refused.json</code> naming the declared version, the actual version and the cycle that moved it, and routes to the Feature Owner: <em>&ldquo;this cycle was authored against an architecture that has since changed.&rdquo;</em> <strong>It surfaces on Day 2, where re-authoring a delta is cheap, rather than at merge on Day 5, where it is a conflict.</strong> There is no fallback and no retry — composing against the wrong base is worse than not composing at all.</span></div>
+        <p style="font-size:10.5px;color:#7a8a9a;margin:8px 0 0;">Why this is a separate agent rather than a step inside the script generator: the resolved view has <strong>a second consumer</strong>. Brownfield provider-mode contract verification needs the base half to establish what a consumer is entitled to today, and reusing one resolver keeps both stages composing the same way from the same inputs.</p>
+      </div>
+
+      <div class="agent-spec-card">
+        <h4>Agent 5: Script Generator — LLM</h4>
+        <div class="spec-row"><span class="spec-label">Role:</span><span class="spec-value">Turn cases into executable automation against a contract that <strong>has not been merged yet</strong>.</span></div>
+        <div class="spec-row"><span class="spec-label">Input:</span><span class="spec-value"><code>test-cases.feature</code>; <code>openapi-&lt;svc&gt;.resolved.yaml</code> <strong>as handed over by <code>contract-resolver</code></strong>; <code>wireframes.md</code>; <code>stub-registry.json</code>. <strong>It never sees the delta or the base separately, so it cannot compose them differently.</strong></span></div>
+        <div class="spec-row"><span class="spec-label">Output:</span><span class="spec-value">Playwright / REST Assured source, one file per tier, every test annotated with its <code>case_id</code>.</span></div>
+        <div class="spec-row"><span class="spec-label">Knowledge Bases:</span><span class="spec-value"><code>kb-L1-testing-standards</code> (~6k)</span></div>
+        <div class="spec-row"><span class="spec-label">Prompt Strategy:</span><span class="spec-value">Few-shot (3 per framework), structured file output. <strong>The resolved view arrives pre-composed</strong> — the model performs no merging.</span></div>
+        <div class="spec-row"><span class="spec-label">Model:</span><span class="spec-value"><strong>Claude Sonnet 5</strong> — code generation against a known contract and known selectors; cost-sensitive at this volume.</span></div>
+        <div class="spec-row"><span class="spec-label">Token Budget:</span><span class="spec-value">Instructions 4k + KB 6k + Input 26k + Output 20k = <strong>56k · 28% of 200k</strong>. The resolved view is the largest input and grows with the service; if it exceeds ~40k, scope the view to the paths this cycle's cases actually call.</span></div>
+        <div class="spec-row"><span class="spec-label">Temperature:</span><span class="spec-value">0.1 — generated code must be stable across runs so review diffs stay meaningful.</span></div>
+        <div class="spec-row"><span class="spec-label">Inline Quality Gates:</span><span class="spec-value">Every emitted test carries a resolvable <code>case_id</code>; every referenced endpoint exists in the resolved view.</span></div>
+        <div class="spec-row"><span class="spec-label">Error Handling:</span><span class="spec-value">This agent never reaches invalid input: <code>contract-resolver</code> has already refused a moved base and rejected an unparseable overlay. Its own failure mode is a script that does not compile — caught by the executability check, retried once with the compiler output, then routed to the QA Expert.</span></div>
+      </div>
+
+      <div class="agent-spec-card">
+        <h4>Agent 6: Defect Triager — LLM · <em>the agent that makes the loop terminate</em></h4>
+        <div class="spec-row"><span class="spec-label">Role:</span><span class="spec-value">Independently classify every failure and route it. Exists so that a construction agent handed a red suite cannot take its one cheap move — weakening the assertion.</span></div>
+        <div class="spec-row"><span class="spec-label">Input:</span><span class="spec-value"><code>test-execution-report.json</code> failures, the implicated source fetched on demand, <code>case-index.json</code>.</span></div>
+        <div class="spec-row"><span class="spec-label">Output:</span><span class="spec-value"><code>triage-verdict.json</code> — <code>{case_id, verdict, target_agent, rationale, ac_citation?}</code>. Verdicts: <code>code_defect</code> · <code>test_defect</code> · <code>data_defect</code> · <code>env_defect</code> · <code>flake</code>.</span></div>
+        <div class="spec-row"><span class="spec-label">Knowledge Bases:</span><span class="spec-value"><code>kb-L1-testing-standards</code> (~6k)</span></div>
+        <div class="spec-row"><span class="spec-label">Prompt Strategy:</span><span class="spec-value">CoT with a forced rationale field, structured JSON. Few-shot with 5 examples, at least one per verdict class.</span></div>
+        <div class="spec-row"><span class="spec-label">Model:</span><span class="spec-value"><strong>Claude Opus 5</strong> — the verdict decides whether code or the test changes. A wrong <code>test_defect</code> erodes the oracle permanently, so this is the most consequential classification in the workflow.</span></div>
+        <div class="spec-row"><span class="spec-label">Token Budget:</span><span class="spec-value">Instructions 4k + KB 6k + Input 30k + Output 4k = <strong>44k · 22% of 200k</strong></span></div>
+        <div class="spec-row"><span class="spec-label">Temperature:</span><span class="spec-value">0.0 — a classifier. The same failure must always produce the same verdict, otherwise triage cannot be audited.</span></div>
+        <div class="spec-row"><span class="spec-label">Inline Quality Gates:</span><span class="spec-value">A <code>test_defect</code> verdict without an <code>ac_citation</code> is invalid on its face and rejected before routing.</span></div>
+        <div class="spec-row"><span class="spec-label">Error Handling:</span><span class="spec-value">Three consecutive triage passes on the same <code>case_id</code> without the suite going green → <strong>escalate to the Feature Owner</strong>. Oscillation is the failure mode; the counter is what stops it. <code>characterisation_break</code> is never auto-resolved at all.</span></div>
+      </div>
+
+      <div class="agent-spec-card">
+        <h4>Agent 7: Regression Pack Curator — LLM + code · <em>sole writer of the pack</em></h4>
+        <div class="spec-row"><span class="spec-label">Role:</span><span class="spec-value">The single writer of <code>regression-pack.json</code> for the life of the product — init, promote, curate. Written by exactly one agent so promotion, re-tiering and retirement are auditable in one place.</span></div>
+        <div class="spec-row"><span class="spec-label">Input:</span><span class="spec-value">Cycle cases + execution history + existing pack + governance rules. Curate mode additionally reads flake signals from <code>triage-verdict.json</code>.</span></div>
+        <div class="spec-row"><span class="spec-label">Output:</span><span class="spec-value"><code>regression-pack.json</code>, XRay test-set updates, <code>pack-changelog.md</code> with one entry per cycle.</span></div>
+        <div class="spec-row"><span class="spec-label">Knowledge Bases:</span><span class="spec-value"><code>kb-L1-testing-standards</code> (~6k)</span></div>
+        <div class="spec-row"><span class="spec-label">Prompt Strategy:</span><span class="spec-value">Structured JSON. Deduplication and tiering are LLM judgements; retirement and quarantine are <strong>code-only rule applications</strong> against the thresholds — a model must not be able to decide to drop a case.</span></div>
+        <div class="spec-row"><span class="spec-label">Model:</span><span class="spec-value"><strong>Claude Sonnet 5</strong> for the judgement half; the enforcement half has no model.</span></div>
+        <div class="spec-row"><span class="spec-label">Token Budget:</span><span class="spec-value">Instructions 3k + KB 6k + Input 24k + Output 10k = <strong>43k · 22% of 200k</strong>. Input is capped by passing pack <em>summaries</em> plus the cycle's cases, never the whole pack.</span></div>
+        <div class="spec-row"><span class="spec-label">Temperature:</span><span class="spec-value">0.1</span></div>
+        <div class="spec-row"><span class="spec-label">Inline Quality Gates:</span><span class="spec-value"><strong>The pack invariant:</strong> a case may leave only with a non-empty <code>superseded_by</code> or an explicit <code>retirement_rationale</code> — which is what stops the pack being quietly trimmed to make a red board green. <code>qg-L1-regression-pack-health ≥7</code>.</span></div>
+        <div class="spec-row"><span class="spec-label">Error Handling:</span><span class="spec-value">A proposed removal failing the invariant is refused and the case stays. <strong>The pack is never left in a partially written state</strong> — writes are transactional, because a half-curated pack is worse than a stale one.</span></div>
+      </div>
+    </div>
+
+    <!-- 4 -->
+    <div class="sd-section">
+      <h3>4. Knowledge Bases &amp; Guardrails</h3>
+      <p class="section-desc">What each agent is <em>given</em>, and what each agent is <em>prevented from doing</em>. The two tables are deliberately adjacent: a knowledge base shapes an agent's judgement, a guardrail bounds it, and a design that specifies one without the other has only described half of any agent.</p>
+
+      <h4>4.1 Knowledge Bases</h4>
+      <p class="section-desc">Purpose-specific micro-KBs, each loaded only by the agents that need it. A KB used by every agent is usually a sign it belongs in the instructions instead.</p>
+      <table class="sd-table">
+        <tr><th style="width:190px;">KB Name</th><th>Content — and what it deliberately excludes</th><th style="width:70px;">Size</th><th style="width:200px;">Used By</th><th style="width:140px;">Update Frequency</th></tr>
+        <tr><td><code>kb-L1-testing-standards</code></td><td>Tier definitions, Gherkin house style, tagging taxonomy, flake and staleness policy, naming rules. <strong>Excludes</strong> anything project-specific — that lives in <code>test-strategy.md</code>, which is an artifact, not a KB.</td><td>~6k</td><td><strong>14 of 18 agents</strong> — the one genuinely shared KB</td><td>On standards change; quarterly review</td></tr>
+        <tr><td><code>kb-L1-enterprise-architecture</code></td><td>Viewpoint section-ID spine (<code>APP-*</code>, <code>DAT-*</code>, <code>INT-*</code>, <code>PLT-*</code>, <code>CON-*</code>), delta semantics, what <em>declared</em> vs <em>realised</em> means. <strong>Excludes</strong> the project's actual architecture — that is read live, not cached.</td><td>~8k</td><td><code>strategy-architect</code> · <code>env-provisioner</code> · <code>contract-verifier</code> · <code>integration-orchestrator</code> · <code>risk-selector</code></td><td>On regime change only</td></tr>
+        <tr><td><code>kb-L1-enterprise-security</code></td><td>Abuse-case catalogue, trust-boundary probe patterns, OWASP mapping, auth failure modes.</td><td>~7k</td><td><code>adversarial-case-writer</code> · <code>nfr-suite-generator</code></td><td>On threat-model revision</td></tr>
+        <tr><td><code>kb-L2-food-regulatory</code></td><td>The regulatory obligations that make a case <code>risk:high</code> — retention, erasure override, audit reconstructability, evidenced delivery.</td><td>~5k</td><td><code>strategy-architect</code> · <code>adversarial-case-writer</code> · <code>coverage-reporter</code> · <code>release-orchestrator</code></td><td>On regulatory change — <strong>owner named, not the QE team</strong></td></tr>
+        <tr><td><code>kb-L2-food-domain-model</code></td><td>Domain vocabulary and process facts a scenario writer needs to phrase a scenario in the business's own words.</td><td>~4k</td><td><code>scenario-writer</code></td><td>On domain model change</td></tr>
+        <tr><td><code>kb-L1-nfr-classification-taxonomy</code></td><td>NFR categories and the measurement approach each implies.</td><td>~3k</td><td><code>nfr-suite-generator</code></td><td>Rarely</td></tr>
+        <tr><td><code>kb-L3-e2e-testing-triage-examples</code></td><td><strong>Evaluation-only.</strong> 120 historically labelled failures, one set per verdict class, used to score triage precision.</td><td>~11k</td><td><strong>Evaluation only — never loaded at runtime</strong></td><td>Appended as new labelled failures accumulate</td></tr>
+      </table>
+      <div class="guidance">
+        <p><strong>The architecture itself is deliberately not a knowledge base.</strong> <code>APP-3</code>
+        invariants, <code>CON-*</code> constraints and <code>REQ-*</code> budgets are <em>read live from the
+        canonical documents</em> at every invocation. A cached copy would have been correct at cycle entry and
+        wrong by mid-cycle — in the reference implementation a new cross-viewpoint constraint was added
+        <em>during</em> a cycle, and the cases it forces are meaningless before it and mandatory after.
+        <strong>A KB caches things that change on a quarterly clock; the architecture changes on a daily one.</strong></p>
+      </div>
+
+      <h4 style="margin-top:22px">4.2 Guardrails</h4>
+      <p class="section-desc">Purpose-specific controls, each bound to the agents whose particular failure mode it addresses. A guardrail applied to every agent is usually a sign it belongs in the platform runtime instead — and a guardrail that only ever warns is documentation, not a control.</p>
+      <table class="sd-table">
+        <tr><th style="width:180px;">Guardrail</th><th>What it enforces — and what it deliberately does <em>not</em></th><th style="width:86px;">Mode</th><th style="width:180px;">Applied to</th><th style="width:200px;">On trip</th></tr>
+
+        <tr style="background:#fdeeea;">
+          <td><code>gr-L1-pii-detection</code></td>
+          <td>No real personal data in a generated fixture, a captured log or a screenshot. <strong>Does not</strong> judge whether the data is <em>needed</em> — classification is <code>DAT-3</code>'s job, and this guardrail only enforces the answer.</td>
+          <td><strong>CRITICAL<br>BLOCKING</strong></td>
+          <td><code>synthetic-data-generator</code> (base + delta) · <code>testing-executor</code></td>
+          <td>Build blocked outright. <strong>Not a warning and not overridable in-flight</strong> — a suppression is a Data Protection decision, not an engineering one.</td>
+        </tr>
+
+        <tr style="background:#fdeeea;">
+          <td><code>gr-L1-test-immutability</code></td>
+          <td>No agent may weaken or edit a case to make it pass. A <code>test_defect</code> amendment must cite the AC clause the case contradicts. <strong>Does not</strong> prevent a human from changing a case — it prevents an <em>agent</em> from doing so unaccountably.</td>
+          <td><strong>BLOCKING</strong></td>
+          <td><code>case-writer</code> · <code>defect-triager</code> · <code>testing-executor</code></td>
+          <td>Uncited amendment rejected before it is written. <strong>A characterisation pin can never be amended by this path at all.</strong></td>
+        </tr>
+
+        <tr style="background:#fdeeea;">
+          <td><code>gr-L1-verification-ref-resolvable</code></td>
+          <td>No Work Unit is emitted whose <code>verification_ref</code> does not resolve to a live <code>case_id</code>. <strong>Does not</strong> check that the case is <em>good</em> — only that it exists, which is what turns the reference from a hopeful string into an enforceable foreign key.</td>
+          <td><strong>BLOCKING</strong></td>
+          <td><code>task-generator</code>, consuming <code>case-index.json</code></td>
+          <td>Work Unit generation halts — loudly, and at the earliest point the error can exist.</td>
+        </tr>
+
+        <tr style="background:#fdeeea;">
+          <td><code>gr-L1-from-version-match</code></td>
+          <td>A contract delta may only be composed against the exact canonical version it declares. <strong>Does not</strong> attempt a merge, a rebase or a best-effort reconciliation — there is no safe way to guess.</td>
+          <td><strong>BLOCKING</strong></td>
+          <td><code>contract-resolver</code></td>
+          <td>Resolution <strong>refused</strong>; <code>resolution-refused.json</code> → Feature Owner. Surfaces on Day 2, not at merge.</td>
+        </tr>
+
+        <tr>
+          <td><code>gr-L1-citation-verifier</code></td>
+          <td>Every scenario cites an AC clause; every adversarial case cites the rule it derives from. <strong>Does not</strong> assess whether the citation is <em>apt</em> — only that the cited section exists and says what is claimed.</td>
+          <td>Reject-and-log</td>
+          <td><code>scenario-writer</code> · <code>adversarial-case-writer</code></td>
+          <td>The individual case is dropped and the invalid citation logged. <strong>Above 20% dropped, the whole output is rejected</strong> — that rate means the KBs are stale, and no retry fixes that.</td>
+        </tr>
+
+        <tr>
+          <td><code>gr-L1-hallucination-check</code></td>
+          <td>An asserted rule, endpoint or behaviour must exist in a named source. The structural backstop against <strong>an agent talked into inventing a requirement</strong> by text that arrived in its context.</td>
+          <td>Reject-and-log</td>
+          <td><code>adversarial-case-writer</code> · <code>characterization-writer</code></td>
+          <td>Fabricated item dropped with its claimed source recorded, so the pattern stays visible across runs.</td>
+        </tr>
+
+        <tr>
+          <td><code>gr-L1-secret-scanner</code></td>
+          <td>No live credential in an environment manifest, a generated script or a DAST configuration. <strong>Does not</strong> manage secrets — it asserts that this workflow never became a place one was written down.</td>
+          <td><strong>BLOCKING</strong></td>
+          <td><code>env-provisioner</code> · <code>script-generator</code> · <code>nfr-suite-generator</code></td>
+          <td>Artifact rejected before it reaches the repository or the runner.</td>
+        </tr>
+
+        <tr>
+          <td><code>gr-L1-schema-validator</code></td>
+          <td>An emitted <em>artifact</em> conforms to its declared schema — a resolved OpenAPI view parses, a feature file is valid Gherkin, a manifest is well-formed.</td>
+          <td>Retry-once</td>
+          <td><code>env-provisioner</code> · <code>case-writer</code> · <code>characterization-writer</code> · <code>contract-resolver</code> · <code>script-generator</code> · <code>contract-verifier</code> · <code>nfr-suite-generator</code></td>
+          <td>One retry with the validator output appended; a second failure routes to the QA Expert.</td>
+        </tr>
+
+        <tr>
+          <td><code>gr-L1-output-schema-validator</code></td>
+          <td>An agent's <em>structured response</em> matches its <code>output_schema.json</code> — the fields the next agent will read. Distinct from the row above: one validates the product, this validates the handover.</td>
+          <td>Retry-once</td>
+          <td><code>strategy-architect</code> · <code>pack-curator</code> · <code>testing-xray-orchestrator</code> · <code>testing-executor</code> · <code>risk-selector</code> · <code>coverage-reporter</code> · <code>integration-orchestrator</code> · <code>release-orchestrator</code></td>
+          <td>One retry, then the stage halts rather than passing a malformed payload downstream.</td>
+        </tr>
+
+        <tr>
+          <td><code>gr-L1-consistency-check</code></td>
+          <td>Cross-artifact agreement: no coverage regression without <code>superseded_by</code>; the staleness ceiling honoured by selection; a verdict that does not contradict the report it came from. <strong>The one guardrail that reads more than one artifact at a time.</strong></td>
+          <td>Reject</td>
+          <td><code>strategy-architect</code> · <code>scenario-writer</code> · <code>defect-triager</code> · <code>contract-verifier</code> · <code>pack-curator</code> · <code>risk-selector</code> · <code>coverage-reporter</code> · <code>integration-orchestrator</code> · <code>release-orchestrator</code></td>
+          <td>The offending change is refused and the prior state stands. <strong>The pack is never left partially written</strong> — a half-curated pack is worse than a stale one.</td>
+        </tr>
+      </table>
+
+      <h4 style="margin-top:22px">4.3 Quality gates — and why they are not guardrails</h4>
+      <p class="section-desc">A guardrail runs on <strong>every invocation</strong> and asks <em>is this output legitimate?</em> A quality gate runs at a <strong>stage boundary</strong> and asks <em>is this stage finished?</em> Conflating them produces either a gate nobody can pass or a guardrail nobody notices.</p>
+      <table class="sd-table">
+        <tr><th style="width:230px;">Quality gate</th><th>Asserts</th><th style="width:140px;">Fires at</th><th style="width:160px;">Scenario</th></tr>
+        <tr><td><code>qg-L1-test-strategy-quality ≥7</code></td><td>Every tier declares entry <em>and</em> exit criteria; every governance threshold is a number, not prose</td><td>End of T-A</td><td>Greenfield only</td></tr>
+        <tr><td><code>qg-L1-test-case-ac-coverage ≥8</code></td><td>Every AC clause maps to ≥1 case, and every compliance-tagged clause to ≥1 <em>adversarial</em> case</td><td>End of T-C</td><td>Greenfield · Brownfield</td></tr>
+        <tr style="background:#fdeeea;"><td><code>qg-L1-verification-ref-integrity 100%</code></td><td>Every Work Unit's verifier exists</td><td>T-C → decomposition</td><td>Greenfield · Brownfield</td></tr>
+        <tr style="background:#fdeeea;"><td><code>qg-L1-characterisation-coverage</code></td><td>Every <code>GAP</code> behaviour in the blast radius is pinned, green against unmodified code</td><td><strong>Pre-construction</strong></td><td><strong>Brownfield only</strong></td></tr>
+        <tr style="background:#fdeeea;"><td><code>qg-L1-repro-test-validity</code></td><td>The reproduction test <strong>fails, for the stated reason</strong>. A hard boolean — a repro that does not fail is not a weak spec, it is no spec</td><td>Before triage</td><td><strong>Bugfix only</strong></td></tr>
+        <tr style="background:#fdeeea;"><td><code>qg-L1-feature-test-pass 100%</code></td><td>The feature's own pack is green</td><td>Feature exit</td><td>All three</td></tr>
+        <tr style="background:#fdeeea;"><td><code>qg-L1-contract-conformance 100%</code></td><td>The running service matches every published pact — <strong>this is what proves the resolved view T-D generated against</strong></td><td>Feature exit</td><td>Greenfield · Brownfield</td></tr>
+        <tr><td><code>qg-L1-regression-pack-health ≥7</code></td><td>Flake rate, staleness and runtime are inside the governance envelope</td><td>Cadence beat</td><td>All three</td></tr>
+        <tr><td><code>qg-L1-release-readiness ≥8</code></td><td>Evidence assembled, residual risk stated, blockers named — <strong>👤 the ship decision stays human</strong></td><td>Release</td><td>All three</td></tr>
+      </table>
+
+      <div class="guidance">
+        <p><strong>The strongest guardrails in this design constrain what an agent may <em>read</em>, not what it
+        may write.</strong> <code>scenario-writer</code> and <code>adversarial-case-writer</code> are denied the
+        source, the contract and the HLD; <code>case-writer</code> is denied everything except the scenarios;
+        <code>script-generator</code> is denied the base and the delta separately and handed only the composed
+        view. None of these are output filters — they are <strong>enforced by the context assembler</strong>,
+        which builds each agent's prompt from an allow-list declared in its <code>spec.yaml</code>.</p>
+        <p style="margin-top:8px"><strong>This matters because an output check can only catch a mistake that is
+        visible in the output.</strong> A scenario derived from <code>openapi.yaml</code> looks perfectly
+        well-formed: it cites a real endpoint, it passes schema validation, and it is <em>useless</em>, because
+        it can only assert what the implementation already claims. No downstream guardrail can detect that. The
+        only reliable control is to never put the contract in that agent's context — <strong>and denial is the
+        one control that cannot be argued around by text arriving inside the context it governs.</strong></p>
+      </div>
+
+      <div class="guidance warn">
+        <p><strong>Two guardrails exist specifically because this is an <em>agentic</em> system, and would be
+        unnecessary in a human process.</strong> <code>gr-L1-test-immutability</code> exists because an agent
+        handed a red suite has exactly one cheap move — weaken the assertion — and unlike a person it feels no
+        professional discomfort in taking it. The <strong>pack invariant</strong> inside
+        <code>gr-L1-consistency-check</code> exists for the same reason at the other end: a case may leave the
+        pack only with a <code>superseded_by</code> or a named <code>retirement_rationale</code>, which is what
+        stops the pack being quietly trimmed to make a red board green. <strong>Both defend the oracle against
+        the system that is supposed to be serving it.</strong></p>
+      </div>
+    </div>
+
+    <!-- 5 -->
+    <div class="sd-section">
+      <h3>5. Data Flow</h3>
+      <p class="section-desc">One item traced end to end per scenario, naming the artifact that passes between each stage. Every branch terminates somewhere — a happy path, a human, or a dead letter.</p>
+
+      <div class="df-key">
+        <span class="n-agent">AGENT</span>
+        <span class="n-art">ARTIFACT</span>
+        <span class="n-gate">GATE / GUARDRAIL</span>
+        <span class="n-human">HUMAN</span>
+        <span class="n-ok">TERMINAL — OK</span>
+        <span class="n-stop">TERMINAL — STOP</span>
+        <span class="n-ext">EXTERNAL SYSTEM</span>
+      </div>
+
+      <!-- ============ GREENFIELD ============ -->
+      <div class="df">
+        <div class="df-h">5.1 GREENFIELD — one feature, Day 1 to Day 5 <span class="tag">ALL FOUR TIERS AT FULL WEIGHT</span></div>
+
+        <div class="df-row"><div class="df-n n-ext"><b>feature-cycle-planner</b><span>emits <code>cycle.committed</code></span></div></div>
+        <div class="df-v">▼</div>
+
+        <div class="df-row">
+          <div class="df-n n-agent"><b>scenario-writer</b><code>AC · PRD · APP-3 INV-*</code></div>
+          <div class="df-a">→</div><div class="df-n n-art"><b>test-scenarios.md</b></div>
+          <div class="df-a">→</div><div class="df-n n-agent"><b>adversarial-case-writer</b><code>+ CON-* SEC-* REQ-*</code></div>
+          <div class="df-a">→</div><div class="df-n n-art"><b>test-scenarios<br>.adversarial.md</b></div>
+          <div class="df-a">→</div><div class="df-n n-agent"><b>case-writer</b><span>mints case_ids</span></div>
+        </div>
+        <div class="df-lbl">none of these three may read code, the contract or an HLD</div>
+        <div class="df-v">▼</div>
+        <div class="df-row"><div class="df-n n-art" style="min-width:230px;"><b>test-cases.feature + case-index.json</b></div></div>
+        <div class="df-v">▼ &nbsp;fans out&nbsp; ▼</div>
+
+        <div class="df-row">
+          <div class="df-n n-agent"><b>task-generator</b><span>binds verification_ref</span></div>
+          <div class="df-a">→</div><div class="df-n n-gate"><b>gr-L1-verification-ref<br>-resolvable</b><span>BLOCKS if unresolvable</span></div>
+          <div class="df-a">&nbsp;&nbsp;</div>
+          <div class="df-n n-agent"><b>contract-resolver</b><span>code-only</span><code>canon@from_version ⊕ delta</code></div>
+          <div class="df-a">→</div><div class="df-n n-art"><b>openapi.resolved.yaml</b></div>
+          <div class="df-a">→</div><div class="df-n n-agent"><b>script-generator</b><span>+ synthetic-data (delta)</span></div>
+        </div>
+        <div class="df-row">
+          <div class="df-n n-gate" style="max-width:300px;"><b>gr-from-version-match</b><span>base moved → <strong>REFUSE</strong>, emit resolution-refused.json</span></div>
+          <div class="df-a">→</div><div class="df-n n-human"><b>Feature Owner</b><span>re-author the delta — Day 2, cheap</span></div>
+        </div>
+        <div class="df-v">▼</div>
+        <div class="df-row">
+          <div class="df-n n-art"><b>scripts + fixtures</b></div>
+          <div class="df-a">→</div><div class="df-n n-agent"><b>xray-orchestrator</b><span>code-only</span></div>
+          <div class="df-a">→</div><div class="df-n n-ext"><b>construction</b><span>read-only oracle</span></div>
+        </div>
+        <div class="df-v">▼</div>
+
+        <div class="df-row">
+          <div class="df-n n-agent"><b>testing-executor</b></div>
+          <div class="df-a">→</div><div class="df-n n-art"><b>test-execution<br>-report.json</b></div>
+          <div class="df-a">→</div><div class="df-n n-agent"><b>defect-triager</b><span>one verdict per failure</span></div>
+        </div>
+        <div class="df-v">▼</div>
+        <div class="df-fan">
+          <div class="df-n n-art"><b>code_defect</b><span>→ Jira Bug → code-generator · loop, max 3</span></div>
+          <div class="df-n n-art"><b>test_defect</b><span>→ case-writer, <strong>AC clause cited</strong> · loop, max 3</span></div>
+          <div class="df-n n-art"><b>data_defect</b><span>→ synthetic-data (delta) · loop, max 3</span></div>
+          <div class="df-n n-art"><b>env_defect</b><span>→ env-provisioner · <strong>not counted as flake</strong></span></div>
+          <div class="df-n n-art"><b>flake</b><span>quarantined above threshold — never silently disabled</span></div>
+          <div class="df-n n-stop"><b>3 passes, still red</b><span>→ <strong>Feature Owner</strong>. The loop terminator</span></div>
+        </div>
+        <div class="df-v">▼ &nbsp;both gates green&nbsp; ▼</div>
+
+        <div class="df-row">
+          <div class="df-n n-agent"><b>contract-verifier</b><span>against the running service</span></div>
+          <div class="df-a">→</div><div class="df-n n-art"><b>pacts published</b><span>incl. to consumers that do not exist yet</span></div>
+          <div class="df-a">→</div><div class="df-n n-gate"><b>qg-L1-contract<br>-conformance 100%</b><span>proves the resolved view</span></div>
+        </div>
+        <div class="df-row"><div class="df-n n-art" style="max-width:320px;"><b>contract_break</b><span>→ a <strong>versioning decision</strong>, not a code fix — re-opens the integration delta</span></div></div>
+        <div class="df-v">▼</div>
+
+        <div class="df-row">
+          <div class="df-n n-ext"><b>PR lands</b></div>
+          <div class="df-a">→</div><div class="df-n n-agent"><b>pack-curator</b><span>promote</span></div>
+          <div class="df-a">→</div><div class="df-n n-ext"><b>arch-delta-merger</b></div>
+          <div class="df-a">→</div><div class="df-n n-ext"><b>baseline-generator</b></div>
+        </div>
+        <div class="df-v">▼</div>
+        <div class="df-row">
+          <div class="df-n n-agent"><b>env-provisioner</b><span>regenerate · stub → real</span></div>
+          <div class="df-a">+</div><div class="df-n n-agent"><b>synthetic-data</b><span>delta</span></div>
+          <div class="df-a">→</div><div class="df-n n-gate"><b>gr-architecture<br>-conformance</b><span>also: stub-registry vs APP-2</span></div>
+          <div class="df-a">→</div><div class="df-n n-ok"><b>conformance-report.md</b></div>
+        </div>
+      </div>
+
+      <!-- ============ BROWNFIELD ============ -->
+      <div class="df">
+        <div class="df-h">5.2 BROWNFIELD — one change against a running system <span class="tag">T-A / T-B INHERITED · 2 STAGES ADDED BEFORE ANY LINE IS MODIFIED</span></div>
+
+        <div class="df-row">
+          <div class="df-n n-ext"><b>requirement raised</b></div>
+          <div class="df-a">→</div><div class="df-n n-ext"><b>impact-assessor</b><span>baseline + target + drift</span></div>
+          <div class="df-a">→</div><div class="df-n n-art"><b>impact-assessment.md</b><span>blast radius · convergence verdict · entry level</span></div>
+        </div>
+        <div class="df-v">▼</div>
+
+        <div class="df-row">
+          <div class="df-n n-art"><b>application<br>-baseline.md</b><span>the current built state</span></div>
+          <div class="df-a">→</div><div class="df-n n-agent"><b>coverage-reporter</b><span>GAP MODE</span></div>
+          <div class="df-a">→</div><div class="df-n n-art"><b>coverage-gap.json</b><span>GAP / COVERED per behaviour, each with a <code>why</code></span></div>
+        </div>
+        <div class="df-row"><div class="df-n n-gate" style="max-width:420px;"><b>caveat field is mandatory</b><span>the analysis names the baseline version it trusted — an analysis that cannot say what it trusted is not evidence</span></div></div>
+        <div class="df-v">▼</div>
+
+        <div class="df-row">
+          <div class="df-n n-agent"><b>characterization-writer</b><span><strong>reads the existing source</strong> — the one testing agent permitted to</span></div>
+          <div class="df-a">→</div><div class="df-n n-art"><b>characterization<br>-tests.feature</b><span>green against <strong>unmodified</strong> code</span></div>
+          <div class="df-a">→</div><div class="df-n n-gate"><b>qg-L1-characterisation<br>-coverage</b><span><strong>BLOCKING, pre-construction</strong></span></div>
+        </div>
+        <div class="df-fan">
+          <div class="df-n n-art"><b>pin, normal</b><span>frozen behaviour. Breaking it later = <code>characterisation_break</code></span></div>
+          <div class="df-n n-art"><b>pin, <code>characterization:suspect</code></b><span>current behaviour <em>is</em> the defect — pinned anyway, defect linked</span></div>
+          <div class="df-n n-stop"><b>characterisation_break</b><span>→ <strong>Feature Owner</strong>. <strong>Never auto-resolved</strong> — an agent cannot tell an accidental fix from an accidental break</span></div>
+        </div>
+        <div class="df-v">▼ &nbsp;only now may an existing line be modified&nbsp; ▼</div>
+
+        <div class="df-row">
+          <div class="df-n n-agent"><b>scenario-writer</b></div>
+          <div class="df-a">→</div><div class="df-n n-agent"><b>adversarial-case-writer</b><span>+ coverage-gap + drift register<br>→ <strong>regression-risk cases</strong></span></div>
+          <div class="df-a">→</div><div class="df-n n-agent"><b>case-writer</b></div>
+          <div class="df-a">→</div><div class="df-n n-agent"><b>contract-resolver</b><span>code-only</span></div>
+          <div class="df-a">→</div><div class="df-n n-agent"><b>script-generator</b></div>
+        </div>
+        <div class="df-row">
+          <div class="df-n n-agent" style="max-width:280px;"><b>synthetic-data</b><span><strong>ANONYMISED PRODUCTION DATA</strong>, not generated fixtures</span></div>
+          <div class="df-a">→</div><div class="df-n n-gate"><b>gr-pii-detection</b><span>CRITICAL — here it verifies a <em>transformation</em>, not a source</span></div>
+          <div class="df-a">→</div><div class="df-n n-gate"><b>referential integrity</b><span>anonymisation that breaks a foreign key makes a test fail for the wrong reason</span></div>
+        </div>
+        <div class="df-v">▼ &nbsp;execute → triage: as greenfield&nbsp; ▼</div>
+
+        <div class="df-row">
+          <div class="df-n n-agent"><b>contract-verifier</b><span><strong>PROVIDER MODE</strong> — enumerates from consumers' pact files, not from INT-2</span></div>
+          <div class="df-a">→</div><div class="df-n n-art"><b>breaking-change list<br>per consumer</b></div>
+        </div>
+        <div class="df-fan">
+          <div class="df-n n-ok"><b>no break</b><span><strong>a result that had to be established</strong> — recorded explicitly, never omitted</span></div>
+          <div class="df-n n-art"><b>contract_break</b><span>→ expand-and-contract: serve both, deprecate, remove next release</span></div>
+          <div class="df-n n-stop"><b>unregistered contract</b><span>consumed but never in <code>INT-2</code> → a <code>CON-4</code> finding in its own right</span></div>
+        </div>
+        <div class="df-v">▼</div>
+        <div class="df-row">
+          <div class="df-n n-ext"><b>PR lands</b></div>
+          <div class="df-a">→</div><div class="df-n n-agent"><b>pack-curator</b><span>promote — <strong>pins promoted alongside the cases</strong></span></div>
+          <div class="df-a">→</div><div class="df-n n-ext"><b>merge → baseline → registers</b></div>
+          <div class="df-a">→</div><div class="df-n n-ok"><b>conformance-report.md</b><span>drift register updated</span></div>
+        </div>
+        <div class="df-row"><div class="df-n n-gate" style="max-width:440px;"><b>the load-bearing dependency</b><span>a change that ships <strong>without</strong> merging its deltas invalidates the baseline — and the <em>next</em> change's gap analysis, pinning and regression selection are all computed against it</span></div></div>
+      </div>
+
+      <!-- ============ BUGFIX ============ -->
+      <div class="df">
+        <div class="df-h">5.3 BUGFIX — one defect <span class="tag">4 AGENTS · 1 MANDATORY EXIT</span></div>
+
+        <div class="df-row">
+          <div class="df-n n-ext"><b>defect reported</b></div>
+          <div class="df-a">→</div><div class="df-n n-agent"><b>case-writer</b><span>REPRO MODE — no PRD, no AC, no story</span></div>
+          <div class="df-a">→</div><div class="df-n n-art"><b>failing repro test</b><span>+ its <code>case_id</code></span></div>
+          <div class="df-a">→</div><div class="df-n n-gate"><b>qg-L1-repro-test-validity</b><span><strong>hard boolean.</strong> A repro that does not fail is <em>no</em> spec</span></div>
+        </div>
+        <div class="df-v">▼</div>
+        <div class="df-row"><div class="df-n n-agent" style="max-width:260px;"><b>impact-assessor</b><span>TRIAGE MODE — a narrow read, not a baseline scan</span></div></div>
+        <div class="df-v">▼ &nbsp;<strong>THE SCOPE TEST — three checks, any one ends the track</strong>&nbsp; ▼</div>
+        <div class="df-fan">
+          <div class="df-n n-gate"><b>T2 scope</b><span>confinable to a handful of files? <strong>A migration has no boundary</strong></span></div>
+          <div class="df-n n-gate"><b>contract change</b><span>a published shape changes, or a live pact breaks? <strong>This track has no stage that makes a versioning decision</strong></span></div>
+          <div class="df-n n-gate"><b>missing capability</b><span>needs something not AVAILABLE? <strong>Provisioning has lead time</strong></span></div>
+        </div>
+        <div class="df-row">
+          <div class="df-n n-stop" style="max-width:430px;"><b>ANY CHECK FAILS → ESCALATE to brownfield (5.2)</b><span>The repro test <strong>survives the escalation</strong> and becomes the feature's acceptance case and <code>verification_ref</code>. The Bug closes as <em>escalated</em>, linked — so a year later &ldquo;why did a bug produce an ADR?&rdquo; has a documented answer</span></div>
+        </div>
+        <div class="df-v">▼ &nbsp;all three pass&nbsp; ▼</div>
+
+        <div class="df-row">
+          <div class="df-n n-agent"><b>risk-selector</b></div>
+          <div class="df-a">→</div><div class="df-n n-art"><b>selection-manifest.json</b><span>touching scope · downstream · <strong>every <code>risk:high</code> case regardless of scope</strong></span></div>
+          <div class="df-a">→</div><div class="df-n n-agent"><b>testing-executor</b><span>repro + slice + boundary cases</span></div>
+        </div>
+        <div class="df-row">
+          <div class="df-n n-gate" style="max-width:420px;"><b>gr-test-immutability</b><span>the verify agent may <strong>never</strong> edit the reproduction test to make it pass. If it cannot be made to pass, <strong>it escalates</strong></span></div>
+        </div>
+        <div class="df-v">▼</div>
+        <div class="df-row">
+          <div class="df-n n-agent"><b>pack-curator</b><span>promote</span></div>
+          <div class="df-a">→</div><div class="df-n n-ok"><b>repro in the pack</b><span><code>polarity:negative</code> + <code>provenance</code> = the defect id</span></div>
+          <div class="df-a">&nbsp;&nbsp;</div>
+          <div class="df-n n-gate"><b>architecture stage</b><span>3 yes/no questions: contract? migration? IaC?</span></div>
+          <div class="df-a">→</div><div class="df-n n-ok"><b>all negative → SKIP</b><span>no delta, no baseline, <strong>no cycle folder</strong></span></div>
+        </div>
+        <div class="df-row"><div class="df-n n-art" style="max-width:440px;"><b>why promotion is the step that pays for this track</b><span>a defect that happened once is the best evidence you will get about where this system is fragile. Without promotion it lives only in the fix commit and protects nothing after the branch merges</span></div></div>
+      </div>
+
+      <div class="guidance">
+        <p><strong>Every terminal box above is one of four destinations</strong> — and no branch in any of the
+        three flows ends anywhere else. <strong>QA Expert</strong>: strategy schema failure, &gt;20% fabricated
+        citations, script that will not compile. <strong>Feature Owner</strong>: triage oscillation at 3 passes,
+        <code>characterisation_break</code>, a refused resolution, an escalated bugfix.
+        <strong>Release Manager</strong>: go/no-go, residual risk stated, blockers named.
+        <strong>Dead-letter queue + alert</strong>: tool timeout, broker unreachable, runner crash — 3 retries
+        with backoff, then a human.</p>
+      </div>
+    </div>
+
+    <!-- 6 -->
+    <div class="sd-section">
+      <h3>6. Integrations</h3>
+      <table class="sd-table">
+        <tr><th style="width:140px;">System</th><th style="width:90px;">Direction</th><th>Interface</th><th style="width:170px;">Auth</th><th style="width:150px;">Owner / Access status</th></tr>
+        <tr><td>Jira</td><td>Read / Write</td><td>REST — issue create/update; reads <code>features.json</code>, <code>stories.json</code>, Work Units</td><td>OAuth 2.0 service account, scoped to the delivery project</td><td>Delivery Tooling · <strong>pending</strong></td></tr>
+        <tr><td>XRay</td><td>Read / Write</td><td>REST — test + test-set create, execution update</td><td>API token in the platform secret store</td><td>QE Tooling · granted</td></tr>
+        <tr><td>GitHub</td><td>Read</td><td>Contents API — source fetch for triage and characterisation; commit diff for risk selection</td><td>GitHub App, <strong>read-only</strong> on the delivery orgs</td><td>Engineering Platform · granted</td></tr>
+        <tr><td>Pact Broker</td><td>Read / Write</td><td>REST — publish provider results, fetch consumer pacts</td><td>Basic auth from the secret store</td><td>Engineering Platform · <strong>pending</strong></td></tr>
+        <tr><td>CI runner</td><td>Write</td><td>Pipeline dispatch + artifact retrieval (GitHub Actions)</td><td>Workload identity federation — <strong>no long-lived credential</strong></td><td>Engineering Platform · granted</td></tr>
+        <tr><td>Test environments</td><td>Write</td><td>Provisioning API driven by <code>env-manifest.yaml</code></td><td>Workload identity, per-environment scoped</td><td>Platform · granted</td></tr>
+        <tr><td>Confluence</td><td>Write</td><td>REST — strategy, traceability matrix, release readiness</td><td>OAuth 2.0 service account</td><td>Delivery Tooling · granted</td></tr>
+        <tr><td>Architecture repo</td><td>Read</td><td>Git — the four viewpoint documents, the baseline, the conformance report, cycle deltas</td><td>Same GitHub App, read-only</td><td>Architecture · granted</td></tr>
+        <tr><td>DAST / perf runners</td><td>Write</td><td>Scan and load dispatch, release band only</td><td>Workload identity</td><td>Security Engineering · <strong>pending</strong></td></tr>
+      </table>
+      <p style="font-size:11px;color:#5a6a7a;margin-top:8px;">Three integrations are <strong>pending</strong>: Jira, Pact Broker and the DAST/perf runners. Each is an open dependency and is carried into section 9 of the requirements document with a named owner — not tracked only here.</p>
+    </div>
+
+    <!-- 7 -->
+    <div class="sd-section">
+      <h3>7. Evaluation Strategy</h3>
+      <p class="section-desc">How we will know it works before it goes anywhere near production. The test dataset must exist before development starts.</p>
+      <table class="sd-table">
+        <tr><th style="width:170px;">Aspect</th><th>Detail</th></tr>
+        <tr><td><strong>Test Dataset</strong></td><td><strong>3 replayed historical feature cycles</strong> (one per scenario) with their real AC, architecture at the version in force at the time, and the cases QA actually wrote — plus <strong>120 labelled historical failures</strong> for triage. Labelled by two QE engineers independently; disagreements adjudicated by the QA Expert and <strong>retained as a third class</strong>, because a failure two experts classify differently is exactly the case the agent will also find hard.</td></tr>
+        <tr><td><strong>Golden Set</strong></td><td>The <strong>compliance-tagged subset</strong>: every AC clause carrying a regulatory obligation, and the adversarial case each must yield. <strong>Must never regress.</strong> Signed off by the QA Expert and the Regulatory owner jointly — the one sign-off in this design requiring two names.</td></tr>
+        <tr><td><strong>Metrics</strong></td><td><strong>Primary:</strong> triage verdict precision ≥0.90 · AC-to-case coverage ≥8/10 · adversarial yield ≥1 per compliance-tagged clause · <code>verification_ref</code> resolvability 100%.<br><strong>Secondary:</strong> script executability on first run ≥0.85 · duplicate-case rate at promotion ≤0.05 · fabricated-citation rate ≤0.02.</td></tr>
+        <tr><td><strong>Quality Gates</strong></td><td>Before staging: all four primary metrics met on the replayed cycles, <strong>0 PII detections</strong> across every generated fixture, and <strong>0 golden-set regressions</strong>. Before production: 4 consecutive shadow cycles with triage precision ≥0.90 and no QA-overturned <code>test_defect</code> verdict.</td></tr>
+        <tr><td><strong>Evaluator Agent</strong></td><td><code>L1-quality-verifier</code> scores generated cases against a rubric of <em>AC traceability · polarity balance · citation validity · tier appropriateness</em>. <strong>It does not score the triager</strong> — triage is scored against the labelled set, because an LLM grading another LLM's classification shares its blind spots.</td></tr>
+        <tr><td><strong>Edge Cases</strong></td><td>AC with no testable assertion · a feature with zero adversarial surface · a 400-case pack against a 20-minute window · a contract delta whose <code>from_version</code> has moved · an architecture section added mid-cycle · anonymised production data with a broken foreign key · a characterisation pin that is red on arrival · an empty regression pack (cycle 1) · a service with no consumers · <strong>an adversarial prompt embedded in an AC clause or a Jira description</strong>.</td></tr>
+        <tr><td><strong>Human Baseline</strong></td><td>The bar to beat, measured over the last two PIs: <strong>~62% AC-to-case coverage</strong>, <strong>~1 in 5 compliance clauses with any negative case</strong>, triage by the engineer who wrote the code (so <code>test_defect</code> is over-called), and a regression pack that <strong>grew every sprint and was never curated</strong>. The design's real target is not accuracy — it is the two things the manual process structurally cannot do: <strong>adversarial coverage</strong> and <strong>a pack that can shrink</strong>.</td></tr>
+      </table>
+      <div class="guidance warn">
+        <p><strong>The prompt-injection edge case is not hypothetical.</strong> Acceptance criteria, Jira
+        descriptions and pact files are written by people outside this workflow and flow directly into agent
+        context. Every one of those is <strong>data, not instruction</strong>. Agents that read them run with
+        instruction-hierarchy enforcement, and <code>gr-L1-citation-verifier</code> provides the structural
+        backstop: an agent that has been talked into inventing a rule cannot cite a section that exists.</p>
+      </div>
+    </div>
+
+    <!-- 8 -->
+    <div class="sd-section">
+      <h3>8. Token Budget Summary</h3>
+      <p class="section-desc">Budgeted against a <strong>200k context window</strong>. No agent exceeds 30% on day one, leaving room for three rounds of prompt iteration before anything approaches the ceiling.</p>
+      <table class="sd-table">
+        <tr><th>Agent</th><th style="width:90px;">Instructions</th><th style="width:70px;">KB</th><th style="width:70px;">Input</th><th style="width:70px;">Output</th><th style="width:70px;">Total</th><th style="width:90px;">% of window</th></tr>
+        <tr><td><code>strategy-architect</code></td><td>~3k</td><td>~19k</td><td>~14k</td><td>~6k</td><td>~42k</td><td>21%</td></tr>
+        <tr><td><code>env-provisioner</code></td><td>~2k</td><td>~14k</td><td>~12k</td><td>~5k</td><td>~33k</td><td>17%</td></tr>
+        <tr><td><code>synthetic-data-generator</code></td><td>~3k</td><td>~6k</td><td>~10k</td><td>~12k</td><td>~31k</td><td>16%</td></tr>
+        <tr><td><code>scenario-writer</code></td><td>~3k</td><td>~10k</td><td>~16k</td><td>~7k</td><td>~36k</td><td>18%</td></tr>
+        <tr style="background:#fff6e0;"><td><code>adversarial-case-writer</code></td><td>~4k</td><td>~18k</td><td>~22k</td><td>~9k</td><td><strong>~53k</strong></td><td><strong>27%</strong></td></tr>
+        <tr><td><code>case-writer</code></td><td>~3k</td><td>~6k</td><td>~18k</td><td>~14k</td><td>~41k</td><td>21%</td></tr>
+        <tr><td><code>characterization-writer</code> <span style="color:#2d6b4a;font-weight:700;">BF</span></td><td>~3k</td><td>~6k</td><td>~28k</td><td>~8k</td><td>~45k</td><td>23%</td></tr>
+        <tr style="background:#fff6e0;"><td><code>script-generator</code></td><td>~4k</td><td>~6k</td><td>~26k</td><td>~20k</td><td><strong>~56k</strong></td><td><strong>28%</strong></td></tr>
+        <tr><td><code>defect-triager</code></td><td>~4k</td><td>~6k</td><td>~30k</td><td>~4k</td><td>~44k</td><td>22%</td></tr>
+        <tr><td><code>contract-verifier</code></td><td>~3k</td><td>~14k</td><td>~16k</td><td>~6k</td><td>~39k</td><td>20%</td></tr>
+        <tr><td><code>regression-pack-curator</code></td><td>~3k</td><td>~6k</td><td>~24k</td><td>~10k</td><td>~43k</td><td>22%</td></tr>
+        <tr><td><code>risk-selector</code></td><td>~2k</td><td>~14k</td><td>~20k</td><td>~4k</td><td>~40k</td><td>20%</td></tr>
+        <tr><td><code>nfr-suite-generator</code></td><td>~4k</td><td>~15k</td><td>~14k</td><td>~12k</td><td>~45k</td><td>23%</td></tr>
+        <tr><td><code>coverage-reporter</code></td><td>~3k</td><td>~11k</td><td>~26k</td><td>~8k</td><td>~48k</td><td>24%</td></tr>
+        <tr><td><code>integration-orchestrator</code></td><td>~2k</td><td>~14k</td><td>~18k</td><td>~5k</td><td>~39k</td><td>20%</td></tr>
+        <tr><td><code>release-orchestrator</code></td><td>~3k</td><td>~11k</td><td>~22k</td><td>~7k</td><td>~43k</td><td>22%</td></tr>
+        <tr style="background:#f0f4f8;"><td colspan="6"><strong>Code-only — no model, no KB, no temperature</strong></td><td><code>contract-resolver</code> · <code>testing-xray-orchestrator</code> · the pack-invariant enforcer</td></tr>
+      </table>
+      <p style="font-size:11px;color:#5a6a7a;margin-top:8px;"><strong>The two agents at 27–28% are the ones to
+      watch, and both grow with the system rather than with the feature.</strong> <code>script-generator</code>'s
+      input is the resolved contract view, which grows every time a service gains an endpoint;
+      <code>adversarial-case-writer</code>'s grows as <code>CON-*</code> and <code>REQ-*</code> accumulate.
+      <strong>What gets cut first, in order:</strong> ① scope the resolved view to the paths this cycle's cases
+      actually call, rather than the whole service; ② pass the drift register as open items only, not the full
+      conformance report; ③ split the adversarial writer per viewpoint. None of these is needed on day one, and
+      all three are cheaper than raising the budget.</p>
+    </div>
+
+    <!-- 9 -->
+    <div class="sd-section">
+      <h3>9. Deployment Plan</h3>
+      <table class="sd-table">
+        <tr><th style="width:170px;">Aspect</th><th>Detail</th></tr>
+        <tr><td><strong>Deployment Target</strong></td><td>Agent runtime on the SFI agentic platform, delivery cluster. Three environments: <code>dev</code> (agent development), <code>staging</code> (shadow runs against real cycles), <code>prod</code> (the delivery pipeline itself).</td></tr>
+        <tr><td><strong>Packaging</strong></td><td>Per agent: <code>spec.yaml</code>, <code>instructions.md</code>, <code>output_schema.json</code>, <code>evaluation.md</code>, examples. Plus: the six KB files, three workflow definitions (one per scenario), integration configs, and the guardrail bindings. <strong>Prompts and KBs version independently of the workflow</strong> — a prompt fix must not require a pipeline release.</td></tr>
+        <tr><td><strong>Staging Validation</strong></td><td><strong>Shadow mode across 4 consecutive real feature cycles.</strong> Agents run on live inputs and write to a parallel namespace; QA continues authoring by hand. Every cycle, the two outputs are diffed and the deltas reviewed. <strong>Nothing the agents produce reaches a Work Unit.</strong></td></tr>
+        <tr><td><strong>Rollout Strategy</strong></td><td>Staged by <em>stage</em>, not by percentage, because these agents form a chain and a half-enabled chain has no meaning.<br><strong>Wave 1 — T-B and T-F reporting:</strong> fixtures, stub registry, coverage and traceability. Lowest blast radius; nothing blocks on them.<br><strong>Wave 2 — T-C authoring:</strong> scenarios, adversarial, cases. QA reviews every case before it binds, with the review requirement relaxed once AC coverage holds ≥8 for two cycles.<br><strong>Wave 3 — T-D and T-E:</strong> scripts, execution, contract verification. <code>defect-triager</code> runs in <strong>advisory mode first</strong> — it posts a verdict, a human routes.<br><strong>Wave 4 — triage routing becomes automatic</strong> for <code>code_defect</code>, <code>data_defect</code>, <code>env_defect</code> and <code>flake</code>. <strong><code>test_defect</code> stays human-confirmed indefinitely</strong> — it is the one verdict that can quietly erode the oracle.<br><strong>Thresholds start tight and relax on evidence:</strong> flake threshold 0.05 → 0.10 after two clean cadence beats; triage auto-route only above 0.90 measured precision.</td></tr>
+        <tr><td><strong>Rollback</strong></td><td><strong>A single feature flag per wave</strong>, flipped in the workflow config, returns that stage to manual. Tested in staging at every wave boundary, not assumed. <strong>No agent output is destructive:</strong> cases are additive, the pack invariant prevents silent removal, and the stub registry is regenerated from the architecture rather than mutated — so rolling back never has to restore state, only stop writing.</td></tr>
+        <tr><td><strong>Monitoring</strong></td><td>Per agent: invocation count, p95 latency, token spend, schema-failure rate, guardrail-trip rate. Per workflow: verdict distribution (a sudden shift in <code>test_defect</code> share is the early signal of oracle erosion), pack size vs the cadence window, and <strong>time-to-first-red on a newly promoted case</strong>.</td></tr>
+        <tr><td><strong>Cost envelope</strong></td><td>Dominated by the per-cycle stages. At ~340k tokens per feature cycle across T-C/T-D/T-E and ~180k per cadence beat, a 4-cycle PI with 2 beats is ~1.7M tokens. <strong>The cost control is the risk selector, not the model choice</strong> — an uncurated pack costs more in runner minutes than every LLM call combined.</td></tr>
+      </table>
+    </div>
+
+    <!-- 10 -->
+    <div class="sd-section">
+      <h3>10. Artifact File Structure</h3>
+      <p class="section-desc">The files this design will produce, laid out as they will appear in the repository. <strong>Every asset name follows the CoE naming standard</strong>; the use case ID is carried as metadata, not as a name prefix — see 10.1 for why.</p>
+
+      <h4 style="margin:0 0 8px">10.1 Naming compliance — and one conflict, resolved</h4>
+      <div class="guidance warn">
+        <p><strong>This template and the CoE naming standard disagree, and the disagreement has to be settled
+        rather than split.</strong> The template says <em>&ldquo;naming follows the use case ID so artifacts are
+        traceable to the intake&rdquo;</em>, which would give <code>SFI-AG-QA-001-testing-case-writer</code>. The
+        standard says an agent is <code>L1-{phase}-{function}</code>, giving
+        <code>L1-testing-case-writer</code>. <strong>An asset cannot have two names.</strong></p>
+        <p style="margin-top:8px"><strong>Resolved in favour of the standard, because these are L1 enterprise
+        assets.</strong> Sixteen of the nineteen agents are generic SDLC testing agents that any SFI project will
+        reuse; naming them after the intake that happened to fund them would make a shared asset look
+        project-owned and would break the inheritance model the moment a second project extends one. <strong>The
+        use case ID moves into <code>spec.yaml</code> as <code>use_case_id: SFI-AG-QA-001</code></strong>, which
+        preserves the traceability the template is actually asking for without putting an intake reference in a
+        reusable asset's name.</p>
+      </div>
+      <table class="sd-table">
+        <tr><th style="width:110px;">Asset type</th><th style="width:210px;">Standard pattern</th><th>This design uses</th><th style="width:230px;">Changed from the first draft</th></tr>
+        <tr><td><strong>Agent</strong></td><td><code>L1-{phase}-{function}</code></td><td><code>L1-testing-strategy-architect</code> … 19 agents, all <code>L1-testing-*</code></td><td><code>L1-xray-orchestrator</code> → <code>L1-testing-xray-orchestrator</code> — <em>the phase segment must be the SDLC phase, not the platform.</em> <strong>Also a CoE catalog name</strong>, so it carries the same approval dependency as the tool renames below</td></tr>
+        <tr><td><strong>Workflow</strong></td><td><code>L1-WF-{phase}-{outcome}</code></td><td><code>L1-WF-testing-greenfield</code> · <code>-brownfield</code> · <code>-bugfix</code></td><td>Was <code>SFI-AG-QA-001-greenfield</code></td></tr>
+        <tr><td><strong>Tool</strong></td><td><code>tool-L1-{platform}-{action}</code></td><td>12 tools, each one API call</td><td><strong>5 renamed, 1 split</strong> — see below</td></tr>
+        <tr><td><strong>KB</strong></td><td><code>kb-L1-{scope}</code><br><code>kb-L2-{domain}-{scope}</code><br><code>kb-L3-{project}-{scope}</code></td><td>4 × L1, 2 × L2, 1 × L3</td><td><code>kb-L2-domain-regulatory</code> → <code>kb-L2-food-regulatory</code> <em>(the L2 slot is the domain, and &ldquo;domain&rdquo; is not one)</em> · <code>kb-L2-food-domain</code> → <code>kb-L2-food-domain-model</code> · <code>kb-SFI-AG-QA-001-triage-examples</code> → <code>kb-L3-e2e-testing-triage-examples</code></td></tr>
+        <tr><td><strong>Guardrail</strong></td><td><code>gr-L1-{type}</code></td><td>10 guardrails, all <code>gr-L1-*</code></td><td>Already compliant</td></tr>
+        <tr><td><strong>Quality gate</strong></td><td><code>qg-L1-{name}</code></td><td>9 gates</td><td><strong>All 9 renamed</strong> from the informal <code>QG: name</code> notation</td></tr>
+      </table>
+
+      <h4 style="margin:18px 0 8px">10.2 Tool renames — five violations of <code>tool-L1-{platform}-{action}</code></h4>
+      <table class="sd-table">
+        <tr><th style="width:230px;">Was (current Agent Catalog)</th><th style="width:250px;">Now</th><th>Why</th></tr>
+        <tr style="background:#fdeeea;"><td><code>tool-L1-pact-broker</code></td><td><code>tool-L1-pact-publish-results</code><br><code>tool-L1-pact-fetch-pacts</code></td><td><strong>Split into two.</strong> Names a platform with no action, and it was doing two different API calls — which the standard's <em>&ldquo;one tool = one API call&rdquo;</em> rule forbids. This is the only substantive finding of the pass.</td></tr>
+        <tr><td><code>tool-L1-test-runner</code></td><td><code>tool-L1-ci-run-suite</code></td><td><code>test-runner</code> is a component name, not <code>{platform}-{action}</code></td></tr>
+        <tr><td><code>tool-L1-perf-runner</code></td><td><code>tool-L1-ci-run-load</code></td><td>Same — and it makes explicit that load and functional runs share the CI platform</td></tr>
+        <tr><td><code>tool-L1-dast-scan</code></td><td><code>tool-L1-dast-run-scan</code></td><td>Action segment missing; <code>scan</code> was reading as the platform</td></tr>
+        <tr><td><code>tool-L1-env-provision</code></td><td><code>tool-L1-env-apply-manifest</code></td><td>Names the intent rather than the operation; the tool applies <code>env-manifest.yaml</code></td></tr>
+      </table>
+      <p style="font-size:11px;color:#5a6a7a;margin-top:8px;"><strong>These five names originate in the Agent
+      Factory BOM and Agent Catalog, where they are still the old form.</strong> They are aligned here because
+      this document is the implementation contract, but the rename is a <strong>CoE decision, not a QE one</strong> —
+      the tools are shared L1 assets and four other agent families consume them. <strong>Carry this table to the
+      CoE for approval before implementation, and treat it as an open dependency if it is not granted.</strong></p>
+      <div class="sd-code"><span class="string">agents/</span>
+  <span class="string">L1-testing-strategy-architect/</span>
+    <span class="keyword">spec.yaml</span>              <span class="comment"># use_case_id: SFI-AG-QA-001 · model, temperature, tools, KB refs, guardrails</span>
+    <span class="keyword">instructions.md</span>        <span class="comment"># system instructions</span>
+    <span class="keyword">output_schema.json</span>     <span class="comment"># test-strategy.md front-matter + governance block</span>
+    <span class="keyword">evaluation.md</span>          <span class="comment"># rubric + thresholds</span>
+    <span class="keyword">README.md</span>
+    examples/
+      <span class="keyword">input-01.json</span>  <span class="keyword">output-01.json</span>
+  <span class="string">L1-testing-env-provisioner/</span>          <span class="comment"># … same shape, 18 agents total</span>
+  <span class="string">L1-testing-synthetic-data-generator/</span>
+  <span class="string">L1-testing-regression-pack-curator/</span>
+  <span class="string">L1-testing-scenario-writer/</span>
+  <span class="string">L1-testing-adversarial-case-writer/</span>
+  <span class="string">L1-testing-case-writer/</span>
+  <span class="string">L1-testing-characterization-writer/</span>    <span class="comment"># brownfield only</span>
+  <span class="string">L1-testing-contract-resolver/</span>          <span class="comment"># code-only — no instructions.md, no KB</span>
+  <span class="string">L1-testing-script-generator/</span>
+  <span class="string">L1-testing-xray-orchestrator/</span>                  <span class="comment"># code-only — no instructions.md</span>
+  <span class="string">L1-testing-executor/</span>
+  <span class="string">L1-testing-defect-triager/</span>
+  <span class="string">L1-testing-contract-verifier/</span>
+  <span class="string">L1-testing-integration-orchestrator/</span>
+  <span class="string">L1-testing-risk-selector/</span>
+  <span class="string">L1-testing-nfr-suite-generator/</span>
+  <span class="string">L1-testing-coverage-reporter/</span>
+  <span class="string">L1-testing-release-orchestrator/</span>
+
+<span class="string">knowledge-bases/</span>
+  <span class="string">kb-L1-testing-standards/</span>        <span class="keyword">kb-L1-testing-standards-slim.md</span>
+  <span class="string">kb-L1-enterprise-architecture/</span>  <span class="keyword">kb-L1-enterprise-architecture-slim.md</span>
+  <span class="string">kb-L1-enterprise-security/</span>      <span class="keyword">kb-L1-enterprise-security-slim.md</span>
+  <span class="string">kb-L2-food-regulatory/</span>        <span class="keyword">kb-L2-food-regulatory-slim.md</span>
+  <span class="string">kb-L2-food-domain-model/</span>              <span class="keyword">kb-L2-food-domain-model-slim.md</span>
+  <span class="string">kb-L1-nfr-classification-taxonomy/</span>             <span class="keyword">kb-L1-nfr-classification-taxonomy-slim.md</span>
+  <span class="string">kb-L3-e2e-testing-triage-examples/</span>          <span class="keyword">triage-labelled-set.jsonl</span>   <span class="comment"># EVALUATION ONLY</span>
+
+<span class="string">workflows/</span>
+  <span class="string">L1-WF-testing-greenfield/</span>   <span class="keyword">workflow.yaml</span>  <span class="keyword">config.yaml</span>  <span class="keyword">README.md</span>
+  <span class="string">L1-WF-testing-brownfield/</span>   <span class="keyword">workflow.yaml</span>  <span class="keyword">config.yaml</span>  <span class="keyword">README.md</span>
+  <span class="string">L1-WF-testing-bugfix/</span>       <span class="keyword">workflow.yaml</span>  <span class="keyword">config.yaml</span>  <span class="keyword">README.md</span>
+  <span class="keyword">routing.yaml</span>              <span class="comment"># scenario selection + the bugfix escalation exit</span>
+
+<span class="string">guardrails/</span>
+  <span class="keyword">gr-test-immutability.yaml</span>          <span class="comment"># amendment must cite an AC clause</span>
+  <span class="keyword">gr-verification-ref-resolvable.yaml</span> <span class="comment"># BLOCKING at Work Unit generation</span>
+  <span class="keyword">gr-pii-detection.yaml</span>              <span class="comment"># CRITICAL — fixtures, logs, screenshots</span>
+  <span class="keyword">gr-citation-verifier.yaml</span>          <span class="keyword">gr-hallucination-check.yaml</span>
+  <span class="keyword">gr-from-version-match.yaml</span>         <span class="comment"># BLOCKING — refuses a moved base</span>
+  <span class="keyword">gr-secret-scanner.yaml</span>             <span class="keyword">gr-schema-validator.yaml</span>
+  <span class="keyword">gr-consistency-check.yaml</span>          <span class="comment"># includes the pack invariant</span>
+
+<span class="string">integrations/</span>
+  <span class="keyword">jira-api.yaml</span>  <span class="keyword">xray-api.yaml</span>  <span class="keyword">github-app.yaml</span>  <span class="keyword">pact-broker.yaml</span>
+  <span class="keyword">ci-runner.yaml</span>  <span class="keyword">env-provision.yaml</span>  <span class="keyword">confluence-api.yaml</span>
+
+<span class="string">evaluation/</span>
+  <span class="keyword">replay-greenfield/</span>  <span class="keyword">replay-brownfield/</span>  <span class="keyword">replay-bugfix/</span>
+  <span class="keyword">golden-set.json</span>                      <span class="comment"># compliance-tagged, dual sign-off</span>
+  <span class="keyword">run-evaluation.md</span></div>
+    </div>
+
+    <!-- 11 -->
+    <div class="sd-section">
+      <h3>11. Design Review Checklist</h3>
+      <p class="section-desc">Complete before development begins. An unchecked box is a decision still outstanding.</p>
+      <table class="dod-table">
+        <tr><th style="width:44px;">☐</th><th style="width:150px;">Area</th><th>Criterion</th></tr>
+        <tr><td>☑</td><td>Traceability</td><td>Every objective and NFR in the requirements document maps to something in this design</td></tr>
+        <tr><td>☑</td><td>Agents</td><td>Every agent has one responsibility, and no agent is doing two jobs — <em>the curator is the only multi-invocation agent, and its three modes share one accountability: it is the sole writer of the pack</em></td></tr>
+        <tr><td>☑</td><td>Agents</td><td>Every LLM agent has a stated model, temperature and token budget with headroom — <em>highest is 28% of a 200k window</em></td></tr>
+        <tr><td>☑</td><td>Knowledge</td><td>Each KB is loaded only by the agents that need it — <em>and the architecture is deliberately not a KB, because it changes on a daily clock</em></td></tr>
+        <tr><td>☐</td><td>Knowledge</td><td>KB sizes are <strong>measured, not estimated</strong> — the figures in §4 and §8 are estimates until the KBs are written</td></tr>
+        <tr><td>☑</td><td>Failure</td><td>Every agent has a safe fallback, and every failure path ends somewhere a human sees it — <em>four named destinations in §5</em></td></tr>
+        <tr><td>☑</td><td>Failure</td><td>The agent loop terminates — <em>3 triage passes on one <code>case_id</code> escalates; <code>characterisation_break</code> is never auto-resolved</em></td></tr>
+        <tr><td>☑</td><td>Data</td><td>Data sensitivity is honoured — <code>gr-L1-pii-detection</code> is critical and blocking on fixtures <strong>and on captured logs and screenshots</strong>, which is where PII most often escapes</td></tr>
+        <tr><td>☐</td><td>Data</td><td>The anonymisation routine for brownfield production data is specified and <strong>preserves referential integrity across context boundaries</strong> — <em>open: needs the Data Protection owner's sign-off</em></td></tr>
+        <tr><td>☐</td><td>Integrations</td><td>Every integration's access is granted, or listed as an open dependency with an owner — <em>three pending: Jira, Pact Broker, DAST/perf</em></td></tr>
+        <tr><td>☐</td><td>Evaluation</td><td>Test dataset exists and is labelled <strong>before</strong> development starts — <em>open: 3 replay cycles selected, 120 failures not yet labelled</em></td></tr>
+        <tr><td>☑</td><td>Evaluation</td><td>The human baseline is known, so &ldquo;good enough&rdquo; is a number and not an opinion — <em>62% AC coverage, 1 in 5 compliance clauses, uncurated pack</em></td></tr>
+        <tr><td>☑</td><td>Deployment</td><td>Rollback is a single action per wave, and no agent output is destructive, so rollback never has to restore state</td></tr>
+        <tr><td>☑</td><td>Security</td><td>Untrusted text entering agent context (AC, Jira descriptions, pact files) is treated as data, not instruction, with the citation verifier as the structural backstop</td></tr>
+        <tr><td>☑</td><td>Naming</td><td>Every asset name conforms to the CoE naming standard — agents, workflows, tools, KBs, guardrails and quality gates (§10.1)</td></tr>
+        <tr><td>☐</td><td>Naming</td><td><strong>Five shared L1 tool renames need CoE approval</strong> (§10.2) — they are consumed by four other agent families, so this is not a QE decision</td></tr>
+        <tr><td>☐</td><td>Review</td><td>Design walked through with the QA Expert and the Tower Representative — they recognise their process in it</td></tr>
+      </table>
+      <div class="guidance warn">
+        <p><strong>Seven boxes are open, and they are the honest state of this design rather than an oversight.</strong>
+        Four are sequencing — KB sizes, the labelled set and the walkthrough cannot be completed before the KBs
+        are written and the review is scheduled. Two are genuine blockers that <strong>should stop development
+        starting</strong>: the brownfield anonymisation routine has no Data Protection sign-off, and three
+        integrations have no granted access. Building against a pending integration produces an agent that has
+        never once run end to end.</p>
+      </div>
+    </div>
+
+    <!-- 12 -->
+    <div class="sd-section">
+      <h3>12. Design Sign-Off</h3>
+      <p class="section-desc">Design is signed off before development begins. Changes after sign-off follow the change request process.</p>
+      <div class="signoff-box">
+        <div class="signoff-row"><label>Agentic Engineer:</label><div class="line"></div><label style="min-width:50px;">Date:</label><div class="date-line"></div></div>
+        <div class="signoff-row"><label>Agentic Lead:</label><div class="line"></div><label style="min-width:50px;">Date:</label><div class="date-line"></div></div>
+        <div class="signoff-row"><label>QA Expert:</label><div class="line"></div><label style="min-width:50px;">Date:</label><div class="date-line"></div></div>
+        <div class="signoff-row"><label>Enterprise Architect:</label><div class="line"></div><label style="min-width:50px;">Date:</label><div class="date-line"></div></div>
+        <div class="signoff-row"><label>Data Protection:</label><div class="line"></div><label style="min-width:50px;">Date:</label><div class="date-line"></div></div>
+      </div>
+      <p style="font-size:11px;color:#5a6a7a;margin-top:10px;"><strong>Five signatures, and two of them are not
+      formalities.</strong> The <strong>Enterprise Architect</strong> signs because this design reads
+      <code>APP-3</code>, <code>CON-*</code>, <code>SEC-*</code> and <code>REQ-*</code> live and turns them into
+      blocking gates — if those sections are not written to be read that way, this workflow will assert the wrong
+      things confidently. <strong>Data Protection</strong> signs because brownfield fixtures derive from
+      anonymised production data, which is the one place in this design where real personal data is handled
+      rather than merely excluded.</p>
+    </div>
+
+  </div>
+</div>
+</body>
+</html>

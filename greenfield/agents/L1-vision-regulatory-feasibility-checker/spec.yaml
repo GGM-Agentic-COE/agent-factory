@@ -19,7 +19,7 @@ purpose:
 prompt:
   ref: "prompts/L1-vision-regulatory-feasibility-checker/instructions.md"
   version: "2.0.0"
-  description: "Walks the coverage-category sweep list held in kb-L1-regulatory-frameworks-index against a domain-specific regulatory KB; every constraint is cited, every Amber/Red carries a mitigation or legal-review flag, and the viability score is derived from the regulatory posture plus idea clarity with unresolved blockers applied as hard caps. The sweep list lives in the KB so the evaluator's coverage audit reads the identical list; the scenario-pattern behaviours stay in the prompt."
+  description: "Walks the coverage-category sweep list held in the regulatory frameworks index KB — read from GitHub at runtime, along with the domain regulatory KB and the examples — against a domain-specific regulatory KB; every constraint is cited, every Amber/Red carries a mitigation or legal-review flag, and the viability score is derived from the regulatory posture plus idea clarity with unresolved blockers applied as hard caps. The sweep list lives in the KB so the evaluator's coverage audit reads the identical list; the scenario-pattern behaviours stay in the prompt."
 
 contract:
   input_schema: "$ref: schemas/agent-input-contract-schema.json"
@@ -33,7 +33,14 @@ contract:
       formats: [".json"]   # idea-brief.json — parsed as JSON by key path, never scanned as markdown
     required_parameters:
       problem_statement: { type: string, description: "From L1-vision-idea-intake's idea-brief.json" }
-      target_geography: { type: string, description: "Target geography for the idea — a country, or a country plus sub-national regions. Resolved at runtime against the jurisdiction the attached KBs declare; a country they do not cover fails with JURISDICTION_MISMATCH rather than being translated" }
+      target_geography: { type: string, description: "Target geography for the idea — a country, or a country plus sub-national regions. Resolved at runtime against the jurisdiction the KBs read from GitHub declare; a country they do not cover fails with JURISDICTION_MISMATCH rather than being translated" }
+      # GitHub reference material. Nothing below is defaulted in the prompt: the agent fails
+      # with INSUFFICIENT_CONTEXT rather than guessing a repo, a branch, or a path, so that a
+      # KB can never be read from somewhere other than where this deployment points.
+      reference_repo: { type: string, description: "Repository holding the knowledge bases and examples — bare name or 'owner/repo'. Read with tool-L1-github-reader-using-app" }
+      reference_branch: { type: string, description: "Branch to read the reference material from (e.g. 'main')" }
+      regulatory_frameworks_index_kb_folder: { type: string, description: "Repo folder holding the cross-domain regulatory framework index KB content — carries #jurisdiction, #coverage-categories (the sweep list) and #cross-domain-index. Select the jurisdiction's folder here: this is what re-targets the deployment. Unreadable or anchor-less content fails the run with REFERENCE_UNAVAILABLE" }
+      domain_regulatory_kb_folder: { type: string, description: "Repo folder holding the domain-specific regulatory facts KB content, declaring the SAME jurisdiction as the index folder. Unavailable → the run degrades: every affected constraint carries requires_legal_review: true" }
     optional_parameters:
       # No date parameter is required. The run date comes from tool-L1-system-current-date,
       # because the agent has no clock and an unaided model fills a date slot with a
@@ -42,6 +49,7 @@ contract:
       product_category: { type: string, default: null, description: "Product/activity category, if known, to narrow the regulator lookup" }
       target_users: { type: string, default: null, description: "Target user segment from idea-brief.json — feeds both the segment-specific constraint sweep and the idea_clarity viability component" }
       value_proposition: { type: string, default: null, description: "Value proposition from idea-brief.json — feeds claim-substantiation constraints and the idea_clarity viability component" }
+      examples_folder: { type: string, default: null, description: "Repo folder holding this agent's worked input/output examples (greenfield/agents/L1-vision-regulatory-feasibility-checker/examples in this repository). Shape guidance only — never a source of constraints, citations, scores or dates. Unavailable is tolerated" }
 
   output:
     $ref: "output_schema.json"
@@ -51,21 +59,25 @@ context:
   # declares its own coverage in a #jurisdiction section, and the agent resolves
   # that against the brief's target_geography at runtime, failing with
   # JURISDICTION_MISMATCH when they disagree. Re-targeting the deployment to
-  # another country means swapping the KBs below — the prompt is unchanged.
-  # Attach ONE matched pair, selected by the idea brief's target_geography.
-  # Both KBs in the pair must declare the same jurisdiction — the agent fails
-  # with JURISDICTION_MISMATCH if they disagree with each other or with the brief.
-  # India:          kb-L1-regulatory-frameworks-index-ind + kb-L2-domain-regulatory-ind
-  # United Kingdom: kb-L1-regulatory-frameworks-index-uk  + kb-L2-domain-regulatory-uk
-  knowledge_bases:
-    - kb-L1-regulatory-frameworks-index-ind   # >=3.1.0 — declares its jurisdiction; carries #coverage-categories (the sweep list) and #cross-domain-index
-    - kb-L2-domain-regulatory-ind             # >=2.1.0 — declares its jurisdiction; domain regulatory facts for that country
+  # another country means pointing the two KB folder parameters at that country's
+  # folders — the prompt is unchanged.
+  # No KB is attached at runtime. Both knowledge bases are READ FROM GITHUB with
+  # tool-L1-github-reader-using-app, from the folders named in
+  # regulatory_frameworks_index_kb_folder and domain_regulatory_kb_folder — so the
+  # generator and its evaluator read the identical text from the identical commit.
+  # Point ONE matched pair of folders at the jurisdiction selected by target_geography.
+  # Both must declare the same jurisdiction — the agent fails with JURISDICTION_MISMATCH
+  # if they disagree with each other or with the brief.
+  # India:          .../kb-L1-regulatory-frameworks-index-ind/content + .../kb-L2-domain-regulatory-ind/content
+  # United Kingdom: .../kb-L1-regulatory-frameworks-index-uk/content  + .../kb-L2-domain-regulatory-uk/content
+  knowledge_bases: []
   guardrails:
     - gr-L1-output-schema-validator
     - gr-L1-pii-detection
     - gr-L1-hallucination-check
     - gr-L1-citation-verifier   # BLOCKER — every constraint must cite a specific regulation/section
   tools:
+    - tool-L1-github-reader-using-app  # reads the two regulatory KBs and the examples folder from GitHub — one call per folder, repo/branch/paths all from the request
     - tool-L1-regulatory-db-lookup   # read-only; invoked directly, per the Core/Utility split
     - tool-L1-system-current-date    # reads the host clock — the only way this agent can date the artifact without guessing
     - tool-L1-azure-blob-reader      # reads idea-brief.json from blob storage

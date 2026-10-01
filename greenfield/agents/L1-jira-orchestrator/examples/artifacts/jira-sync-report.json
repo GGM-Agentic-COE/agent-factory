@@ -1,0 +1,90 @@
+{
+  "schema_version": "1.0",
+  "produced_by": "L1-jira-orchestrator@1.0.0",
+  "execution_id": "exec-jo-1f2a3b4c",
+  "workflow_execution_id": "wf-hl-pi1-3c4d5e6f",
+  "project_key": "HL",
+  "site": "thornbury.atlassian.net",
+  "pi_id": "PI-2026-Q2",
+  "cycle": 1,
+  "synced_at": "2026-04-28T11:32:07Z",
+
+  "level_mapping": {
+    "adlc_levels": 4,
+    "jira_levels": 3,
+    "mapping": { "Epic": "Epic", "Feature": "Story", "Story slice": "Story", "Work Unit": "Sub-task" },
+    "collision_resolution": "The collapsible-story rule. An unsliced feature becomes the Story itself; a sliced feature contributes no issue of its own and its slices become the Stories. Exactly one of Feature or Slice occupies the Story level on any branch, so no issue is ever both."
+  },
+
+  "issues": [
+    { "adlc_id": "EPIC-5", "jira_key": "HL-12", "issue_type": "Epic", "summary": "Identity & Access", "action": "FETCHED", "parent": null, "labels": ["adlc", "pi:PI-2026-Q2"] },
+    { "adlc_id": "EPIC-1", "jira_key": "HL-8", "issue_type": "Epic", "summary": "Producer Onboarding & Catalog", "action": "FETCHED", "parent": null, "labels": ["adlc", "pi:PI-2026-Q2"] },
+    { "adlc_id": "F5.1", "jira_key": "HL-84", "issue_type": "Story", "summary": "External identity-provider integration", "action": "CREATED", "parent": "HL-12", "story_points": 13, "labels": ["adlc", "feature:F5.1", "band:1", "wsjf:1"] },
+    { "adlc_id": "S-F1.1-a", "jira_key": "HL-85", "issue_type": "Story", "summary": "Happy-path producer registration", "action": "CREATED", "parent": "HL-8", "story_points": 14, "labels": ["adlc", "feature:F1.1", "slice", "band:1"] },
+    { "adlc_id": "S-F1.1-b", "jira_key": "HL-86", "issue_type": "Story", "summary": "Asynchronous FBO verification and its outcomes", "action": "CREATED", "parent": "HL-8", "story_points": 8, "labels": ["adlc", "feature:F1.1", "slice", "band:1"] },
+    { "adlc_id": "WU-F5.1-01", "jira_key": "HL-87", "issue_type": "Sub-task", "summary": "Producer registration via external IdP", "action": "CREATED", "parent": "HL-84", "story_points": 5, "labels": ["adlc", "layer:integration", "feature:F5.1"], "verification_ref": "TC-F5.1-01" },
+    { "adlc_id": "WU-F5.1-02", "jira_key": "HL-88", "issue_type": "Sub-task", "summary": "OIDC token validation", "action": "CREATED", "parent": "HL-84", "story_points": 3, "labels": ["adlc", "layer:business-logic", "feature:F5.1"], "verification_ref": "TC-F5.1-03,TC-ADV-F5.1-01" },
+    { "adlc_id": "WU-F5.1-03", "jira_key": "HL-89", "issue_type": "Sub-task", "summary": "Role provisioning from the onboarding record", "action": "CREATED", "parent": "HL-84", "story_points": 5, "labels": ["adlc", "layer:business-logic", "feature:F5.1"], "verification_ref": "TC-F5.1-02" },
+    { "adlc_id": "WU-F1.1-01", "jira_key": "HL-90", "issue_type": "Sub-task", "summary": "Producer entity schema migration", "action": "CREATED", "parent": "HL-85", "story_points": 3, "labels": ["adlc", "layer:data", "feature:F1.1"], "verification_ref": "TC-S-F1.1-a-05" },
+    { "adlc_id": "WU-F1.1-02", "jira_key": "HL-91", "issue_type": "Sub-task", "summary": "FBO number capture endpoint", "action": "CREATED", "parent": "HL-85", "story_points": 5, "labels": ["adlc", "layer:api", "feature:F1.1"], "verification_ref": "TC-S-F1.1-a-01,TC-S-F1.1-a-02,TC-S-F1.1-a-03,TC-ADV-S-F1.1-a-01" },
+    { "adlc_id": "WU-F1.1-03", "jira_key": "HL-92", "issue_type": "Sub-task", "summary": "Registration submission form", "action": "CREATED", "parent": "HL-85", "story_points": 3, "labels": ["adlc", "layer:ui", "feature:F1.1"], "verification_ref": "TC-S-F1.1-a-02" },
+    { "adlc_id": "WU-F1.1-04", "jira_key": "HL-93", "issue_type": "Sub-task", "summary": "Publication gate on pending-verification", "action": "CREATED", "parent": "HL-85", "story_points": 3, "labels": ["adlc", "layer:business-logic", "feature:F1.1"], "verification_ref": "TC-S-F1.1-a-04" },
+    { "adlc_id": "WU-F1.1-05", "jira_key": "HL-94", "issue_type": "Sub-task", "summary": "FBO register lookup integration", "action": "CREATED", "parent": "HL-86", "story_points": 5, "labels": ["adlc", "layer:integration", "feature:F1.1"], "verification_ref": "TC-S-F1.1-b-01,TC-S-F1.1-b-03,TC-ADV-S-F1.1-b-01" },
+    { "adlc_id": "WU-F1.1-06", "jira_key": "HL-95", "issue_type": "Sub-task", "summary": "Rejected-verification notification", "action": "CREATED", "parent": "HL-86", "story_points": 3, "labels": ["adlc", "layer:business-logic", "feature:F1.1"], "verification_ref": "TC-S-F1.1-b-02" }
+  ],
+
+  "issue_links": [
+    { "from": "HL-88", "type": "is blocked by", "to": "HL-87", "derived_from": "WU-F5.1-02.depends_on_unit" },
+    { "from": "HL-89", "type": "is blocked by", "to": "HL-88", "derived_from": "WU-F5.1-03.depends_on_unit" },
+    { "from": "HL-91", "type": "is blocked by", "to": "HL-90", "derived_from": "WU-F1.1-02.depends_on_unit" },
+    { "from": "HL-91", "type": "is blocked by", "to": "HL-88", "derived_from": "WU-F1.1-02.depends_on_unit — cross-feature, F1.1 to F5.1" },
+    { "from": "HL-92", "type": "is blocked by", "to": "HL-91", "derived_from": "WU-F1.1-03.depends_on_unit" },
+    { "from": "HL-93", "type": "is blocked by", "to": "HL-90", "derived_from": "WU-F1.1-04.depends_on_unit" },
+    { "from": "HL-94", "type": "is blocked by", "to": "HL-90", "derived_from": "WU-F1.1-05.depends_on_unit" },
+    { "from": "HL-95", "type": "is blocked by", "to": "HL-94", "derived_from": "WU-F1.1-06.depends_on_unit" },
+    { "from": "HL-86", "type": "is blocked by", "to": "HL-85", "derived_from": "S-F1.1-b.depends_on_slices" },
+    { "from": "HL-85", "type": "is blocked by", "to": "HL-84", "derived_from": "S-F1.1-a.depends_on_features" }
+  ],
+
+  "updates_applied": [
+    { "jira_key": "HL-8", "adlc_id": "EPIC-1", "fields_changed": ["customfield_10500 (ADLC Run Id)"], "before": "wf-hl-pi0-1a2b3c4d", "after": "wf-hl-pi1-3c4d5e6f" },
+    { "jira_key": "HL-12", "adlc_id": "EPIC-5", "fields_changed": ["customfield_10500 (ADLC Run Id)"], "before": "wf-hl-pi0-1a2b3c4d", "after": "wf-hl-pi1-3c4d5e6f" }
+  ],
+
+  "hierarchy_verification": {
+    "expected_issues": 14,
+    "created": 12,
+    "fetched": 2,
+    "updated": 2,
+    "orphans": 0,
+    "level_occupancy": [
+      { "jira_level": "Epic", "count": 2 },
+      { "jira_level": "Story", "count": 3 },
+      { "jira_level": "Sub-task", "count": 9 }
+    ],
+    "double_representation_check": "PASS — F1.1 has no issue of its own. Its 22 points appear once, split across HL-85 (14) and HL-86 (8)."
+  },
+
+  "api_call_log": {
+    "total_calls": 30,
+    "by_tool": [
+      { "tool": "tool-L1-jira-fetch-issue", "calls": 14, "hits": 2, "misses": 12 },
+      { "tool": "tool-L1-jira-create-issue", "calls": 13, "successes": 12, "retried": 1 },
+      { "tool": "tool-L1-jira-update-issue", "calls": 3 }
+    ],
+    "retries": [
+      { "adlc_id": "WU-F1.1-02", "attempt_1": "HTTP 429 rate limited", "attempt_2": "success — HL-91", "idempotency": "The retry re-ran fetch-before-create first, so a call that had committed server-side before the 429 would have been a no-op rather than a duplicate." }
+    ]
+  },
+
+  "not_pushed": [
+    { "item": "rightsizing_log (6 events, 4 blocking)", "reason": "Evaluator material, not delivery state." },
+    { "item": "capacity_signal disposition (35 points vs 30)", "reason": "cycle and disposition are the feature-cycle-planner's fields. Asserting overflow in Jira before the planner decides would make Jira disagree with cycle-plan.md." },
+    { "item": "OQ-01, OQ-02", "reason": "An open question is not a unit of work until someone decides it is." }
+  ],
+
+  "warnings": [
+    { "id": "JO-W01", "severity": "MEDIUM", "summary": "Cycle 1 is over capacity in Jira as it now stands: 35 points against 30.", "action": "Flagged. The planner's reflow will move S-F1.1-b (HL-86, HL-94, HL-95 — 8 points); this agent then updates rather than recreates." },
+    { "id": "JO-W02", "severity": "LOW", "summary": "Sub-task story points are not rolled up by this project's configuration; parent totals are written explicitly and go stale if edited directly in Jira.", "action": "Recorded. The next sync recomputes from tasks.json, which stays the source of truth." }
+  ]
+}

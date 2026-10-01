@@ -1,0 +1,92 @@
+{
+  "target_document": "integration-architecture.md",
+  "produced_by": "L1-design-integration-architect@1.0.0",
+  "invocation": "delta",
+  "execution_id": "exec-intd-9b0c1d2f",
+  "workflow_execution_id": "wf-hl-pi1-3c4d5e6f",
+  "cycle": "C1-producer-registration",
+
+  "from_version": "1.0",
+  "to_version": "2.0",
+  "type": "structural",
+  "version_bump": "major",
+  "structural": true,
+  "adr_required": true,
+  "adr_id": "ADR-012",
+  "approval_gate": "Enterprise Architect",
+  "approval_status": "PENDING — this delta cannot merge until ADR-012 is approved",
+  "propagates_to": [
+    { "document": "foundational-solution-architecture.md", "section": "APP-2.3", "change": "New edge APP-2.3-e7: Identity -> competent-authority FBO register (external)" }
+  ],
+  "structural_assessment": "STRUCTURAL, and not a close call. Cycle 1 introduces an integration edge crossing the product boundary to a party HarvestLink does not control, and no such edge exists in APP-2.3. The FSA's component interaction map is what changes. Treating this as extending would let the target and the built system diverge on the one question a conformance check is least able to recover: what this product talks to.",
+
+  "changes": [
+    {
+      "change_id": "INTD-01",
+      "section": "INT-4",
+      "operation": "add",
+      "content": "INT-4.7 — Producer FBO verification against the competent authority's register. Identity -> external register. Style: asynchronous within the product, request/response at the external boundary. Owner of contract: the competent authority, NOT HarvestLink. Degraded mode: NoAnswer leaves the registration pending with bounded retry; there is no branch that treats an unanswered lookup as valid. Latency budget: PENDING, INT-PEND-04.",
+      "rationale": "The first flow in this product whose contract is owned outside it. Every prior flow is between two HarvestLink contexts or is outbound-only to a group system with no answer expected.",
+      "source": ["00-overview.md cross-component sequence", "lld LLD-D01", "fr FR-003"]
+    },
+    {
+      "change_id": "INTD-02",
+      "section": "INT-2",
+      "operation": "add",
+      "content": "New approved style — 'Third-party dependency on an externally-owned contract': a synchronous request/response call to a contract this product neither owns nor versions, consumed out of band so the product's own transactions never block on it. Permitted only where the answer is a matter of external fact the product cannot determine for itself.",
+      "rationale": "The new flow shape the delta rule anticipates. All five existing approved styles assume HarvestLink owns one end of the contract. This one does not, and version negotiation, deprecation timing and availability are all outside this product's control — a style entry that did not say so would invite a second such integration to be added casually.",
+      "source": ["int INT-2", "kb-L2-food-domain-api-patterns FD2"]
+    },
+    {
+      "change_id": "INTD-03",
+      "section": "INT-5",
+      "operation": "add",
+      "content": "Contract fbo-register.lookup — owner: competent authority (EXTERNAL); consumer: identity-service; style: synchronous request/response; version: as published by the authority; initial state: Planned; externally_owned: true.",
+      "rationale": "An externally-owned contract cannot be version-negotiated by us, has a deprecation timetable we do not set, and cannot be stubbed from our own OpenAPI document. INT-9's expand-and-contract policy does not apply — we are the consumer, and our only lever is to detect a breaking change and react.",
+      "consequences": [
+        "INT-9 does not govern this contract. Version pinning where the authority supports it, and a contract test against the live register that fails loudly rather than a stub that keeps passing after the real thing changes.",
+        "INT-8's external-party contract-version distribution signal was written for partners consuming OUR contracts. It does not cover us consuming someone else's — recorded as INT-PEND-05."
+      ],
+      "source": ["int INT-5", "int INT-9"]
+    },
+    {
+      "change_id": "INTD-04",
+      "section": "INT-7",
+      "operation": "extend",
+      "content": "New trust boundary: identity-service -> competent-authority register. Outbound egress crossing the product boundary. Caller identity is the credential the authority issues to HarvestLink; the producer's identity is NOT forwarded, and the producer's session correlation id is not propagated outside the product boundary.",
+      "rationale": "Correlation propagation is required at every internal hop (INT-8) and is deliberately terminated at this one. A correlation id carried to an external register would leak an internal identifier into a third party's logs for no benefit to either side.",
+      "source": ["int INT-7", "kb-L1-enterprise-security ES1"]
+    },
+    {
+      "change_id": "INTD-05",
+      "section": "INT-4",
+      "operation": "extend",
+      "content": "INT-4.3 (publication eligibility, Catalogue -> Identity) gains its realising operation: getRegistrationStatus, p95 <= 250 ms. The flow was registered at Cycle 0; the contract is now realised by a named operation, and its consumer in Cycle 1 is producer-portal rather than Catalogue, which does not yet publish listings.",
+      "rationale": "Merging the cycle's cross-component sequence into INT-4 is this invocation's job. The end-to-end sequence crosses producer-portal, identity-service, the event broker and notifications-worker; no single component HLD can hold it.",
+      "source": ["00-overview.md", "openapi.yaml"]
+    },
+    {
+      "change_id": "INTD-06",
+      "section": "INT-12",
+      "operation": "add",
+      "content": "INT-PEND-04 — latency budget and timeout for the FBO register lookup. Trigger: the competent authority publishes a service level, or observed p95 over a month of production traffic supplies an evidence-based figure. INT-PEND-05 — an observability signal for contract versions on externally-owned contracts we consume. Trigger: a second externally-owned contract is admitted, or the authority announces a version change.",
+      "rationale": "No NFR supplies a budget and the authority publishes none. A plausible '2 seconds' would become the timeout the retry policy is built around, derived from nothing. The non-answer BEHAVIOUR is decided — stays pending, bounded retry, never optimistically valid. A missing number defers a number, not a decision.",
+      "source": ["int INT-12", "kb-L2-food-domain-api-patterns FD4"]
+    },
+    {
+      "change_id": "INTD-07",
+      "section": "INT-11",
+      "operation": "extend",
+      "content": "INT-C1 amended: 'every cross-context edge has a contract' extended to 'every cross-context AND every cross-boundary edge has a registered contract, whether or not this product owns it'. INT-C3 unchanged but now has a PENDING it must tolerate — INT-4.7's budget is PENDING with a trigger, which the check permits and a silence would not.",
+      "rationale": "INT-C1 as written would have passed silently on an ungoverned external egress, because the edge is not between two bounded contexts. The check has to see the edge the FSA did not have.",
+      "source": ["int INT-11", "PRIN-03-C1"]
+    }
+  ],
+
+  "findings_raised": ["INTD-F01", "INTD-F02"],
+  "guardrails": {
+    "gr-L1-consistency-check": "pass",
+    "gr-L1-schema-validator": "pass",
+    "correction_during_authoring": "INT-4.3's consumer was corrected from Catalogue to producer-portal for this cycle. Catalogue is the declared consumer at Cycle 0 and does not consume it yet; recording it as active would have made the dependency graph assert traffic that does not flow."
+  }
+}

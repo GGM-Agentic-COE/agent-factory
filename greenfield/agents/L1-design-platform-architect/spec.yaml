@@ -1,0 +1,95 @@
+# Agent Specification Document
+spec_version: "1.0"
+artifact_type: agent
+metadata:
+  name: L1-design-platform-architect
+  version: "1.0.0"
+  layer: L1
+  phase: design
+  owner: agentic-ai-coe
+  created: "2026-09-22"
+  bom_phase: "2.25 — Platform & Data Foundation (Cycle 0)"
+  bom_status: "NEW"
+  invocation: "foundational (runs once per project). A conditional delta invocation exists in BOM Phase 4 — it fires only on a PLT-6 NOT PRESENT hit, which is most cycles' no — and is NOT built here. See README."
+
+purpose:
+  description: "Owns the platform viewpoint (PLT-*) for the whole product — runtime topology, environment model, CI/CD pipeline and supply chain, observability and SLOs, secrets and workload identity, network, resilience and DR. Its distinguishing output is PLT-6, the capability register: a table of what the platform can currently support, which turns 'did we think about platform?' from a judgement call into a lookup the impact assessor performs mechanically."
+  input: "foundational-solution-architecture.md (APP-1 contexts, APP-2 component map, CON-*, REQ-PLT-*, SEC-*, § 4 PRIN rows) from L1-design-foundational-architect, and nfr_classifications from L1-requirements-nfr-classifier — both fetched from blob storage. Optionally data-architecture.md and integration-architecture.md (whose demands this viewpoint realises) and binding-principles.json."
+  output: "platform-architecture.md (incl. PLT-6 capability register) written back to blob storage, plus per-platform-component hld.md/lld.md and the IaC manifests the platform requires — all as blob artifacts. Structured items carry the capability register, runtime workloads, resilience targets, demand traceability, conformance checks, pending decisions and the Cycle 0 exit proof."
+  business_value: "Platform is ~80% front-loaded: a feature cycle's platform delta is empty most of the time and occasionally very large, a completely different shape from application architecture, and the reason platform cannot be a subsection of a per-feature HLD. Smuggling this work into the first real feature cycle is what makes that feature take three times its estimate and forces platform decisions under delivery pressure. PLT-6 is the lasting payoff: every later Impact Assessment performs a mechanical lookup against it instead of a judgement call, which is also why a wrongly-AVAILABLE row is the most damaging error this agent can make — it makes a feature's platform delta disappear from its estimate."
+
+prompt:
+  ref: "prompts/L1-design-platform-architect/instructions.md"
+  version: "1.0.0"
+  description: >
+    Derives the capability DEMAND set first — from REQ-PLT-*, PLT-binding
+    CON-*, SEC-* controls, and where available DAT-4's planes, DAT-3.3's
+    encryption requirement and INT-2/INT-8's runtime demands — then chooses a
+    realization for each from the approved enterprise catalogue, checking
+    every named product's lifecycle status per PRIN-07. Builds PLT-6
+    including NOT PRESENT rows, maps every APP-1 context to at least one
+    independently deployable component, takes every resilience figure from an
+    nfr-spec.md boundary condition or leaves it PENDING, and states the
+    Cycle 0 exit test as a proof rather than a score. The full
+    platform-architecture.md template is embedded literally per S4.
+
+contract:
+  input_schema: "$ref: schemas/agent-input-contract-schema.json"
+  output_schema: "$ref: schemas/agent-output-schema.json"
+
+  input:
+    accepts_from_agents: [L1-design-foundational-architect, L1-requirements-nfr-classifier, L1-design-data-architect, L1-design-integration-architect]
+    accepts_direct_input: false
+    accepts_file_upload:
+      enabled: true
+      formats: [".md", ".json"]
+    required_parameters:
+      folder_name: { type: string, description: "Blob storage folder holding the Cycle 0 input artifacts; also the folder platform-architecture.md and every secondary artifact are written back to" }
+      foundational_architecture_output: { type: object, description: "foundational-solution-architecture.md — must contain APP-1 bounded contexts. Without them there is no deployability obligation to satisfy, which is half this document's content. Hard precondition: missing or context-less is INSUFFICIENT_CONTEXT" }
+      nfr_spec_output: { type: object, description: "L1-requirements-nfr-classifier's agent_output — supplies the Availability, Performance and Scalability boundary conditions. These are the ONLY admissible source for an availability target, RTO, RPO or capacity figure. Hard precondition: a platform architecture with no boundary conditions is where invented uptime percentages come from" }
+    optional_parameters:
+      data_architecture_output: { type: object, description: "data-architecture.md from L1-design-data-architect. Enriching: DAT-4's plane decisions and DAT-3.3's encryption requirement become platform capabilities this viewpoint realises. The data viewpoint states the requirement; this one selects the realization" }
+      integration_architecture_output: { type: object, description: "integration-architecture.md from L1-design-integration-architect. Enriching: INT-2's approved styles imply event-infrastructure capability, INT-8's observability requirement implies the correlation-propagation capability PLT-12 provides. Note the BOM's Phase 2.25 chain order is platform -> data -> integration, so on a first pass BOTH siblings are usually absent; when they are, capability demands come from REQ-PLT-* alone and the document records that the capability set must be re-checked before Cycle 0 closes" }
+      binding_principles_json: { type: object, description: "The per-product principle resolution authored against binding-principles.template.json. Read per kb-L1-enterprise-architecture BP11 — and read BP8's standing note before concluding PRIN-07 does not bind: resolved NOT_APPLICABLE at FSA level, it is still MANDATORY here, because this document is one of the first two in the pipeline permitted to name a product" }
+
+  output:
+    $ref: "output_schema.json"
+
+context:
+  knowledge_bases:
+    - kb-L1-enterprise-architecture   # binding-principles.md PRIN-04 (deployability), PRIN-07 (approved platforms) incl. BP8's standing note, PRIN-08 (operability); BP11 resolution contract; landscape EA2 approved stack, EA6 SLA tiers, EA10 governance triggers
+    - kb-L1-enterprise-security       # ES1 identity boundary, ES4 availability tiering, ES5 secure SDLC pre-launch, ES10 encryption and key management — the realisation side of what DAT-3.3 states as a requirement
+  guardrails:
+    - gr-L1-output-schema-validator
+    - gr-L1-consistency-check         # per BOM Phase 2.25 row. NOTE: repo has gr-L3-consistency-checker, not an L1 build — see README open item 1
+    - gr-L1-secret-scanner            # per BOM Phase 2.25 row. NOTE: not built. Load-bearing here specifically: this agent emits IaC manifests, which is where a committed credential actually gets introduced
+  tools:
+    - tool-L1-azure-blob-reader       # fetches the FSA, nfr-spec.md, both sibling viewpoint documents and binding-principles.json in ONE call
+    - tool-L1-azure-blob-writer       # writes platform-architecture.md, the platform-component HLD/LLDs and the IaC manifests back to the same folder
+  # The BOM row also lists tool-L1-github-upload-file, tool-L1-github-create-branch and
+  # tool-L1-confluence-create-page. Those are WRITE/PUBLISH tools, which per the agent-creator
+  # Core/Utility split belong to a Utility agent rather than to a generator — coupling this
+  # agent's derivation logic to one repository host is exactly what that split prevents. The
+  # blob writer is the repo's standing exception (L1-vision-statement-generator uses it the
+  # same way). "IaC committed" on the BOM row is therefore satisfied in two steps: this agent
+  # writes the manifests to blob, github-orchestrator commits what it wrote. The prompt
+  # forbids claiming the commit happened here. See README.
+
+quality:
+  evaluation_ref: "evaluation.md"
+  min_score: 7.0        # self-check bar; no L1-design-platform-architect-evaluator exists.
+                        # The real downstream check is the Cycle 0 exit test, signed off by the
+                        # Platform Lead at the Phase 2.25 human gate — a BOOLEAN gate, not a
+                        # score, because a scalar cannot express "the pipeline half works".
+  hallucination_check: true
+  consistency_check: true
+
+performance:
+  target_latency_seconds: 60    # highest of the three viewpoint architects: it emits the main
+                                # document plus per-platform-component HLD/LLDs plus IaC manifests
+  max_token_budget: 28000
+
+versioning:
+  input_version: "1.0"
+  output_version: "1.0"
+  instruction_hash: "sha256:pending"

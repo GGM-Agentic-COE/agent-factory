@@ -1,0 +1,133 @@
+{
+  "_comment": "Input to L1-inception-task-generator, BOM Phase 3. The BOM row names stories.json as the only input, but the v2.1 scope note places behaviour-level test design BETWEEN story-generator and task-generator — scenario-writer -> adversarial-case-writer -> case-writer mint the case_ids that this agent binds as verification_ref, and gr-L1-verification-ref-resolvable blocks any Work Unit whose verifier does not exist. Test cases are therefore a required input, not an optional one: T3 cannot be satisfied without them.",
+  "_bom_note": "Appendix B.2 offers 'OIDC token validation & role provisioning' as an example of a T1-compliant title, while T1's encoded check forbids a coordinating conjunction ('and'/'&'/','-joined verbs) in the title. The two cannot both hold. This example follows the encoded check, because that is what the guardrail actually runs, and the T1 block below shows the consequence.",
+
+  "folder_name": "harvestlink/pi-2026-q2/cycle-1",
+
+  "stories_output": {
+    "agent_id": "L1-inception-story-generator",
+    "agent_version": "1.0.0",
+    "execution_id": "exec-sg-8c9d0e1f",
+    "workflow_execution_id": "wf-hl-pi1-3c4d5e6f",
+    "status": "success",
+    "content": {
+      "type": "stories",
+      "schema_version": "1.0",
+      "items": {
+        "stories": [
+          {
+            "slice_id": "S-F1.1-a",
+            "feature_id": "F1.1",
+            "epic_id": "EPIC-1",
+            "title": "Happy-path producer registration",
+            "sequence": 1,
+            "depends_on_slices": [],
+            "depends_on_features": ["F5.1"],
+            "acceptance_criteria": [
+              { "ac_id": "S-F1.1-a-AC1", "summary": "well-formed FBO number accepted, held pending-verification" },
+              { "ac_id": "S-F1.1-a-AC2", "summary": "malformed FBO number refused, no record created" },
+              { "ac_id": "S-F1.1-a-AC3", "summary": "missing attestation refused server-side, not client-bypassable" },
+              { "ac_id": "S-F1.1-a-AC4", "summary": "publication blocked while pending-verification" }
+            ]
+          },
+          {
+            "slice_id": "S-F1.1-b",
+            "feature_id": "F1.1",
+            "epic_id": "EPIC-1",
+            "title": "Asynchronous FBO verification and its outcomes",
+            "sequence": 2,
+            "depends_on_slices": ["S-F1.1-a"],
+            "depends_on_features": [],
+            "acceptance_criteria": [
+              { "ac_id": "S-F1.1-b-AC1", "summary": "valid lookup -> registration valid, evidence recorded, publication permitted" },
+              { "ac_id": "S-F1.1-b-AC2", "summary": "invalid lookup -> rejected, producer notified, publication blocked" },
+              { "ac_id": "S-F1.1-b-AC3", "summary": "lookup timeout -> stays pending and retries, never optimistically valid" },
+              { "ac_id": "S-F1.1-b-AC4", "summary": "duplicate verification delivery -> no second evidence record" }
+            ]
+          },
+          {
+            "slice_id": null,
+            "feature_id": "F5.1",
+            "epic_id": "EPIC-5",
+            "title": "External identity-provider integration",
+            "sequence": 0,
+            "depends_on_slices": [],
+            "depends_on_features": [],
+            "acceptance_criteria": [
+              { "ac_id": "F5.1-AC1", "summary": "external party authenticates via external IdP, no employee-directory credential" },
+              { "ac_id": "F5.1-AC2", "summary": "role provisioned from onboarding record, no default elevated role" },
+              { "ac_id": "F5.1-AC3", "summary": "invalid token refused server-side, not client-bypassable" }
+            ]
+          }
+        ]
+      },
+      "artifacts": [
+        { "id": "artifact-sg-8c9d0e1f", "type": "document", "name": "stories.json", "format": "json", "storage": { "provider": "s3", "location": "s3://adlc-artifacts/wf-hl-pi1-3c4d5e6f/cycle-1/stories.json" }, "description": "Cycle 1 stories", "produced_by": "L1-inception-story-generator" }
+      ],
+      "execution_summary": "• 2 story slices under F1.1; F5.1 carried unsliced. 15 acceptance criteria."
+    }
+  },
+
+  "test_cases_output": {
+    "agent_id": "L1-testing-case-writer",
+    "agent_version": "1.0.0",
+    "execution_id": "exec-cw-9d0e1f2a",
+    "workflow_execution_id": "wf-hl-pi1-3c4d5e6f",
+    "status": "success",
+    "content": {
+      "type": "test_cases",
+      "schema_version": "1.0",
+      "items": {
+        "cases": [
+          { "case_id": "TC-F5.1-01", "covers_ac": "F5.1-AC1", "kind": "behaviour", "tier": "integration", "title": "External party authenticates through the external IdP" },
+          { "case_id": "TC-F5.1-02", "covers_ac": "F5.1-AC2", "kind": "behaviour", "tier": "unit", "title": "Role provisioned from the onboarding record, never defaulted" },
+          { "case_id": "TC-F5.1-03", "covers_ac": "F5.1-AC3", "kind": "behaviour", "tier": "unit", "title": "Invalid token refused server-side" },
+          { "case_id": "TC-ADV-F5.1-01", "covers_ac": "F5.1-AC3", "kind": "adversarial", "tier": "integration", "title": "Replayed token with altered role claim is refused" },
+          { "case_id": "TC-S-F1.1-a-01", "covers_ac": "S-F1.1-a-AC1", "kind": "behaviour", "tier": "contract", "title": "Well-formed FBO number accepted and held pending" },
+          { "case_id": "TC-S-F1.1-a-02", "covers_ac": "S-F1.1-a-AC2", "kind": "behaviour", "tier": "contract", "title": "Malformed FBO number refused, no record created" },
+          { "case_id": "TC-S-F1.1-a-03", "covers_ac": "S-F1.1-a-AC3", "kind": "behaviour", "tier": "contract", "title": "Submission without attestation refused server-side" },
+          { "case_id": "TC-ADV-S-F1.1-a-01", "covers_ac": "S-F1.1-a-AC3", "kind": "adversarial", "tier": "contract", "title": "Attestation flag forged client-side is ignored by the server" },
+          { "case_id": "TC-S-F1.1-a-04", "covers_ac": "S-F1.1-a-AC4", "kind": "behaviour", "tier": "component", "title": "Publication blocked while pending-verification" },
+          { "case_id": "TC-S-F1.1-a-05", "covers_ac": "S-F1.1-a-AC1", "kind": "behaviour", "tier": "unit", "title": "Producer entity persists a pending-verification registration" },
+          { "case_id": "TC-S-F1.1-b-01", "covers_ac": "S-F1.1-b-AC1", "kind": "behaviour", "tier": "integration", "title": "Valid FBO lookup marks the registration valid against a stubbed register" },
+          { "case_id": "TC-S-F1.1-b-02", "covers_ac": "S-F1.1-b-AC2", "kind": "behaviour", "tier": "scenario", "title": "Invalid lookup rejects the registration and notifies the producer" },
+          { "case_id": "TC-S-F1.1-b-03", "covers_ac": "S-F1.1-b-AC3", "kind": "behaviour", "tier": "integration", "title": "Lookup timeout leaves the registration pending and schedules a retry" },
+          { "case_id": "TC-ADV-S-F1.1-b-01", "covers_ac": "S-F1.1-b-AC4", "kind": "adversarial", "tier": "integration", "title": "Duplicate verification delivery creates no second evidence record" }
+        ]
+      },
+      "artifacts": [
+        { "id": "artifact-cw-9d0e1f2a", "type": "document", "name": "test-cases.json", "format": "json", "storage": { "provider": "s3", "location": "s3://adlc-artifacts/wf-hl-pi1-3c4d5e6f/cycle-1/test-cases.json" }, "description": "14 minted case_ids across 15 acceptance criteria", "produced_by": "L1-testing-case-writer" }
+      ],
+      "execution_summary": "• 14 cases minted: 11 behaviour, 3 adversarial. These are the only ids a verification_ref may resolve to."
+    }
+  },
+
+  "decomposition_standard": {
+    "source": "kb-L1-decomposition-standard",
+    "spine": ["Epic", "Feature", "[Story slice]", "Work Unit"],
+    "layer_enum": ["data", "api", "business-logic", "ui", "integration", "test", "docs"],
+    "thresholds": {
+      "T2_max_files_read": 12,
+      "T2_max_context_fraction_of_window": 0.5,
+      "model_window_tokens": 200000,
+      "T2_max_context_tokens": 100000,
+      "T5_max_hard_dependency_count": 2
+    },
+    "threshold_note": "N=12 and 0.5 x window are the defaults; both are overridable per L2/L3 domain variant via knowledge_bases_append. This run used the defaults.",
+    "verdicts": {
+      "T1": "BLOCK -> split",
+      "T2": "BLOCK -> split",
+      "T3": "BLOCK -> add verifier",
+      "T4": "WARN -> prefer split",
+      "T5": "WARN -> merge"
+    }
+  },
+
+  "cycle_context": {
+    "pi_id": "PI-2026-Q2",
+    "cycle": 1,
+    "capacity_points": 30,
+    "team": "HarvestLink Squad A",
+    "capacity_note": "Supplied for the capacity signal only. Fitting Work Units to a cycle and assigning disposition is L1-planning-feature-cycle-planner's decision, not this agent's."
+  }
+}

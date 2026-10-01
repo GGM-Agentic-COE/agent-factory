@@ -1,0 +1,365 @@
+{
+  "agent_id": "L1-arch-baseline-generator",
+  "agent_version": "1.0.0",
+  "execution_id": "exec-bl-4e5f6a7b",
+  "workflow_execution_id": "wf-hl-cycle0-9f8e7d6c",
+  "status": "success",
+  "content": {
+    "type": "application_baseline",
+    "schema_version": "1.0",
+    "items": {
+      "baseline_control": {
+        "baseline_version": "0.1",
+        "invocation": "seed",
+        "lifecycle_stage": "Cycle 0 close",
+        "mode": "GREENFIELD-SEED",
+        "pre_implementation": true,
+        "generated_at": "2026-04-13T09:14:22Z",
+        "regenerated_from": "canonical documents only",
+        "deployed_estate_read": false,
+        "deployed_estate_note": "No CMDB or service-catalogue export was read: at Cycle 0 close nothing is built. Every component below is DECLARED, not observed. From Phase 7.5 onward this generator reads the deployed estate as well, and the two halves are reconciled rather than merged.",
+        "derivation_rule": "Every row is derived from a canonical document section. Nothing here is authored. A hand-edit to application-baseline.md means the generator is broken, not that the baseline was improved.",
+        "downstream_registration": "kb-L3-harvestlink-application-baseline"
+      },
+
+      "source_documents": [
+        { "document": "foundational-solution-architecture.md", "version": "1.0.0", "status": "APPROVED", "produced_by": "L1-design-foundational-architect@2.3.0", "content_hash": "sha256:7c1a…e93f", "location": "s3://adlc-artifacts/wf-hl-cycle0-9f8e7d6c/foundational-solution-architecture.md", "sections_indexed": ["APP-1", "APP-2", "APP-2.3", "APP-3", "CON-*", "REQ-*", "OPEN-*"] },
+        { "document": "data-architecture.md", "version": "1.0", "status": "APPROVED", "produced_by": "L1-design-data-architect@1.0.0", "content_hash": "sha256:2b8d…41ac", "location": "s3://adlc-artifacts/wf-hl-cycle0-9f8e7d6c/data-architecture.md", "sections_indexed": ["DAT-1.1", "DAT-2.2", "DAT-3.2", "DAT-4", "DAT-6", "DAT-8", "DAT-9"] },
+        { "document": "integration-architecture.md", "version": "1.0", "status": "APPROVED", "produced_by": "L1-design-integration-architect@1.0.0", "content_hash": "sha256:9f40…c7b2", "location": "s3://adlc-artifacts/wf-hl-cycle0-9f8e7d6c/integration-architecture.md", "sections_indexed": ["INT-3.2", "INT-4", "INT-5", "INT-11", "INT-12"] },
+        { "document": "platform-architecture.md", "version": "1.0", "status": "APPROVED", "produced_by": "L1-design-platform-architect@1.0.0", "content_hash": "sha256:5e13…8dd0", "location": "s3://adlc-artifacts/wf-hl-cycle0-9f8e7d6c/platform-architecture.md", "sections_indexed": ["PLT-1", "PLT-3", "PLT-6", "PLT-9", "PLT-13", "PLT-14", "PLT-16", "PLT-17", "PLT-19"] }
+      ],
+
+      "components": [
+        {
+          "component_id": "CMP-001",
+          "name": "catalogue-service",
+          "bounded_context": "Catalogue",
+          "context_ref": "APP-1.01",
+          "kind": "service",
+          "lifecycle_state": "DECLARED",
+          "implementation_status": "NOT_STARTED",
+          "independently_deployable": true,
+          "workload_identity": "wi-catalogue",
+          "persistence": "catalogue_schema",
+          "entities_written": ["Listing", "ListingImage", "Category"],
+          "contracts_provided": ["catalogue.availability@v1", "catalogue.listing.published@1.0.0"],
+          "contracts_consumed": ["identity.registration-status@v1"],
+          "capabilities_required": ["Relational persistence", "Object storage", "Asynchronous messaging", "External-party identity"],
+          "availability_target": "99.5%",
+          "hld_ref": null,
+          "lld_ref": null,
+          "repo": null,
+          "deployed_version": null,
+          "cmdb_id": null,
+          "derived_from": ["fsa APP-2.01", "plt PLT-1", "dat DAT-1.1", "int INT-5", "plt PLT-14"]
+        },
+        {
+          "component_id": "CMP-002",
+          "name": "orders-service",
+          "bounded_context": "Orders",
+          "context_ref": "APP-1.02",
+          "kind": "service",
+          "lifecycle_state": "DECLARED",
+          "implementation_status": "NOT_STARTED",
+          "independently_deployable": true,
+          "workload_identity": "wi-orders",
+          "persistence": "orders_schema",
+          "entities_written": ["Order", "OrderLine", "OrderStatus"],
+          "contracts_provided": ["orders.order.placed@1.0.0"],
+          "contracts_consumed": ["catalogue.availability@v1", "billing.fee-quote@v1", "identity.registration-status@v1"],
+          "capabilities_required": ["Relational persistence", "Asynchronous messaging", "External-party identity"],
+          "availability_target": "99.5%",
+          "hld_ref": null,
+          "lld_ref": null,
+          "repo": null,
+          "deployed_version": null,
+          "cmdb_id": null,
+          "runtime_dependencies": [
+            { "on": "billing-service", "via": "INT-4.2", "style": "synchronous", "inside_transaction": true, "note": "Confirmation path; drives billing-service's 99.9% target" },
+            { "on": "catalogue-service", "via": "INT-4.1", "style": "synchronous", "inside_transaction": true }
+          ],
+          "derived_from": ["fsa APP-2.02", "plt PLT-1", "dat DAT-1.1", "int INT-4.1", "int INT-4.2", "int INT-5"]
+        },
+        {
+          "component_id": "CMP-003",
+          "name": "billing-service",
+          "bounded_context": "Billing",
+          "context_ref": "APP-1.03",
+          "kind": "service",
+          "lifecycle_state": "DECLARED",
+          "implementation_status": "NOT_STARTED",
+          "independently_deployable": true,
+          "workload_identity": "wi-billing",
+          "persistence": "billing_schema",
+          "entities_written": ["Transaction", "Fee", "Payout"],
+          "contracts_provided": ["billing.fee-quote@v1", "billing.payout.scheduled@1.0.0"],
+          "contracts_consumed": ["orders.order.placed@1.0.0", "identity.registration-status@v1"],
+          "capabilities_required": ["Relational persistence", "Asynchronous messaging", "Secrets and key management"],
+          "availability_target": "99.9%",
+          "availability_basis": "ES4 regulatory-defence case (Fee is tax-audit evidence) and the INT-4.2 confirmation-path dependency — not an inherited group default",
+          "data_residency": "Approved financial-data region",
+          "hld_ref": null,
+          "lld_ref": null,
+          "repo": null,
+          "deployed_version": null,
+          "cmdb_id": null,
+          "derived_from": ["fsa APP-2.03", "plt PLT-1", "dat DAT-1.1", "dat DAT-3.2", "plt PLT-14", "int INT-5"]
+        },
+        {
+          "component_id": "CMP-004",
+          "name": "identity-service",
+          "bounded_context": "Identity",
+          "context_ref": "APP-1.04",
+          "kind": "service",
+          "lifecycle_state": "DECLARED",
+          "implementation_status": "NOT_STARTED",
+          "independently_deployable": true,
+          "workload_identity": "wi-identity",
+          "persistence": "identity_schema",
+          "entities_written": ["Producer", "Buyer", "Session", "FoodSafetyRegistration"],
+          "contracts_provided": ["identity.registration-status@v1", "identity.registration.verified@1.0.0"],
+          "contracts_consumed": [],
+          "capabilities_required": ["Relational persistence", "Asynchronous messaging", "External-party identity", "Secrets and key management"],
+          "availability_target": "99.9%",
+          "availability_basis": "ES4 regulatory-defence case (FBO-status dispute); also gates publication via INT-4.3",
+          "data_residency": "Approved PII region",
+          "hld_ref": null,
+          "lld_ref": null,
+          "repo": null,
+          "deployed_version": null,
+          "cmdb_id": null,
+          "derived_from": ["fsa APP-2.04", "plt PLT-1", "dat DAT-1.1", "dat DAT-3.2", "plt PLT-14", "int INT-5"]
+        },
+        {
+          "component_id": "CMP-005",
+          "name": "notifications-worker",
+          "bounded_context": "Notifications",
+          "context_ref": "APP-1.05",
+          "kind": "worker",
+          "lifecycle_state": "DECLARED",
+          "implementation_status": "NOT_STARTED",
+          "independently_deployable": true,
+          "workload_identity": "wi-notifications",
+          "persistence": null,
+          "entities_written": [],
+          "entities_written_note": "Owns no entities by design (DAT-1.1). Recorded explicitly so a later reader cannot mistake the empty set for a gap in derivation.",
+          "contracts_provided": [],
+          "contracts_consumed": ["billing.payout.scheduled@1.0.0", "orders.order.placed@1.0.0", "identity.registration.verified@1.0.0"],
+          "capabilities_required": ["Asynchronous messaging"],
+          "availability_target": "99.5%",
+          "public_ingress": false,
+          "hld_ref": null,
+          "lld_ref": null,
+          "repo": null,
+          "deployed_version": null,
+          "cmdb_id": null,
+          "derived_from": ["fsa APP-2.05", "plt PLT-1", "dat DAT-1.1", "int INT-5"]
+        },
+        {
+          "component_id": "CMP-006",
+          "name": "buyer-web",
+          "bounded_context": "experience (Catalogue, Orders)",
+          "context_ref": "APP-2.06",
+          "kind": "frontend",
+          "lifecycle_state": "DECLARED",
+          "implementation_status": "NOT_STARTED",
+          "independently_deployable": true,
+          "workload_identity": "wi-buyer-web",
+          "persistence": null,
+          "entities_written": [],
+          "contracts_provided": [],
+          "contracts_consumed": ["catalogue.availability@v1"],
+          "contracts_consumed_note": "Via the group gateway only; the frontend reaches no service endpoint directly and no store at all.",
+          "capabilities_required": ["External-party identity"],
+          "availability_target": "99.5%",
+          "hld_ref": null,
+          "lld_ref": null,
+          "repo": null,
+          "deployed_version": null,
+          "cmdb_id": null,
+          "derived_from": ["fsa APP-2.06", "plt PLT-1", "plt PLT-8"]
+        },
+        {
+          "component_id": "CMP-007",
+          "name": "producer-portal",
+          "bounded_context": "experience (Catalogue, Billing)",
+          "context_ref": "APP-2.07",
+          "kind": "frontend",
+          "lifecycle_state": "DECLARED",
+          "implementation_status": "NOT_STARTED",
+          "independently_deployable": true,
+          "workload_identity": "wi-producer-portal",
+          "persistence": null,
+          "entities_written": [],
+          "contracts_provided": [],
+          "contracts_consumed": [],
+          "capabilities_required": ["External-party identity"],
+          "availability_target": "99.5%",
+          "hld_ref": null,
+          "lld_ref": null,
+          "repo": null,
+          "deployed_version": null,
+          "cmdb_id": null,
+          "derived_from": ["fsa APP-2.07", "plt PLT-1", "plt PLT-8"]
+        }
+      ],
+
+      "entity_ownership_index": [
+        { "entity": "Listing", "owning_context": "Catalogue", "writing_component": "catalogue-service", "classification": "Internal", "retention": "business lifecycle", "residency": "approved operating region", "derived_from": "dat DAT-1.1, DAT-3.2" },
+        { "entity": "ListingImage", "owning_context": "Catalogue", "writing_component": "catalogue-service", "classification": "Internal", "retention": "business lifecycle", "residency": "approved operating region", "derived_from": "dat DAT-1.1, DAT-3.2" },
+        { "entity": "Category", "owning_context": "Catalogue", "writing_component": "catalogue-service", "classification": "Public", "retention": "business lifecycle", "residency": "approved operating region", "derived_from": "dat DAT-1.1" },
+        { "entity": "Order", "owning_context": "Orders", "writing_component": "orders-service", "classification": "Confidential", "retention": "PENDING", "residency": "approved operating region", "pending_ref": "DAT-PEND-02", "derived_from": "dat DAT-1.1, DAT-3.2" },
+        { "entity": "OrderLine", "owning_context": "Orders", "writing_component": "orders-service", "classification": "Confidential", "retention": "PENDING", "residency": "approved operating region", "pending_ref": "DAT-PEND-02", "derived_from": "dat DAT-1.1, DAT-3.2" },
+        { "entity": "OrderStatus", "owning_context": "Orders", "writing_component": "orders-service", "classification": "Internal", "retention": "PENDING", "residency": "approved operating region", "pending_ref": "DAT-PEND-02", "derived_from": "dat DAT-1.1" },
+        { "entity": "Transaction", "owning_context": "Billing", "writing_component": "billing-service", "classification": "Financial", "retention": "6 years", "residency": "approved financial-data region", "derived_from": "dat DAT-1.1, DAT-3.2" },
+        { "entity": "Fee", "owning_context": "Billing", "writing_component": "billing-service", "classification": "Financial / Regulated Evidence", "retention": "10 years", "residency": "approved financial-data region", "derived_from": "dat DAT-1.1, DAT-3.2" },
+        { "entity": "Payout", "owning_context": "Billing", "writing_component": "billing-service", "classification": "Financial", "retention": "6 years", "residency": "approved financial-data region", "derived_from": "dat DAT-1.1, DAT-3.2" },
+        { "entity": "Producer", "owning_context": "Identity", "writing_component": "identity-service", "classification": "PII", "retention": "UK GDPR erasure for the non-retained population", "residency": "approved PII region", "derived_from": "dat DAT-1.1, DAT-3.2" },
+        { "entity": "Buyer", "owning_context": "Identity", "writing_component": "identity-service", "classification": "PII", "retention": "UK GDPR erasure for the non-retained population", "residency": "approved PII region", "derived_from": "dat DAT-1.1, DAT-3.2" },
+        { "entity": "Session", "owning_context": "Identity", "writing_component": "identity-service", "classification": "Confidential", "retention": "PENDING", "residency": "approved operating region", "pending_ref": "DAT-PEND-03", "derived_from": "dat DAT-1.1, DAT-3.2" },
+        { "entity": "FoodSafetyRegistration", "owning_context": "Identity", "writing_component": "identity-service", "classification": "Regulated Evidence", "retention": "6 years from creation", "residency": "approved PII region", "derived_from": "dat DAT-1.1, DAT-3.2" }
+      ],
+
+      "contract_index": [
+        { "contract": "catalogue.availability", "version": "v1", "owner_component": "catalogue-service", "consumer_components": ["orders-service", "buyer-web"], "style": "synchronous", "state": "Planned", "stub_required": true, "latency_budget": "p95 <= 300 ms", "degraded_mode": "refuse the order", "derived_from": "int INT-4.1, INT-5" },
+        { "contract": "billing.fee-quote", "version": "v1", "owner_component": "billing-service", "consumer_components": ["orders-service"], "style": "synchronous", "state": "Planned", "stub_required": true, "latency_budget": "p95 <= 400 ms", "degraded_mode": "hold confirmation", "derived_from": "int INT-4.2, INT-5" },
+        { "contract": "identity.registration-status", "version": "v1", "owner_component": "identity-service", "consumer_components": ["catalogue-service", "orders-service", "billing-service"], "style": "synchronous", "state": "Planned", "stub_required": true, "latency_budget": "p95 <= 250 ms", "degraded_mode": "refuse publication", "derived_from": "int INT-4.3, INT-5" },
+        { "contract": "orders.order.placed", "version": "1.0.0", "owner_component": "orders-service", "consumer_components": ["billing-service", "notifications-worker"], "style": "asynchronous", "event_kind": "Lifecycle", "replay_policy": "replayable, idempotent on dedup key", "state": "Planned", "stub_required": true, "derived_from": "int INT-3.2, INT-4.4, INT-5" },
+        { "contract": "identity.registration.verified", "version": "1.0.0", "owner_component": "identity-service", "consumer_components": ["notifications-worker", "UNRESOLVED: compliance evidence store"], "style": "asynchronous", "event_kind": "Evidence", "replay_policy": "never replayed", "state": "Planned", "stub_required": true, "finding_ref": "BL-F02", "derived_from": "int INT-3.2, INT-5" },
+        { "contract": "billing.payout.scheduled", "version": "1.0.0", "owner_component": "billing-service", "consumer_components": ["notifications-worker"], "style": "asynchronous", "event_kind": "Notification", "replay_policy": "replayable, idempotently", "state": "Planned", "stub_required": true, "latency_budget": "PENDING", "pending_ref": "INT-PEND-02", "derived_from": "int INT-4.5, INT-5" },
+        { "contract": "catalogue.listing.published", "version": "1.0.0", "owner_component": "catalogue-service", "consumer_components": ["notifications-worker"], "style": "asynchronous", "event_kind": "Lifecycle", "replay_policy": "replayable", "state": "Planned", "stub_required": true, "derived_from": "dat DAT-2.2, int INT-3.2" }
+      ],
+
+      "capability_index": [
+        { "capability": "Relational persistence", "status": "AVAILABLE", "realization": "managed relational service, schema-per-context", "lifecycle_check": "approved; invest", "consumed_by": ["catalogue-service", "orders-service", "billing-service", "identity-service"], "derived_from": "plt PLT-6" },
+        { "capability": "Asynchronous messaging", "status": "AVAILABLE", "realization": "managed event broker with dead-letter paths", "lifecycle_check": "approved; invest", "consumed_by": ["catalogue-service", "orders-service", "billing-service", "identity-service", "notifications-worker"], "derived_from": "plt PLT-6" },
+        { "capability": "Object storage", "status": "AVAILABLE", "realization": "managed object store", "lifecycle_check": "approved; invest", "consumed_by": ["catalogue-service"], "derived_from": "plt PLT-6" },
+        { "capability": "External-party identity", "status": "AVAILABLE", "realization": "group-approved external IdP", "lifecycle_check": "approved; invest", "consumed_by": ["catalogue-service", "orders-service", "identity-service", "buyer-web", "producer-portal"], "derived_from": "plt PLT-6" },
+        { "capability": "Secrets and key management", "status": "AVAILABLE", "realization": "group secrets vault + managed key capability", "lifecycle_check": "approved; invest", "consumed_by": ["billing-service", "identity-service"], "derived_from": "plt PLT-6" },
+        { "capability": "Outbound enterprise reporting feed", "status": "NOT PRESENT", "realization": null, "lifecycle_check": null, "consumed_by": [], "finding_ref": "BL-F01", "derived_from": "plt PLT-6" },
+        { "capability": "Full-text search", "status": "NOT PRESENT", "realization": null, "lifecycle_check": null, "consumed_by": [], "derived_from": "plt PLT-6" },
+        { "capability": "Analytical plane", "status": "NOT PRESENT", "realization": null, "lifecycle_check": null, "consumed_by": [], "pending_ref": "DAT-PEND-01", "derived_from": "plt PLT-6, dat DAT-4.3" },
+        { "capability": "Evidence-chain completeness monitoring", "status": "PARTIAL", "realization": "logs exist; no reconstruction query surface", "lifecycle_check": "approved; invest", "consumed_by": [], "gap": "no consumer can rebuild an evidence chain from events alone", "pending_ref": "PLT-PEND-03", "derived_from": "plt PLT-6, plt PLT-12" }
+      ],
+
+      "conformance_status": [
+        { "check": "DAT-C1", "description": "One writer per entity", "severity": "BLOCKING", "result": "PASS", "evidence": "13 entities, each with exactly one writing component in the inventory" },
+        { "check": "DAT-C2", "description": "No unregistered replication", "severity": "MAJOR", "result": "PASS", "evidence": "DAT-6 read-model register empty; no component holds a non-identifier attribute of another context's entity" },
+        { "check": "DAT-C3", "description": "Protected data has classification, retention and residency", "severity": "BLOCKING", "result": "PASS_WITH_PENDING", "evidence": "All protected entities resolved. Order, OrderLine, OrderStatus and Session carry PENDING retention, each with a DAT-PEND trigger — which the check permits and a missing trigger would not" },
+        { "check": "INT-C1", "description": "Every cross-context edge has a contract", "severity": "MAJOR", "result": "PASS", "evidence": "6 APP-2.3 edges, 6 INT-4 flows, 7 registered contracts" },
+        { "check": "INT-C2", "description": "No cross-context direct data access", "severity": "BLOCKING", "result": "PASS_WITH_EXCEPTION", "evidence": "One grant exists: EXC-PRIN-02-001, read-only, three columns, exit 2026-12-31. Declared, not discovered" },
+        { "check": "INT-C3", "description": "Synchronous calls are budgeted and have a degraded mode", "severity": "MAJOR", "result": "PASS", "evidence": "3 synchronous flows, each with budget, timeout and degraded mode" },
+        { "check": "PLT-C1", "description": "Isolation — no cross-context schema grants", "severity": "BLOCKING", "result": "PASS_WITH_EXCEPTION", "evidence": "Same single declared grant as INT-C2" },
+        { "check": "PLT-C2", "description": "Technology lifecycle not contain/retire", "severity": "MAJOR", "result": "PASS_WITH_EXCEPTION", "evidence": "EXC-PRIN-07-001: approved relational product mid-migration (EA8), version pinned, exit tied to the group programme" },
+        { "check": "PLT-C3", "description": "Every context independently deployable", "severity": "BLOCKING", "result": "PASS", "evidence": "5 contexts, 5 context-owned deployables plus 2 experience components" },
+        { "check": "PLT-C4", "description": "Classified data protected and access attributable", "severity": "BLOCKING", "result": "PASS", "evidence": "Every protected class has a PLT-10 realisation; 7 workload identities, none shared" }
+      ],
+
+      "pending_decisions_index": [
+        { "id": "DAT-PEND-01", "viewpoint": "DAT", "summary": "Analytical plane", "trigger": "Any DAT-4.3 condition fires" },
+        { "id": "DAT-PEND-02", "viewpoint": "DAT", "summary": "Order retention period", "trigger": "A dispute-handling or regulatory obligation supplies a period" },
+        { "id": "DAT-PEND-03", "viewpoint": "DAT", "summary": "Session retention and erasure", "trigger": "External IdP session policy agreed with the security team" },
+        { "id": "INT-PEND-01", "viewpoint": "INT", "summary": "Partner file-exchange pattern", "trigger": "A distributor with an EDI-only estate is committed" },
+        { "id": "INT-PEND-02", "viewpoint": "INT", "summary": "Notification delivery latency budget", "trigger": "An NFR supplies a delivery-time obligation" },
+        { "id": "INT-PEND-03", "viewpoint": "INT", "summary": "Certification-body evidence read API scope", "trigger": "First audit body contracted" },
+        { "id": "PLT-PEND-01", "viewpoint": "PLT", "summary": "RTO and RPO targets", "trigger": "A recovery obligation is supplied for Billing or Identity" },
+        { "id": "PLT-PEND-02", "viewpoint": "PLT", "summary": "Full-text search realisation", "trigger": "A committed requirement needs search" },
+        { "id": "PLT-PEND-03", "viewpoint": "PLT", "summary": "Evidence-chain reconstruction query surface", "trigger": "First audit body contracted, or a compliance report requires it" },
+        { "id": "OPEN-02", "viewpoint": "FSA", "summary": "Where tax rates and effective dates live", "trigger": "A requirement needs a jurisdiction-varying tax rate", "structural": true }
+      ],
+
+      "exceptions_and_deviations": [
+        { "id": "EXC-PRIN-02-001", "kind": "exception", "type": "TRANSITIONAL", "principle": "PRIN-02", "binding_level": "MANDATORY", "where": "dat DAT-6, plt PLT-3", "summary": "Group wholesale reporting reads the Producer store read-only during pilot", "due": "2026-12-31", "remediation_owner": "Core IT", "carried_into_baseline_as": "known drift" },
+        { "id": "EXC-PRIN-07-001", "kind": "exception", "type": "TRANSITIONAL", "principle": "PRIN-07", "binding_level": "MANDATORY", "where": "plt PLT-3", "summary": "Approved relational product mid-migration at group level; version pinned", "due": "group migration completion", "remediation_owner": "Core IT", "carried_into_baseline_as": "known drift" },
+        { "id": "DEV-01", "kind": "deviation", "principle": "PRIN-03", "binding_level": "DIRECTIONAL", "where": "int INT-4.2", "summary": "Synchronous fee read against the async default", "review_trigger": "Confirmation-time fee changes become impossible by policy" },
+        { "id": "DEV-02", "kind": "deviation", "principle": "PRIN-03", "binding_level": "DIRECTIONAL", "where": "int INT-4.3", "summary": "Synchronous eligibility check against the async default", "review_trigger": "Registration status becomes an event with an acceptable staleness window" }
+      ],
+
+      "inconsistencies": [
+        {
+          "id": "BL-F01",
+          "severity": "MAJOR",
+          "summary": "A data flow and an integration flow are registered for a platform capability recorded as NOT PRESENT.",
+          "detail": "data-architecture.md DAT-4.4 registers the lineage flow 'Aggregate metrics to enterprise DW', and integration-architecture.md INT-4.6 registers the corresponding outbound edge against APP-2.3-e6. platform-architecture.md PLT-6 records 'Outbound enterprise reporting feed' as NOT PRESENT. Two viewpoints describe a flow the third cannot currently carry.",
+          "documents": ["data-architecture.md@1.0 § DAT-4.4", "integration-architecture.md@1.0 § INT-4.6", "platform-architecture.md@1.0 § PLT-6"],
+          "resolution": "NOT_RESOLVED_BY_GENERATOR",
+          "resolution_note": "Reported, not reconciled. The generator cannot know whether the correct answer is to mark the edge Planned-pending-capability, to provision the feed, or to remove the lineage row — all three are architecture decisions. Raised to the three viewpoint architects; the edge is carried in the inventory with the capability gap attached so the first cycle that touches metrics finds it by lookup.",
+          "affects": ["capability_index: Outbound enterprise reporting feed", "contract_index: APP-2.3-e6"]
+        },
+        {
+          "id": "BL-F02",
+          "severity": "MINOR",
+          "summary": "A registered contract names a consumer that is not a component or a context in the FSA.",
+          "detail": "integration-architecture.md INT-5 lists 'Compliance evidence store' as a consumer of identity.registration.verified@1.0.0. No such component exists in fsa APP-2, and it is not an APP-1 bounded context or a named external system in kb-L1-enterprise-architecture EA3.",
+          "documents": ["integration-architecture.md@1.0 § INT-5", "foundational-solution-architecture.md@1.0.0 § APP-2"],
+          "resolution": "NOT_RESOLVED_BY_GENERATOR",
+          "resolution_note": "Recorded in contract_index as 'UNRESOLVED: compliance evidence store' rather than silently dropped or silently promoted to a component. Either the FSA is missing a component or INT-5 names an aspiration; both are for the architects, and inventing CMP-008 here would put a component into the baseline that no approved document declares.",
+          "affects": ["contract_index: identity.registration.verified@1.0.0"]
+        }
+      ],
+
+      "derivation_coverage": {
+        "contexts_declared": 5,
+        "contexts_with_at_least_one_component": 5,
+        "components_derived": 7,
+        "components_authored": 0,
+        "entities_declared_in_dat": 13,
+        "entities_indexed": 13,
+        "entities_with_exactly_one_writer": 13,
+        "app_2_3_edges": 6,
+        "edges_with_a_registered_contract": 6,
+        "contracts_indexed": 7,
+        "contracts_requiring_stubs": 7,
+        "capabilities_indexed": 9,
+        "conformance_checks_evaluated": 10,
+        "rows_without_a_derived_from": 0,
+        "hld_or_lld_text_included": false,
+        "hld_refs_pinned": 0,
+        "hld_refs_pinned_note": "Zero is correct at v0.1: a component HLD is created by the first cycle that builds that component. From Cycle 1 close these fields carry version-pinned references, never inlined content."
+      },
+
+      "next_regeneration": {
+        "fires_at": "every cycle close, after arch-delta-merger and before gr-L1-architecture-conformance",
+        "reads": "the merged canonical documents plus the deployed estate",
+        "expected_first_transitions": [
+          "components: DECLARED -> BUILT as each component's HLD and contract merge",
+          "contracts: stub -> real in stub-registry.json on the same event",
+          "capability_index: NOT PRESENT -> AVAILABLE on any merged platform delta",
+          "hld_refs_pinned: 0 -> n"
+        ]
+      }
+    },
+
+    "artifacts": [
+      {
+        "id": "artifact-bl-4e5f6a7b-md",
+        "type": "document",
+        "name": "application-baseline.md",
+        "format": "markdown",
+        "storage": { "provider": "s3", "location": "s3://adlc-artifacts/wf-hl-cycle0-9f8e7d6c/application-baseline.md" },
+        "description": "Application baseline v0.1 — Cycle 0 close, pre-implementation. Indexes and version-pins the four canonical documents; contains no HLD or LLD content. Registered as kb-L3-harvestlink-application-baseline.",
+        "produced_by": "L1-arch-baseline-generator"
+      },
+      {
+        "id": "artifact-bl-4e5f6a7b-json",
+        "type": "inventory",
+        "name": "component-inventory.json",
+        "format": "json",
+        "storage": { "provider": "s3", "location": "s3://adlc-artifacts/wf-hl-cycle0-9f8e7d6c/component-inventory.json" },
+        "description": "7 declared components with context, entities written, contracts provided/consumed, capabilities required, workload identity and availability target. Read mechanically by impact-assessor, dependency-mapper and env-provisioner.",
+        "produced_by": "L1-arch-baseline-generator"
+      },
+      {
+        "id": "artifact-bl-4e5f6a7b-github",
+        "type": "commit",
+        "name": "docs/architecture/baseline",
+        "format": "git",
+        "storage": { "provider": "github", "location": "https://github.com/thornbury/harvestlink-architecture/commit/8d21f4c" },
+        "description": "Both artifacts committed to the architecture repository via tool-L1-github-upload-file on branch baseline/v0.1",
+        "produced_by": "L1-arch-baseline-generator"
+      }
+    ],
+
+    "execution_summary": "• Emitted application baseline v0.1 at Cycle 0 close: 7 components across 5 bounded contexts, 13 entities, 7 contracts, 9 capability rows, 10 conformance checks, 10 pending decisions.\n• Every component is DECLARED / NOT_STARTED. Nothing is built at Cycle 0 close, so no CMDB export or repo scan was read and every deployed_version, cmdb_id, hld_ref and lld_ref is null. Recording a component as BUILT here would put a fiction into the baseline the next brownfield project reads as fact.\n• Derivation integrity: 0 authored rows, 0 rows without a derived_from, no HLD or LLD text included. The baseline indexes and version-pins the four canonical documents by content hash; if a document moves, the pin breaks visibly rather than the baseline drifting quietly.\n• Conformance: 10 checks evaluated, 0 failures. Three results are PASS_WITH_EXCEPTION or PASS_WITH_PENDING — DAT-C3 (four entities carry PENDING retention, each with a trigger), INT-C2 and PLT-C1 (one declared read-only grant, EXC-PRIN-02-001), PLT-C2 (EXC-PRIN-07-001). Each is a declared, dated exception, not discovered drift.\n• Inconsistencies found and NOT reconciled: 2. BL-F01 — DAT-4.4 and INT-4.6 both register an outbound metrics flow that PLT-6 records as a NOT PRESENT capability. BL-F02 — INT-5 names 'Compliance evidence store' as a consumer, and no such component exists in APP-2. Both are raised to the viewpoint architects. Reconciling either one here would mean authoring a line, which is the one thing this generator must not do.\n• Cycle 0 exit proof carried through from PLT-19: PASS, signed off by A. Reyes 2026-04-12, including the dead-letter path verified after an initial failure.\n• Knowledge bases consulted: kb-L1-enterprise-architecture (EA3 for the outbound-only posture of the group data warehouse, which is why BL-F01 is a capability gap and not an architecture error; EA10 for whether any declared integration triggers mandatory EA review — none does).\n• Guardrails evaluated: gr-L1-output-schema-validator (pass).\n• Tools invoked: tool-L1-github-upload-file (success — branch baseline/v0.1, commit 8d21f4c).\n• Registered downstream as kb-L3-harvestlink-application-baseline. Next regeneration fires at Cycle 1 close, after arch-delta-merger and before gr-L1-architecture-conformance, and reads the deployed estate for the first time."
+  }
+}

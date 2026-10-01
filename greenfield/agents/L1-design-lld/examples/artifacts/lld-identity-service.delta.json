@@ -1,0 +1,64 @@
+{
+  "delta_id": "LLD-D01",
+  "target_document": "services/identity-service/lld.md",
+  "component": "identity-service",
+  "produced_by": "L1-design-lld@1.0.0",
+  "execution_id": "exec-lld-7f8a9b0d",
+  "workflow_execution_id": "wf-hl-pi1-3c4d5e6f",
+  "cycle": "C1-producer-registration",
+
+  "from_version": "0.0.0",
+  "to_version": "1.0.0",
+  "creates_document": true,
+  "type": "additive",
+  "version_bump": "major",
+  "structural": false,
+  "adr_required": false,
+  "scope_boundary": "Classes, sequence diagrams and error handling. Entity ownership, classification and retention belong to the data viewpoint; two candidates surfaced here and were escalated rather than absorbed (LLD-F01, LLD-F02).",
+
+  "changes": [
+    {
+      "section": "LLD-1 Classes",
+      "operation": "add",
+      "content": "RegistrationService — submit(command) -> RegistrationId; resolveStatus(producerId) -> EligibilityDecision. TokenValidator — validate(rawToken) -> Principal | TokenRejected. RoleProvisioner — provision(principal, onboardingRecord) -> Role. FboRegisterClient — lookup(fboNumber) -> Verified | Invalid | NoAnswer. ProducerRepository — append-only over identity_schema; supersede(registration) and NO update(registration).",
+      "derived_from": ["hld HLD-D01 C4-3", "dat DAT-3.2"]
+    },
+    {
+      "section": "LLD-2 Sequence — registration submitted",
+      "operation": "add",
+      "content": "```text\nproducer-portal -> RegistrationService : POST /v1/producers/registrations\nRegistrationService -> RegistrationService : validate fbo_number format\nRegistrationService -> RegistrationService : assert fbo_attestation == true   [server-side]\nRegistrationService -> ProducerRepository : append Producer + FoodSafetyRegistration\n                                            status = pending-verification\nRegistrationService --> producer-portal : 201 Created { registrationId }\nRegistrationService -> FboRegisterClient : lookup(fbo_number)   [async, out of band]\n```",
+      "derived_from": ["openapi.yaml createProducerRegistration", "stories.json S-F1.1-a"]
+    },
+    {
+      "section": "LLD-3 Sequence — verification outcome",
+      "operation": "add",
+      "content": "```text\nFboRegisterClient -> competent-authority register : lookup\nalt Verified\n    FboRegisterClient -> ProducerRepository : append status = valid, supersedes prior row\n    FboRegisterClient -> EventPublisher     : identity.registration.verified\nelse Invalid\n    FboRegisterClient -> ProducerRepository : append status = rejected, reason passed through\n    FboRegisterClient -> EventPublisher     : identity.registration.verified (outcome=rejected)\nelse NoAnswer\n    FboRegisterClient -> RetryScheduler     : schedule bounded retry\n    note: no row appended, no event emitted, status stays pending-verification\nend\n```",
+      "derived_from": ["stories.json S-F1.1-b", "int INT-6"]
+    },
+    {
+      "section": "LLD-4 Error handling",
+      "operation": "add",
+      "content": "Malformed fbo_number -> 400 with a field-level problem detail; no row appended (S-F1.1-a-AC2). Missing attestation -> 422, refused server-side regardless of what the client sent (S-F1.1-a-AC3, ES1). FBO register non-answer -> NoAnswer, bounded retry with exponential backoff, registration stays pending; it is never promoted to valid on a timeout, and no 'assume valid' branch exists in the code path at all (S-F1.1-b-AC3). FBO register Invalid -> rejected, and the register's reason string is stored and passed through verbatim, never paraphrased.",
+      "derived_from": ["stories.json", "kb-L2-food-domain FD4"]
+    },
+    {
+      "section": "LLD-5 Evidence write discipline",
+      "operation": "add",
+      "content": "FoodSafetyRegistration rows are append-only. A status change is a new row superseding the prior one; ProducerRepository exposes no update path for this entity, so 'supersede, never overwrite' is enforced by the absence of a method rather than by a code-review convention. The deduplication key for the emitted event is (producer_id, fbo_number, verified_on) — the business act, not the message id, which a producer's retry would regenerate.",
+      "derived_from": ["dat DAT-3.2", "int INT-3.2", "kb-L2-food-domain FD3, FD7"]
+    },
+    {
+      "section": "LLD-6 Current-status resolution",
+      "operation": "add",
+      "content": "resolveStatus(producerId) returns the latest non-superseded FoodSafetyRegistration row for that producer, ordered by appended_at. This satisfies getRegistrationStatus's p95 <= 250 ms budget only with an index on (producer_id, appended_at desc).",
+      "derived_from": ["openapi.yaml getRegistrationStatus", "int INT-4.3"],
+      "finding_ref": "LLD-F01"
+    }
+  ],
+
+  "findings_raised": ["LLD-F01", "LLD-F02", "LLD-F03"],
+  "guardrails": {
+    "gr-L1-consistency-check": "pass",
+    "correction_during_authoring": "ProducerRepository was drafted with an update(registration) method, contradicting DAT-3.2's append-only rule. Replaced with supersede(registration)."
+  }
+}

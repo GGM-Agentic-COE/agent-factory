@@ -1,0 +1,85 @@
+# Agent Specification Document
+spec_version: "1.0"
+artifact_type: agent
+metadata:
+  name: L1-design-data-architect
+  version: "1.0.0"
+  layer: L1
+  phase: design
+  owner: agentic-ai-coe
+  created: "2026-09-22"
+  bom_phase: "2.25 — Platform & Data Foundation (Cycle 0)"
+  bom_status: "RE-SCOPED"
+  invocation: "foundational (runs once per project). A delta invocation exists in BOM Phase 4 and is NOT built here — see README."
+
+purpose:
+  description: "Owns the data viewpoint (DAT-*) for the whole product — canonical entity model, system-of-record register with exactly one owner per entity, classification/retention/residency policy, event envelope standard, and the operational/analytical plane decision or its explicit trigger condition."
+  input: "foundational-solution-architecture.md (APP-1 contexts, APP-3 aggregates, CON-*, REQ-DAT-*, SEC-*, § 4 PRIN rows) from L1-design-foundational-architect, and prd.md from L1-requirements-prd-composer — both fetched from blob storage. Optionally binding-principles.json, the per-product principle resolution."
+  output: "data-architecture.md (DAT-1 entity model · DAT-2 event schemas · DAT-3 classification/retention/residency · DAT-4 planes & lineage) written back to blob storage, plus structured items carrying the ownership register, classification register, demand traceability, conformance checks and pending decisions."
+  business_value: "Previously triggered from the LLD, which made the data model a consequence of how someone happened to design their classes — an inverted dependency in a DDD regime. Running before epics means the canonical entity model exists before anything is built against it. Two writers on one entity, or a retention period invented under delivery pressure in a feature cycle, are both effectively permanent once code exists; deciding ownership and classification once at Cycle 0 is what makes them cheap to get right and expensive to get wrong later."
+
+prompt:
+  ref: "prompts/L1-design-data-architect/instructions.md"
+  version: "1.0.0"
+  description: >
+    Walks the FSA's APP-3 aggregate model to build the DAT-1 ownership
+    register (exactly one writer per entity), derives DAT-3 classification /
+    retention / residency from kb-L1-enterprise-security ES2/ES3/ES9 and the
+    PRD's regulatory posture, sets the DAT-2 event envelope, decides the
+    DAT-4 planes, and carries every ungrounded value through as PENDING with
+    a trigger rather than a plausible number. The full data-architecture.md
+    template is embedded literally in the prompt per S4 — no template KB
+    exists and the document's section structure IS the contract downstream
+    agents read.
+
+contract:
+  input_schema: "$ref: schemas/agent-input-contract-schema.json"
+  output_schema: "$ref: schemas/agent-output-schema.json"
+
+  input:
+    accepts_from_agents: [L1-design-foundational-architect, L1-requirements-prd-composer]
+    accepts_direct_input: false
+    accepts_file_upload:
+      enabled: true
+      formats: [".md", ".json"]
+    required_parameters:
+      folder_name: { type: string, description: "Blob storage folder holding the Cycle 0 input artifacts; also the folder data-architecture.md is written back to" }
+      foundational_architecture_output: { type: object, description: "foundational-solution-architecture.md — must contain an APP-3 aggregate model. Without it there is no entity set to assign ownership over, and ownership is this document's whole reason to exist. Hard precondition: missing or APP-3-less is INSUFFICIENT_CONTEXT" }
+      prd_output: { type: object, description: "prd.md — supplies the regulatory posture (which regimes apply). Hard precondition: classification and retention decided without a regulatory posture is guesswork wearing a table" }
+    optional_parameters:
+      binding_principles_json: { type: object, description: "The per-product principle resolution authored against binding-principles.template.json. Read per kb-L1-enterprise-architecture BP11 and validated before use. When absent, the FSA § 4 PRIN rows are the documented fallback and the document must say so — the agent must not apply the whole catalogue as if every principle were MANDATORY, nor skip § 4 as if none were" }
+
+  output:
+    $ref: "output_schema.json"
+
+context:
+  knowledge_bases:
+    - kb-L1-enterprise-architecture   # binding-principles.md PRIN-02 (one owner, one source) and PRIN-06; BP11 resolution contract; landscape EA3/EA5 for what the estate already owns
+    - kb-L1-enterprise-security       # ES2 classification, ES3 retention/erasure, ES9 residency, ES10 encryption requirement — the three that together satisfy PRIN-06-C1
+  guardrails:
+    - gr-L1-output-schema-validator
+    - gr-L1-schema-validator          # per BOM Phase 2.25 row. NOTE: not built — see README open item 1
+    - gr-L1-pii-detection             # per BOM Phase 2.25 row
+  tools:
+    - tool-L1-azure-blob-reader       # fetches foundational-solution-architecture.md, prd.md and binding-principles.json in ONE call
+    - tool-L1-azure-blob-writer       # writes data-architecture.md back to the same folder
+  # tool-L1-db-schema-diff is listed "(optional)" on the BOM row. It is a DELTA-invocation
+  # tool — it diffs a proposed db-schema.sql against the current one — and has no role in the
+  # foundational invocation, which deliberately emits no physical schema at all. Not attached.
+
+quality:
+  evaluation_ref: "evaluation.md"
+  min_score: 7.0        # self-check bar; no L1-design-data-architect-evaluator exists.
+                        # The Cycle 0 human gate (Platform Lead) and gr-L1-architecture-conformance
+                        # are the real downstream checks.
+  hallucination_check: true
+  consistency_check: true
+
+performance:
+  target_latency_seconds: 45
+  max_token_budget: 20000
+
+versioning:
+  input_version: "1.0"
+  output_version: "1.0"
+  instruction_hash: "sha256:pending"

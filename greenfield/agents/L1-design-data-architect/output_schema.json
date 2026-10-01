@@ -1,0 +1,177 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "L1-design-data-architect-output-schema-v1.0",
+  "title": "DataArchitectureItems",
+  "description": "Shape of content.items for L1-design-data-architect. The artifact (data-architecture.md) is the authoritative, human-readable document; items restates the same facts in queryable structured form so downstream consumers (L1-design-integration-architect, L1-design-platform-architect, L1-arch-baseline-generator, L1-testing-env-provisioner, L1-testing-synthetic-data-generator, gr-L1-architecture-conformance) can read ownership, classification and conformance without parsing markdown. Meta-points pattern: every narrative field here is a capped summary; the full prose lives only in the artifact. Two invariants are enforced structurally rather than left to prose. First, one writer per entity — entity_ownership names exactly one owning_context per entity and the entity values are unique, so a second writer is not expressible. Second, no invented governance value — a retention or residency of PENDING must carry a pending_ref into pending_decisions, and a non-PENDING value must carry a source, so a plausible-sounding period with nothing behind it fails validation rather than shipping into a register that reads as decided.",
+  "type": "object",
+  "required": ["entity_ownership", "classification_register", "events", "data_planes", "demand_traceability", "conformance_checks", "pending_decisions", "open_questions"],
+  "properties": {
+    "entity_ownership": {
+      "type": "array",
+      "minItems": 1,
+      "description": "DAT-1.1, one entry per entity in the FSA's APP-3 aggregate model — same names, same order, none added, none dropped. This is the system-of-record register PRIN-02-C1 evaluates.",
+      "items": { "$ref": "#/$defs/EntityOwnership" }
+    },
+    "classification_register": {
+      "type": "array",
+      "minItems": 1,
+      "description": "DAT-3.2, covering the same entity set as entity_ownership in the same order. PRIN-06-C1 checks classification AND retention AND residency together, so all three are required fields — 'PENDING' is a permitted value, silence is not.",
+      "items": { "$ref": "#/$defs/ClassificationEntry" }
+    },
+    "events": {
+      "type": "array",
+      "description": "DAT-2.2 initial event register. May be empty only where the FSA's component map contains no asynchronous edge at all — which is unusual enough that the reasoning should say so.",
+      "items": { "$ref": "#/$defs/EventEntry" }
+    },
+    "data_planes": {
+      "type": "array",
+      "minItems": 1,
+      "description": "DAT-4. The operational plane entry is always present. An analytical plane entry is present even when the decision is NOT_PRESENT — recording the deferral and its trigger is the decision, and omitting the row turns a deliberate deferral into a silence nobody can reopen.",
+      "items": { "$ref": "#/$defs/DataPlane" }
+    },
+    "read_models": {
+      "type": "array",
+      "description": "DAT-6 replication register. Commonly empty at Cycle 0 — an empty array is the correct expression of 'None at Cycle 0' and is not a gap.",
+      "items": { "$ref": "#/$defs/ReadModel" }
+    },
+    "demand_traceability": {
+      "type": "array",
+      "minItems": 1,
+      "description": "DAT-7. One entry per REQ-DAT-* demand, per CON-* constraint whose binding viewpoints include DAT, and per principle applied. A demand with no entry is an unanswered demand, which must instead appear in open_questions.",
+      "items": { "$ref": "#/$defs/DemandTrace" }
+    },
+    "conformance_checks": {
+      "type": "array",
+      "minItems": 3,
+      "description": "DAT-9. At minimum the three the viewpoint always owes: one writer per entity, no unregistered replication, and protected data has classification+retention+residency. Written as expressions a checker evaluates, never as prose.",
+      "items": { "$ref": "#/$defs/ConformanceCheck" }
+    },
+    "pending_decisions": {
+      "type": "array",
+      "description": "DAT-8. Every deferred decision, each with the trigger that reopens it. A pending decision without a trigger is a silence, so trigger is required.",
+      "items": { "$ref": "#/$defs/PendingDecision" }
+    },
+    "open_questions": {
+      "type": "array",
+      "description": "Gaps this agent could not close and must not paper over — an FSA entity two contexts both appear to need to write, a regulatory posture that does not answer a retention question, a REQ-DAT demand with no satisfying decision.",
+      "items": { "$ref": "#/$defs/OpenQuestion" }
+    }
+  },
+  "$defs": {
+    "EntityOwnership": {
+      "type": "object",
+      "required": ["entity", "owning_context", "system_of_record", "classification", "source", "confidence", "reasoning"],
+      "properties": {
+        "entity": { "type": "string", "minLength": 2, "description": "The entity name exactly as the FSA's APP-3 model states it — never renamed, never pluralised differently, never invented. Unique across this array: a repeated entity is a second writer expressed as two rows." },
+        "owning_context": { "type": "string", "minLength": 2, "description": "Exactly one bounded context from the FSA's APP-1, and it must exist there. Ownership is assigned to a business capability — never to a team, a service name or a database (PRIN-02)." },
+        "system_of_record": { "type": "string", "minLength": 3, "description": "The authoritative store for this entity, named at capability level (e.g. 'Catalogue persistence'), not as a physical table or instance." },
+        "classification": { "type": "string", "enum": ["Public", "Internal", "Confidential", "PII", "Financial", "Regulated Evidence", "Financial / Regulated Evidence", "Security-sensitive"], "description": "From kb-L1-enterprise-security ES2. Must equal the classification for the same entity in classification_register — the two tables disagreeing is exactly the drift DAT-3's register exists to prevent." },
+        "source": { "type": "string", "pattern": "^(fsa APP-[0-9](\\.[0-9])?|prd\\.md § [A-Za-z ]+|kb-L1-enterprise-security § ES[0-9]+|kb-L1-enterprise-architecture § (EA[0-9]+|BP[0-9]+|PRIN-[0-9]{2}))$", "description": "Where the ownership assignment came from: the FSA section that names the entity, or the KB rule that settled a contested assignment." },
+        "confidence": { "type": "number", "minimum": 0.0, "maximum": 1.0, "description": "0.9+ where the FSA states the owner outright; 0.7-0.8 where it was inferred from which context's invariant the entity protects; below 0.7 should be paired with an open_questions entry." },
+        "reasoning": { "type": "string", "minLength": 20, "maxLength": 400, "description": "Why THIS context owns the entity — which invariant it protects, or which heuristic decided a contested case. Not a restatement of the entity's purpose." }
+      }
+    },
+    "ClassificationEntry": {
+      "type": "object",
+      "required": ["entity", "classification", "retention", "residency"],
+      "description": "One DAT-3.2 row. PRIN-06-C1 fails on a missing residency exactly as it fails on a missing retention, so all three are required — the permitted way to say 'not yet decided' is the literal 'PENDING' plus a pending_ref, never an absent field and never a plausible value.",
+      "properties": {
+        "entity": { "type": "string", "minLength": 2, "description": "Matches an entity in entity_ownership exactly." },
+        "classification": { "type": "string", "enum": ["Public", "Internal", "Confidential", "PII", "Financial", "Regulated Evidence", "Financial / Regulated Evidence", "Security-sensitive"], "description": "From ES2." },
+        "retention": { "type": "string", "minLength": 4, "description": "The retention rule, or the literal 'PENDING'. A value here is either stated by the PRD's regulatory posture, by kb-L1-enterprise-security ES3, or by a REQ-DAT demand. '6 years is typical for financial records' is an invention with a citation-shaped wrapper and must be PENDING instead." },
+        "residency": { "type": "string", "minLength": 4, "description": "The residency rule as an approved operating region per ES9 — never a concrete cloud region id, which is a platform decision — or the literal 'PENDING'. Never silently defaulted to the platform's home region." },
+        "source": { "type": "string", "description": "Required whenever retention and residency are both non-PENDING: the standard or requirement that grounds them." },
+        "pending_ref": { "type": "string", "pattern": "^DAT-PEND-[0-9]{2}$", "description": "Required whenever retention or residency is 'PENDING' — the DAT-8 row carrying the trigger that reopens the decision. A PENDING with no trigger is a silence." },
+        "encryption_required": { "type": "boolean", "description": "True for every PII, Financial, Confidential and Regulated Evidence entity per ES10. The data viewpoint states the requirement; the platform viewpoint selects the realisation." }
+      },
+      "allOf": [
+        {
+          "if": { "anyOf": [ { "properties": { "retention": { "const": "PENDING" } } }, { "properties": { "residency": { "const": "PENDING" } } } ] },
+          "then": { "required": ["pending_ref"] }
+        },
+        {
+          "if": { "allOf": [ { "properties": { "retention": { "not": { "const": "PENDING" } } } }, { "properties": { "residency": { "not": { "const": "PENDING" } } } } ] },
+          "then": { "required": ["source"] }
+        }
+      ]
+    },
+    "EventEntry": {
+      "type": "object",
+      "required": ["event_type", "owner_context", "purpose_summary", "version_state"],
+      "properties": {
+        "event_type": { "type": "string", "pattern": "^[a-z0-9-]+\\.[a-z0-9-]+\\.[a-z0-9-]+$", "description": "Canonical {context}.{entity}.{event} naming, lowercase, dot-separated. The context segment is a bounded context name — never a team, system or product." },
+        "owner_context": { "type": "string", "minLength": 2, "description": "The producing context, which owns the event's business meaning. A consumer never becomes owner of the entity behind it." },
+        "purpose_summary": { "type": "string", "minLength": 10, "maxLength": 150, "description": "Capped summary — what this event tells downstream. Full description lives in the artifact." },
+        "version_state": { "type": "string", "enum": ["Planned", "Active"], "description": "'Planned' means the architecture recognises the contract but the producing feature has not necessarily been implemented. At Cycle 0 nearly everything is Planned; an 'Active' event before any feature exists is a defect." },
+        "version": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$", "description": "Semantic version of the event contract, once one is assigned." }
+      }
+    },
+    "DataPlane": {
+      "type": "object",
+      "required": ["plane", "decision"],
+      "properties": {
+        "plane": { "type": "string", "enum": ["operational", "object", "analytical"], "description": "Which DAT-4 plane this entry decides." },
+        "decision": { "type": "string", "enum": ["REQUIRED", "PENDING", "NOT_PRESENT"], "description": "'NOT_PRESENT' is a real, defensible Cycle 0 decision — a platform is not created because it may eventually be useful — but it obliges a trigger." },
+        "realization_summary": { "type": "string", "maxLength": 200, "description": "Capped summary of the technology and ownership model. This document MAY name a technology; the FSA may not. Required when decision is REQUIRED." },
+        "trigger": { "type": "string", "minLength": 15, "description": "Required when decision is PENDING or NOT_PRESENT: the condition that reopens the decision, stated as a condition and not a date." },
+        "pending_ref": { "type": "string", "pattern": "^DAT-PEND-[0-9]{2}$", "description": "The DAT-8 row for a PENDING plane decision." },
+        "lifecycle_check": { "type": "string", "description": "PRIN-07-C1 outcome for a named technology: that its lifecycle status is not contain/retire, or the exception that permits it. Required whenever realization_summary names a product." }
+      },
+      "allOf": [
+        { "if": { "properties": { "decision": { "const": "REQUIRED" } } }, "then": { "required": ["realization_summary"] } },
+        { "if": { "properties": { "decision": { "enum": ["PENDING", "NOT_PRESENT"] } } }, "then": { "required": ["trigger"] } }
+      ]
+    },
+    "ReadModel": {
+      "type": "object",
+      "required": ["read_model", "source_owner", "consumer", "staleness_budget", "status"],
+      "description": "A registered replication. PRIN-02-C2 checks that every attribute mirrored from another context has one of these; an unregistered copy is a second writer in slow motion.",
+      "properties": {
+        "read_model": { "type": "string", "minLength": 3 },
+        "source_owner": { "type": "string", "minLength": 2, "description": "The bounded context that owns the source entity — the read model does not transfer ownership." },
+        "consumer": { "type": "string", "minLength": 2 },
+        "staleness_budget": { "type": "string", "minLength": 2, "description": "How stale the consumer may tolerate. A read model without a declared staleness budget is uncontrolled replication with a nicer name." },
+        "status": { "type": "string", "enum": ["Planned", "Active"] }
+      }
+    },
+    "DemandTrace": {
+      "type": "object",
+      "required": ["demand_id", "satisfied_by", "satisfaction_summary"],
+      "properties": {
+        "demand_id": { "type": "string", "pattern": "^(REQ-DAT-[0-9]{2}|CON-[0-9]{2}|PRIN-[0-9]{2})$", "description": "The FSA demand, the cross-viewpoint constraint, or the principle — id exactly as the source states it, never renumbered." },
+        "satisfied_by": { "type": "string", "pattern": "^DAT-[0-9](\\.[0-9])?(\\.[a-z])?$", "description": "The DAT section that answers it. A demand answered nowhere belongs in open_questions instead of being given a hopeful row here." },
+        "satisfaction_summary": { "type": "string", "minLength": 15, "maxLength": 200, "description": "Capped summary of HOW it is satisfied — the decision, not a restatement of the demand." }
+      }
+    },
+    "ConformanceCheck": {
+      "type": "object",
+      "required": ["id", "description", "check"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^DAT-C[0-9]+$" },
+        "description": { "type": "string", "minLength": 10, "maxLength": 150 },
+        "check": { "type": "string", "minLength": 10, "description": "A machine-evaluable expression over the design artifacts — e.g. 'for every critical entity: count(authoritative_writers) == 1'. Prose here makes the check unevaluable, which makes it a slogan." },
+        "severity": { "type": "string", "enum": ["BLOCKING", "MAJOR", "MINOR"] }
+      }
+    },
+    "PendingDecision": {
+      "type": "object",
+      "required": ["id", "decision_summary", "status", "trigger"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^DAT-PEND-[0-9]{2}$", "description": "Sequential, DAT-PEND-01 upward." },
+        "decision_summary": { "type": "string", "minLength": 10, "maxLength": 180, "description": "Capped summary of what is not yet decided." },
+        "status": { "type": "string", "const": "PENDING" },
+        "trigger": { "type": "string", "minLength": 15, "description": "The condition that reopens this decision. Required with no exception — PRIN-01-C1 checks exactly this, and a pending decision with a date instead of a condition just expires quietly." }
+      }
+    },
+    "OpenQuestion": {
+      "type": "object",
+      "required": ["id", "question", "origin", "doc_location"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^OQ-[0-9]{2}$" },
+        "question": { "type": "string", "minLength": 15, "description": "The decision someone has to make, phrased so it can be answered — not a restatement that something is unclear." },
+        "origin": { "type": "string", "enum": ["fsa_gap", "regulatory_gap", "ownership_ambiguity", "principle_conflict"], "description": "'ownership_ambiguity' is the one to watch: two contexts both appearing to need write access to an entity is a boundary problem in APP-1, raised against the FSA — never resolved here by permitting two writers." },
+        "doc_location": { "type": "string", "minLength": 3, "description": "The DAT section where this question is visible in the artifact. A question recorded only in items is invisible to everyone who reads the document." }
+      }
+    }
+  }
+}

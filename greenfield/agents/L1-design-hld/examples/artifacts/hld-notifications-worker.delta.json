@@ -1,0 +1,48 @@
+{
+  "delta_id": "HLD-D03",
+  "target_document": "services/notifications-worker/hld.md",
+  "component": "notifications-worker",
+  "bounded_context": "Notifications (APP-1.05)",
+  "produced_by": "L1-design-hld@1.0.0",
+  "execution_id": "exec-hld-6e7f8a9c",
+  "workflow_execution_id": "wf-hl-pi1-3c4d5e6f",
+  "cycle": "C1-producer-registration",
+
+  "from_version": "0.0.0",
+  "to_version": "1.0.0",
+  "creates_document": true,
+  "type": "additive",
+  "version_bump": "major",
+  "structural": false,
+  "adr_required": false,
+
+  "changes": [
+    {
+      "section": "C4-2 Container",
+      "operation": "add",
+      "content": "notifications-worker — event-driven worker, no public ingress, no schema. Owns no entities (DAT-1.1).",
+      "derived_from": ["fsa APP-2.05", "plt PLT-1", "dat DAT-1.1"]
+    },
+    {
+      "section": "C4-3 Component",
+      "operation": "add",
+      "content": "VerificationOutcomeNotifier (WU-F1.1-06), consuming identity.registration.verified@1.0.0.",
+      "derived_from": ["tasks.json", "int INT-5"]
+    },
+    {
+      "section": "HLD-9 Consumer obligations",
+      "operation": "add",
+      "content": "Declares all five async consumer obligations. Deduplication key derived from the business act (producer, registration number, verified-on date), not the message id. Idempotency: a producer is never emailed twice for one verification outcome. Bounded retry with backoff. Dead-letter path with a named owner. Replay policy: none — the source event is Evidence kind.",
+      "derived_from": ["int INT-6", "kb-L2-food-domain FD7"]
+    },
+    {
+      "section": "HLD-10 Notification content boundary",
+      "operation": "add",
+      "content": "Outbound email carries no FBO number, no business identifier and no personal data beyond the addressee. The rejection reason is passed through from the register verbatim, never paraphrased — a rewritten regulatory reason is a new assertion about a legal status.",
+      "derived_from": ["wireframes.md WF-03", "kb-L1-enterprise-security ES2"]
+    }
+  ],
+
+  "findings_raised": [],
+  "guardrails": { "gr-L1-consistency-check": "pass", "gr-L1-hallucination-check": "pass" }
+}

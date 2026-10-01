@@ -1,0 +1,159 @@
+{
+  "agent_id": "L1-design-integration-architect",
+  "agent_version": "1.0.0",
+  "execution_id": "exec-intd-9b0c1d2f",
+  "workflow_execution_id": "wf-hl-pi1-3c4d5e6f",
+  "status": "success",
+  "content": {
+    "type": "integration_architecture_delta",
+    "schema_version": "1.0",
+    "items": {
+      "delta_control": {
+        "invocation": "delta",
+        "cycle": "C1-producer-registration",
+        "target_document": "integration-architecture.md",
+        "from_version": "1.0",
+        "to_version": "2.0",
+        "type": "structural",
+        "version_bump": "major",
+        "structural": true,
+        "adr_required": true,
+        "adr_id": "ADR-012",
+        "approval_gate": "Enterprise Architect",
+        "approval_status": "PENDING — this delta cannot merge until ADR-012 is approved",
+        "propagates_to": [
+          { "document": "foundational-solution-architecture.md", "section": "APP-2.3", "change": "New edge APP-2.3-e7: Identity -> competent-authority FBO register (external)" }
+        ],
+        "structural_assessment": "STRUCTURAL, and the test is not a close call. Cycle 1 introduces an integration edge that crosses the product boundary to a party HarvestLink does not control, and no such edge exists in APP-2.3. The FSA's component interaction map is the thing that changes, which is precisely the condition the structural/additive asymmetry exists to catch. Treating this as an extending delta would let the target and the built system diverge on the one question a conformance check is least able to recover: what this product talks to."
+      },
+
+      "changes": [
+        {
+          "change_id": "INTD-01",
+          "section": "INT-4",
+          "operation": "add",
+          "content": "INT-4.7 — Producer FBO verification against the competent authority's register. Identity -> external register. Style: asynchronous within the product, request/response at the external boundary. Owner of contract: the competent authority — NOT HarvestLink. Degraded mode: NoAnswer leaves the registration pending with bounded retry; there is no branch that treats an unanswered lookup as valid. Latency budget: PENDING, INT-PEND-04.",
+          "rationale": "The first flow in this product whose contract is owned outside it. Every prior flow is between two HarvestLink contexts or is outbound-only to a group system with no answer expected.",
+          "source": ["00-overview.md cross-component sequence", "lld LLD-D01", "fr FR-003"]
+        },
+        {
+          "change_id": "INTD-02",
+          "section": "INT-2",
+          "operation": "add",
+          "content": "New approved style — 'Third-party dependency on an externally-owned contract': a synchronous request/response call to a contract this product neither owns nor versions, consumed out of band so that the product's own transactions never block on it. Permitted only where the answer is a matter of external fact that the product cannot determine for itself.",
+          "rationale": "This is the new flow shape the BOM's delta rule anticipates. All five existing approved styles assume HarvestLink owns one end of the contract. This one does not, and the consequences are structural rather than cosmetic — version negotiation, deprecation timing and availability are all outside this product's control, and a style entry that did not say so would invite a second such integration to be added casually.",
+          "source": ["int INT-2", "kb-L2-food-domain-api-patterns FD2 participant model"]
+        },
+        {
+          "change_id": "INTD-03",
+          "section": "INT-5",
+          "operation": "add",
+          "content": "Contract fbo-register.lookup — owner: competent authority (EXTERNAL); consumer: identity-service; style: synchronous request/response; version: as published by the authority; initial state: Planned. Marked externally_owned: true.",
+          "rationale": "The register is a new column on the contract register and is not decoration. An externally-owned contract cannot be version-negotiated by us, has a deprecation timetable we do not set, and cannot be stubbed from our own OpenAPI document. INT-9's expand-and-contract policy does not apply to it — we are the consumer, and our only lever is to detect a breaking change and react.",
+          "consequences": [
+            "INT-9 contract change policy does not govern this contract; a new section records what we do instead — version pinning where the authority supports it, and a contract test against the live register that fails loudly rather than a stub that keeps passing after the real thing changes.",
+            "INT-8's external-party contract-version distribution signal was written for partners consuming OUR contracts. It does not cover us consuming someone else's, and that gap is recorded as INT-PEND-05."
+          ],
+          "source": ["int INT-5", "int INT-9"]
+        },
+        {
+          "change_id": "INTD-04",
+          "section": "INT-7",
+          "operation": "extend",
+          "content": "New trust boundary: identity-service -> competent-authority register. Outbound egress crossing the product boundary. Caller identity is whatever credential the authority issues to HarvestLink; the producer's identity is NOT forwarded, and the producer's session correlation id is not propagated outside the product boundary.",
+          "rationale": "Correlation propagation is required at every internal hop (INT-8), and is deliberately terminated at this one. A correlation id carried to an external register would leak an internal identifier into a third party's logs for no benefit to either side. The internal trace records the outbound call; the outbound call does not carry the trace.",
+          "source": ["int INT-7", "kb-L1-enterprise-security ES1"]
+        },
+        {
+          "change_id": "INTD-05",
+          "section": "INT-4",
+          "operation": "extend",
+          "content": "INT-4.3 (publication eligibility, Catalogue -> Identity) gains its realising operation: getRegistrationStatus, p95 <= 250 ms. The flow was registered at Cycle 0; the contract is now realised by a named operation, and its consumer in Cycle 1 is producer-portal rather than Catalogue, which does not yet publish listings.",
+          "rationale": "Merging the cycle's cross-component sequence into INT-4 is this invocation's job. The end-to-end sequence crosses producer-portal, identity-service, the event broker and notifications-worker; no single component HLD can hold it, which is why it lands here rather than in one of them.",
+          "source": ["00-overview.md", "openapi.yaml"]
+        },
+        {
+          "change_id": "INTD-06",
+          "section": "INT-12",
+          "operation": "add",
+          "content": "INT-PEND-04 — latency budget and timeout for the FBO register lookup. Trigger: the competent authority publishes a service level, or observed p95 over a month of production traffic supplies an evidence-based figure. INT-PEND-05 — an observability signal for contract versions on externally-owned contracts we consume. Trigger: a second externally-owned contract is admitted, or the authority announces a version change.",
+          "rationale": "No NFR supplies a budget for the register call and the authority publishes none. A plausible '2 seconds' would become the timeout the retry policy is built around, derived from nothing. The behaviour on non-answer IS decided — stays pending, bounded retry, never optimistically valid — because a missing number defers a number, not a decision.",
+          "source": ["int INT-12", "kb-L2-food-domain-api-patterns FD4"]
+        },
+        {
+          "change_id": "INTD-07",
+          "section": "INT-11",
+          "operation": "extend",
+          "content": "INT-C1 amended: 'every cross-context edge has a contract' extended to 'every cross-context AND every cross-boundary edge has a registered contract, whether or not this product owns it'. INT-C3 unchanged but now has a PENDING it must tolerate — INT-4.7's budget is PENDING with a trigger, which the check permits and a silence would not.",
+          "rationale": "INT-C1 as written would have passed silently on an ungoverned external egress, because the edge is not between two bounded contexts. The check has to see the edge that the FSA did not have.",
+          "source": ["int INT-11", "PRIN-03-C1"]
+        }
+      ],
+
+      "adr_draft": {
+        "adr_id": "ADR-012",
+        "title": "Consume the competent authority's FBO register directly from Identity",
+        "status": "PROPOSED",
+        "context": "FR-003 requires a producer's declared FBO registration to be verified against the competent authority's register before publication. No HarvestLink context can determine this fact for itself, and no existing group system holds it — kb-L1-enterprise-architecture EA3 records the compliance document store as manual, API-less and deliberately not integrated.",
+        "decision": "identity-service calls the competent authority's register directly, out of band from the producer's registration transaction. The call is not routed through the group ESB.",
+        "alternatives_considered": [
+          { "option": "Route via the group ESB (MuleSoft)", "rejected_because": "EA2 mandates the API gateway for new digital products' INBOUND traffic and does not require the ESB for outbound third-party calls. Adding an ESB hop would place a Tier-1-adjacent shared component in the path of a new product's compliance check, coupling HarvestLink's verification availability to a system it does not own or fund." },
+          { "option": "Manual verification by an operations team", "rejected_because": "FR-003 gates publication; a manual step makes onboarding latency a staffing question and leaves no evidence record with a verification timestamp." },
+          { "option": "Cache the register periodically and query the copy", "rejected_because": "This is OQ-02, still open. A cached register makes eligibility decisions from stale data, and kb-L2-food-domain is explicit that an unknown or stale eligibility is a refusal, not an optimistic assumption. Deferred rather than rejected outright — if the authority publishes a bulk feed, the trade changes." }
+        ],
+        "consequences": [
+          "APP-2.3 gains edge e7; the FSA's interaction map now shows a dependency on a party outside the enterprise.",
+          "Identity's 99.9% availability target does not extend to the register. The product's degraded mode absorbs the register's unavailability by leaving registrations pending — which is why the timeout behaviour is decided even though the timeout value is not.",
+          "A new platform capability is required: outbound third-party egress. PLT-6 has no such row, which fires the platform architect's delta invocation (HLD-F03)."
+        ],
+        "approval": { "gate": "Enterprise Architect", "status": "PENDING", "blocks_merge": true }
+      },
+
+      "findings": [
+        {
+          "id": "INTD-F01",
+          "severity": "MEDIUM",
+          "summary": "The integration this cycle depends on has no platform capability behind it.",
+          "detail": "INT-4.7 requires outbound egress to a third party. PLT-6's five AVAILABLE capabilities are persistence, messaging, object storage, external identity and secrets — none of them is egress. This confirms HLD-F03 from the integration side.",
+          "resolution": "ESCALATED_TO_PLATFORM_ARCHITECT",
+          "resolution_note": "This is the NOT PRESENT capability that fires the platform architect's conditional delta invocation. Without it the flow is designed, contracted, governed and unreachable."
+        },
+        {
+          "id": "INTD-F02",
+          "severity": "LOW",
+          "summary": "OQ-02 is now a decision with a cost, not an open question.",
+          "detail": "Story-generator's OQ-02 asked whether the register is queried live or from a refreshed copy. ADR-012 answers it for now — live — and records the caching option as deferred rather than rejected. The open question is closed in one direction with a stated reason to reopen it.",
+          "resolution": "RESOLVED_IN_ADR"
+        }
+      ],
+
+      "guardrail_evidence": {
+        "consistency_check": { "result": "pass", "note": "Every flow references an edge; every contract names an owner; the one contract with an external owner is marked as such rather than left to read like an internal one. INT-4.3's consumer was corrected during authoring from Catalogue to producer-portal for this cycle — Catalogue is the declared consumer at Cycle 0 and does not consume it yet, and recording it as an active Catalogue consumer would have made the dependency graph assert traffic that does not flow." },
+        "schema_validator": { "result": "pass" }
+      }
+    },
+
+    "artifacts": [
+      {
+        "id": "artifact-intd-9b0c1d2f",
+        "type": "delta",
+        "name": "integration-architecture.delta.json",
+        "format": "json",
+        "storage": { "provider": "s3", "location": "s3://adlc-artifacts/wf-hl-pi1-3c4d5e6f/cycle-1/deltas/integration-architecture.delta.json" },
+        "description": "STRUCTURAL delta 1.0 -> 2.0, 7 changes, propagates a new edge to FSA APP-2.3, ADR-012 required, EA approval pending",
+        "produced_by": "L1-design-integration-architect"
+      },
+      {
+        "id": "artifact-intd-9b0c1d2f-adr",
+        "type": "adr",
+        "name": "ADR-012-fbo-register-direct-consumption.md",
+        "format": "markdown",
+        "storage": { "provider": "s3", "location": "s3://adlc-artifacts/wf-hl-pi1-3c4d5e6f/cycle-1/deltas/ADR-012-fbo-register-direct-consumption.md" },
+        "description": "PROPOSED. Three alternatives considered; one deferred rather than rejected. Blocks the delta's merge until approved.",
+        "produced_by": "L1-design-integration-architect"
+      }
+    ],
+
+    "execution_summary": "• Emitted a STRUCTURAL delta, integration-architecture.md 1.0 -> 2.0, with 7 changes, ADR-012 and an Enterprise Architect gate that blocks merge. This is the only structural delta in the cycle — the HLD, LLD and data deltas are all additive or extending.\n• The structural test was not a close call. Cycle 1 introduces an integration edge crossing the product boundary to a party HarvestLink does not control, and no such edge exists in APP-2.3. The FSA's component interaction map is what changes, which is exactly the condition the structural/additive asymmetry exists to catch. Calling it extending would let the target and the built system diverge on the question a conformance check can least recover: what this product talks to.\n• The interesting content is the new contract category. fbo-register.lookup is the first contract in this product owned by someone else, and the consequences are not cosmetic: we cannot version-negotiate it, we do not set its deprecation timetable, INT-9's expand-and-contract policy does not apply to us, and it cannot be stubbed from our own OpenAPI document. INT-2 gains a corresponding approved style so a second such integration cannot be added casually.\n• Correlation propagation is deliberately terminated at that boundary. Every internal hop carries the session correlation id; the outbound register call does not, because carrying it would leak an internal identifier into a third party's logs for no benefit to either side.\n• Two pending decisions added with triggers, no invented numbers. INT-PEND-04 — the register's latency budget and timeout, because neither an NFR nor the authority supplies one and a plausible '2 seconds' would become the figure the retry policy is built around. INT-PEND-05 — version observability for externally-owned contracts we consume, which INT-8's existing signal does not cover. The non-answer BEHAVIOUR is decided in both cases: stays pending, bounded retry, never optimistically valid. A missing number defers a number, not a decision.\n• INT-C1 was amended because as written it would have passed silently on this edge — 'every cross-context edge has a contract' does not see an edge that is not between two bounded contexts.\n• ADR-012 records three alternatives. The group ESB was rejected on EA2/EA3 grounds; manual verification on FR-003 grounds; and a periodically cached register was DEFERRED rather than rejected, because it answers story-generator's OQ-02 and the trade changes if the authority ever publishes a bulk feed.\n• INTD-F01 escalates to the platform architect and confirms HLD-F03 from the integration side: this flow is designed, contracted, governed and currently unreachable, because PLT-6 has no outbound-egress capability. That is the NOT PRESENT capability which fires the platform architect's conditional invocation.\n• Knowledge bases consulted: kb-L1-enterprise-architecture (EA2 gateway mandate and its scope, EA3 why the compliance document store is not the answer); kb-L2-food-domain-api-patterns (FD2 participant model, FD4 refusal on unknown eligibility).\n• Guardrails evaluated: gr-L1-consistency-check (pass — one correction, INT-4.3's Cycle 1 consumer), gr-L1-schema-validator (pass)."
+  }
+}

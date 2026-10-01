@@ -33,19 +33,30 @@ contract:
     required_parameters:
       original_input: { type: object, description: "The upstream item sets and the viability_score L1-vision-statement-generator received" }
       generator_output: { type: object, description: "L1-vision-statement-generator's draft items output" }
+      # GitHub reference material — nothing defaulted or inferred. A rubric read from the
+      # wrong path silently changes the bar at the last checkpoint before a human reads vision.md.
+      reference_repo: { type: string, description: "Repository holding the rubric and examples — bare name or 'owner/repo'. Read with tool-L1-github-reader-using-app" }
+      reference_branch: { type: string, description: "Branch to read the reference material from (e.g. 'main')" }
+      evaluation_rubric_kb_folder: { type: string, description: "Repo folder holding L1-vision-statement-generator's evaluation.md rubric content. Unavailable → REFERENCE_UNAVAILABLE: a gate that invented its own bar is worse than no gate" }
+    optional_parameters:
+      examples_folder: { type: string, default: null, description: "Repo folder holding this evaluator's worked input/output examples (greenfield/agents/L1-vision-statement-generator-evaluator/examples in this repository). Shape guidance only — never a source of findings, numbers or verdicts. Unavailable is tolerated" }
 
   output:
     $ref: "output_schema.json"
 
 context:
-  knowledge_bases:
-    - kb-L1-vision-statement-evaluation-rubric   # runtime copy of L1-vision-statement-generator/evaluation.md — see that KB's spec.yaml for source-of-truth note
+  # No KB is attached at runtime. The rubric (L1-vision-statement-generator/evaluation.md)
+  # and this evaluator's examples are READ FROM GITHUB with tool-L1-github-reader-using-app,
+  # from evaluation_rubric_kb_folder and examples_folder — the repository is the single
+  # source of truth, so no runtime copy can drift from it.
+  knowledge_bases: []
   guardrails:
     - gr-L1-output-schema-validator
     - gr-L1-pii-detection
     - gr-L1-consistency-check   # re-checked independently — the reconciliation coverage check
     - gr-L1-vision-statement-quality-gate   # fires when THIS evaluator concludes; validates L1-vision-statement-generator's RESULTANT output against its own schema+evaluation.md, above all the reconciliation-coverage BLOCKER (guardrails/gr-L1-vision-statement-quality-gate)
   tools:
+    - tool-L1-github-reader-using-app  # reads the rubric and the examples folder from GitHub — one call per folder, repo/branch/paths all from the request
     - tool-L1-azure-blob-reader      # reads vision.md, regulatory-feasibility.md, idea-brief.json and market-analysis.md in one call
     - tool-L1-azure-blob-writer      # re-saves vision.md when a fix changes its content
 

@@ -1,0 +1,91 @@
+# Agent Specification Document
+spec_version: "1.0"
+artifact_type: agent
+metadata:
+  name: L1-arch-baseline-generator
+  version: "1.0.0"
+  layer: L1
+  phase: arch
+  owner: agentic-ai-coe
+  created: "2026-09-25"
+  bom_phase: "2.25 — Platform & Data Foundation (Cycle 0)"
+  bom_status: "NEW"
+  invocation: "seed (runs once, at Cycle 0 close, emitting v0.1 pre-implementation). A regeneration invocation re-fires at every cycle close in BOM Phase 7.5 and is NOT built here — see README."
+
+purpose:
+  description: "Emits the application baseline: the derived index of what this product's architecture declares, version-pinned to the four canonical documents it was derived from. At Cycle 0 close it emits v0.1 — pre-implementation, every component DECLARED, nothing observed. It regenerates at every later cycle close rather than being written once and maintained by hand."
+  input: "The four canonical architecture documents, as agent_output from L1-design-foundational-architect, L1-design-data-architect, L1-design-integration-architect and L1-design-platform-architect, or fetched from blob storage."
+  output: "application-baseline.md v0.1 and component-inventory.json, committed to the architecture repository, plus structured items carrying the component inventory, entity ownership index, contract index, capability index, conformance status and any cross-document inconsistency found."
+  business_value: "Three things depend on a baseline that is actually current. The impact assessor reads the capability index mechanically, which is what turns 'did we think about platform?' into a lookup. The next brownfield project reads this file as kb-L3-{project}-application-baseline, and a stale baseline there means a retrofit encodes yesterday's architecture as today's target. And the conformance checker diffs baseline against target by section id — a hand-maintained baseline drifts from both. Regenerating every cycle from the canonical documents is what makes all three trustworthy; every line being derived rather than authored is what makes regeneration safe."
+
+prompt:
+  ref: "prompts/L1-arch-baseline-generator/instructions.md"
+  version: "1.0.0"
+  description: >
+    Reads the four canonical documents in one blob call, cross-walks them to
+    build the component inventory (one row per APP-2 component, enriched with
+    the entities it writes from DAT-1.1, the contracts it provides and
+    consumes from INT-5, the capabilities it requires from PLT-6 and its
+    availability target from PLT-14), evaluates every DAT-C/INT-C/PLT-C check
+    against the assembled picture, and reports cross-document tension as a
+    finding rather than reconciling it. Emits application-baseline.md and
+    component-inventory.json. At the seed invocation every component is
+    DECLARED and no deployed estate is read, because nothing is built.
+
+contract:
+  input_schema: "$ref: schemas/agent-input-contract-schema.json"
+  output_schema: "$ref: schemas/agent-output-schema.json"
+
+  input:
+    accepts_from_agents:
+      - L1-design-foundational-architect
+      - L1-design-data-architect
+      - L1-design-integration-architect
+      - L1-design-platform-architect
+    accepts_direct_input: false
+    accepts_file_upload:
+      enabled: true
+      formats: [".md", ".json"]
+    required_parameters:
+      folder_name: { type: string, description: "Blob storage folder holding the four Cycle 0 canonical documents; also the folder the baseline artifacts are written back to" }
+      foundational_architecture_output: { type: object, description: "foundational-solution-architecture.md — supplies APP-1 contexts, APP-2 components, the APP-2.3 edge set, CON-*, REQ-* and OPEN-*. Hard precondition: the component map is the spine of the inventory. Missing APP-2 is INSUFFICIENT_CONTEXT" }
+      data_architecture_output: { type: object, description: "data-architecture.md — supplies DAT-1.1 ownership (which component writes which entity), DAT-3.2 governance, DAT-6 read models, DAT-8 pending, DAT-9 checks" }
+      integration_architecture_output: { type: object, description: "integration-architecture.md — supplies INT-4 flows, INT-5 the contract register (which becomes the stub registry seed), INT-3.2 event kinds, INT-11 checks, INT-12 pending" }
+      platform_architecture_output: { type: object, description: "platform-architecture.md — supplies PLT-1 workloads, PLT-6 the capability register read by every later impact assessment, PLT-14 availability targets, PLT-16 checks, PLT-17 pending, PLT-19 the exit proof" }
+    optional_parameters:
+      previous_baseline: { type: object, description: "The prior application-baseline.md. Absent at the seed invocation by definition. Supplied at every regeneration so component lifecycle transitions (DECLARED -> BUILT) and capability transitions can be reported as deltas rather than recomputed silently" }
+      deployed_estate_export: { type: object, description: "CMDB or service-catalogue export. NOT supplied at the seed invocation — nothing is built at Cycle 0 close, and an export that returns rows there means the generator is reading another product's estate. Supplied from Cycle 1 close onward, where declared and observed are reconciled, never merged" }
+
+  output:
+    $ref: "output_schema.json"
+
+context:
+  knowledge_bases:
+    - kb-L1-enterprise-architecture   # EA3 for which external systems a declared flow may legitimately touch and in which direction; EA10 for whether any declared integration triggers mandatory EA review; BP-catalogue check ids so conformance_status cites the real check, not a paraphrase
+  guardrails:
+    - gr-L1-output-schema-validator   # per BOM Phase 2.25 row
+  tools:
+    - tool-L1-azure-blob-reader       # fetches all four canonical documents in ONE call
+    - tool-L1-github-upload-file      # per BOM row — commits application-baseline.md and component-inventory.json to the architecture repository
+    - tool-L1-github-create-branch    # the commit lands on baseline/v{version}, never directly on the default branch
+  # The BOM row lists only tool-L1-github-upload-file. The blob reader is attached because the
+  # four documents are written to blob by their authoring agents and a re-run that depends on
+  # upstream agent_output still being in the conversation is not re-runnable. See README open item 2.
+
+quality:
+  evaluation_ref: "evaluation.md"
+  min_score: 7.0        # self-check bar; no L1-arch-baseline-generator-evaluator exists.
+                        # The real downstream checks are gr-L1-architecture-conformance, which
+                        # diffs this baseline against the target by section id, and the next
+                        # brownfield project, which reads it as kb-L3-{project}-application-baseline.
+  hallucination_check: true
+  consistency_check: true
+
+performance:
+  target_latency_seconds: 40
+  max_token_budget: 18000
+
+versioning:
+  input_version: "1.0"
+  output_version: "1.0"
+  instruction_hash: "sha256:pending"

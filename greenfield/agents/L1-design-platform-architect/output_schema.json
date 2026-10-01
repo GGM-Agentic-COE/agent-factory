@@ -1,0 +1,196 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "L1-design-platform-architect-output-schema-v1.0",
+  "title": "PlatformArchitectureItems",
+  "description": "Shape of content.items for L1-design-platform-architect. The artifacts (platform-architecture.md, per-platform-component HLD/LLDs, IaC manifests) are the authoritative content; items restates the same facts in queryable structured form. capability_register is the one downstream agents read most: L1-planning-impact-assessor performs a MECHANICAL lookup against it on every future feature, which is what turns 'did we think about platform?' into a check rather than a judgement — and is also why a wrongly-AVAILABLE row is the most damaging error expressible here, since it makes a feature's platform delta disappear from its estimate. Meta-points pattern: narrative fields are capped summaries, full prose lives in the artifacts. Two invariants are enforced structurally. First, no unchecked product: a capability whose status is AVAILABLE or PENDING requires a realization AND a lifecycle_check outcome, so a product cannot be named without PRIN-07 having been applied to it. Second, no invented resilience figure: a resilience target that is not PENDING requires a source, and a PENDING one requires a pending_ref, so a plausible uptime percentage with nothing behind it fails validation rather than shipping into a document that reads as committed.",
+  "type": "object",
+  "required": ["capability_register", "runtime_workloads", "environments", "resilience_targets", "security_capabilities", "demand_traceability", "conformance_checks", "cycle0_exit_proof", "pending_decisions", "open_questions"],
+  "properties": {
+    "capability_register": {
+      "type": "array",
+      "minItems": 1,
+      "description": "PLT-6. One entry per capability class any REQ-PLT-* demand implies, plus every one the sibling viewpoints demand. MUST include capabilities whose status is NOT_PRESENT — a capability absent from the register cannot be looked up, and the mechanical lookup is the register's entire purpose. An absent row reads to the impact assessor as 'no such capability was ever considered', which is indistinguishable from an oversight.",
+      "items": { "$ref": "#/$defs/Capability" }
+    },
+    "runtime_workloads": {
+      "type": "array",
+      "minItems": 1,
+      "description": "PLT-1. One entry per deployable component. Every bounded context in the FSA's APP-1 must appear as the bounded_context of at least one entry (PRIN-04-C2), and no component may appear against two contexts (PRIN-04-C1).",
+      "items": { "$ref": "#/$defs/RuntimeWorkload" }
+    },
+    "environments": {
+      "type": "array",
+      "minItems": 1,
+      "description": "PLT-13. Environment differences should be configuration and capacity differences rather than different architecture patterns — an environment whose purpose implies a different pattern is worth an open question.",
+      "items": { "$ref": "#/$defs/Environment" }
+    },
+    "resilience_targets": {
+      "type": "array",
+      "description": "PLT-14. Availability target, RTO, RPO, backup policy, scaling policy. Values not provided by the NFRs remain PENDING rather than being invented — '99.9% is standard for this kind of service' is an invention with a citation-shaped wrapper, and it is undetectable to whoever reads the document later.",
+      "items": { "$ref": "#/$defs/ResilienceTarget" }
+    },
+    "security_capabilities": {
+      "type": "array",
+      "minItems": 1,
+      "description": "PLT-9 and PLT-10. The realisation side of what the data viewpoint states as a requirement: per-component workload identity, no shared credentials across contexts, rotatable secrets, encryption at rest and in transit, attributable access.",
+      "items": { "$ref": "#/$defs/SecurityCapability" }
+    },
+    "demand_traceability": {
+      "type": "array",
+      "minItems": 1,
+      "description": "One entry per REQ-PLT-* demand, per CON-* constraint whose binding viewpoints include PLT, and per principle applied. An unanswered demand belongs in open_questions, not in a hopeful row here.",
+      "items": { "$ref": "#/$defs/DemandTrace" }
+    },
+    "conformance_checks": {
+      "type": "array",
+      "minItems": 4,
+      "description": "PLT-16. At minimum the four the viewpoint always owes: isolation (no cross-context DB grants), technology lifecycle, deployability, classified-data protection.",
+      "items": { "$ref": "#/$defs/ConformanceCheck" }
+    },
+    "cycle0_exit_proof": {
+      "type": "array",
+      "minItems": 6,
+      "maxItems": 6,
+      "description": "PLT-19. Exactly the six proofs, no more and no fewer: build, deploy, run, observe, emit_event, consume_event. Platform readiness is PROVEN, not scored — which is why the Phase 2.25 quality gate is boolean. A scalar cannot express 'the pipeline half works', and a five-of-six is not 83% ready, it is not ready.",
+      "items": { "$ref": "#/$defs/ExitProof" }
+    },
+    "platform_components": {
+      "type": "array",
+      "description": "The platform's OWN deployable pieces for which this agent emitted an hld-{component}.md and lld-{component}.md — a gateway configuration, a shared observability stack, a pipeline. Application-service HLDs are NOT this agent's: those belong to Phase 4's per-component design agents, and emitting one here would create a second, drifting source for them.",
+      "items": { "$ref": "#/$defs/PlatformComponent" }
+    },
+    "pending_decisions": {
+      "type": "array",
+      "description": "PLT-17. Every deferred decision with the trigger that reopens it.",
+      "items": { "$ref": "#/$defs/PendingDecision" }
+    },
+    "open_questions": {
+      "type": "array",
+      "description": "Gaps this agent must not paper over — a TBD boundary condition, a demand no approved product satisfies, a context with no viable deployable.",
+      "items": { "$ref": "#/$defs/OpenQuestion" }
+    }
+  },
+  "$defs": {
+    "Capability": {
+      "type": "object",
+      "required": ["capability", "status", "consumer_reason"],
+      "description": "One PLT-6 row. The conditional block below is PRIN-07 expressed in the schema: naming a realization obliges a lifecycle_check, so a product cannot enter the register without the contain/retire check having been applied to it.",
+      "properties": {
+        "capability": { "type": "string", "minLength": 3, "description": "The capability CLASS, not the product — 'Relational persistence', 'Event bus', 'Search index'. Stating the class is what makes the approved-platform lookup possible and what lets the realization change without the demand changing." },
+        "realization": { "type": "string", "minLength": 2, "description": "The product or service realising it, or the literal 'Not selected' for a NOT_PRESENT capability. This document MAY name a product; the FSA may not." },
+        "status": { "type": "string", "enum": ["AVAILABLE", "NOT_PRESENT", "PENDING"], "description": "AVAILABLE means technically provisioned and consumable. It does NOT mean 'we know which product we might use' — that is NOT_PRESENT with a named realization. When in doubt the status is NOT_PRESENT: the impact assessor trusts this field mechanically, so a wrong AVAILABLE makes a feature's platform delta vanish from its estimate." },
+        "lifecycle_check": { "type": "string", "minLength": 4, "description": "The PRIN-07-C1 outcome for the named product: that its lifecycle status is not contain/retire, or the approved exception that permits it anyway. Required whenever a real product is named — a product named without one is a PRIN-07 violation the register itself cannot detect." },
+        "consumer_reason": { "type": "string", "minLength": 5, "maxLength": 180, "description": "Who consumes this capability and why — or, for NOT_PRESENT, why there is no current requirement. 'No current requirement' is a complete and respectable answer; silence is not." },
+        "demand_ref": { "type": "string", "pattern": "^(REQ-PLT-[0-9]{2}|CON-[0-9]{2}|DAT-[0-9](\\.[0-9])?|INT-[0-9]+(\\.[0-9]+)?|SEC-[0-9]{2})$", "description": "The demand this capability satisfies — a REQ-PLT, a PLT-binding CON, a SEC control, or a sibling viewpoint's section where one was available." },
+        "pending_ref": { "type": "string", "pattern": "^PLT-PEND-[0-9]{2}$", "description": "Required when status is PENDING — the PLT-17 row carrying the trigger." }
+      },
+      "allOf": [
+        { "if": { "properties": { "status": { "enum": ["AVAILABLE", "PENDING"] } } }, "then": { "required": ["realization", "lifecycle_check"] } },
+        { "if": { "properties": { "status": { "const": "PENDING" } } }, "then": { "required": ["pending_ref"] } }
+      ]
+    },
+    "RuntimeWorkload": {
+      "type": "object",
+      "required": ["component", "bounded_context", "technology", "deployment_target", "independently_deployable"],
+      "properties": {
+        "component": { "type": "string", "minLength": 3, "description": "The deployable's name, matching the FSA's APP-2 component map where it names one." },
+        "bounded_context": { "type": "string", "minLength": 2, "description": "Exactly ONE context from the FSA's APP-1. A component spanning two contexts is PRIN-04-C1's BLOCKING failure, and it is not expressible here." },
+        "technology": { "type": "string", "minLength": 2, "description": "The runtime technology. Its lifecycle check belongs in the matching capability_register row, not repeated here." },
+        "deployment_target": { "type": "string", "minLength": 2, "description": "Where it runs, at capability level." },
+        "independently_deployable": { "type": "boolean", "description": "PRIN-04-C2 requires every context to have at least one component where this is true. A false value needs a reason in the artifact, and probably an open question." }
+      }
+    },
+    "Environment": {
+      "type": "object",
+      "required": ["environment", "purpose_summary"],
+      "properties": {
+        "environment": { "type": "string", "minLength": 2 },
+        "purpose_summary": { "type": "string", "minLength": 10, "maxLength": 150, "description": "Capped summary. Environment differences should be configuration and capacity differences, not different architecture patterns." }
+      }
+    },
+    "ResilienceTarget": {
+      "type": "object",
+      "required": ["target", "value"],
+      "properties": {
+        "target": { "type": "string", "enum": ["availability", "rto", "rpo", "backup", "scaling", "multi_zone"], "description": "Which PLT-14 value this is." },
+        "value": { "type": "string", "minLength": 2, "description": "The value from the matching nfr-spec.md boundary condition, or the literal 'PENDING'. Never an uptime percentage that sounds right." },
+        "source": { "type": "string", "description": "Required when value is not PENDING: the nfr-spec.md boundary condition, REQ-PLT demand or KB standard (e.g. kb-L1-enterprise-security § ES4) that grounds it. A KB-stated policy is a real source; a sector norm is not." },
+        "applies_to": { "type": "string", "description": "The component, capability or endpoint group this target binds. ES4's rule is that a tier is stated explicitly, never silently inherited from an unrelated system." },
+        "pending_ref": { "type": "string", "pattern": "^PLT-PEND-[0-9]{2}$", "description": "Required when value is PENDING." }
+      },
+      "allOf": [
+        { "if": { "properties": { "value": { "const": "PENDING" } } }, "then": { "required": ["pending_ref"] } },
+        { "if": { "properties": { "value": { "type": "string", "not": { "const": "PENDING" } } }, "required": ["value"] }, "then": { "required": ["source"] } }
+      ]
+    },
+    "SecurityCapability": {
+      "type": "object",
+      "required": ["capability", "realization_summary", "applies_to", "source"],
+      "properties": {
+        "capability": { "type": "string", "minLength": 4, "description": "e.g. 'Per-component workload identity', 'Managed key/secret capability', 'Encryption at rest'." },
+        "realization_summary": { "type": "string", "minLength": 10, "maxLength": 200, "description": "Capped summary of how the platform provides it." },
+        "applies_to": { "type": "string", "minLength": 3, "description": "Which components or data classes. For encryption, the classes DAT-3 marks PII / Financial / Confidential / Regulated Evidence." },
+        "source": { "type": "string", "pattern": "^(kb-L1-enterprise-security § ES[0-9]+|kb-L1-enterprise-architecture § (EA[0-9]+|BP[0-9]+|PRIN-[0-9]{2})|data-architecture\\.md § DAT-[0-9](\\.[0-9])?|nfr-spec\\.md § FR-[0-9]{3}|REQ-PLT-[0-9]{2}|SEC-[0-9]{2})$", "description": "The standard or demand this realises. The split is constant: the data viewpoint and the security KB state the REQUIREMENT, this viewpoint selects the REALISATION." }
+      }
+    },
+    "DemandTrace": {
+      "type": "object",
+      "required": ["demand_id", "satisfied_by", "satisfaction_summary"],
+      "properties": {
+        "demand_id": { "type": "string", "pattern": "^(REQ-PLT-[0-9]{2}|CON-[0-9]{2}|SEC-[0-9]{2}|PRIN-[0-9]{2})$", "description": "Id exactly as the FSA or the principle catalogue states it, never renumbered." },
+        "satisfied_by": { "type": "string", "pattern": "^PLT-[0-9]+(\\.[0-9]+)?$", "description": "The PLT section that answers it." },
+        "satisfaction_summary": { "type": "string", "minLength": 15, "maxLength": 200, "description": "Capped summary of HOW it is satisfied — the decision, not a restatement of the demand." }
+      }
+    },
+    "ConformanceCheck": {
+      "type": "object",
+      "required": ["id", "description", "check"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^PLT-C[0-9]+$" },
+        "description": { "type": "string", "minLength": 10, "maxLength": 150 },
+        "check": { "type": "string", "minLength": 10, "description": "A machine-evaluable expression — e.g. 'cross_context_db_grants == 0'. Prose here makes the check unevaluable, which makes it a slogan." },
+        "severity": { "type": "string", "enum": ["BLOCKING", "MAJOR", "MINOR"] }
+      }
+    },
+    "ExitProof": {
+      "type": "object",
+      "required": ["proof", "supported", "evidence_summary"],
+      "description": "One of PLT-19's six proofs. 'supported' is the architecture's claim that the capability set makes the proof achievable — it is NOT a claim that the proof has been executed. The Platform Lead executes and signs it at the Phase 2.25 gate.",
+      "properties": {
+        "proof": { "type": "string", "enum": ["build", "deploy", "run", "observe", "emit_event", "consume_event"] },
+        "supported": { "type": "boolean", "description": "Whether the architecture as designed supports this proof. A false value is honest and useful; it names exactly what blocks Cycle 0 exit." },
+        "evidence_summary": { "type": "string", "minLength": 10, "maxLength": 200, "description": "Which capability or section makes this proof achievable — or, when supported is false, what is missing." }
+      }
+    },
+    "PlatformComponent": {
+      "type": "object",
+      "required": ["component", "hld_artifact", "lld_artifact", "responsibility_summary"],
+      "properties": {
+        "component": { "type": "string", "minLength": 3, "description": "A deployable piece of the PLATFORM itself — a gateway configuration, a shared observability stack, a pipeline. Never an application service." },
+        "hld_artifact": { "type": "string", "description": "The artifacts[] name of its hld-{component}.md." },
+        "lld_artifact": { "type": "string", "description": "The artifacts[] name of its lld-{component}.md." },
+        "responsibility_summary": { "type": "string", "minLength": 10, "maxLength": 200 }
+      }
+    },
+    "PendingDecision": {
+      "type": "object",
+      "required": ["id", "decision_summary", "status", "trigger"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^PLT-PEND-[0-9]{2}$" },
+        "decision_summary": { "type": "string", "minLength": 10, "maxLength": 180 },
+        "status": { "type": "string", "enum": ["PENDING", "NOT_PRESENT"], "description": "'NOT_PRESENT' appears here for a capability deliberately not provisioned — the decision is made, the capability simply is not there, and the trigger says what would change that." },
+        "trigger": { "type": "string", "minLength": 15, "description": "The condition that reopens this decision, stated as a condition and not a date. PRIN-01-C1 checks exactly this." }
+      }
+    },
+    "OpenQuestion": {
+      "type": "object",
+      "required": ["id", "question", "origin", "doc_location"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^OQ-[0-9]{2}$" },
+        "question": { "type": "string", "minLength": 15, "description": "The decision someone has to make, phrased so it can be answered." },
+        "origin": { "type": "string", "enum": ["nfr_tbd", "fsa_gap", "lifecycle_conflict", "capability_gap"], "description": "'lifecycle_conflict' — the only approved product for a demand is in contain/retire status, which needs an exception decision rather than a quiet substitution. 'capability_gap' — a demand no approved product satisfies at all." },
+        "doc_location": { "type": "string", "minLength": 3, "description": "The PLT section where this question is visible in the artifact. A question recorded only in items is invisible to everyone who reads the document." }
+      }
+    }
+  }
+}

@@ -1,0 +1,49 @@
+{
+  "delta_id": "HLD-D02",
+  "target_document": "frontend/producer-portal/hld.md",
+  "component": "producer-portal",
+  "bounded_context": "experience (Catalogue, Billing)",
+  "produced_by": "L1-design-hld@1.0.0",
+  "execution_id": "exec-hld-6e7f8a9c",
+  "workflow_execution_id": "wf-hl-pi1-3c4d5e6f",
+  "cycle": "C1-producer-registration",
+
+  "from_version": "0.0.0",
+  "to_version": "1.0.0",
+  "creates_document": true,
+  "type": "additive",
+  "version_bump": "major",
+  "structural": false,
+  "adr_required": false,
+
+  "changes": [
+    {
+      "section": "C4-2 Container",
+      "operation": "add",
+      "content": "producer-portal — statically hosted SPA behind the group API gateway, own workload identity (wi-producer-portal), no persistence of its own.",
+      "derived_from": ["fsa APP-2.07", "plt PLT-1", "plt PLT-8"]
+    },
+    {
+      "section": "C4-3 Component",
+      "operation": "add",
+      "content": "RegistrationForm (WU-F1.1-03) and RegistrationStatusView. The status view has no Work Unit.",
+      "derived_from": ["tasks.json", "wireframes.md WF-01, WF-02"],
+      "finding_ref": "HLD-F02"
+    },
+    {
+      "section": "HLD-5 Integrations",
+      "operation": "add",
+      "content": "Consumes identity.registration-status@v1 and createProducerRegistration through the group gateway. Reaches no service endpoint directly and no store at all.",
+      "derived_from": ["dependency-graph.json", "plt PLT-8"]
+    },
+    {
+      "section": "HLD-8 Client-side validation posture",
+      "operation": "add",
+      "content": "Client-side FBO format checking and the attestation guard are affordances, not controls. The server refuses independently, and TC-ADV-S-F1.1-a-01 proves a forged client-side attestation flag is ignored.",
+      "derived_from": ["stories.json S-F1.1-a-AC3", "kb-L1-enterprise-security ES1"]
+    }
+  ],
+
+  "findings_raised": ["HLD-F02"],
+  "guardrails": { "gr-L1-consistency-check": "pass", "gr-L1-hallucination-check": "pass" }
+}

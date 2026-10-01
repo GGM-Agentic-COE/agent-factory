@@ -1,0 +1,89 @@
+{
+  "_comment": "Input to L1-design-ux-wireframe, BOM Phase 4. Two inputs per the BOM row: stories.json for the acceptance criteria a screen must satisfy, and user-journeys.md for the touchpoints a screen must exist at. Wireframes are additive — they land in the FDP's additive/ folder and are never merged.",
+  "folder_name": "harvestlink/pi-2026-q2/cycle-1",
+  "cycle": { "pi_id": "PI-2026-Q2", "cycle": 1, "slug": "producer-registration" },
+
+  "stories_output": {
+    "agent_id": "L1-inception-story-generator",
+    "execution_id": "exec-sg-8c9d0e1f",
+    "workflow_execution_id": "wf-hl-pi1-3c4d5e6f",
+    "status": "success",
+    "content": {
+      "type": "stories",
+      "schema_version": "1.0",
+      "items": {
+        "stories": [
+          {
+            "slice_id": "S-F1.1-a",
+            "title": "Happy-path producer registration",
+            "acceptance_criteria": [
+              { "ac_id": "S-F1.1-a-AC1", "given": "an authenticated producer on the registration form", "when": "they submit a well-formed FBO number", "then": "the registration is accepted and held with status pending-verification" },
+              { "ac_id": "S-F1.1-a-AC2", "given": "an authenticated producer on the registration form", "when": "they submit a malformed FBO number", "then": "the submission is refused with a field-level message and no registration record is created" },
+              { "ac_id": "S-F1.1-a-AC3", "given": "a producer completing registration", "when": "they submit without having ticked the FBO-status attestation", "then": "the submission is refused server-side, and the refusal is not bypassable by altering the client request" },
+              { "ac_id": "S-F1.1-a-AC4", "given": "a producer with a registration held pending-verification", "when": "they attempt to publish a listing", "then": "publication is blocked and the producer is told verification is still in progress" }
+            ]
+          },
+          {
+            "slice_id": "S-F1.1-b",
+            "title": "Asynchronous FBO verification and its outcomes",
+            "acceptance_criteria": [
+              { "ac_id": "S-F1.1-b-AC2", "given": "a registration held pending-verification", "when": "the FBO lookup returns an invalid status", "then": "the registration is rejected, the producer is notified with the reason, and publication stays blocked" },
+              { "ac_id": "S-F1.1-b-AC3", "given": "a registration held pending-verification", "when": "the FBO lookup does not answer within its timeout", "then": "the registration stays pending and is retried; it is never optimistically treated as valid" }
+            ]
+          }
+        ]
+      },
+      "artifacts": [
+        { "id": "artifact-sg-8c9d0e1f", "type": "document", "name": "stories.json", "format": "json", "storage": { "provider": "s3", "location": "s3://adlc-artifacts/wf-hl-pi1-3c4d5e6f/cycle-1/stories.json" }, "description": "Cycle 1 stories", "produced_by": "L1-inception-story-generator" }
+      ],
+      "execution_summary": "• Cycle 1 acceptance criteria with a user-facing surface."
+    }
+  },
+
+  "user_journeys_output": {
+    "agent_id": "L1-design-user-journey-mapper",
+    "execution_id": "exec-ujm-2a3b4c5e",
+    "workflow_execution_id": "wf-hl-pi1-3c4d5e6f",
+    "status": "success",
+    "content": {
+      "type": "user_journeys",
+      "schema_version": "1.0",
+      "items": {
+        "journeys": [
+          {
+            "journey_id": "UJ-01",
+            "persona_id": "P-01",
+            "title": "Producer registers and waits for eligibility",
+            "steps": [
+              { "step": 3, "touchpoint": "TP-03", "action": "Completes the registration form: business details, FBO number, attestation tick", "emotional_note": "The producer may not have their FBO number to hand. The journey must survive being abandoned here and resumed later." },
+              { "step": 4, "touchpoint": "TP-03", "action": "Reads and ticks the FBO-status attestation", "note": "The UI must not let it feel like boilerplate." },
+              { "step": 5, "touchpoint": "TP-04", "action": "Sees an explicit pending state with what happens next", "emotional_note": "The producer has finished their part and cannot act further. An unexplained wait is read as failure." },
+              { "step": 6, "touchpoint": "TP-04", "action": "Attempts to publish while pending; blocked with a stated reason" },
+              { "step": "7b", "touchpoint": "TP-04", "action": "Lookup times out; producer sees the same pending state", "note": "A timeout and a slow answer must be indistinguishable to the producer." }
+            ]
+          }
+        ],
+        "touchpoints": [
+          { "touchpoint_id": "TP-03", "name": "Registration form", "channel": "web", "owning_component": "producer-portal", "new_this_cycle": true, "work_unit": "WU-F1.1-03" },
+          { "touchpoint_id": "TP-04", "name": "Registration status screen", "channel": "web", "owning_component": "producer-portal", "new_this_cycle": true, "work_unit": "UNASSIGNED", "finding_ref": "UJ-F01" },
+          { "touchpoint_id": "TP-05", "name": "Verification outcome notification", "channel": "email", "owning_component": "notifications-worker", "new_this_cycle": true, "work_unit": "WU-F1.1-06" }
+        ],
+        "findings": [
+          { "id": "UJ-F01", "severity": "MEDIUM", "summary": "TP-04 registration status screen is required by the journey and built by no Work Unit." },
+          { "id": "UJ-F02", "severity": "LOW", "summary": "No resumption path after abandonment at step 3." }
+        ]
+      },
+      "artifacts": [
+        { "id": "artifact-ujm-2a3b4c5e", "type": "document", "name": "user-journeys.md", "format": "markdown", "storage": { "provider": "s3", "location": "s3://adlc-artifacts/wf-hl-pi1-3c4d5e6f/cycle-1/additive/user-journeys.md" }, "description": "UJ-01 producer journey", "produced_by": "L1-design-user-journey-mapper" }
+      ],
+      "execution_summary": "• UJ-01, 9 steps, 5 touchpoints, 3 findings."
+    }
+  },
+
+  "design_constraints": {
+    "persona_context": "Producer, P-01: low technical capability, often on a phone, often outdoors. Source: kb-L2-food-domain FD2.",
+    "accessibility_baseline": "WCAG 2.2 AA",
+    "figma_push": false,
+    "figma_push_note": "tool-L1-figma-create-frame is optional per the BOM row and is not invoked in this run. Wireframes are emitted as ASCII in the markdown artifact so they are readable in a terminal, a diff and a PR review."
+  }
+}

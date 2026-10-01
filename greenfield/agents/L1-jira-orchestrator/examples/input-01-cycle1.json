@@ -1,0 +1,130 @@
+{
+  "_comment": "Input to L1-jira-orchestrator, BOM Phase 3. Takes all four levels of the decomposition as JSON — epics and features from Phase 2, stories and tasks from Phase 3 — and creates them as Jira issues. Records are abbreviated to the fields that map onto a Jira issue; the full records are the upstream artifacts.",
+  "_mapping_problem": "The ADLC spine is 4 levels (Epic -> Feature -> [Story slice] -> Work Unit). Jira's native ladder is 3 (Epic -> Story -> Sub-task). The collapsible-story rule is what makes the mapping tractable: a slice only exists when a feature was oversized, so at most one of Feature/Slice needs the Story level for any given branch. The mapping is declared explicitly in jira_config below rather than left to the agent to improvise per run.",
+
+  "epics_output": {
+    "agent_id": "L1-inception-epic-creator",
+    "agent_version": "1.0.0",
+    "execution_id": "exec-ec-2a3b4c5d",
+    "workflow_execution_id": "wf-hl-pi1-3c4d5e6f",
+    "status": "success",
+    "content": {
+      "type": "epics",
+      "schema_version": "1.0",
+      "items": {
+        "epics": [
+          { "epic_id": "EPIC-1", "title": "Producer Onboarding & Catalog", "intent": "Producers can join the marketplace and list produce, with their trading eligibility verified.", "owner": "Product Lead", "human_authored": true, "pi_id": "PI-2026-Q2" },
+          { "epic_id": "EPIC-5", "title": "Identity & Access", "intent": "External parties authenticate and are authorised without extending the employee directory.", "owner": "Product Lead", "human_authored": true, "pi_id": "PI-2026-Q2" }
+        ]
+      },
+      "artifacts": [
+        { "id": "artifact-ec-2a3b4c5d", "type": "document", "name": "epics.json", "format": "json", "storage": { "provider": "s3", "location": "s3://adlc-artifacts/wf-hl-pi1-3c4d5e6f/epics.json" }, "description": "2 epics in scope for PI-2026-Q2 Cycle 1", "produced_by": "L1-inception-epic-creator" }
+      ],
+      "execution_summary": "• 2 human-authored epics. Both were pushed to Jira in a prior PI-planning run."
+    }
+  },
+
+  "features_output": {
+    "agent_id": "L1-inception-feature-decomposer",
+    "agent_version": "1.0.0",
+    "execution_id": "exec-fd-7b8c9d0e",
+    "workflow_execution_id": "wf-hl-pi1-3c4d5e6f",
+    "status": "success",
+    "content": {
+      "type": "features",
+      "schema_version": "1.0",
+      "items": {
+        "features": [
+          { "feature_id": "F5.1", "epic_id": "EPIC-5", "title": "External identity-provider integration", "band": 1, "size": "M", "wsjf_rank": 1, "depends_on": [], "status": "committed", "needs_slicing": false, "acceptance_criteria_count": 3 },
+          { "feature_id": "F1.1", "epic_id": "EPIC-1", "title": "Producer registration + FBO verification", "band": 1, "size": "L", "wsjf_rank": 3, "depends_on": ["F5.1"], "status": "committed", "needs_slicing": true, "acceptance_criteria_count": 4 }
+        ]
+      },
+      "artifacts": [
+        { "id": "artifact-fd-7b8c9d0e", "type": "document", "name": "features.json", "format": "json", "storage": { "provider": "s3", "location": "s3://adlc-artifacts/wf-hl-pi1-3c4d5e6f/features.json" }, "description": "Committed features for Cycle 1", "produced_by": "L1-inception-feature-decomposer" }
+      ],
+      "execution_summary": "• 2 committed features. F1.1 was re-sized to L after PI planning, which changes its Jira record."
+    }
+  },
+
+  "stories_output": {
+    "agent_id": "L1-inception-story-generator",
+    "agent_version": "1.0.0",
+    "execution_id": "exec-sg-8c9d0e1f",
+    "workflow_execution_id": "wf-hl-pi1-3c4d5e6f",
+    "status": "success",
+    "content": {
+      "type": "stories",
+      "schema_version": "1.0",
+      "items": {
+        "stories": [
+          { "slice_id": "S-F1.1-a", "feature_id": "F1.1", "epic_id": "EPIC-1", "title": "Happy-path producer registration", "narrative": "As a producer, I want to submit my registration with my FBO number so that I can begin the process of listing produce.", "sequence": 1, "acceptance_criteria_count": 4, "depends_on_features": ["F5.1"] },
+          { "slice_id": "S-F1.1-b", "feature_id": "F1.1", "epic_id": "EPIC-1", "title": "Asynchronous FBO verification and its outcomes", "narrative": "As a compliance-accountable platform, I want a producer's declared FBO registration verified against the competent authority's register so that no unverified party can sell.", "sequence": 2, "acceptance_criteria_count": 4, "depends_on_slices": ["S-F1.1-a"] },
+          { "slice_id": null, "feature_id": "F5.1", "epic_id": "EPIC-5", "title": "External identity-provider integration", "narrative": null, "sequence": 0, "acceptance_criteria_count": 3, "unsliced": true }
+        ]
+      },
+      "artifacts": [
+        { "id": "artifact-sg-8c9d0e1f", "type": "document", "name": "stories.json", "format": "json", "storage": { "provider": "s3", "location": "s3://adlc-artifacts/wf-hl-pi1-3c4d5e6f/cycle-1/stories.json" }, "description": "Cycle 1 stories", "produced_by": "L1-inception-story-generator" }
+      ],
+      "execution_summary": "• 2 slices under F1.1; F5.1 carried unsliced."
+    }
+  },
+
+  "tasks_output": {
+    "agent_id": "L1-inception-task-generator",
+    "agent_version": "1.0.0",
+    "execution_id": "exec-tg-0e1f2a3b",
+    "workflow_execution_id": "wf-hl-pi1-3c4d5e6f",
+    "status": "success",
+    "content": {
+      "type": "tasks",
+      "schema_version": "1.0",
+      "items": {
+        "work_units": [
+          { "work_unit_id": "WU-F5.1-01", "feature_id": "F5.1", "slice_id": null, "title": "Producer registration via external IdP", "layer": "integration", "unit_points": 5, "depends_on_unit": [], "verification_ref": ["TC-F5.1-01"] },
+          { "work_unit_id": "WU-F5.1-02", "feature_id": "F5.1", "slice_id": null, "title": "OIDC token validation", "layer": "business-logic", "unit_points": 3, "depends_on_unit": ["WU-F5.1-01"], "verification_ref": ["TC-F5.1-03", "TC-ADV-F5.1-01"] },
+          { "work_unit_id": "WU-F5.1-03", "feature_id": "F5.1", "slice_id": null, "title": "Role provisioning from the onboarding record", "layer": "business-logic", "unit_points": 5, "depends_on_unit": ["WU-F5.1-02"], "verification_ref": ["TC-F5.1-02"] },
+          { "work_unit_id": "WU-F1.1-01", "feature_id": "F1.1", "slice_id": "S-F1.1-a", "title": "Producer entity schema migration", "layer": "data", "unit_points": 3, "depends_on_unit": [], "verification_ref": ["TC-S-F1.1-a-05"] },
+          { "work_unit_id": "WU-F1.1-02", "feature_id": "F1.1", "slice_id": "S-F1.1-a", "title": "FBO number capture endpoint", "layer": "api", "unit_points": 5, "depends_on_unit": ["WU-F1.1-01", "WU-F5.1-02"], "verification_ref": ["TC-S-F1.1-a-01", "TC-S-F1.1-a-02", "TC-S-F1.1-a-03", "TC-ADV-S-F1.1-a-01"] },
+          { "work_unit_id": "WU-F1.1-03", "feature_id": "F1.1", "slice_id": "S-F1.1-a", "title": "Registration submission form", "layer": "ui", "unit_points": 3, "depends_on_unit": ["WU-F1.1-02"], "verification_ref": ["TC-S-F1.1-a-02"] },
+          { "work_unit_id": "WU-F1.1-04", "feature_id": "F1.1", "slice_id": "S-F1.1-a", "title": "Publication gate on pending-verification", "layer": "business-logic", "unit_points": 3, "depends_on_unit": ["WU-F1.1-01"], "verification_ref": ["TC-S-F1.1-a-04"] },
+          { "work_unit_id": "WU-F1.1-05", "feature_id": "F1.1", "slice_id": "S-F1.1-b", "title": "FBO register lookup integration", "layer": "integration", "unit_points": 5, "depends_on_unit": ["WU-F1.1-01"], "verification_ref": ["TC-S-F1.1-b-01", "TC-S-F1.1-b-03", "TC-ADV-S-F1.1-b-01"] },
+          { "work_unit_id": "WU-F1.1-06", "feature_id": "F1.1", "slice_id": "S-F1.1-b", "title": "Rejected-verification notification", "layer": "business-logic", "unit_points": 3, "depends_on_unit": ["WU-F1.1-05"], "verification_ref": ["TC-S-F1.1-b-02"] }
+        ],
+        "capacity_signal": { "cycle": 1, "capacity_points": 30, "emitted_points": 35, "fits": false, "action": "FLAGGED_TO_PLANNER" }
+      },
+      "artifacts": [
+        { "id": "artifact-tg-0e1f2a3b", "type": "document", "name": "tasks.json", "format": "json", "storage": { "provider": "s3", "location": "s3://adlc-artifacts/wf-hl-pi1-3c4d5e6f/cycle-1/tasks.json" }, "description": "9 Work Units", "produced_by": "L1-inception-task-generator" }
+      ],
+      "execution_summary": "• 9 Work Units, 35 points against a 30-point cycle, flagged to the planner."
+    }
+  },
+
+  "jira_config": {
+    "project_key": "HL",
+    "site": "thornbury.atlassian.net",
+    "issue_type_mapping": {
+      "Epic": "Epic",
+      "Feature": "Story",
+      "Story slice": "Story",
+      "Work Unit": "Sub-task"
+    },
+    "mapping_rule": "Four ADLC levels, three Jira levels. The collapsible-story rule resolves the collision: an unsliced feature becomes the Story itself; a sliced feature contributes no issue of its own and its slices become the Stories, with the feature carried as a label and through the Epic link. Exactly one of Feature or Slice occupies the Story level on any branch, so no issue is ever both.",
+    "field_mapping": {
+      "unit_points": "customfield_10016 (Story Points)",
+      "layer": "labels (layer:<value>)",
+      "feature_id": "labels (feature:<value>)",
+      "verification_ref": "customfield_10412 (Verification Ref), comma-separated",
+      "acceptance_criteria": "description (Given/When/Then block)",
+      "depends_on_unit": "issue link type 'Blocks' / 'is blocked by'",
+      "workflow_execution_id": "customfield_10500 (ADLC Run Id)"
+    },
+    "idempotency": {
+      "strategy": "fetch-before-create on the ADLC id held in customfield_10501 (ADLC Id)",
+      "note": "Epics are human-authored and were created in a prior PI-planning run. Re-creating them would fork the hierarchy silently, which is why every level is fetched first and created only on a miss."
+    },
+    "do_not_push": [
+      "rightsizing_log — evaluator material, not delivery state",
+      "capacity_signal disposition — cycle and disposition are the feature-cycle-planner's fields; writing 'overflow' into Jira before the planner has decided would make Jira disagree with cycle-plan.md"
+    ]
+  }
+}

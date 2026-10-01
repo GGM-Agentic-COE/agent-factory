@@ -1,0 +1,77 @@
+{
+  "_comment": "Input to L1-design-platform-architect, DELTA INVOCATION (BOM Phase 4), CONDITIONAL. This agent fires only when the impact assessment reports a NOT PRESENT capability against PLT-6. In most cycles it does not fire at all. It fires in Cycle 1 because the FBO register verification needs outbound third-party egress and PLT-6 has no such capability — the empty-then-large shape that is the whole reason platform is a separate document rather than a section of a per-feature HLD.",
+  "folder_name": "harvestlink/pi-2026-q2/cycle-1",
+  "cycle": { "pi_id": "PI-2026-Q2", "cycle": 1, "slug": "producer-registration" },
+
+  "firing_condition": {
+    "fires": true,
+    "reason": "impact-assessment.md reports 1 NOT PRESENT capability against PLT-6",
+    "note": "Had every required capability been AVAILABLE and no topology changed, the verdict would have been PLT viewpoint = NONE and this agent would not have run. The 00-overview.md assertion table would still have carried a PLATFORM: NONE row with that reason, because gr-L1-viewpoint-completeness fails on silence, not on a stated NONE."
+  },
+
+  "impact_assessment_output": {
+    "agent_id": "L1-planning-impact-assessor",
+    "execution_id": "exec-ia-0c1d2e3a",
+    "workflow_execution_id": "wf-hl-pi1-3c4d5e6f",
+    "status": "success",
+    "content": {
+      "type": "impact_assessment",
+      "schema_version": "1.0",
+      "items": {
+        "capability_gap_list": [
+          {
+            "capability": "Outbound third-party egress",
+            "plt6_status": "NOT PRESENT",
+            "required_by": ["INT-4.7 FBO register verification", "WU-F1.1-05"],
+            "raised_by": ["HLD-F03", "INTD-F01"],
+            "verdict": "PLT DELTA REQUIRED"
+          }
+        ],
+        "capabilities_checked_and_available": [
+          { "capability": "Relational persistence", "plt6_status": "AVAILABLE" },
+          { "capability": "Asynchronous messaging", "plt6_status": "AVAILABLE" },
+          { "capability": "External-party identity", "plt6_status": "AVAILABLE" },
+          { "capability": "Secrets and key management", "plt6_status": "AVAILABLE" }
+        ],
+        "topology_change": true
+      },
+      "artifacts": [
+        { "id": "artifact-ia-0c1d2e3a", "type": "document", "name": "impact-assessment.md", "format": "markdown", "storage": { "provider": "s3", "location": "s3://adlc-artifacts/wf-hl-pi1-3c4d5e6f/cycle-1/impact-assessment.md" }, "description": "Cycle 1 impact assessment; 1 capability gap", "produced_by": "L1-planning-impact-assessor" }
+      ],
+      "execution_summary": "• 5 capabilities checked against PLT-6; 4 AVAILABLE, 1 NOT PRESENT. Platform delta required."
+    }
+  },
+
+  "current_canonical_document": {
+    "document": "platform-architecture.md",
+    "version": "1.0",
+    "status": "APPROVED",
+    "content_hash": "sha256:5e13…8dd0",
+    "sections_relevant": {
+      "PLT-6": "9 capability rows: 5 AVAILABLE (relational persistence, async messaging, object storage, external-party identity, secrets and key management), 3 NOT PRESENT (outbound enterprise reporting feed, full-text search, analytical plane), 1 PARTIAL (evidence-chain completeness monitoring). No row for outbound third-party egress.",
+      "PLT-8": "Public ingress via the group gateway; private application network; data and messaging capabilities not publicly routable. Stated for INGRESS; outbound egress is not addressed.",
+      "PLT-9": "One workload identity per component, 7 total, none shared. Secrets in the group vault. No application-held keys.",
+      "PLT-10": "Encryption at rest and in transit for PII, Financial, Regulated Evidence and Confidential; keys in the managed key capability; rotation without redeploying unrelated consumers.",
+      "PLT-14": "billing-service and identity-service 99.9% (ES4 regulatory defence); others 99.5%; RTO/RPO PENDING (PLT-PEND-01).",
+      "PLT-15": "Technology lifecycle: no contain/retire status without an approved exception. Applies to future platform deltas too.",
+      "PLT-16": "PLT-C1 isolation, PLT-C2 lifecycle, PLT-C3 deployability, PLT-C4 classified data protection."
+    }
+  },
+
+  "nfr_classifications": [
+    { "id": "FR-003", "category": "Availability", "boundary_condition": "99.9% for identity-service — the record could be required for active regulatory defence", "source": "kb-L1-enterprise-security § ES4" },
+    { "id": "FR-003", "category": "Security", "boundary_condition": "The credential used to call the competent authority's register is a secret and must be vault-managed", "source": "kb-L1-enterprise-security § ES5" }
+  ],
+
+  "integration_delta_ref": {
+    "document": "integration-architecture.delta.json",
+    "to_version": "2.0",
+    "structural": true,
+    "adr_id": "ADR-012",
+    "adr_status": "PROPOSED — EA approval pending",
+    "flow": "INT-4.7 identity-service -> competent-authority FBO register, outbound, request/response at the boundary, consumed out of band",
+    "budget": "PENDING (INT-PEND-04)",
+    "degraded_mode": "NoAnswer leaves the registration pending with bounded retry; no branch treats an unanswered lookup as valid",
+    "correlation_rule": "The producer's session correlation id is NOT propagated across this boundary"
+  }
+}

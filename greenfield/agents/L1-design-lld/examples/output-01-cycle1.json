@@ -1,0 +1,175 @@
+{
+  "agent_id": "L1-design-lld",
+  "agent_version": "1.0.0",
+  "execution_id": "exec-lld-7f8a9b0d",
+  "workflow_execution_id": "wf-hl-pi1-3c4d5e6f",
+  "status": "success",
+  "content": {
+    "type": "lld_deltas",
+    "schema_version": "1.0",
+    "items": {
+      "delta_control": {
+        "cycle": "C1-producer-registration",
+        "mode": "delta",
+        "fdp_location": "deltas/",
+        "components_affected": ["identity-service", "producer-portal", "notifications-worker"],
+        "creating_delta_note": "First cycle for all three components, so each delta is taken against an empty document: 0.0.0 -> 1.0.0, creates_document true. Same resolution as the HLD deltas.",
+        "scope_boundary": "Classes, sequence diagrams and error handling. Entity ownership, classification and retention are the data viewpoint's; a change to any of them is a data-architecture delta, not an LLD one. Two candidates surfaced here and were escalated rather than absorbed — see LLD-F01 and LLD-F02."
+      },
+
+      "deltas": [
+        {
+          "delta_id": "LLD-D01",
+          "target_document": "services/identity-service/lld.md",
+          "component": "identity-service",
+          "from_version": "0.0.0",
+          "to_version": "1.0.0",
+          "creates_document": true,
+          "type": "additive",
+          "version_bump": "major",
+          "structural": false,
+          "adr_required": false,
+          "changes": [
+            {
+              "section": "LLD-1 Classes",
+              "operation": "add",
+              "content": "RegistrationService — submit(command) -> RegistrationId; resolveStatus(producerId) -> EligibilityDecision. TokenValidator — validate(rawToken) -> Principal | TokenRejected. RoleProvisioner — provision(principal, onboardingRecord) -> Role. FboRegisterClient — lookup(fboNumber) -> Verified | Invalid | NoAnswer. ProducerRepository — append-only over identity_schema; supersede(registration) rather than update(registration).",
+              "derived_from": ["hld HLD-D01 C4-3", "dat DAT-3.2"]
+            },
+            {
+              "section": "LLD-2 Sequence — registration submitted",
+              "operation": "add",
+              "content": "```text\nproducer-portal -> RegistrationService : POST /v1/producers/registrations\nRegistrationService -> RegistrationService : validate fbo_number format\nRegistrationService -> RegistrationService : assert fbo_attestation == true   [server-side]\nRegistrationService -> ProducerRepository : append Producer + FoodSafetyRegistration\n                                            status = pending-verification\nRegistrationService --> producer-portal : 201 Created { registrationId }\nRegistrationService -> FboRegisterClient : lookup(fbo_number)   [async, out of band]\n```",
+              "derived_from": ["openapi.yaml createProducerRegistration", "stories.json S-F1.1-a"]
+            },
+            {
+              "section": "LLD-3 Sequence — verification outcome",
+              "operation": "add",
+              "content": "```text\nFboRegisterClient -> competent-authority register : lookup\nalt Verified\n    FboRegisterClient -> ProducerRepository : append FoodSafetyRegistration\n                                              status = valid, supersedes prior row\n    FboRegisterClient -> EventPublisher      : identity.registration.verified\nelse Invalid\n    FboRegisterClient -> ProducerRepository : append status = rejected, reason passed through\n    FboRegisterClient -> EventPublisher      : identity.registration.verified (outcome=rejected)\nelse NoAnswer\n    FboRegisterClient -> RetryScheduler      : schedule bounded retry\n    note: no row appended, no event emitted, status stays pending-verification\nend\n```",
+              "derived_from": ["stories.json S-F1.1-b", "int INT-6"]
+            },
+            {
+              "section": "LLD-4 Error handling",
+              "operation": "add",
+              "content": "Malformed fbo_number -> 400 with a field-level problem detail; no row appended (S-F1.1-a-AC2). Missing attestation -> 422; refused server-side regardless of what the client sent (S-F1.1-a-AC3, ES1). FBO register non-answer -> NoAnswer, bounded retry with exponential backoff, registration stays pending; it is never promoted to valid on a timeout, and no 'assume valid' branch exists in the code path at all (S-F1.1-b-AC3). FBO register returns Invalid -> rejected, and the register's reason string is stored and passed through verbatim, never paraphrased.",
+              "derived_from": ["stories.json", "kb-L2-food-domain FD4"]
+            },
+            {
+              "section": "LLD-5 Evidence write discipline",
+              "operation": "add",
+              "content": "FoodSafetyRegistration rows are append-only. A status change is a new row superseding the prior one; ProducerRepository exposes no update path for this entity, so 'supersede, never overwrite' is enforced by the absence of a method rather than by a code-review convention. The deduplication key for the emitted event is (producer_id, fbo_number, verified_on) — the business act, not the message id, which a producer's retry would regenerate.",
+              "derived_from": ["dat DAT-3.2", "int INT-3.2", "kb-L2-food-domain FD3, FD7"]
+            },
+            {
+              "section": "LLD-6 Current-status resolution",
+              "operation": "add",
+              "content": "resolveStatus(producerId) returns the latest non-superseded FoodSafetyRegistration row for that producer, ordered by appended_at. This satisfies getRegistrationStatus's p95 <= 250 ms budget only with an index on (producer_id, appended_at desc) — see LLD-F01.",
+              "derived_from": ["openapi.yaml getRegistrationStatus", "int INT-4.3"],
+              "finding_ref": "LLD-F01"
+            }
+          ]
+        },
+        {
+          "delta_id": "LLD-D02",
+          "target_document": "frontend/producer-portal/lld.md",
+          "component": "producer-portal",
+          "from_version": "0.0.0",
+          "to_version": "1.0.0",
+          "creates_document": true,
+          "type": "additive",
+          "version_bump": "major",
+          "structural": false,
+          "adr_required": false,
+          "changes": [
+            {
+              "section": "LLD-1 Classes",
+              "operation": "add",
+              "content": "RegistrationForm — local field validation, submit handler. RegistrationStatusView — polls getRegistrationStatus; no Work Unit builds it (HLD-F02). ApiClient — gateway-only, carries the session correlation id on every call.",
+              "derived_from": ["hld HLD-D02", "wireframes.md WF-01, WF-02"]
+            },
+            {
+              "section": "LLD-4 Error handling",
+              "operation": "add",
+              "content": "400 -> render the field-level problem detail against the FBO field and preserve the entered value. 422 -> render the attestation requirement; the client guard is re-shown but is not treated as the control. Network failure on submit -> the form is not cleared and the submission is not retried automatically; a silent retry could create a second registration the producer never intended.",
+              "derived_from": ["openapi.yaml responses", "stories.json S-F1.1-a"]
+            },
+            {
+              "section": "LLD-7 Status polling",
+              "operation": "add",
+              "content": "RegistrationStatusView polls at a fixed interval with no countdown and no progress indication. The view cannot distinguish a slow lookup from a timed-out one and must not imply it can (S-F1.1-b-AC3, wireframes WF-02).",
+              "derived_from": ["wireframes.md WF-02"]
+            }
+          ]
+        },
+        {
+          "delta_id": "LLD-D03",
+          "target_document": "services/notifications-worker/lld.md",
+          "component": "notifications-worker",
+          "from_version": "0.0.0",
+          "to_version": "1.0.0",
+          "creates_document": true,
+          "type": "additive",
+          "version_bump": "major",
+          "structural": false,
+          "adr_required": false,
+          "changes": [
+            {
+              "section": "LLD-1 Classes",
+              "operation": "add",
+              "content": "VerificationOutcomeNotifier — handle(event) with a DedupStore lookup on (producer_id, fbo_number, verified_on) before any send. TemplateRenderer — renders from the event payload only; has no read path to identity_schema, which would breach DAT-1.b.",
+              "derived_from": ["hld HLD-D03", "dat DAT-1.b"]
+            },
+            {
+              "section": "LLD-4 Error handling",
+              "operation": "add",
+              "content": "Duplicate delivery -> DedupStore hit, no send, acknowledged. Render failure -> dead-letter with the named owner, never discarded: the verification really happened, and a dropped evidence-derived notification is a producer who was never told their livelihood is blocked. Mail transport failure -> bounded retry, then dead-letter. No replay path exists — the source event is Evidence kind and a replay would re-assert the fact.",
+              "derived_from": ["int INT-6", "kb-L2-food-domain FD3, FD7"]
+            }
+          ]
+        }
+      ],
+
+      "findings": [
+        {
+          "id": "LLD-F01",
+          "severity": "MEDIUM",
+          "summary": "Append-only evidence plus a 250 ms status read implies an index the data architecture has not been asked for.",
+          "detail": "DAT-3.2 makes FoodSafetyRegistration append-only, so current status is the latest non-superseded row rather than a column. INT-4.3 budgets the status read at p95 <= 250 ms. Meeting that over an append-only history needs an index on (producer_id, appended_at desc), and as row counts grow it may need a current-status projection.",
+          "resolution": "ESCALATED_TO_DATA_ARCHITECT",
+          "resolution_note": "Not decided here. An index is physical schema and belongs to the data architecture delta; a projection would be a registered read model with a staleness budget under DAT-6, which is emphatically not an LLD's to invent. The LLD states the access pattern and the budget it has to meet, and stops."
+        },
+        {
+          "id": "LLD-F02",
+          "severity": "LOW",
+          "summary": "The register's reason string is stored, and no classification covers it.",
+          "detail": "LLD-4 stores the competent authority's rejection reason verbatim so it can be passed through unparaphrased. That string is a new stored value on a Regulated Evidence entity and could carry identifying or commercially sensitive content. DAT-3.2 classifies the entity, not this field.",
+          "resolution": "ESCALATED_TO_DATA_ARCHITECT",
+          "resolution_note": "Raised for the data architecture delta. The LLD does not assign a classification, because assigning one here would put a governance decision in a class diagram."
+        },
+        {
+          "id": "LLD-F03",
+          "severity": "LOW",
+          "summary": "The 'no assume-valid branch' rule is a design assertion with no test that can prove its absence.",
+          "detail": "LLD-4 states that no code path promotes a pending registration to valid on a timeout. TC-S-F1.1-b-03 proves the timeout leaves it pending, which is evidence of the behaviour but not of the absence of the branch.",
+          "resolution": "NOT_RESOLVED_BY_AGENT",
+          "resolution_note": "Flagged for the adversarial case writer: the useful case is a register that answers with a malformed or ambiguous payload, where an optimistic branch would be most tempting to add later."
+        }
+      ],
+
+      "guardrail_evidence": {
+        "consistency_check": {
+          "result": "pass",
+          "note": "Class responsibilities were checked against the HLD components they realise, and every error path against the acceptance criterion it serves. One correction during authoring: ProducerRepository was drafted with an update(registration) method, which contradicts DAT-3.2's append-only rule. Replaced with supersede(registration), so the prohibition is enforced by the absence of a method rather than by convention."
+        }
+      }
+    },
+
+    "artifacts": [
+      { "id": "artifact-lld-7f8a9b0d-01", "type": "delta", "name": "lld-identity-service.delta.json", "format": "json", "storage": { "provider": "s3", "location": "s3://adlc-artifacts/wf-hl-pi1-3c4d5e6f/cycle-1/deltas/lld-identity-service.delta.json" }, "description": "Creating delta 0.0.0 -> 1.0.0, 6 sections including two sequence diagrams", "produced_by": "L1-design-lld" },
+      { "id": "artifact-lld-7f8a9b0d-02", "type": "delta", "name": "lld-producer-portal.delta.json", "format": "json", "storage": { "provider": "s3", "location": "s3://adlc-artifacts/wf-hl-pi1-3c4d5e6f/cycle-1/deltas/lld-producer-portal.delta.json" }, "description": "Creating delta 0.0.0 -> 1.0.0, 3 sections", "produced_by": "L1-design-lld" },
+      { "id": "artifact-lld-7f8a9b0d-03", "type": "delta", "name": "lld-notifications-worker.delta.json", "format": "json", "storage": { "provider": "s3", "location": "s3://adlc-artifacts/wf-hl-pi1-3c4d5e6f/cycle-1/deltas/lld-notifications-worker.delta.json" }, "description": "Creating delta 0.0.0 -> 1.0.0, 2 sections", "produced_by": "L1-design-lld" }
+    ],
+
+    "execution_summary": "• Emitted 3 LLD deltas — identity-service, producer-portal, notifications-worker — all creating (0.0.0 -> 1.0.0), all additive, none structural, no ADR.\n• Two sequence diagrams carry the cycle's real behaviour: registration submission, and the three-way verification outcome. The NoAnswer branch is the one worth reading — it appends no row, emits no event and leaves the registration pending, and LLD-4 states that no 'assume valid' path exists in the code at all rather than merely that it is not taken.\n• Two design decisions are enforced structurally rather than by convention. ProducerRepository exposes supersede() and no update(), so DAT-3.2's append-only rule cannot be broken by a well-meaning edit — this was a correction during authoring, the draft had update(). And TemplateRenderer renders from the event payload only, with no read path to identity_schema, so DAT-1.b holds by construction in notifications-worker.\n• Three findings, two of them escalated to the data architect rather than absorbed. LLD-F01 is the substantive one: append-only evidence plus a 250 ms status read implies an index, and possibly a current-status projection — an index is physical schema and a projection would be a DAT-6 registered read model with a staleness budget. Neither is an LLD's to invent, so the LLD states the access pattern and the budget and stops. LLD-F02 notes the register's rejection reason is a newly stored string on a Regulated Evidence entity that no classification covers.\n• LLD-F03 flags a limit of the current test set for the adversarial case writer: TC-S-F1.1-b-03 proves a timeout leaves the registration pending, which is evidence of behaviour, not of the absence of an optimistic branch. The case worth writing is a malformed or ambiguous register response.\n• Knowledge bases consulted: kb-L1-enterprise-architecture (component boundaries); kb-L2-food-domain via the integration architecture (FD3 evidence-event semantics, FD4 refusal on unknown eligibility, FD7 deduplication from the business act).\n• Guardrails evaluated: gr-L1-consistency-check (pass — one correction, the removed update() method)."
+  }
+}

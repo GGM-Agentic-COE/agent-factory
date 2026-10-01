@@ -1,0 +1,74 @@
+{
+  "target_document": "data-architecture.md",
+  "produced_by": "L1-design-data-architect@1.0.0",
+  "invocation": "delta",
+  "execution_id": "exec-datd-8a9b0c1e",
+  "workflow_execution_id": "wf-hl-pi1-3c4d5e6f",
+  "cycle": "C1-producer-registration",
+
+  "from_version": "1.0",
+  "to_version": "1.1",
+  "type": "extending",
+  "version_bump": "minor",
+  "structural": false,
+  "adr_required": false,
+  "structural_assessment": "Not structural. No entity added, no ownership moved, no plane created, no classification downgraded. FoodSafetyRegistration gains a field and the event register records a state transition — both within an existing entity owned by an existing context. Nothing propagates to foundational-solution-architecture.md.",
+  "constrained_by_foundational": "The Cycle 0 invocation decided ownership, classification and planes. This invocation is bound by DAT-1.1, DAT-3.2 and DAT-6; none was reopened.",
+
+  "changes": [
+    {
+      "change_id": "DATD-01",
+      "section": "DAT-3.2",
+      "operation": "extend",
+      "resolves": "LLD-F02",
+      "content": "FoodSafetyRegistration gains register_reason — the competent authority's rejection reason, stored verbatim. Classified Regulated Evidence / Confidential, inheriting the entity's 6-year retention (ES3) and approved PII region (ES9).",
+      "rationale": "The field is stored on a Regulated Evidence entity and is supplied by a third party, so its content cannot be predicted: a register may return a reason naming an individual, a premises address or a commercial circumstance. Classifying it as Internal because 'it is just a status message' would be a guess about someone else's data.",
+      "handling_rule": "Passed through to the producer verbatim; never logged, never included in an outbound notification body, never replicated.",
+      "source": ["kb-L1-enterprise-security ES2", "ES3", "ES9", "lld LLD-F02"]
+    },
+    {
+      "change_id": "DATD-02",
+      "section": "DAT-2.2",
+      "operation": "extend",
+      "content": "identity.registration.verified transitions Planned -> Active on merge of this cycle. Deduplication key recorded as (producer_id, fbo_number, verified_on) — the business act.",
+      "rationale": "Active means the producing feature has landed. The transition is written here but takes effect at Phase 7.5 merge; recording it as Active now would assert a capability that does not exist until the PR lands.",
+      "source": ["dat DAT-2.2", "int INT-3.2", "kb-L2-food-domain FD7"]
+    },
+    {
+      "change_id": "DATD-03",
+      "section": "DAT-6",
+      "operation": "no-op with recorded decision",
+      "resolves": "LLD-F01 (projection half)",
+      "content": "No read model registered. The current-status projection LLD-F01 raises is NOT created at Cycle 1. Decision trigger recorded as DAT-PEND-04.",
+      "rationale": "A projection of the latest FoodSafetyRegistration row would be a replicated attribute needing a DAT-6 entry with a staleness budget — and the honest staleness budget for an eligibility decision is zero, which is another way of writing 'read the source'. At Cycle 1 volumes an index satisfies the 250 ms budget. Creating a projection now would add a replication DAT-C2 must police, to solve a performance problem nobody has measured.",
+      "trigger": "DAT-PEND-04 — revisit when registration history per producer exceeds a depth at which the indexed read misses the INT-4.3 p95 <= 250 ms budget in a production-shaped environment.",
+      "source": ["dat DAT-6", "lld LLD-F01", "int INT-4.3"]
+    },
+    {
+      "change_id": "DATD-04",
+      "section": "DAT-8",
+      "operation": "add",
+      "content": "DAT-PEND-04 — current-status projection for FoodSafetyRegistration. PENDING. Trigger: the indexed read on the append-only history misses the INT-4.3 p95 <= 250 ms budget in a production-shaped environment.",
+      "rationale": "A deferral with a trigger, not a silence. PRIN-01-C1 checks that every pending decision has one.",
+      "source": ["dat DAT-8"]
+    },
+    {
+      "change_id": "DATD-05",
+      "section": "DAT-9",
+      "operation": "no change",
+      "content": "DAT-C1, DAT-C2 and DAT-C3 unchanged and re-evaluated against the amended document. All three still pass: Identity remains the sole writer of FoodSafetyRegistration; no read model was registered and none is held; register_reason carries classification, retention and residency.",
+      "source": ["dat DAT-9"]
+    }
+  ],
+
+  "physical_schema_boundary": {
+    "note": "LLD-F01's other half — the index — is physical schema and does NOT appear in data-architecture.md. It is emitted in db-schema.sql. The canonical document records the access pattern and the budget it must meet; the index that satisfies it can change without the architecture changing.",
+    "emitted_to": "db-schema.sql"
+  },
+
+  "findings_raised": ["DATD-F01"],
+  "guardrails": {
+    "gr-L1-schema-validator": "pass",
+    "gr-L1-pii-detection": "pass_with_note — register_reason is an unbounded third-party-supplied string on an entity that already holds PII. The detector cannot classify content it has not seen, which is why DATD-01 classifies it defensively. Flagged for the Phase 5 security review."
+  }
+}

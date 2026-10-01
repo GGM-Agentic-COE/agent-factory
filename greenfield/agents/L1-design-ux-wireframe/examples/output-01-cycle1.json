@@ -1,0 +1,142 @@
+{
+  "agent_id": "L1-design-ux-wireframe",
+  "agent_version": "1.0.0",
+  "execution_id": "exec-uxw-3b4c5d6f",
+  "workflow_execution_id": "wf-hl-pi1-3c4d5e6f",
+  "status": "success",
+  "content": {
+    "type": "wireframes",
+    "schema_version": "1.0",
+    "items": {
+      "wireframe_control": {
+        "cycle": "C1-producer-registration",
+        "fdp_location": "additive/wireframes.md",
+        "additive_note": "Wireframes are additive: added to the Feature Design Package, never merged into a canonical document, no delta and no version_bump.",
+        "fidelity": "low — layout, hierarchy and state, not visual design",
+        "accessibility_baseline": "WCAG 2.2 AA",
+        "viewport_primary": "360px — the producer is on a phone, per P-01. Desktop is the secondary layout, not the reference one.",
+        "figma_pushed": false
+      },
+
+      "screens": [
+        {
+          "screen_id": "WF-01",
+          "touchpoint_id": "TP-03",
+          "name": "Producer registration form",
+          "component": "producer-portal",
+          "work_unit": "WU-F1.1-03",
+          "covers_ac": ["S-F1.1-a-AC1", "S-F1.1-a-AC2", "S-F1.1-a-AC3"],
+          "layout": "```text\n┌─ HarvestLink ─────────────── [account] ┐\n│                                        │\n│  Register as a producer         1 of 1 │\n│                                        │\n│  Business name                         │\n│  [____________________________]        │\n│                                        │\n│  Food Business Operator (FBO) number   │\n│  [____________________________]        │\n│  ⓘ Where do I find this?               │\n│  ⚠ field-level error appears here      │\n│                                        │\n│  ┌────────────────────────────────┐    │\n│  │ ☐  I confirm that I, not       │    │\n│  │    HarvestLink, am the Food    │    │\n│  │    Business Operator for what  │    │\n│  │    I sell here.                │    │\n│  │                                │    │\n│  │    This is a legal declaration.│    │\n│  └────────────────────────────────┘    │\n│                                        │\n│  [ Submit registration ]               │\n│                                        │\n│  Your details are saved as you type.   │\n└────────────────────────────────────────┘\n```",
+          "design_notes": [
+            "The attestation is boxed and set apart from the other fields, with its consequence stated in plain words. UJ-01 step 4 warns it must not feel like boilerplate — a tick-box inline with business name would read as terms-and-conditions, and this one carries the facilitation-only regulatory position.",
+            "The attestation is NOT pre-ticked and has no 'select all' affordance. A pre-ticked legal declaration is not a declaration.",
+            "'Where do I find this?' addresses UJ-01 step 3's abandonment risk directly: the producer who does not have their FBO number to hand is the predicted drop-off, and the cheapest intervention is telling them where to look.",
+            "The save-as-you-type line is the visible half of the resumption behaviour UJ-F02 says nothing specifies. Drawn because the journey needs it; flagged below because no acceptance criterion supports it."
+          ],
+          "states": [
+            { "state": "empty", "note": "Submit enabled; validation is on submit, not on blur — an outdoor user tabbing through fields should not be scolded mid-entry." },
+            { "state": "field error", "covers_ac": "S-F1.1-a-AC2", "note": "Error sits under the FBO field, names the expected format, and the entered value is preserved. No record is created." },
+            { "state": "attestation missing", "covers_ac": "S-F1.1-a-AC3", "note": "Client-side guard shown, but the screen assumes nothing about it — the server refuses regardless, and the wireframe annotates that the client guard is an affordance, not the control." },
+            { "state": "submitted", "covers_ac": "S-F1.1-a-AC1", "note": "Navigates to WF-02." }
+          ]
+        },
+        {
+          "screen_id": "WF-02",
+          "touchpoint_id": "TP-04",
+          "name": "Registration status",
+          "component": "producer-portal",
+          "work_unit": "UNASSIGNED",
+          "work_unit_note": "No Work Unit builds this screen. Drawn anyway, because UJ-01 carries three steps here and a wireframe gap would hide the Work Unit gap. See finding WF-F01.",
+          "covers_ac": ["S-F1.1-a-AC4", "S-F1.1-b-AC3"],
+          "layout": "```text\n┌─ HarvestLink ─────────────── [account] ┐\n│                                        │\n│  Your registration                     │\n│                                        │\n│  ┌────────────────────────────────┐    │\n│  │  ◐  Checking your FBO number   │    │\n│  │                                │    │\n│  │  We're confirming your Food    │    │\n│  │  Business Operator registration│    │\n│  │  with the competent authority. │    │\n│  │                                │    │\n│  │  Most checks finish within a   │    │\n│  │  working day. We'll email you. │    │\n│  └────────────────────────────────┘    │\n│                                        │\n│  What you can do now                   │\n│  ✓ Add your business details           │\n│  ✓ Draft listings (not published)      │\n│  ✗ Publish listings — available once   │\n│    your registration is confirmed      │\n│                                        │\n└────────────────────────────────────────┘\n```",
+          "design_notes": [
+            "The blocked action is shown as blocked with its reason, not hidden. UJ-01 step 6 is explicit that a silently absent publish button generates the support contact this screen exists to prevent.",
+            "'Most checks finish within a working day' is an expectation, not a commitment, and it is deliberately not a countdown or a progress bar. S-F1.1-b-AC3 means a timeout and a slow answer are indistinguishable to this screen; a progress bar would assert knowledge the system does not have.",
+            "The 'what you can do now' list exists because UJ-01 step 5 identifies this as the point where the producer has finished their part and cannot act further. An empty waiting screen is read as failure."
+          ],
+          "states": [
+            { "state": "pending", "covers_ac": ["S-F1.1-a-AC4", "S-F1.1-b-AC3"], "note": "The only state for both a slow lookup and a timed-out one." },
+            { "state": "verified", "covers_ac": "S-F1.1-b-AC1", "note": "Panel becomes confirmation; publish moves from ✗ to ✓." },
+            { "state": "rejected", "covers_ac": "S-F1.1-b-AC2", "note": "Panel states the reason returned by the register and what the producer can do. Publish stays ✗ — see finding WF-F02." }
+          ]
+        },
+        {
+          "screen_id": "WF-03",
+          "touchpoint_id": "TP-05",
+          "name": "Verification outcome email",
+          "component": "notifications-worker",
+          "work_unit": "WU-F1.1-06",
+          "covers_ac": ["S-F1.1-b-AC2"],
+          "layout": "```text\n┌────────────────────────────────────────┐\n│ Subject: Your HarvestLink registration │\n│                                        │\n│ We couldn't confirm your FBO           │\n│ registration.                          │\n│                                        │\n│ Reason: <reason returned by the        │\n│          competent authority>          │\n│                                        │\n│ Your listings stay unpublished until   │\n│ this is resolved.                      │\n│                                        │\n│ [ View your registration ]             │\n└────────────────────────────────────────┘\n```",
+          "design_notes": [
+            "Carries no FBO number, no business identifiers and no personal data beyond the addressee. An email is forwarded, quoted and archived outside the platform's control, and a registration number in a subject line is a disclosure nobody authorised.",
+            "The reason is passed through from the register rather than paraphrased. A rewritten regulatory reason is a new assertion about a legal status."
+          ],
+          "states": [
+            { "state": "rejected", "covers_ac": "S-F1.1-b-AC2" },
+            { "state": "verified", "note": "Same template, positive outcome. Drawn once." }
+          ]
+        }
+      ],
+
+      "coverage": {
+        "touchpoints_in_journey": 5,
+        "touchpoints_with_a_wireframe": 3,
+        "not_wireframed": [
+          { "touchpoint_id": "TP-01", "reason": "Public landing exists already and is unchanged by this cycle. Redrawing it would put an unchanged screen into an additive folder, where a later reader would take it for a change." },
+          { "touchpoint_id": "TP-02", "reason": "External IdP authentication screen is owned by the identity provider, not by HarvestLink. Wireframing someone else's screen would assert a design this product does not control." }
+        ],
+        "acceptance_criteria_with_a_surface": 6,
+        "acceptance_criteria_surfaced": 6
+      },
+
+      "findings": [
+        {
+          "id": "WF-F01",
+          "severity": "MEDIUM",
+          "summary": "WF-02 is fully specified and has no Work Unit.",
+          "detail": "The registration status screen carries three journey steps and two acceptance criteria, and nothing in tasks.json builds it. This is UJ-F01 reaching the wireframe stage unresolved, now with a concrete surface attached and therefore a concrete size.",
+          "resolution": "NOT_RESOLVED_BY_AGENT",
+          "resolution_note": "Escalated, not absorbed. The wireframe was drawn rather than omitted so the gap is visible as a missing builder rather than a missing screen."
+        },
+        {
+          "id": "WF-F02",
+          "severity": "MEDIUM",
+          "summary": "WF-02's rejected state has nowhere to go.",
+          "detail": "The rejected panel says what the producer can do, and no acceptance criterion says what that is. S-F1.1-b-AC2 ends at 'notified with the reason'. Whether a producer can correct an FBO number and resubmit, and whether that is a new registration or an amendment, is unspecified.",
+          "resolution": "NOT_RESOLVED_BY_AGENT",
+          "resolution_note": "The wireframe shows the reason and stops. A resubmit button was drawn and removed during authoring — it would have implied a flow with no acceptance criteria, no Work Unit and no verifier behind it."
+        },
+        {
+          "id": "WF-F03",
+          "severity": "LOW",
+          "summary": "WF-01's save-as-you-type is drawn but unspecified.",
+          "detail": "UJ-F02 notes the journey has no resumption path. The wireframe shows one, because a form the persona will abandon needs one. No acceptance criterion covers what is saved, for how long, or whether a partial registration with an unverified FBO number is a record at all — which is a data question (DAT-1.1 owns Producer) as much as a UX one.",
+          "resolution": "NOT_RESOLVED_BY_AGENT",
+          "resolution_note": "Drawn as a line of copy, flagged here, and deliberately not detailed into behaviour."
+        }
+      ],
+
+      "guardrail_evidence": {
+        "consistency_check": {
+          "result": "pass",
+          "note": "Screen states were checked against the acceptance criteria they claim. One correction during authoring: WF-02's pending panel originally showed a progress bar with an estimated completion time. That contradicts S-F1.1-b-AC3 — the system cannot distinguish a slow lookup from a timed-out one, so a progress bar would display confidence it does not have. Replaced with a non-committal expectation."
+        }
+      }
+    },
+
+    "artifacts": [
+      {
+        "id": "artifact-uxw-3b4c5d6f",
+        "type": "document",
+        "name": "wireframes.md",
+        "format": "markdown",
+        "storage": { "provider": "s3", "location": "s3://adlc-artifacts/wf-hl-pi1-3c4d5e6f/cycle-1/additive/wireframes.md" },
+        "description": "3 low-fidelity screens covering 3 of 5 journey touchpoints and all 6 acceptance criteria with a user-facing surface; 3 findings",
+        "produced_by": "L1-design-ux-wireframe"
+      }
+    ],
+
+    "execution_summary": "• Three low-fidelity screens: the registration form (WF-01), the registration status screen (WF-02) and the verification outcome email (WF-03). Drawn at 360px first, because P-01 is a producer on a phone, often outdoors.\n• Two touchpoints were deliberately not wireframed: the public landing is unchanged by this cycle, and the external IdP screen belongs to the identity provider. An unchanged screen placed in an additive folder reads as a change; someone else's screen redrawn here asserts a design this product does not control.\n• All 6 acceptance criteria with a user-facing surface are covered. S-F1.1-b-AC4 has no surface and correctly has no screen.\n• Two design decisions carry regulatory weight rather than aesthetic weight. The attestation on WF-01 is boxed, unticked, and states that it is a legal declaration — UJ-01 warns it must not feel like boilerplate, and it is what the facilitation-only position rests on. WF-02's pending panel shows no progress bar, because S-F1.1-b-AC3 makes a timeout and a slow answer indistinguishable, and a progress bar would display confidence the system does not possess.\n• Three findings, none resolved here. WF-F01 carries UJ-F01 forward with a concrete surface and therefore a concrete size: the status screen is fully specified and no Work Unit builds it. WF-F02 is new — the rejected state tells the producer what happened and nothing specifies what they can do next; a resubmit button was drawn and removed, because it would have implied a flow with no AC, no Work Unit and no verifier. WF-F03 notes the save-as-you-type line is drawn but unspecified, and is a data question as much as a UX one.\n• Output is additive: it lands in the FDP's additive/ folder and is never merged.\n• Knowledge bases consulted: kb-L1-sdlc-templates (wireframe and state conventions); kb-L2-food-domain through the persona record (FD2 — UI-first, low technical capability, which is why the mobile layout is the reference and not the adaptation).\n• Guardrails evaluated: gr-L1-consistency-check (pass — one correction, the removed progress bar).\n• tool-L1-figma-create-frame not invoked; it is optional per the BOM row and ASCII wireframes stay readable in a terminal, a diff and a PR review."
+  }
+}

@@ -1,0 +1,109 @@
+{
+  "agent_id": "L1-design-user-journey-mapper",
+  "agent_version": "1.0.0",
+  "execution_id": "exec-ujm-2a3b4c5e",
+  "workflow_execution_id": "wf-hl-pi1-3c4d5e6f",
+  "status": "success",
+  "content": {
+    "type": "user_journeys",
+    "schema_version": "1.0",
+    "items": {
+      "journey_control": {
+        "cycle": "C1-producer-registration",
+        "fdp_location": "additive/user-journeys.md",
+        "additive_note": "Journeys are additive by nature: this document is added to the Feature Design Package and is never merged into a canonical document. There is no delta, no version_bump and no canonical destination — which is why this agent, unlike the four viewpoint agents, does not run in delta mode.",
+        "personas_in_scope": ["P-01 Producer"],
+        "personas_out_of_scope": ["P-02", "P-03", "P-04"],
+        "out_of_scope_rationale": "Stated rather than omitted. A persona silently absent from a journey map reads as an oversight; a persona named with a reason reads as a decision."
+      },
+
+      "journeys": [
+        {
+          "journey_id": "UJ-01",
+          "persona_id": "P-01",
+          "title": "Producer registers and waits for eligibility",
+          "trigger": "A producer has heard about HarvestLink and wants to sell.",
+          "outcome_success": "The producer is registered, verified, and can publish a listing.",
+          "outcome_failure": "The producer is registered, rejected, and knows why and what to do next.",
+          "spans_slices": ["F5.1", "S-F1.1-a", "S-F1.1-b"],
+          "steps": [
+            { "step": 1, "actor": "Producer", "action": "Arrives at HarvestLink and chooses to sign up", "touchpoint": "TP-01 public landing", "system_response": "Redirected to the external identity provider", "covers_ac": ["F5.1-AC1"], "emotional_note": "Highest abandonment risk in the journey — the producer has no account yet and no investment in the outcome." },
+            { "step": 2, "actor": "Producer", "action": "Authenticates with the external IdP", "touchpoint": "TP-02 external IdP", "system_response": "Session established; returned to HarvestLink with a role provisioned from the onboarding record", "covers_ac": ["F5.1-AC1", "F5.1-AC2"], "note": "The producer never sees a Thornbury employee login. That is a hard boundary, not a design preference." },
+            { "step": 3, "actor": "Producer", "action": "Completes the registration form: business details, FBO number, attestation tick", "touchpoint": "TP-03 registration form", "system_response": "Field-level validation on the FBO number format", "covers_ac": ["S-F1.1-a-AC1", "S-F1.1-a-AC2"], "emotional_note": "The producer may not have their FBO number to hand. The journey must survive being abandoned here and resumed later." },
+            { "step": 4, "actor": "Producer", "action": "Reads and ticks the FBO-status attestation", "touchpoint": "TP-03 registration form", "system_response": "Submission refused if unticked — server-side, not merely hidden in the UI", "covers_ac": ["S-F1.1-a-AC3"], "note": "This is the step the whole facilitation-only regulatory position rests on. It is a deliberate act by an identified party, and the UI must not let it feel like boilerplate." },
+            { "step": 5, "actor": "System", "action": "Accepts the registration and holds it pending-verification", "touchpoint": "TP-04 status screen", "system_response": "Producer sees an explicit pending state with what happens next and roughly when", "covers_ac": ["S-F1.1-a-AC1", "S-F1.1-a-AC4"], "emotional_note": "The producer has finished their part and cannot act further. An unexplained wait here is read as failure." },
+            { "step": 6, "actor": "Producer", "action": "Attempts to publish a listing while still pending", "touchpoint": "TP-04 status screen", "system_response": "Publication blocked, with the reason stated as 'verification in progress', not as a generic permission error", "covers_ac": ["S-F1.1-a-AC4"], "note": "A blocked action that does not explain itself generates the support contact this step exists to prevent." },
+            { "step": 7, "actor": "System", "action": "FBO lookup returns valid", "touchpoint": "TP-05 notification", "system_response": "Registration becomes valid, evidence recorded, publication permitted, producer notified", "covers_ac": ["S-F1.1-b-AC1"] },
+            { "step": "7a", "actor": "System", "action": "FBO lookup returns invalid", "touchpoint": "TP-05 notification", "system_response": "Registration rejected, producer notified with the reason, publication stays blocked", "covers_ac": ["S-F1.1-b-AC2"], "branch": "failure" },
+            { "step": "7b", "actor": "System", "action": "FBO lookup does not answer", "touchpoint": "TP-04 status screen", "system_response": "Registration stays pending and is retried; the producer sees the same pending state", "covers_ac": ["S-F1.1-b-AC3"], "branch": "deferral", "note": "From the producer's side a timeout and a slow answer are indistinguishable, and deliberately so — an unknown eligibility must never be presented as a provisional yes." }
+          ]
+        }
+      ],
+
+      "touchpoints": [
+        { "touchpoint_id": "TP-01", "name": "Public landing", "channel": "web", "owning_component": "buyer-web", "owning_component_note": "Shares the public shell with the buyer experience; the producer path diverges at sign-up.", "new_this_cycle": false },
+        { "touchpoint_id": "TP-02", "name": "External IdP authentication", "channel": "redirect", "owning_component": "external IdP", "new_this_cycle": true, "work_unit": "WU-F5.1-01" },
+        { "touchpoint_id": "TP-03", "name": "Registration form", "channel": "web", "owning_component": "producer-portal", "new_this_cycle": true, "work_unit": "WU-F1.1-03" },
+        { "touchpoint_id": "TP-04", "name": "Registration status screen", "channel": "web", "owning_component": "producer-portal", "new_this_cycle": true, "work_unit": "UNASSIGNED", "finding_ref": "UJ-F01" },
+        { "touchpoint_id": "TP-05", "name": "Verification outcome notification", "channel": "email", "owning_component": "notifications-worker", "new_this_cycle": true, "work_unit": "WU-F1.1-06" }
+      ],
+
+      "coverage": {
+        "acceptance_criteria_in_scope": 11,
+        "acceptance_criteria_reached_by_a_journey_step": 10,
+        "not_reached": [
+          { "ac_id": "S-F1.1-b-AC4", "reason": "Duplicate verification delivery has no user-visible surface. Correctly absent from the journey — the producer cannot perceive a deduplicated event, and inventing a step for it would put a system concern in a persona's path." }
+        ]
+      },
+
+      "findings": [
+        {
+          "id": "UJ-F01",
+          "severity": "MEDIUM",
+          "summary": "Journey step 5 requires a registration status screen that no Work Unit builds.",
+          "detail": "TP-04 carries steps 5, 6 and 7b — the entire pending state, including the blocked-publication explanation. S-F1.1-a-AC4 covers the blocking behaviour, and WU-F1.1-04 implements the gate as business logic, but no Work Unit in tasks.json owns the producer-facing surface that shows it.",
+          "resolution": "NOT_RESOLVED_BY_AGENT",
+          "resolution_note": "Raised to task-generator and the cycle planner. This agent does not mint Work Units, and the alternative — quietly folding the status screen into WU-F1.1-03's registration form — would breach T1, since a form and a status screen are two nameable objectives.",
+          "affects": ["TP-04", "UJ-01 steps 5, 6, 7b"]
+        },
+        {
+          "id": "UJ-F02",
+          "severity": "LOW",
+          "summary": "The journey has no resumption path, and step 3 predicts abandonment.",
+          "detail": "A producer who does not have their FBO number to hand will leave the form. Nothing in the Cycle 1 stories describes what they return to — a saved draft, a fresh form, or a session that has expired.",
+          "resolution": "NOT_RESOLVED_BY_AGENT",
+          "resolution_note": "No acceptance criterion covers resumption and none was invented. Recorded for the story generator's next elaboration."
+        },
+        {
+          "id": "UJ-F03",
+          "severity": "LOW",
+          "summary": "OQ-01 has a visible journey consequence.",
+          "detail": "Story-generator's open question — what happens when a verified registration later lapses — is not an abstract gap. It is a journey with no map: a producer who has published listings and whose registration then lapses appears nowhere in UJ-01, and the listings are already visible to buyers.",
+          "resolution": "NOT_RESOLVED_BY_AGENT",
+          "resolution_note": "Strengthens OQ-01 rather than answering it. Journey mapping surfaced a consequence the requirement did not state."
+        }
+      ],
+
+      "guardrail_evidence": {
+        "consistency_check": {
+          "result": "pass",
+          "note": "Every journey step's system_response was compared against the acceptance criterion it claims to cover. Step 7b was corrected during authoring: the draft had the status screen show 'verification delayed', which contradicts S-F1.1-b-AC3 — a producer told their verification is delayed has been told something the system does not know, and the pending state must be indistinguishable from a slow answer."
+        }
+      }
+    },
+
+    "artifacts": [
+      {
+        "id": "artifact-ujm-2a3b4c5e",
+        "type": "document",
+        "name": "user-journeys.md",
+        "format": "markdown",
+        "storage": { "provider": "s3", "location": "s3://adlc-artifacts/wf-hl-pi1-3c4d5e6f/cycle-1/additive/user-journeys.md" },
+        "description": "One producer journey across F5.1 and both F1.1 slices; 9 steps including two branches, 5 touchpoints, 3 findings",
+        "produced_by": "L1-design-user-journey-mapper"
+      }
+    ],
+
+    "execution_summary": "• Mapped one journey, UJ-01, for the Producer persona across F5.1 and both F1.1 slices: 9 steps including a rejection branch and a timeout branch, over 5 touchpoints.\n• Three personas were named as out of scope with reasons rather than omitted. A persona silently absent from a journey map is indistinguishable from one nobody thought about.\n• Coverage: 10 of 11 in-scope acceptance criteria are reached by a journey step. S-F1.1-b-AC4 (duplicate verification delivery) is deliberately not reached — it has no user-visible surface, and inventing a step for it would put a system concern into a persona's path.\n• Three findings, none resolved here. UJ-F01 is the substantive one: the journey needs a registration status screen that carries the pending state and the blocked-publication explanation, and no Work Unit builds it. Folding it into the registration form Work Unit would breach T1, so it is raised to task-generator rather than absorbed.\n• UJ-F03 is worth the cycle planner's attention: story-generator's OQ-01 turns out to have a journey with no map behind it — a producer whose registration lapses after publishing has listings already visible to buyers, and nothing describes what they or the buyers see.\n• Output is additive. It lands in the FDP's additive/ folder, is never merged into a canonical document, and emits no delta — which is why this agent does not run in delta mode as the four viewpoint agents do.\n• Knowledge bases consulted: kb-L1-sdlc-templates (journey and touchpoint structure); kb-L2-food-domain via the persona records (FD2 participant model — a producer is UI-first and low-capability, which is why every step assumes a phone and no API).\n• Guardrails evaluated: gr-L1-consistency-check (pass — one step corrected during authoring, where the draft told the producer their verification was 'delayed', a fact the system does not possess)."
+  }
+}

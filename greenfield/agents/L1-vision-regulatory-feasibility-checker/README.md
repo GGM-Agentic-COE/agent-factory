@@ -12,7 +12,10 @@ mandatory, structured, and impossible to silently drop a serious finding.
 ## Jurisdiction
 
 **The agent is jurisdiction-neutral. The KBs are not.** Nothing in the prompt
-names a country: each attached regulatory KB declares the jurisdiction it
+names a country, and no KB is attached at runtime — both are read from GitHub
+with `tool-L1-github-reader-using-app`, from the folders the request names
+(`reference_repo`, `reference_branch`, `regulatory_frameworks_index_kb_folder`,
+`domain_regulatory_kb_folder`). Each regulatory KB declares the jurisdiction it
 covers in its own `#jurisdiction` section, and the agent resolves that at
 runtime against the brief's `target_geography` **before assessing anything**.
 
@@ -94,7 +97,13 @@ be the agent that sets it.
 ## How does it work?
 
 1. Reads and parses `idea-brief.json` — by key path, never scanned as markdown
-2. Queries `kb-L1-regulatory-frameworks-index` to identify which regulator
+1a. Reads its reference material from GitHub with `tool-L1-github-reader-using-app`:
+   the regulatory frameworks index KB, the domain regulatory KB, and this agent's
+   `examples/` folder — one call per folder, every repo/branch/path taken from the
+   request. An unreadable index KB fails the run with `REFERENCE_UNAVAILABLE`
+   rather than falling back on remembered categories. The repository is read-only:
+   `regulatory-feasibility.md` still goes to blob storage
+2. Uses the regulatory frameworks index KB to identify which regulator
    categories apply at all
 3. Walks the **sweep list** in that KB's `#coverage-categories` section —
    licensing, data protection, international transfer, automated
@@ -105,7 +114,7 @@ be the agent that sets it.
    recorded as assessed-and-not-applicable, never silently dropped.
    The list lives in the KB, not this prompt, so the evaluator's coverage
    audit reads the identical list — see below
-4. Queries `kb-L2-domain-regulatory` (and `tool-L1-regulatory-db-lookup`
+4. Reads the domain regulatory KB (and `tool-L1-regulatory-db-lookup`
    for anything beyond the KBs) for the specific applicable rules
 5. Classifies each constraint Green/Amber/Red with a citation, applying the
    scenario patterns in the prompt's Edge Cases Section D — rules not yet in

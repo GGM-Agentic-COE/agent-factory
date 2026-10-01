@@ -1,0 +1,63 @@
+{
+  "delta_id": "HLD-D01",
+  "target_document": "services/identity-service/hld.md",
+  "component": "identity-service",
+  "bounded_context": "Identity (APP-1.04)",
+  "produced_by": "L1-design-hld@1.0.0",
+  "execution_id": "exec-hld-6e7f8a9c",
+  "workflow_execution_id": "wf-hl-pi1-3c4d5e6f",
+  "cycle": "C1-producer-registration",
+
+  "from_version": "0.0.0",
+  "to_version": "1.0.0",
+  "creates_document": true,
+  "creates_document_note": "First cycle for this component. The application baseline v0.1 records identity-service as DECLARED with hld_ref null, so there is no current document to diff against. Taken as a delta against an empty document so the first HLD arrives as a reviewable diff from the same mechanism as every later amendment.",
+  "type": "additive",
+  "version_bump": "major",
+  "structural": false,
+  "adr_required": false,
+  "structural_assessment": "Not structural. The component, its bounded context and its ownership of Producer and FoodSafetyRegistration are already declared in the FSA (APP-1.04, APP-2.04) and the data architecture (DAT-1.1). This delta describes how a declared component is built, not what the decomposition is. Nothing propagates to foundational-solution-architecture.md.",
+
+  "changes": [
+    {
+      "section": "C4-2 Container",
+      "operation": "add",
+      "content": "identity-service — containerised service behind the group API gateway, own schema (identity_schema), own workload identity (wi-identity). Realises three operations: createProducerRegistration, getProducerRegistration, getRegistrationStatus.",
+      "derived_from": ["fsa APP-2.04", "plt PLT-1", "openapi.yaml"]
+    },
+    {
+      "section": "C4-3 Component",
+      "operation": "add",
+      "content": "TokenValidator (WU-F5.1-02) · RoleProvisioner (WU-F5.1-03) · RegistrationService (WU-F1.1-02, WU-F1.1-04) · FboRegisterClient (WU-F1.1-05) · ProducerRepository over identity_schema (WU-F1.1-01).",
+      "derived_from": ["tasks.json work_units"]
+    },
+    {
+      "section": "HLD-4 Data flow",
+      "operation": "add",
+      "content": "Registration submitted -> RegistrationService validates format and attestation server-side -> Producer and FoodSafetyRegistration written with status pending-verification -> FboRegisterClient queries the competent-authority register asynchronously -> outcome written, identity.registration.verified emitted.",
+      "derived_from": ["stories.json S-F1.1-a, S-F1.1-b", "dat DAT-1.1"]
+    },
+    {
+      "section": "HLD-5 Integrations",
+      "operation": "add",
+      "content": "Two outbound integrations: the group-approved external IdP (inbound authentication, WU-F5.1-01) and the competent-authority FBO register (outbound lookup, WU-F1.1-05). One outbound event: identity.registration.verified, Evidence kind, never replayed.",
+      "derived_from": ["dependency-graph.json", "int INT-3.2"]
+    },
+    {
+      "section": "HLD-6 NFR allocation",
+      "operation": "add",
+      "content": "Availability 99.9% (ES4 — an FBO-status dispute is a regulatory-defence case). getRegistrationStatus p95 <= 250 ms, the budget INT-4.3 holds it to. FoodSafetyRegistration append-only, 6-year retention (ES3), approved PII region (ES9).",
+      "derived_from": ["nfr_classifications", "plt PLT-14", "dat DAT-3.2"]
+    },
+    {
+      "section": "HLD-7 Eligibility decision boundary",
+      "operation": "add",
+      "content": "identity-service owns the eligibility DECISION and exposes it through identity.registration-status@v1. Enforcement at the point of publication is catalogue-service's and is not built this cycle. WU-F1.1-04's title says 'publication gate', which reads as Catalogue work; the decision belongs to Identity because DAT-1.1 gives Identity sole ownership of FoodSafetyRegistration, and a gate that reads another context's entity would breach CON-2.",
+      "derived_from": ["dat DAT-1.1", "fsa CON-2", "int INT-4.3"],
+      "finding_ref": "HLD-F01"
+    }
+  ],
+
+  "findings_raised": ["HLD-F01", "HLD-F03"],
+  "guardrails": { "gr-L1-consistency-check": "pass", "gr-L1-hallucination-check": "pass" }
+}

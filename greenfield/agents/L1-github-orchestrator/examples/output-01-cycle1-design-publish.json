@@ -1,0 +1,132 @@
+{
+  "agent_id": "L1-github-orchestrator",
+  "agent_version": "1.0.0",
+  "execution_id": "exec-gho-1d2e3f4a",
+  "workflow_execution_id": "wf-hl-pi1-3c4d5e6f",
+  "status": "success",
+  "content": {
+    "type": "design_package_publish",
+    "schema_version": "1.0",
+    "items": {
+      "publish_control": {
+        "invocation": "design-publish",
+        "cycle": "C1-producer-registration",
+        "branch": "aava/design-pi2026q2-c1-producer-registration",
+        "package_path": "/cycles/C1-producer-registration/",
+        "committed_at": "2026-05-06T14:21:53Z",
+        "commit_sha": "4f7be91",
+        "merged": false,
+        "merge_policy_note": "Committed, not merged. The deltas name their canonical destinations and do not reach them here. Merge happens at Phase 7.5 after the PR lands, so a canonical document only moves once the change is real — a delta merged at design time would make the baseline describe a system nobody has built."
+      },
+
+      "package_contents": {
+        "00-overview.md": {
+          "original_content": true,
+          "note": "The only original content in the package. Everything else has a canonical destination elsewhere and exists here as a diff.",
+          "sections": ["slice narrative", "cross-component sequence diagram", "viewpoint assertion table", "NFR budget allocation"]
+        },
+        "deltas/": [
+          { "file": "openapi.yaml", "canonical_destination": "services/identity-service/openapi.yaml", "type": "additive", "structural": false },
+          { "file": "hld-identity-service.delta.json", "canonical_destination": "services/identity-service/hld.md", "type": "additive", "creates_document": true, "structural": false },
+          { "file": "hld-producer-portal.delta.json", "canonical_destination": "frontend/producer-portal/hld.md", "type": "additive", "creates_document": true, "structural": false },
+          { "file": "hld-notifications-worker.delta.json", "canonical_destination": "services/notifications-worker/hld.md", "type": "additive", "creates_document": true, "structural": false },
+          { "file": "lld-identity-service.delta.json", "canonical_destination": "services/identity-service/lld.md", "type": "additive", "creates_document": true, "structural": false },
+          { "file": "lld-producer-portal.delta.json", "canonical_destination": "frontend/producer-portal/lld.md", "type": "additive", "creates_document": true, "structural": false },
+          { "file": "lld-notifications-worker.delta.json", "canonical_destination": "services/notifications-worker/lld.md", "type": "additive", "creates_document": true, "structural": false },
+          { "file": "data-architecture.delta.json", "canonical_destination": "architecture/data-architecture.md", "type": "extending", "structural": false },
+          { "file": "db-schema.sql", "canonical_destination": "services/identity-service/schema/", "type": "additive", "structural": false },
+          { "file": "integration-architecture.delta.json", "canonical_destination": "architecture/integration-architecture.md", "type": "structural", "structural": true, "adr_id": "ADR-012", "blocks_merge": true },
+          { "file": "platform-architecture.delta.json", "canonical_destination": "architecture/platform-architecture.md", "type": "extending", "structural": false },
+          { "file": "hld-egress-gateway.delta.json", "canonical_destination": "platform/egress-gateway/hld.md", "type": "additive", "creates_document": true, "structural": false },
+          { "file": "lld-egress-gateway.delta.json", "canonical_destination": "platform/egress-gateway/lld.md", "type": "additive", "creates_document": true, "structural": false },
+          { "file": "ADR-012-fbo-register-direct-consumption.md", "canonical_destination": "architecture/adr/ADR-012.md", "type": "additive", "structural": false, "status": "PROPOSED" }
+        ],
+        "additive/": [
+          { "file": "user-journeys.md", "canonical_destination": null, "never_merged": true, "reason": "Additive by nature. A journey map is a record of this cycle's design thinking, not an amendment to a standing document." },
+          { "file": "wireframes.md", "canonical_destination": null, "never_merged": true, "reason": "Same." }
+        ],
+        "file_count": 17,
+        "no_duplicate_authorship_check": {
+          "result": "PASS",
+          "note": "Every file in deltas/ names exactly one canonical destination, and no two files name the same one. Nothing in the package restates content that lives elsewhere — the design is composed rather than duplicated, which is what makes drift structurally impossible rather than merely discouraged."
+        }
+      },
+
+      "viewpoint_assertion_table": {
+        "gate": "gr-L1-viewpoint-completeness",
+        "result": "PASS",
+        "rows": [
+          { "viewpoint": "APPLICATION", "assertion": "DELTA", "detail": "3 HLD + 3 LLD creating deltas. catalogue-service, orders-service, billing-service and buyer-web each asserted NONE with a stated reason." },
+          { "viewpoint": "DATA", "assertion": "DELTA", "detail": "extending 1.0 -> 1.1. register_reason classified Regulated Evidence / Confidential; DAT-PEND-04 recorded; physical schema kept out of the canonical document and emitted as db-schema.sql." },
+          { "viewpoint": "INTEGRATION", "assertion": "DELTA (STRUCTURAL)", "detail": "1.0 -> 2.0. New edge to a party outside the product boundary; propagates to FSA APP-2.3; ADR-012 required." },
+          { "viewpoint": "PLATFORM", "assertion": "DELTA", "detail": "extending 1.0 -> 1.1. PLT-6 outbound third-party egress NOT PRESENT -> AVAILABLE; new egress-gateway platform component with its own HLD and LLD." }
+        ],
+        "gate_note": "All four viewpoints assert DELTA, which is unusual and is what Cycle 1 looks like — the first cycle touches everything. The gate blocks on an OMITTED viewpoint, not on a NONE: a NONE with a stated reason passes and silence fails, because an omission is indistinguishable from an oversight. Three of the four component-level NONE assertions in the APPLICATION row exist for exactly that reason."
+      },
+
+      "merge_readiness": {
+        "ready_to_merge": false,
+        "blocking": [
+          {
+            "blocker": "ADR-012 is PROPOSED, not APPROVED",
+            "gate": "Enterprise Architect",
+            "affects": ["integration-architecture.delta.json", "platform-architecture.delta.json"],
+            "detail": "The integration delta is structural and propagates a new external edge to foundational-solution-architecture.md. The platform delta provisions the egress path that edge needs. Neither can merge until the ADR is approved, and the platform IaC is committed but deliberately not applied.",
+            "note": "The other 12 files are independently mergeable in principle. They are held together anyway: merging the application and data halves of a cycle whose integration half is unapproved would leave a component HLD describing a call the architecture has not authorised."
+          }
+        ],
+        "non_blocking_open_items": [
+          { "id": "HLD-F02", "summary": "producer-portal's RegistrationStatusView is designed and has no Work Unit.", "carried_from": ["UJ-F01", "WF-F01"], "note": "Raised at journey stage, again at wireframe stage, again in a component HLD. Still unresolved at commit. Recorded in the package so the PR reviewer sees it rather than discovering it from a baseline diff next cycle." },
+          { "id": "PLTD-F01", "summary": "PLT-19's exit proofs contain nothing that exercises egress.", "note": "For the Platform Lead. A seventh proof is proposed and not added unilaterally." },
+          { "id": "DATD-F01", "summary": "register_reason's classification is defensive, made without a single real register response." },
+          { "id": "LLD-F03", "summary": "No test can prove the absence of an assume-valid branch." }
+        ]
+      },
+
+      "github": {
+        "repository": "thornbury/harvestlink-architecture",
+        "branch": "aava/design-pi2026q2-c1-producer-registration",
+        "commit_sha": "4f7be91",
+        "files_committed": 17,
+        "pull_request": {
+          "number": 41,
+          "title": "FDP C1 — Producer registration + FBO verification",
+          "state": "open",
+          "labels": ["adlc", "fdp", "structural", "blocked:adr"],
+          "reviewers_requested": ["Enterprise Architect", "Platform Lead"],
+          "body_includes": ["viewpoint assertion table", "structural delta notice", "ADR-012 link", "4 non-blocking open items"]
+        },
+        "related_branches": [
+          { "repository": "thornbury/harvestlink-platform", "branch": "aava/platform-c1-egress", "applied": false, "note": "IaC for the egress gateway. Committed by the platform architect, applied by neither agent." }
+        ]
+      },
+
+      "confluence": {
+        "space": "HLARCH",
+        "parent_page": "HarvestLink Architecture / Feature Design Packages",
+        "pages": [
+          { "title": "C1 — Producer registration: Overview", "source": "00-overview.md", "page_id": "884736", "action": "CREATED" },
+          { "title": "C1 — Producer journeys", "source": "additive/user-journeys.md", "page_id": "884737", "action": "CREATED" },
+          { "title": "C1 — Wireframes", "source": "additive/wireframes.md", "page_id": "884738", "action": "CREATED" },
+          { "title": "ADR-012 — Consume the competent authority's FBO register directly from Identity", "source": "deltas/ADR-012-fbo-register-direct-consumption.md", "page_id": "884739", "action": "CREATED", "banner": "PROPOSED — awaiting Enterprise Architect approval" }
+        ],
+        "not_published": [
+          { "files": "the 10 delta JSON files, db-schema.sql", "reason": "A delta is a diff against a document with a canonical home. Publishing diffs to a wiki gives readers a second place to look and a worse one — it would be current for about a week, and then it would be the version somebody found first." }
+        ]
+      },
+
+      "guardrail_evidence": {
+        "viewpoint_completeness": { "result": "pass", "note": "All four viewpoints present in 00-overview.md's assertion table, each with a verdict and a detail. None omitted." },
+        "output_schema_validator": { "result": "pass" }
+      }
+    },
+
+    "artifacts": [
+      { "id": "artifact-gho-1d2e3f4a", "type": "commit", "name": "aava/design-pi2026q2-c1-producer-registration", "format": "git", "storage": { "provider": "github", "location": "https://github.com/thornbury/harvestlink-architecture/tree/aava/design-pi2026q2-c1-producer-registration/cycles/C1-producer-registration" }, "description": "Feature Design Package, 17 files: 00-overview.md, 14 in deltas/, 2 in additive/", "produced_by": "L1-github-orchestrator" },
+      { "id": "artifact-gho-1d2e3f4a-pr", "type": "pull_request", "name": "PR #41", "format": "github", "storage": { "provider": "github", "location": "https://github.com/thornbury/harvestlink-architecture/pull/41" }, "description": "Open, labelled structural and blocked:adr; EA and Platform Lead requested", "produced_by": "L1-github-orchestrator" },
+      { "id": "artifact-gho-1d2e3f4a-conf", "type": "pages", "name": "Confluence HLARCH C1 pages", "format": "confluence", "storage": { "provider": "confluence", "location": "https://thornbury.atlassian.net/wiki/spaces/HLARCH/pages/884736" }, "description": "4 pages created: overview, journeys, wireframes, ADR-012 with a PROPOSED banner", "produced_by": "L1-github-orchestrator" }
+    ],
+
+    "execution_summary": "• Committed the Feature Design Package for C1-producer-registration to aava/design-pi2026q2-c1-producer-registration: 17 files — 00-overview.md, 14 in deltas/, 2 in additive/ — and opened PR #41 with the Enterprise Architect and Platform Lead as reviewers.\n• Committed, not merged. Every delta names a canonical destination and reaches none of them here; merge happens at Phase 7.5 after the PR lands, so a canonical document only moves once the change is real. A delta merged at design time would make the baseline describe a system nobody has built.\n• The no-duplicate-authorship check passed: every file in deltas/ names exactly one canonical destination and no two name the same one. 00-overview.md is the only original content in the package. That composition, rather than duplication, is what makes drift structurally impossible instead of merely discouraged.\n• gr-L1-viewpoint-completeness passed with all four viewpoints asserting DELTA — unusual, and what a first cycle looks like, since Cycle 1 touches everything. The gate blocks on an omitted viewpoint, not on a NONE; the APPLICATION row carries four component-level NONE assertions with reasons for exactly that purpose.\n• Merge is blocked on one thing: ADR-012 is PROPOSED. The integration delta is structural and propagates a new external edge to the FSA, and the platform delta provisions the egress path that edge requires. The other 12 files are independently mergeable in principle and are held together anyway — merging the application and data halves of a cycle whose integration half is unapproved would leave a component HLD describing a call the architecture has not authorised.\n• Four non-blocking open items are recorded in the PR body rather than left in agent outputs nobody re-reads. HLD-F02 is the one that has now survived three stages: the producer-portal status view was raised at journey stage, again at wireframe stage, again in a component HLD, and still has no Work Unit. It is in the PR so a reviewer sees it, instead of a baseline diff surfacing it next cycle.\n• Confluence: 4 pages published — the overview, journeys, wireframes and ADR-012 with a PROPOSED banner. The 10 delta JSON files and db-schema.sql were deliberately not published: a delta is a diff against a document with a canonical home, and putting diffs on a wiki gives readers a second place to look and a worse one.\n• The platform IaC on aava/platform-c1-egress is committed and not applied, by design. Neither this agent nor the platform architect applies it.\n• Tools invoked: tool-L1-github-upload-file (17 files, 1 commit, 1 PR), tool-L1-confluence-create-page (4 pages).\n• Guardrails evaluated: gr-L1-viewpoint-completeness (pass), gr-L1-output-schema-validator (pass).\n• No knowledge base is attached and none is needed: this agent moves files and asserts nothing about the domain."
+  }
+}

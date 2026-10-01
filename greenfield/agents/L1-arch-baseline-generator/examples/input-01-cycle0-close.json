@@ -1,0 +1,274 @@
+{
+  "_comment": "Input to L1-arch-baseline-generator at Cycle 0 close (seed invocation, v0.1 pre-implementation). The generator reads the four canonical architecture documents and nothing else: no repo scan, no CMDB export, no deployed estate — none of those exist yet. Fields trimmed to what the generator actually consumes; each upstream output is the full AgentOutput in practice.",
+
+  "foundational_architecture_output": {
+    "agent_id": "L1-design-foundational-architect",
+    "agent_version": "2.3.0",
+    "execution_id": "exec-fsa-0a1b2c3d",
+    "workflow_execution_id": "wf-hl-cycle0-9f8e7d6c",
+    "status": "success",
+    "content": {
+      "type": "foundational_solution_architecture",
+      "schema_version": "1.0",
+      "items": {
+        "document_control": {
+          "document_id": "fsa-harvestlink",
+          "version": "1.0.0",
+          "status": "APPROVED",
+          "mode": "GREENFIELD-CREATE",
+          "approval": { "gate": "Enterprise Architect", "approver": "J. Okafor", "date": "2026-04-02" }
+        },
+        "bounded_contexts": [
+          { "id": "APP-1.01", "name": "Catalogue", "type": "Core", "owns": ["Listing", "ListingImage", "Category"], "upstream_of": ["Orders"], "downstream_of": ["Identity"], "status": "INTENDED" },
+          { "id": "APP-1.02", "name": "Orders", "type": "Core", "owns": ["Order", "OrderLine", "OrderStatus"], "upstream_of": ["Billing", "Notifications"], "downstream_of": ["Catalogue", "Identity", "Billing"], "status": "INTENDED" },
+          { "id": "APP-1.03", "name": "Billing", "type": "Core", "owns": ["Transaction", "Fee", "Payout"], "upstream_of": ["Notifications", "Orders"], "downstream_of": ["Orders", "Identity"], "status": "INTENDED" },
+          { "id": "APP-1.04", "name": "Identity", "type": "Generic", "owns": ["Producer", "Buyer", "Session", "FoodSafetyRegistration"], "upstream_of": ["Catalogue", "Orders", "Billing"], "downstream_of": [], "status": "INTENDED" },
+          { "id": "APP-1.05", "name": "Notifications", "type": "Supporting", "owns": [], "upstream_of": [], "downstream_of": ["Orders", "Billing", "Identity"], "status": "INTENDED" }
+        ],
+        "components": [
+          { "id": "APP-2.01", "name": "catalogue-service", "context": "Catalogue", "kind": "service" },
+          { "id": "APP-2.02", "name": "orders-service", "context": "Orders", "kind": "service" },
+          { "id": "APP-2.03", "name": "billing-service", "context": "Billing", "kind": "service" },
+          { "id": "APP-2.04", "name": "identity-service", "context": "Identity", "kind": "service" },
+          { "id": "APP-2.05", "name": "notifications-worker", "context": "Notifications", "kind": "worker" },
+          { "id": "APP-2.06", "name": "buyer-web", "context": "Catalogue, Orders (experience)", "kind": "frontend" },
+          { "id": "APP-2.07", "name": "producer-portal", "context": "Catalogue, Billing (experience)", "kind": "frontend" }
+        ],
+        "interaction_edges": [
+          { "id": "APP-2.3-e1", "from": "Orders", "to": "Catalogue", "purpose": "listing availability at order creation" },
+          { "id": "APP-2.3-e2", "from": "Orders", "to": "Billing", "purpose": "fee at confirmation" },
+          { "id": "APP-2.3-e3", "from": "Catalogue", "to": "Identity", "purpose": "publication eligibility" },
+          { "id": "APP-2.3-e4", "from": "Orders", "to": "Billing", "purpose": "order placed" },
+          { "id": "APP-2.3-e5", "from": "Billing", "to": "Notifications", "purpose": "payout scheduled" },
+          { "id": "APP-2.3-e6", "from": "All contexts", "to": "Group data warehouse", "purpose": "aggregate metrics, outbound only" }
+        ],
+        "constraints": [
+          { "id": "CON-2", "rule": "No context reads another context's store directly", "binds_viewpoints": ["DAT", "INT", "PLT"] },
+          { "id": "CON-3", "rule": "All cross-context traffic passes through governed contracts", "binds_viewpoints": ["INT"] },
+          { "id": "CON-5", "rule": "Every context is independently deployable", "binds_viewpoints": ["PLT"] }
+        ],
+        "demands": [
+          { "id": "REQ-DAT-03", "viewpoint": "DAT", "demand": "Fee records immutable and retrievable for 10 years", "budget": "10 years" },
+          { "id": "REQ-DAT-07", "viewpoint": "DAT", "demand": "Registration status authoritative at point of sale, not cached", "budget": "zero staleness" },
+          { "id": "REQ-INT-04", "viewpoint": "INT", "demand": "Availability check inside order creation", "budget": "p95 <= 300 ms" },
+          { "id": "REQ-INT-06", "viewpoint": "INT", "demand": "Fee correct at display time", "budget": "p95 <= 400 ms" },
+          { "id": "REQ-INT-09", "viewpoint": "INT", "demand": "Registration valid at point of sale", "budget": "p95 <= 250 ms" },
+          { "id": "REQ-PLT-02", "viewpoint": "PLT", "demand": "Every context independently deployable", "budget": "one deployable minimum per context" }
+        ],
+        "open_structural_decisions": [
+          { "id": "OPEN-02", "decision": "Where tax rates and their effective dates live", "trigger": "A requirement needs a tax rate that varies by jurisdiction" }
+        ],
+        "principles_applied": ["PRIN-01", "PRIN-02", "PRIN-03", "PRIN-04", "PRIN-06", "PRIN-07", "PRIN-08"]
+      },
+      "artifacts": [
+        { "id": "artifact-fsa-0a1b2c3d", "type": "document", "name": "foundational-solution-architecture.md", "format": "markdown", "storage": { "provider": "s3", "location": "s3://adlc-artifacts/wf-hl-cycle0-9f8e7d6c/foundational-solution-architecture.md" }, "description": "FSA v1.0.0, APPROVED", "produced_by": "L1-design-foundational-architect" }
+      ],
+      "execution_summary": "• 5 bounded contexts, 7 components, 6 interaction edges, 13 entities across 4 owning contexts."
+    }
+  },
+
+  "data_architecture_output": {
+    "agent_id": "L1-design-data-architect",
+    "agent_version": "1.0.0",
+    "execution_id": "exec-dat-1b2c3d4e",
+    "workflow_execution_id": "wf-hl-cycle0-9f8e7d6c",
+    "status": "success",
+    "content": {
+      "type": "data_architecture",
+      "schema_version": "1.0",
+      "items": {
+        "document_control": { "version": "1.0", "status": "APPROVED", "parent": "foundational-solution-architecture.md@1.0.0" },
+        "entity_ownership": [
+          { "entity": "Listing", "owning_context": "Catalogue", "system_of_record": "catalogue persistence", "classification": "Internal", "source": "fsa APP-3.1" },
+          { "entity": "ListingImage", "owning_context": "Catalogue", "system_of_record": "catalogue persistence + object store", "classification": "Internal", "source": "fsa APP-3.1" },
+          { "entity": "Category", "owning_context": "Catalogue", "system_of_record": "catalogue persistence", "classification": "Public", "source": "fsa APP-3.1" },
+          { "entity": "Order", "owning_context": "Orders", "system_of_record": "orders persistence", "classification": "Confidential", "source": "fsa APP-3.1" },
+          { "entity": "OrderLine", "owning_context": "Orders", "system_of_record": "orders persistence", "classification": "Confidential", "source": "fsa APP-3.1" },
+          { "entity": "OrderStatus", "owning_context": "Orders", "system_of_record": "orders persistence", "classification": "Internal", "source": "fsa APP-3.1" },
+          { "entity": "Transaction", "owning_context": "Billing", "system_of_record": "billing persistence", "classification": "Financial", "source": "fsa APP-3.1" },
+          { "entity": "Fee", "owning_context": "Billing", "system_of_record": "billing persistence", "classification": "Financial / Regulated Evidence", "source": "fsa APP-3.1" },
+          { "entity": "Payout", "owning_context": "Billing", "system_of_record": "billing persistence", "classification": "Financial", "source": "fsa APP-3.1" },
+          { "entity": "Producer", "owning_context": "Identity", "system_of_record": "identity persistence", "classification": "PII", "source": "fsa APP-3.1" },
+          { "entity": "Buyer", "owning_context": "Identity", "system_of_record": "identity persistence", "classification": "PII", "source": "fsa APP-3.1" },
+          { "entity": "Session", "owning_context": "Identity", "system_of_record": "identity persistence", "classification": "Confidential", "source": "fsa APP-3.1" },
+          { "entity": "FoodSafetyRegistration", "owning_context": "Identity", "system_of_record": "identity persistence", "classification": "Regulated Evidence", "source": "fsa APP-3.1" }
+        ],
+        "classification_register": [
+          { "entity": "Fee", "classification": "Financial / Regulated Evidence", "retention": "10 years", "residency": "Approved financial-data region", "source": "prd.md § Regulatory Posture (exceeds ES3 6-year floor); kb-L1-enterprise-security § ES9" },
+          { "entity": "FoodSafetyRegistration", "classification": "Regulated Evidence", "retention": "6 years from creation", "residency": "Approved PII region", "source": "kb-L1-enterprise-security § ES3, § ES9" },
+          { "entity": "Producer", "classification": "PII", "retention": "UK GDPR erasure for the non-retained population", "residency": "Approved PII region", "source": "kb-L1-enterprise-security § ES3, § ES9" },
+          { "entity": "Order", "classification": "Confidential", "retention": "PENDING", "residency": "Approved operating region", "source": "—", "pending_ref": "DAT-PEND-02" },
+          { "entity": "Session", "classification": "Confidential", "retention": "PENDING", "residency": "Approved operating region", "source": "—", "pending_ref": "DAT-PEND-03" }
+        ],
+        "events": [
+          { "event_type": "catalogue.listing.published", "owner_context": "Catalogue", "version_state": "Planned" },
+          { "event_type": "orders.order.placed", "owner_context": "Orders", "version_state": "Planned" },
+          { "event_type": "identity.registration.verified", "owner_context": "Identity", "version_state": "Planned" },
+          { "event_type": "billing.payout.scheduled", "owner_context": "Billing", "version_state": "Planned" }
+        ],
+        "data_planes": [
+          { "plane": "operational", "decision": "REQUIRED", "realization_summary": "managed relational capability, schema per context", "lifecycle_check": "approved; invest" },
+          { "plane": "object", "decision": "REQUIRED", "realization_summary": "managed object store for ListingImage binaries", "lifecycle_check": "approved; invest" },
+          { "plane": "analytical", "decision": "NOT_PRESENT", "trigger": "Any of the three DAT-4.3 conditions", "pending_ref": "DAT-PEND-01" }
+        ],
+        "lineage_flows": [
+          { "flow": "Aggregate metrics to enterprise DW", "source_owner": "All contexts", "destination": "Group data warehouse", "may_cross": "aggregate non-PII counts", "may_not_cross": "any PII field; any Fee, Payout or Producer record", "source": "kb-L1-enterprise-architecture § EA3" }
+        ],
+        "read_models": [],
+        "conformance_checks": [
+          { "id": "DAT-C1", "description": "One writer per entity", "severity": "BLOCKING", "source_check": "PRIN-02-C1" },
+          { "id": "DAT-C2", "description": "No unregistered replication", "severity": "MAJOR", "source_check": "PRIN-02-C2" },
+          { "id": "DAT-C3", "description": "Protected data has classification, retention and residency", "severity": "BLOCKING", "source_check": "PRIN-06-C1" }
+        ],
+        "pending_decisions": [
+          { "id": "DAT-PEND-01", "decision_summary": "Analytical plane", "trigger": "Any DAT-4.3 condition fires" },
+          { "id": "DAT-PEND-02", "decision_summary": "Order retention period", "trigger": "A dispute-handling or regulatory obligation supplies a period" },
+          { "id": "DAT-PEND-03", "decision_summary": "Session retention and erasure", "trigger": "External IdP session policy agreed with the security team" }
+        ],
+        "exceptions_recorded": [
+          { "id": "EXC-PRIN-02-001", "type": "TRANSITIONAL", "principle": "PRIN-02", "summary": "Group wholesale reporting reads the Producer store read-only during pilot", "due": "2026-12-31", "remediation_owner": "Core IT" }
+        ]
+      },
+      "artifacts": [
+        { "id": "artifact-dat-1b2c3d4e", "type": "document", "name": "data-architecture.md", "format": "markdown", "storage": { "provider": "s3", "location": "s3://adlc-artifacts/wf-hl-cycle0-9f8e7d6c/data-architecture.md" }, "description": "Data Architecture v1.0", "produced_by": "L1-design-data-architect" }
+      ],
+      "execution_summary": "• 13 entities, 4 owning contexts, 4 planned events, 3 conformance checks, 3 pending decisions."
+    }
+  },
+
+  "integration_architecture_output": {
+    "agent_id": "L1-design-integration-architect",
+    "agent_version": "1.0.0",
+    "execution_id": "exec-int-2c3d4e5f",
+    "workflow_execution_id": "wf-hl-cycle0-9f8e7d6c",
+    "status": "success",
+    "content": {
+      "type": "integration_architecture",
+      "schema_version": "1.0",
+      "items": {
+        "document_control": { "version": "1.0", "status": "APPROVED", "parent": "foundational-solution-architecture.md@1.0.0" },
+        "flows": [
+          { "id": "INT-4.1", "name": "Checkout listing availability", "from": "Orders", "to": "Catalogue", "style": "synchronous", "latency_budget": "p95 <= 300 ms", "timeout": "1 s", "degraded_mode": "refuse the order, retryable error", "edge_ref": "APP-2.3-e1" },
+          { "id": "INT-4.2", "name": "Confirmation-time fee", "from": "Orders", "to": "Billing", "style": "synchronous", "latency_budget": "p95 <= 400 ms", "timeout": "800 ms", "degraded_mode": "hold confirmation; never display a cached fee", "edge_ref": "APP-2.3-e2" },
+          { "id": "INT-4.3", "name": "Publication eligibility", "from": "Catalogue", "to": "Identity", "style": "synchronous", "latency_budget": "p95 <= 250 ms", "timeout": "1 s", "degraded_mode": "refuse publication", "edge_ref": "APP-2.3-e3" },
+          { "id": "INT-4.4", "name": "Order placed", "from": "Orders", "to": "Billing", "style": "asynchronous", "latency_budget": "n/a", "degraded_mode": "broker retry then dead-letter", "edge_ref": "APP-2.3-e4" },
+          { "id": "INT-4.5", "name": "Payout scheduled", "from": "Billing", "to": "Notifications", "style": "asynchronous", "latency_budget": "PENDING", "degraded_mode": "queue and retry; never dropped", "edge_ref": "APP-2.3-e5", "pending_ref": "INT-PEND-02" },
+          { "id": "INT-4.6", "name": "Aggregate metrics", "from": "All contexts", "to": "Group data warehouse", "style": "asynchronous, outbound-only", "latency_budget": "best effort", "degraded_mode": "retry on next window", "edge_ref": "APP-2.3-e6" }
+        ],
+        "contracts": [
+          { "contract": "catalogue.availability", "owner": "Catalogue", "consumer": "Orders", "style": "synchronous", "version": "v1", "initial_state": "Planned" },
+          { "contract": "billing.fee-quote", "owner": "Billing", "consumer": "Orders", "style": "synchronous", "version": "v1", "initial_state": "Planned" },
+          { "contract": "identity.registration-status", "owner": "Identity", "consumer": "Catalogue, Orders, Billing", "style": "synchronous", "version": "v1", "initial_state": "Planned" },
+          { "contract": "orders.order.placed", "owner": "Orders", "consumer": "Billing", "style": "asynchronous", "version": "1.0.0", "initial_state": "Planned" },
+          { "contract": "identity.registration.verified", "owner": "Identity", "consumer": "Compliance evidence store, Notifications", "style": "asynchronous", "version": "1.0.0", "initial_state": "Planned" },
+          { "contract": "billing.payout.scheduled", "owner": "Billing", "consumer": "Notifications", "style": "asynchronous", "version": "1.0.0", "initial_state": "Planned" }
+        ],
+        "event_kinds": [
+          { "event": "catalogue.listing.published", "kind": "Lifecycle", "replay_policy": "replayable" },
+          { "event": "orders.order.placed", "kind": "Lifecycle", "replay_policy": "replayable, idempotent on dedup key" },
+          { "event": "identity.registration.verified", "kind": "Evidence", "replay_policy": "never replayed" },
+          { "event": "billing.payout.scheduled", "kind": "Notification", "replay_policy": "replayable, idempotently" }
+        ],
+        "conformance_checks": [
+          { "id": "INT-C1", "description": "Every cross-context edge has a contract", "severity": "MAJOR", "source_check": "PRIN-03-C1" },
+          { "id": "INT-C2", "description": "No cross-context direct data access", "severity": "BLOCKING", "source_check": "PRIN-03-C2" },
+          { "id": "INT-C3", "description": "Synchronous calls are budgeted and have a degraded mode", "severity": "MAJOR", "source_check": "PRIN-03-C3" }
+        ],
+        "pending_decisions": [
+          { "id": "INT-PEND-01", "decision_summary": "Partner file-exchange pattern", "trigger": "A distributor with an EDI-only estate is committed to the roadmap" },
+          { "id": "INT-PEND-02", "decision_summary": "Notification delivery latency budget", "trigger": "An NFR classification supplies a delivery-time obligation" },
+          { "id": "INT-PEND-03", "decision_summary": "Certification-body evidence read API scope", "trigger": "First audit body contracted, or a regulator requests direct access" }
+        ],
+        "deviations": [
+          { "id": "DEV-01", "principle": "PRIN-03", "where": "INT-4.2", "summary": "Synchronous fee read against the async default", "review_trigger": "Confirmation-time fee changes become impossible by policy" },
+          { "id": "DEV-02", "principle": "PRIN-03", "where": "INT-4.3", "summary": "Synchronous eligibility check against the async default", "review_trigger": "Registration status becomes an event with an acceptable staleness window" }
+        ]
+      },
+      "artifacts": [
+        { "id": "artifact-int-2c3d4e5f", "type": "document", "name": "integration-architecture.md", "format": "markdown", "storage": { "provider": "s3", "location": "s3://adlc-artifacts/wf-hl-cycle0-9f8e7d6c/integration-architecture.md" }, "description": "Integration Architecture v1.0", "produced_by": "L1-design-integration-architect" }
+      ],
+      "execution_summary": "• 6 flows covering 6 APP-2.3 edges, 6 contracts, 3 conformance checks, 2 declared deviations."
+    }
+  },
+
+  "platform_architecture_output": {
+    "agent_id": "L1-design-platform-architect",
+    "agent_version": "1.0.0",
+    "execution_id": "exec-plt-3d4e5f6a",
+    "workflow_execution_id": "wf-hl-cycle0-9f8e7d6c",
+    "status": "success",
+    "content": {
+      "type": "platform_architecture",
+      "schema_version": "1.0",
+      "items": {
+        "document_control": { "version": "1.0", "status": "APPROVED", "parent": "foundational-solution-architecture.md@1.0.0" },
+        "workloads": [
+          { "workload": "catalogue-service", "context": "Catalogue", "runtime": "containerised service, managed container platform", "independently_deployable": true, "workload_identity": "wi-catalogue", "schema": "catalogue_schema" },
+          { "workload": "orders-service", "context": "Orders", "runtime": "containerised service, managed container platform", "independently_deployable": true, "workload_identity": "wi-orders", "schema": "orders_schema" },
+          { "workload": "billing-service", "context": "Billing", "runtime": "containerised service, managed container platform", "independently_deployable": true, "workload_identity": "wi-billing", "schema": "billing_schema" },
+          { "workload": "identity-service", "context": "Identity", "runtime": "containerised service, managed container platform", "independently_deployable": true, "workload_identity": "wi-identity", "schema": "identity_schema" },
+          { "workload": "notifications-worker", "context": "Notifications", "runtime": "event-driven worker, no public ingress", "independently_deployable": true, "workload_identity": "wi-notifications", "schema": null },
+          { "workload": "buyer-web", "context": "experience", "runtime": "statically hosted, behind group gateway", "independently_deployable": true, "workload_identity": "wi-buyer-web", "schema": null },
+          { "workload": "producer-portal", "context": "experience", "runtime": "statically hosted, behind group gateway", "independently_deployable": true, "workload_identity": "wi-producer-portal", "schema": null }
+        ],
+        "capability_register": [
+          { "capability": "Relational persistence", "realization": "managed relational service, schema-per-context", "status": "AVAILABLE", "lifecycle_check": "approved; invest", "consumer": "all contexts (DAT-4.1)" },
+          { "capability": "Asynchronous messaging", "realization": "managed event broker with dead-letter paths", "status": "AVAILABLE", "lifecycle_check": "approved; invest", "consumer": "INT-4.4, INT-4.5" },
+          { "capability": "Object storage", "realization": "managed object store", "status": "AVAILABLE", "lifecycle_check": "approved; invest", "consumer": "ListingImage binaries (DAT-4.2)" },
+          { "capability": "External-party identity", "realization": "group-approved external IdP", "status": "AVAILABLE", "lifecycle_check": "approved; invest", "consumer": "producers, buyers, distributors (ES1)" },
+          { "capability": "Secrets and key management", "realization": "group secrets vault + managed key capability", "status": "AVAILABLE", "lifecycle_check": "approved; invest", "consumer": "PLT-9, PLT-10" },
+          { "capability": "Outbound enterprise reporting feed", "realization": null, "status": "NOT PRESENT", "lifecycle_check": null, "consumer": "EA3 permits it; no committed requirement yet" },
+          { "capability": "Full-text search", "realization": null, "status": "NOT PRESENT", "lifecycle_check": null, "consumer": "a buyer-search feature would need it" },
+          { "capability": "Analytical plane", "realization": null, "status": "NOT PRESENT", "lifecycle_check": null, "consumer": "deferred by DAT-4.3" },
+          { "capability": "Evidence-chain completeness monitoring", "realization": "logs exist; no reconstruction query surface", "status": "PARTIAL", "lifecycle_check": "approved; invest", "consumer": "INT-8" }
+        ],
+        "environments": [
+          { "environment": "Development", "purpose": "engineer-facing, synthetic data only" },
+          { "environment": "Test", "purpose": "automated test execution; Phase 2.5 provisions here" },
+          { "environment": "Staging", "purpose": "pre-production verification; pen test target" },
+          { "environment": "Production", "purpose": "external users; only environment with real PII/Financial data" }
+        ],
+        "resilience": [
+          { "service": "billing-service", "availability_target": "99.9%", "source": "kb-L1-enterprise-security § ES4 (regulatory defence); INT-4.2 dependency" },
+          { "service": "identity-service", "availability_target": "99.9%", "source": "kb-L1-enterprise-security § ES4 (FBO-status dispute)" },
+          { "service": "catalogue-service", "availability_target": "99.5%", "source": "kb-L1-enterprise-security § ES4 Tier 2 equivalent" },
+          { "service": "orders-service", "availability_target": "99.5%", "source": "kb-L1-enterprise-security § ES4 Tier 2 equivalent" },
+          { "service": "notifications-worker", "availability_target": "99.5%", "source": "kb-L1-enterprise-security § ES4 Tier 2 equivalent" },
+          { "service": "outbound metrics feed", "availability_target": "best effort", "source": "kb-L1-enterprise-security § ES4 Tier 3 equivalent" },
+          { "service": "ALL", "rto": "PENDING", "rpo": "PENDING", "source": "—", "pending_ref": "PLT-PEND-01" }
+        ],
+        "conformance_checks": [
+          { "id": "PLT-C1", "description": "Isolation — no cross-context schema grants", "severity": "BLOCKING", "source_check": "PRIN-03-C2" },
+          { "id": "PLT-C2", "description": "Technology lifecycle not contain/retire", "severity": "MAJOR", "source_check": "PRIN-07-C1" },
+          { "id": "PLT-C3", "description": "Every context independently deployable", "severity": "BLOCKING", "source_check": "PRIN-04-C2" },
+          { "id": "PLT-C4", "description": "Classified data protected and access attributable", "severity": "BLOCKING", "source_check": "PRIN-06-C1" }
+        ],
+        "pending_decisions": [
+          { "id": "PLT-PEND-01", "decision_summary": "RTO and RPO targets", "trigger": "An NFR or recovery requirement supplies an obligation for Billing or Identity" },
+          { "id": "PLT-PEND-02", "decision_summary": "Full-text search realisation", "trigger": "A committed requirement needs search" },
+          { "id": "PLT-PEND-03", "decision_summary": "Evidence-chain reconstruction query surface", "trigger": "First audit body contracted, or a compliance report requires it" }
+        ],
+        "exceptions_recorded": [
+          { "id": "EXC-PRIN-07-001", "type": "TRANSITIONAL", "principle": "PRIN-07", "summary": "Approved relational product mid-migration at group level (EA8); version pinned", "due": "group migration completion", "remediation_owner": "Core IT" }
+        ],
+        "cycle0_exit_proof": {
+          "status": "PASS",
+          "signed_off_by": "A. Reyes",
+          "date": "2026-04-12",
+          "proofs": [
+            { "proof": "build", "result": "PASS", "evidence": "pipeline run #142" },
+            { "proof": "deploy", "result": "PASS", "evidence": "deployed to production, zero manual steps" },
+            { "proof": "run", "result": "PASS", "evidence": "GET /healthz through gateway, 200" },
+            { "proof": "observe", "result": "PASS", "evidence": "logs, metrics, trace with correlation id" },
+            { "proof": "emit", "result": "PASS", "evidence": "plt-canary.probe.emitted accepted, id a41f" },
+            { "proof": "consume", "result": "PASS", "evidence": "consumed by second canary; dead-letter path verified after initial failure and remediation" }
+          ]
+        }
+      },
+      "artifacts": [
+        { "id": "artifact-plt-3d4e5f6a", "type": "document", "name": "platform-architecture.md", "format": "markdown", "storage": { "provider": "s3", "location": "s3://adlc-artifacts/wf-hl-cycle0-9f8e7d6c/platform-architecture.md" }, "description": "Platform Architecture v1.0", "produced_by": "L1-design-platform-architect" }
+      ],
+      "execution_summary": "• 7 workloads, 9 capability rows (5 AVAILABLE, 3 NOT PRESENT, 1 PARTIAL), 4 conformance checks, Cycle 0 exit proof PASS."
+    }
+  }
+}

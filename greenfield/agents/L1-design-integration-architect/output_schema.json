@@ -1,0 +1,186 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "L1-design-integration-architect-output-schema-v1.0",
+  "title": "IntegrationArchitectureItems",
+  "description": "Shape of content.items for L1-design-integration-architect. The artifact (integration-architecture.md) is the authoritative, human-readable document; items restates the same facts in queryable structured form so downstream consumers (L1-design-api-spec, L1-design-platform-architect, L1-testing-env-provisioner seeding the stub registry, L1-arch-baseline-generator, gr-L1-architecture-conformance) can read the flow register, contract register and conformance checks without parsing markdown. Meta-points pattern: narrative fields are capped summaries, full prose lives only in the artifact. Two invariants are enforced structurally rather than left to prose. First, a synchronous edge is not expressible without a justification, a timeout, a latency budget and a degraded mode — the four together, because a sync call whose failure behaviour nobody wrote down works perfectly until the callee is down and then fails however the first implementer happened to choose. Second, no invented budget: a latency_budget or timeout that is not PENDING requires a source, and one that is PENDING requires a pending_ref, so a plausible-sounding millisecond figure with nothing behind it fails validation rather than shipping into a register that reads as agreed.",
+  "type": "object",
+  "required": ["flows", "contracts", "event_taxonomy", "integration_styles", "trust_boundaries", "demand_traceability", "conformance_checks", "pending_decisions", "open_questions"],
+  "properties": {
+    "flows": {
+      "type": "array",
+      "minItems": 1,
+      "description": "INT-4, one entry per edge in the FSA's APP-2 component map — all of them. An edge with no entry here is an ungoverned integration, which is the condition INT-C1 exists to detect. Every entry must also have a matching row in contracts[].",
+      "items": { "$ref": "#/$defs/Flow" }
+    },
+    "contracts": {
+      "type": "array",
+      "minItems": 1,
+      "description": "INT-5 initial contract register. One row per contract implied by flows[] — both directions are checked in the self-check, so a flow governed here but absent from flows[], or the reverse, is a defect.",
+      "items": { "$ref": "#/$defs/Contract" }
+    },
+    "event_taxonomy": {
+      "type": "array",
+      "description": "INT-3.2. Every event classified by KIND, because the kind — not the name — decides ordering, retention and replay policy. May be empty only where the product has no asynchronous edge at all, which given PRIN-03's async default should be visible in the reasoning.",
+      "items": { "$ref": "#/$defs/EventKind" }
+    },
+    "integration_styles": {
+      "type": "array",
+      "minItems": 1,
+      "description": "INT-2. Includes the explicitly NOT-approved styles with approved:false — recording what is prohibited is half the point of the section, and a prohibition stated nowhere is a prohibition nobody can cite.",
+      "items": { "$ref": "#/$defs/IntegrationStyle" }
+    },
+    "trust_boundaries": {
+      "type": "array",
+      "minItems": 1,
+      "description": "INT-7. One entry per boundary in the FSA's SEC-* model. Exact identity technology is deliberately absent — that belongs to the platform viewpoint.",
+      "items": { "$ref": "#/$defs/TrustBoundary" }
+    },
+    "demand_traceability": {
+      "type": "array",
+      "minItems": 1,
+      "description": "INT-10. One entry per REQ-INT-* demand, per CON-* constraint whose binding viewpoints include INT, and per principle applied. An unanswered demand belongs in open_questions, not in a hopeful row here.",
+      "items": { "$ref": "#/$defs/DemandTrace" }
+    },
+    "conformance_checks": {
+      "type": "array",
+      "minItems": 3,
+      "description": "INT-11. At minimum the three the viewpoint always owes: every cross-context edge has a contract, no cross-context DB grants, every synchronous call is budgeted and has a degraded mode.",
+      "items": { "$ref": "#/$defs/ConformanceCheck" }
+    },
+    "pending_decisions": {
+      "type": "array",
+      "description": "INT-12. Every deferred decision with the trigger that reopens it — commonly a latency budget waiting on a TBD boundary condition.",
+      "items": { "$ref": "#/$defs/PendingDecision" }
+    },
+    "open_questions": {
+      "type": "array",
+      "description": "Gaps this agent must not paper over — a TBD boundary condition carried through, an APP-2 edge that cannot be governed as specified, a flow that would imply a second writer.",
+      "items": { "$ref": "#/$defs/OpenQuestion" }
+    }
+  },
+  "$defs": {
+    "Flow": {
+      "type": "object",
+      "required": ["id", "name", "producer_context", "consumer_context", "style", "contract_owner", "purpose_summary", "degraded_mode", "fsa_edge"],
+      "description": "One governed cross-context edge. The conditional block below is the agent's central discipline expressed in the schema: choosing 'synchronous' obliges a justification, a latency budget, a timeout and a degraded mode, so a sync edge cannot be registered on convenience alone.",
+      "properties": {
+        "id": { "type": "string", "pattern": "^INT-4\\.[0-9]+$", "description": "Sequential, matching the subsection heading in the artifact." },
+        "name": { "type": "string", "minLength": 5, "description": "The flow's name as the artifact's subsection heading states it." },
+        "producer_context": { "type": "string", "minLength": 2, "description": "A bounded context from the FSA's APP-1, named exactly as it appears there." },
+        "consumer_context": { "type": "string", "minLength": 2, "description": "A bounded context from APP-1, or a named external system from the enterprise landscape." },
+        "style": { "type": "string", "enum": ["synchronous", "asynchronous"], "description": "Asynchronous is the default (PRIN-03). Synchronous requires that the caller needs the result to complete the CURRENT user transaction — 'it is simpler' and 'it is faster to build' are not justifications." },
+        "contract_owner": { "type": "string", "minLength": 2, "description": "The PRODUCING context. A consumer never becomes owner of the contract, nor of the entity behind it." },
+        "purpose_summary": { "type": "string", "minLength": 10, "maxLength": 180, "description": "Capped summary of what the flow achieves. Full prose in the artifact." },
+        "sync_justification": { "type": "string", "minLength": 20, "maxLength": 300, "description": "Required when style is synchronous: why the caller cannot complete its current transaction without the answer. Must name the transaction, not merely assert that the data is needed." },
+        "latency_budget": { "type": "string", "minLength": 2, "description": "The budget taken from the matching nfr-spec.md Performance boundary condition, or the literal 'PENDING'. A TBD boundary condition stays TBD — if nfr-spec.md says 'TBD — needs stakeholder input', this says PENDING, it does not say 200ms." },
+        "timeout": { "type": "string", "minLength": 2, "description": "The timeout, or the literal 'PENDING'. A synchronous dependency with no timeout inherits whatever the HTTP client library defaults to, which is a decision made by a dependency author rather than an architect." },
+        "degraded_mode": { "type": "string", "minLength": 15, "description": "What happens when this integration fails — a real behaviour, required for BOTH styles. It must not be an optimistic assumption about the unknown answer: assuming availability sells goods that do not exist, assuming eligibility lets an unvetted party create regulatory evidence. 'Assume it is fine' is not a degraded mode." },
+        "source": { "type": "string", "description": "Required whenever latency_budget is not PENDING: the nfr-spec.md boundary condition, REQ-INT demand or KB standard that grounds it." },
+        "pending_ref": { "type": "string", "pattern": "^INT-PEND-[0-9]{2}$", "description": "Required whenever latency_budget or timeout is PENDING — the INT-12 row carrying the trigger." },
+        "fsa_edge": { "type": "string", "minLength": 5, "description": "The APP-2 edge this flow governs, identified so the bidirectional coverage check against the component map is mechanical rather than a judgement." },
+        "event_type": { "type": "string", "description": "For an asynchronous flow, the event that carries it — must appear in event_taxonomy[]." }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "style": { "const": "synchronous" } } },
+          "then": { "required": ["sync_justification", "latency_budget", "timeout", "degraded_mode"] }
+        },
+        {
+          "if": { "anyOf": [ { "properties": { "latency_budget": { "const": "PENDING" } } }, { "properties": { "timeout": { "const": "PENDING" } } } ] },
+          "then": { "required": ["pending_ref"] }
+        },
+        {
+          "if": { "properties": { "latency_budget": { "type": "string", "not": { "const": "PENDING" } } }, "required": ["latency_budget"] },
+          "then": { "required": ["source"] }
+        }
+      ]
+    },
+    "Contract": {
+      "type": "object",
+      "required": ["contract", "owner_context", "consumer", "style", "version", "initial_state"],
+      "properties": {
+        "contract": { "type": "string", "minLength": 3, "description": "The contract's name — an API name, or an event type in canonical {context}.{entity}.{event} form." },
+        "owner_context": { "type": "string", "minLength": 2, "description": "The producing context." },
+        "consumer": { "type": "string", "minLength": 2, "description": "The consuming context, application or external party. 'TBD' is acceptable for an event with no committed consumer yet — an event nobody consumes is still a published contract." },
+        "style": { "type": "string", "enum": ["REST", "Event", "Read model"], "description": "Must be one of the approved styles in integration_styles[] with approved:true." },
+        "version": { "type": "string", "minLength": 2, "description": "Explicit version — 'v1' for an API path version, semantic for an event contract. A contract without a version cannot be evolved without breaking someone." },
+        "initial_state": { "type": "string", "enum": ["Planned", "Active"], "description": "'Planned' means the architecture recognises the contract but the producing feature has not necessarily been implemented. At Cycle 0 nearly everything is Planned." }
+      }
+    },
+    "EventKind": {
+      "type": "object",
+      "required": ["event_type", "kind", "owner_context", "ordering", "replay_policy", "reasoning"],
+      "description": "INT-3.2. Classifying by kind is the domain's most consequential modelling decision: the kind decides ordering, retention and replay, and conflating kinds is how one real-world act becomes two audit records.",
+      "properties": {
+        "event_type": { "type": "string", "pattern": "^[a-z0-9-]+\\.[a-z0-9-]+\\.[a-z0-9-]+$", "description": "Canonical {context}.{entity}.{event}, lowercase, past tense on the event segment. The context segment is a bounded context — never a team, system or product." },
+        "kind": { "type": "string", "enum": ["lifecycle", "evidence", "movement", "notification"], "description": "Per the domain KB's taxonomy. 'evidence' is the one to get right: replaying an evidence event does not re-deliver a fact, it asserts the fact a second time." },
+        "owner_context": { "type": "string", "minLength": 2, "description": "The producing context, which owns the event's business meaning." },
+        "ordering": { "type": "string", "minLength": 4, "description": "The ordering guarantee this kind requires — e.g. 'per aggregate, strict' for evidence, 'best-effort; late and out-of-order arrivals are normal' for movement." },
+        "replay_policy": { "type": "string", "minLength": 4, "description": "Whether and how the event may be replayed. For evidence events the policy is usually 'never' — and that must be stated, not left implied by the kind." },
+        "deduplication_key": { "type": "string", "description": "What the consumer deduplicates on. For trade and evidence events this derives from the business act (party + subject + business timestamp), never from a message id a producer might regenerate on retry." },
+        "reasoning": { "type": "string", "minLength": 20, "maxLength": 300, "description": "Why this kind, and what follows from it. Not a restatement of what the event announces." }
+      }
+    },
+    "IntegrationStyle": {
+      "type": "object",
+      "required": ["style", "use_summary", "approved"],
+      "properties": {
+        "style": { "type": "string", "minLength": 3 },
+        "use_summary": { "type": "string", "minLength": 10, "maxLength": 180, "description": "Capped summary of when this style applies — or, for approved:false, why it is prohibited." },
+        "example_edge": { "type": "string", "description": "A real edge from this product using this style. Required when approved is true — a permitted style with no example is a style nobody knows how to apply." },
+        "approved": { "type": "boolean", "description": "false records a deliberately prohibited style (database integration, shared mutable tables, unmanaged point-to-point file exchange). Recording the prohibition is half the section's value." }
+      },
+      "allOf": [
+        { "if": { "properties": { "approved": { "const": true } } }, "then": { "required": ["example_edge"] } }
+      ]
+    },
+    "TrustBoundary": {
+      "type": "object",
+      "required": ["boundary", "identity_source", "controls_summary"],
+      "properties": {
+        "boundary": { "type": "string", "minLength": 5, "description": "Where the boundary sits, named against the FSA's SEC-* model." },
+        "identity_source": { "type": "string", "minLength": 3, "description": "Where caller identity originates for traffic crossing here, at capability level. External parties are never on the employee identity provider (kb-L1-enterprise-security ES1). The exact identity PRODUCT belongs to the platform viewpoint and must not appear." },
+        "controls_summary": { "type": "string", "minLength": 15, "maxLength": 250, "description": "Capped summary of what happens at the boundary: identity established, authorization applied, correlation preserved." }
+      }
+    },
+    "DemandTrace": {
+      "type": "object",
+      "required": ["demand_id", "satisfied_by", "satisfaction_summary"],
+      "properties": {
+        "demand_id": { "type": "string", "pattern": "^(REQ-INT-[0-9]{2}|CON-[0-9]{2}|PRIN-[0-9]{2})$", "description": "Id exactly as the FSA or the principle catalogue states it, never renumbered." },
+        "satisfied_by": { "type": "string", "pattern": "^INT-[0-9]+(\\.[0-9]+)?$", "description": "The INT section that answers it." },
+        "satisfaction_summary": { "type": "string", "minLength": 15, "maxLength": 200, "description": "Capped summary of HOW it is satisfied — the decision, not a restatement of the demand." }
+      }
+    },
+    "ConformanceCheck": {
+      "type": "object",
+      "required": ["id", "description", "check"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^INT-C[0-9]+$" },
+        "description": { "type": "string", "minLength": 10, "maxLength": 150 },
+        "check": { "type": "string", "minLength": 10, "description": "A machine-evaluable expression — e.g. 'count(cross_context_database_grants) == 0'. Prose here makes the check unevaluable, which makes it a slogan." },
+        "severity": { "type": "string", "enum": ["BLOCKING", "MAJOR", "MINOR"] }
+      }
+    },
+    "PendingDecision": {
+      "type": "object",
+      "required": ["id", "decision_summary", "status", "trigger"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^INT-PEND-[0-9]{2}$" },
+        "decision_summary": { "type": "string", "minLength": 10, "maxLength": 180 },
+        "status": { "type": "string", "const": "PENDING" },
+        "trigger": { "type": "string", "minLength": 15, "description": "The condition that reopens this decision, stated as a condition and not a date. PRIN-01-C1 checks exactly this." }
+      }
+    },
+    "OpenQuestion": {
+      "type": "object",
+      "required": ["id", "question", "origin", "doc_location"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^OQ-[0-9]{2}$" },
+        "question": { "type": "string", "minLength": 15, "description": "The decision someone has to make, phrased so it can be answered." },
+        "origin": { "type": "string", "enum": ["nfr_tbd", "fsa_gap", "ownership_conflict", "domain_pattern_conflict"], "description": "'ownership_conflict' — a flow that would imply a second writer for an entity DAT-1 owns elsewhere; raised against the FSA's boundaries, never registered as a flow. 'domain_pattern_conflict' — the domain KB's pattern and a REQ-INT demand disagree; raised rather than silently resolved in either direction." },
+        "doc_location": { "type": "string", "minLength": 3, "description": "The INT section where this question is visible in the artifact. A question recorded only in items is invisible to everyone who reads the document." }
+      }
+    }
+  }
+}

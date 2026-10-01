@@ -45,10 +45,15 @@ Accepts the original input and draft output from
 1. Ingests the generator's original input and draft output
 2. Reads `regulatory-feasibility.md` and `idea-brief.json` from blob storage
    — the brief is **JSON**, parsed by key path, not scanned as markdown
-3. Loads `L1-vision-regulatory-feasibility-checker/evaluation.md` as the
-   scoring source of truth, plus `kb-L1-regulatory-frameworks-index` and
-   `kb-L2-domain-regulatory` to sanity-check citations and re-run the
-   category sweep
+3. Reads from GitHub with `tool-L1-github-reader-using-app` — one call per
+   folder, every repo/branch/path from the request:
+   `L1-vision-regulatory-feasibility-checker/evaluation.md` as the scoring
+   source of truth, plus the regulatory frameworks index and domain regulatory
+   KBs to sanity-check citations and re-run the category sweep, and this
+   evaluator's `examples/` folder for shape. Pointed at the same repo, branch
+   and folders the generator ran against, so the audit and the sweep cannot
+   diverge; an unreadable rubric or index KB fails with `REFERENCE_UNAVAILABLE`.
+   Corrections still go back to blob storage, never to the repository
 4. Checks every constraint's citation, mitigation/legal-review status, and
    whether its severity label actually matches its rationale
 5. Validates any claimed overall_status discount against its precondition

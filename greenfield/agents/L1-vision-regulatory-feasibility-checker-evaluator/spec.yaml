@@ -33,24 +33,35 @@ contract:
     required_parameters:
       original_input: { type: object, description: "The input L1-vision-regulatory-feasibility-checker received" }
       generator_output: { type: object, description: "L1-vision-regulatory-feasibility-checker's draft items output, including constraints, overall_status, categories_not_applicable, viability and open_items" }
+      # GitHub reference material — the SAME repo, branch and KB folders the generator ran
+      # against. A rubric or sweep list read from elsewhere silently changes the bar this
+      # gate enforces, so nothing here is defaulted or inferred.
+      reference_repo: { type: string, description: "Repository holding the rubric, the regulatory KBs and the examples — bare name or 'owner/repo'. Read with tool-L1-github-reader-using-app" }
+      reference_branch: { type: string, description: "Branch to read the reference material from — the same branch the generator read" }
+      evaluation_rubric_kb_folder: { type: string, description: "Repo folder holding L1-vision-regulatory-feasibility-checker's evaluation.md rubric content. Unavailable → REFERENCE_UNAVAILABLE: scoring against a remembered rubric is not an independent audit" }
+      regulatory_frameworks_index_kb_folder: { type: string, description: "Repo folder holding the cross-domain index KB content — #coverage-categories is the sweep list the generator walked and the audit re-reads. Unavailable → REFERENCE_UNAVAILABLE" }
+      domain_regulatory_kb_folder: { type: string, description: "Repo folder holding the domain regulatory facts KB content, for groundedness beyond category plausibility. Unavailable → those checks are recorded as unperformed, never as passed" }
+    optional_parameters:
+      examples_folder: { type: string, default: null, description: "Repo folder holding this evaluator's worked input/output examples (greenfield/agents/L1-vision-regulatory-feasibility-checker-evaluator/examples in this repository). Shape guidance only — never a source of findings or verdicts. Unavailable is tolerated" }
 
   output:
     $ref: "output_schema.json"
 
 context:
-  knowledge_bases:
-    - kb-L1-regulatory-feasibility-evaluation-rubric   # runtime copy of L1-vision-regulatory-feasibility-checker/evaluation.md — see that KB's spec.yaml for source-of-truth note
-    # Jurisdiction is read from each KB's own #jurisdiction section at runtime, never assumed here.
-    # Attach the SAME pair the generator ran against, selected by target_geography:
-    #   India — *-ind   |   United Kingdom — *-uk
-    - kb-L1-regulatory-frameworks-index-ind   # >=3.1.0 — #jurisdiction declares coverage; #cross-domain-index sanity-checks a citation's plausibility; #coverage-categories is the sweep list the generator walked, re-read here so the audit and the sweep cannot diverge
-    - kb-L2-domain-regulatory-ind   # >=2.1.0 — #jurisdiction declares coverage; domain facts for groundedness, not merely category plausibility
+  # No KB is attached at runtime. The rubric and both regulatory KBs are READ FROM GITHUB
+  # with tool-L1-github-reader-using-app, from evaluation_rubric_kb_folder,
+  # regulatory_frameworks_index_kb_folder and domain_regulatory_kb_folder — pointed at the
+  # SAME repo, branch and folders the generator ran against, so the coverage audit and the
+  # generator's sweep cannot diverge. Jurisdiction is read from each KB's own #jurisdiction
+  # section at runtime, never assumed here (India — *-ind | United Kingdom — *-uk).
+  knowledge_bases: []
   guardrails:
     - gr-L1-output-schema-validator
     - gr-L1-pii-detection
     - gr-L1-citation-verifier
     - gr-L1-regulatory-feasibility-quality-gate   # fires when THIS evaluator concludes; validates L1-vision-regulatory-feasibility-checker's RESULTANT output against its own schema+evaluation.md, zero-tolerance mitigation rule re-checked directly (guardrails/gr-L1-regulatory-feasibility-quality-gate)
   tools:
+    - tool-L1-github-reader-using-app  # reads the rubric, both regulatory KBs and the examples folder from GitHub — one call per folder, repo/branch/paths all from the request
     - tool-L1-azure-blob-reader      # reads regulatory-feasibility.md and idea-brief.json for full-text and groundedness checks
     - tool-L1-azure-blob-writer      # re-saves regulatory-feasibility.md when a fix changes its content
 

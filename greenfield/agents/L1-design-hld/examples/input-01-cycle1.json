@@ -1,0 +1,93 @@
+{
+  "_comment": "Input to L1-design-hld, BOM Phase 4, DELTA MODE. The agent takes the current canonical hld.md for each affected component and emits a structured diff — never a fresh document.",
+  "_bom_gap": "The BOM states the rule as 'takes the current canonical document as input — never a blank template'. In Cycle 1 there is no current hld.md for any component: the application baseline v0.1 records every component as DECLARED with hld_ref null, because a component HLD is created by the first cycle that builds that component. The rule has no stated answer for the creating case. This example resolves it as a delta against an empty document (0.0.0 -> 1.0.0) with creates_document: true, so that even the first HLD arrives through the same diff mechanism everything else uses — and flags it rather than treating the absence as licence to author a document outside delta mode.",
+
+  "folder_name": "harvestlink/pi-2026-q2/cycle-1",
+  "cycle": { "pi_id": "PI-2026-Q2", "cycle": 1, "slug": "producer-registration", "features": ["F5.1", "F1.1"] },
+
+  "current_component_documents": [
+    { "component": "identity-service", "document": "services/identity-service/hld.md", "current_version": null, "exists": false, "first_cycle_for_component": true, "baseline_state": "DECLARED, hld_ref null (application-baseline v0.1)" },
+    { "component": "producer-portal", "document": "frontend/producer-portal/hld.md", "current_version": null, "exists": false, "first_cycle_for_component": true, "baseline_state": "DECLARED, hld_ref null" },
+    { "component": "notifications-worker", "document": "services/notifications-worker/hld.md", "current_version": null, "exists": false, "first_cycle_for_component": true, "baseline_state": "DECLARED, hld_ref null" },
+    { "component": "catalogue-service", "document": "services/catalogue-service/hld.md", "current_version": null, "exists": false, "first_cycle_for_component": true, "baseline_state": "DECLARED, hld_ref null", "affected_this_cycle": false }
+  ],
+
+  "foundational_architecture_ref": {
+    "document": "foundational-solution-architecture.md",
+    "version": "1.0.0",
+    "status": "APPROVED",
+    "constraints_binding_this_cycle": [
+      { "id": "CON-2", "rule": "No context reads another context's store directly" },
+      { "id": "CON-3", "rule": "All cross-context traffic passes through governed contracts" },
+      { "id": "CON-5", "rule": "Every context is independently deployable" }
+    ],
+    "contexts": ["Catalogue APP-1.01", "Orders APP-1.02", "Billing APP-1.03", "Identity APP-1.04", "Notifications APP-1.05"],
+    "note": "The FSA names no technology. A structural delta would propagate here and require an ADR plus Enterprise Architect approval; an additive or extending delta touches component documents only."
+  },
+
+  "dependency_graph_output": {
+    "agent_id": "L1-planning-dependency-mapper",
+    "execution_id": "exec-dm-4c5d6e7a",
+    "workflow_execution_id": "wf-hl-pi1-3c4d5e6f",
+    "status": "success",
+    "content": {
+      "type": "dependency_graph",
+      "schema_version": "1.0",
+      "items": {
+        "edges": [
+          { "from": "producer-portal", "to": "identity-service", "kind": "api", "contract": "identity.registration-status@v1", "cycle": 1 },
+          { "from": "identity-service", "to": "external IdP", "kind": "integration", "cycle": 1 },
+          { "from": "identity-service", "to": "competent-authority FBO register", "kind": "integration", "cycle": 1, "note": "New outbound third-party egress — not present in any prior cycle" },
+          { "from": "notifications-worker", "to": "identity-service", "kind": "event", "contract": "identity.registration.verified@1.0.0", "cycle": 1 },
+          { "from": "catalogue-service", "to": "identity-service", "kind": "api", "contract": "identity.registration-status@v1", "cycle": "deferred", "note": "Declared in INT-4.3; Catalogue does not consume it in Cycle 1 because no listing publication exists yet" }
+        ]
+      },
+      "artifacts": [
+        { "id": "artifact-dm-4c5d6e7a", "type": "document", "name": "dependency-graph.json", "format": "json", "storage": { "provider": "s3", "location": "s3://adlc-artifacts/wf-hl-pi1-3c4d5e6f/cycle-1/dependency-graph.json" }, "description": "Cycle 1 component dependency edges", "produced_by": "L1-planning-dependency-mapper" }
+      ],
+      "execution_summary": "• 5 edges; 4 active in Cycle 1, 1 declared-but-deferred."
+    }
+  },
+
+  "api_spec_output": {
+    "agent_id": "L1-design-api-spec",
+    "execution_id": "exec-as-5d6e7f8b",
+    "workflow_execution_id": "wf-hl-pi1-3c4d5e6f",
+    "status": "success",
+    "content": {
+      "type": "api_spec",
+      "schema_version": "1.0",
+      "items": {
+        "endpoints": [
+          { "operation_id": "createProducerRegistration", "method": "post", "path": "/v1/producers/registrations", "owning_component": "identity-service", "fr_trace": ["FR-001"], "auth": "externalIdpOAuth2" },
+          { "operation_id": "getProducerRegistration", "method": "get", "path": "/v1/producers/registrations/{registrationId}", "owning_component": "identity-service", "fr_trace": ["FR-001", "FR-003"], "auth": "externalIdpOAuth2" },
+          { "operation_id": "getRegistrationStatus", "method": "get", "path": "/v1/producers/{producerId}/registration", "owning_component": "identity-service", "fr_trace": ["FR-003"], "auth": "externalIdpOAuth2", "note": "Realises the identity.registration-status@v1 contract consumed by Catalogue (INT-4.3) and, in Cycle 1, by producer-portal" }
+        ]
+      },
+      "artifacts": [
+        { "id": "artifact-as-5d6e7f8b", "type": "api_spec", "name": "openapi.yaml", "format": "yaml", "storage": { "provider": "s3", "location": "s3://adlc-artifacts/wf-hl-pi1-3c4d5e6f/cycle-1/deltas/openapi.yaml" }, "description": "3 operations on identity-service", "produced_by": "L1-design-api-spec" }
+      ],
+      "execution_summary": "• 3 operations, all on identity-service."
+    }
+  },
+
+  "nfr_classifications": [
+    { "id": "FR-001", "category": "Security", "boundary_condition": "Attestation must be tied to an authenticated producer identity", "source": "nfr-spec.md § FR-001" },
+    { "id": "FR-001", "category": "Compliance", "boundary_condition": "Retain 6 years from creation", "source": "kb-L1-enterprise-security § ES3" },
+    { "id": "FR-003", "category": "Availability", "boundary_condition": "99.9% — the record could be required for active regulatory defence in an FBO-status dispute", "source": "kb-L1-enterprise-security § ES4" },
+    { "id": "FR-003", "category": "Performance", "boundary_condition": "Registration status read p95 <= 250 ms", "source": "nfr-spec.md § FR-003; integration-architecture.md INT-4.3" },
+    { "id": "FR-005", "category": "Security", "boundary_condition": "External parties on the approved external IdP only; employee directory not extended", "source": "kb-L1-enterprise-security § ES1" }
+  ],
+
+  "work_units_in_scope": [
+    { "work_unit_id": "WU-F5.1-01", "title": "Producer registration via external IdP", "layer": "integration", "component": "identity-service" },
+    { "work_unit_id": "WU-F5.1-02", "title": "OIDC token validation", "layer": "business-logic", "component": "identity-service" },
+    { "work_unit_id": "WU-F5.1-03", "title": "Role provisioning from the onboarding record", "layer": "business-logic", "component": "identity-service" },
+    { "work_unit_id": "WU-F1.1-01", "title": "Producer entity schema migration", "layer": "data", "component": "identity-service" },
+    { "work_unit_id": "WU-F1.1-02", "title": "FBO number capture endpoint", "layer": "api", "component": "identity-service" },
+    { "work_unit_id": "WU-F1.1-03", "title": "Registration submission form", "layer": "ui", "component": "producer-portal" },
+    { "work_unit_id": "WU-F1.1-04", "title": "Publication gate on pending-verification", "layer": "business-logic", "component": "identity-service" },
+    { "work_unit_id": "WU-F1.1-05", "title": "FBO register lookup integration", "layer": "integration", "component": "identity-service" },
+    { "work_unit_id": "WU-F1.1-06", "title": "Rejected-verification notification", "layer": "business-logic", "component": "notifications-worker" }
+  ]
+}

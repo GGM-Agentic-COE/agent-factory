@@ -1,0 +1,154 @@
+{
+  "agent_id": "L1-inception-story-generator",
+  "agent_version": "1.0.0",
+  "execution_id": "exec-sg-8c9d0e1f",
+  "workflow_execution_id": "wf-hl-pi1-3c4d5e6f",
+  "status": "success",
+  "content": {
+    "type": "stories",
+    "schema_version": "1.0",
+    "items": {
+      "elaboration_control": {
+        "pi_id": "PI-2026-Q2",
+        "planned_cycles": [1],
+        "features_elaborated": ["F5.1", "F1.1"],
+        "features_on_roadmap_not_elaborated": ["F3.2", "F2.1"],
+        "just_in_time_note": "F3.2 and F2.1 are on the roadmap and were not elaborated. Elaborating them now would produce stories against a feature definition the next cycle plan may change, which is the waste just-in-time exists to avoid.",
+        "definition_of_ready_applied": true,
+        "dor_source": "kb-L1-sdlc-templates"
+      },
+
+      "slicing_decisions": [
+        {
+          "feature_id": "F5.1",
+          "needs_slicing": false,
+          "decision": "NO_STORY_LAYER",
+          "fit_test": "fits one feature cycle (<= 5 days)",
+          "rationale": "The collapsible-story rule: a story is only a vertical slice of an oversized feature. F5.1 fits one cycle, so no slice layer is created and its acceptance criteria carry forward unchanged for Work-Unit elaboration. Minting a story here would add a level that restates the feature and nothing else.",
+          "acceptance_criteria_carrier": "feature",
+          "source": "kb-L1-decomposition-standard § C.2"
+        },
+        {
+          "feature_id": "F1.1",
+          "needs_slicing": true,
+          "decision": "STORY_LAYER_INVOKED",
+          "fit_test": "size L — does not fit one feature cycle",
+          "rationale": "Two independently valuable vertical slices exist: a producer can register and be held pending (a) before asynchronous verification resolves the outcome (b). Each slice re-runs the fit test on its own.",
+          "acceptance_criteria_carrier": "slice",
+          "slices_emitted": ["S-F1.1-a", "S-F1.1-b"],
+          "source": "kb-L1-decomposition-standard § C.2"
+        }
+      ],
+
+      "stories": [
+        {
+          "slice_id": "S-F1.1-a",
+          "feature_id": "F1.1",
+          "epic_id": "EPIC-1",
+          "title": "Happy-path producer registration",
+          "narrative": "As a producer, I want to submit my registration with my FBO number so that I can begin the process of listing produce.",
+          "vertical_slice": true,
+          "fit_test": { "result": "PASS", "basis": "one cycle; a demonstrable end-to-end path from form submission to a pending record" },
+          "sequence": 1,
+          "depends_on_slices": [],
+          "depends_on_features": ["F5.1"],
+          "depends_on_features_note": "A producer cannot register before there is an authenticated external identity to register as. F5.1 is committed to the same cycle and ranked ahead of it (wsjf_rank 1 vs 3).",
+          "acceptance_criteria": [
+            { "ac_id": "S-F1.1-a-AC1", "given": "an authenticated producer on the registration form", "when": "they submit a well-formed FBO number", "then": "the registration is accepted and held with status pending-verification", "traces_to": ["F1.1-AC1", "FR-001"] },
+            { "ac_id": "S-F1.1-a-AC2", "given": "an authenticated producer on the registration form", "when": "they submit a malformed FBO number", "then": "the submission is refused with a field-level message and no registration record is created", "traces_to": ["F1.1-AC1", "FR-001"] },
+            { "ac_id": "S-F1.1-a-AC3", "given": "a producer completing registration", "when": "they submit without having ticked the FBO-status attestation", "then": "the submission is refused server-side, and the refusal is not bypassable by altering the client request", "traces_to": ["F1.1-AC4", "FR-001"], "citation": "kb-L1-enterprise-security § ES1 (server-side enforcement)" },
+            { "ac_id": "S-F1.1-a-AC4", "given": "a producer with a registration held pending-verification", "when": "they attempt to publish a listing", "then": "publication is blocked and the producer is told verification is still in progress", "traces_to": ["F1.1-AC2", "FR-003"] }
+          ],
+          "out_of_scope": ["The outcome of the FBO lookup itself — that is S-F1.1-b"],
+          "domain_notes": "FBO = Food Business Operator; the party legally accountable for a food product at a point in the chain. An unverified producer is never merely 'not yet shown' — they are blocked from publishing, because publication is the point of sale.",
+          "domain_notes_source": "kb-L2-food-domain"
+        },
+        {
+          "slice_id": "S-F1.1-b",
+          "feature_id": "F1.1",
+          "epic_id": "EPIC-1",
+          "title": "Asynchronous FBO verification and its outcomes",
+          "narrative": "As a compliance-accountable platform, I want a producer's declared FBO registration verified against the competent authority's register so that no unverified party can sell.",
+          "vertical_slice": true,
+          "fit_test": { "result": "PASS", "basis": "one cycle; both outcome paths are demonstrable against a stubbed register" },
+          "sequence": 2,
+          "depends_on_slices": ["S-F1.1-a"],
+          "depends_on_features": [],
+          "acceptance_criteria": [
+            { "ac_id": "S-F1.1-b-AC1", "given": "a registration held pending-verification", "when": "the FBO lookup returns a valid status", "then": "the registration becomes valid, the verification is recorded as evidence, and publication is permitted", "traces_to": ["F1.1-AC2", "FR-003"] },
+            { "ac_id": "S-F1.1-b-AC2", "given": "a registration held pending-verification", "when": "the FBO lookup returns an invalid status", "then": "the registration is rejected, the producer is notified with the reason, and publication stays blocked", "traces_to": ["F1.1-AC3", "FR-003"] },
+            { "ac_id": "S-F1.1-b-AC3", "given": "a registration held pending-verification", "when": "the FBO lookup does not answer within its timeout", "then": "the registration stays pending and is retried; it is never optimistically treated as valid", "traces_to": ["F1.1-AC3", "FR-003"], "citation": "kb-L2-food-domain (an unknown eligibility is a refusal or a deferral, never an optimistic assumption)" },
+            { "ac_id": "S-F1.1-b-AC4", "given": "a verification that has completed", "when": "the same verification event is delivered a second time", "then": "no second verification record is created", "traces_to": ["F1.1-AC2", "FR-003"], "citation": "kb-L2-food-domain (evidence events carry a deduplication key derived from the business act; a replay asserts the fact twice)" }
+          ],
+          "out_of_scope": ["Re-verification on registration expiry — no committed requirement covers it; raised as OQ-01"],
+          "domain_notes": "The verification record is regulatory evidence, not application state: it may be produced in a dispute years later, so it is append-only and a duplicate assertion is a compliance defect rather than a cosmetic one.",
+          "domain_notes_source": "kb-L2-food-domain"
+        },
+        {
+          "slice_id": null,
+          "feature_id": "F5.1",
+          "epic_id": "EPIC-5",
+          "title": "External identity-provider integration",
+          "narrative": null,
+          "narrative_note": "No narrative and no slice id: F5.1 was not sliced. This record exists so the feature's acceptance criteria reach the task generator in one place, not to introduce a story level the fit test said was unnecessary.",
+          "vertical_slice": false,
+          "fit_test": { "result": "PASS", "basis": "size M; fits one cycle without slicing" },
+          "sequence": 0,
+          "depends_on_slices": [],
+          "depends_on_features": [],
+          "acceptance_criteria": [
+            { "ac_id": "F5.1-AC1", "given": "an unregistered external party", "when": "they authenticate through the group-approved external identity provider", "then": "a session is established and no employee-directory credential is involved", "traces_to": ["FR-005"], "citation": "kb-L1-enterprise-security § ES1 (the employee directory has no external-party tier)" },
+            { "ac_id": "F5.1-AC2", "given": "an authenticated external party with no role claim", "when": "the token is validated", "then": "the party is provisioned with the role their onboarding record specifies, and no default elevated role is granted", "traces_to": ["FR-005"] },
+            { "ac_id": "F5.1-AC3", "given": "a token that fails validation", "when": "any downstream call is attempted", "then": "the call is refused server-side and the refusal is not bypassable by altering the client request", "traces_to": ["FR-005"], "citation": "kb-L1-enterprise-security § ES1 (server-side enforcement)" }
+          ],
+          "out_of_scope": [],
+          "domain_notes": null
+        }
+      ],
+
+      "coverage": [
+        { "feature_id": "F5.1", "acceptance_criteria_carried": 3, "acceptance_criteria_added": 0, "coverage": "complete", "rationale": "Unsliced: the feature's three AC carry forward verbatim, same ids, none invented." },
+        { "feature_id": "F1.1", "acceptance_criteria_carried": 4, "acceptance_criteria_added": 4, "coverage": "complete", "rationale": "Sliced: each of F1.1's four AC is claimed by exactly one slice, and each slice added the negative and duplicate-delivery cases its own fit test needs. Every added AC traces to a parent AC and an FR — none is a new requirement wearing an AC's clothes." }
+      ],
+
+      "requirement_traceability": [
+        { "requirement_id": "FR-001", "covered_by": ["S-F1.1-a-AC1", "S-F1.1-a-AC2", "S-F1.1-a-AC3"], "coverage": "covered" },
+        { "requirement_id": "FR-003", "covered_by": ["S-F1.1-a-AC4", "S-F1.1-b-AC1", "S-F1.1-b-AC2", "S-F1.1-b-AC3", "S-F1.1-b-AC4"], "coverage": "covered" },
+        { "requirement_id": "FR-005", "covered_by": ["F5.1-AC1", "F5.1-AC2", "F5.1-AC3"], "coverage": "covered" }
+      ],
+
+      "guardrail_evidence": {
+        "pii_detection": {
+          "result": "pass",
+          "note": "No personal data appears in any narrative, acceptance criterion or example value. Two draft AC carried a sample producer name and a sample FBO number; both were replaced with role placeholders ('an authenticated producer') and a format description ('a well-formed FBO number') rather than a specimen value. A realistic-looking registration number in an AC is indistinguishable from a real one to everything downstream that reads it."
+        },
+        "citation_verifier": {
+          "result": "pass",
+          "cited_claims": 7,
+          "uncited_claims": 0,
+          "note": "Every claim not derivable from the feature AC itself carries a citation to its source. The two domain claims — refusal on an unknown eligibility, and deduplication of evidence events — cite kb-L2-food-domain rather than being asserted as general good practice."
+        },
+        "schema_validator": { "result": "pass" }
+      },
+
+      "open_questions": [
+        { "id": "OQ-01", "question": "What happens when a previously verified FBO registration lapses or is revoked after the producer has published listings?", "origin": "requirements_gap", "source_fr": "FR-003", "raised_against": "S-F1.1-b", "note": "FR-003 covers verification before first publication and is silent on continuous validity. Not invented into an acceptance criterion; the slice states it as out of scope." },
+        { "id": "OQ-02", "question": "Is the competent-authority register queried live, or is a periodically refreshed copy acceptable?", "origin": "architecture_gap", "source_fr": "FR-003", "raised_against": "S-F1.1-b", "note": "Affects whether the Work Unit is an integration against a live service or against a cached dataset — a difference the task generator cannot resolve on its own." }
+      ]
+    },
+
+    "artifacts": [
+      {
+        "id": "artifact-sg-8c9d0e1f",
+        "type": "document",
+        "name": "stories.json",
+        "format": "json",
+        "storage": { "provider": "s3", "location": "s3://adlc-artifacts/wf-hl-pi1-3c4d5e6f/cycle-1/stories.json" },
+        "description": "Cycle 1 elaboration: 2 story slices under F1.1 plus F5.1 carried unsliced; 15 acceptance criteria, all traced to FR-001, FR-003 or FR-005",
+        "produced_by": "L1-inception-story-generator"
+      }
+    ],
+
+    "execution_summary": "• Elaborated 2 committed features into 3 records: 2 story slices (S-F1.1-a, S-F1.1-b) and F5.1 carried forward unsliced.\n• Collapsible-story rule applied in both directions. F5.1 (needs_slicing=false) got NO story layer — a story there would have restated the feature and added a level. F1.1 (needs_slicing=true, size L) got two slices, each of which independently re-passed the fit test.\n• 15 acceptance criteria in Given/When/Then. 7 carried verbatim from the feature AC with their ids intact; 8 added by slicing, each tracing to a parent AC and an FR. No AC introduces a requirement that no FR supports.\n• Requirement coverage: FR-001, FR-003, FR-005 all covered. Slice ordering is stated (S-F1.1-a before S-F1.1-b) along with F1.1's cross-feature dependency on F5.1 — a producer cannot register before there is an identity to register as.\n• Just-in-time honoured: F3.2 and F2.1 are on the roadmap and were deliberately not elaborated.\n• Open questions: 2 — OQ-01 (registration lapse after publication) and OQ-02 (live register vs cached copy). Both are genuine gaps and are recorded as out-of-scope rather than resolved into an acceptance criterion the requirements do not support.\n• Knowledge bases consulted: kb-L1-sdlc-templates (Definition of Ready, AC form); kb-L2-food-domain (FBO meaning, refusal-on-unknown-eligibility, evidence-event deduplication).\n• Guardrails evaluated: gr-L1-schema-validator (pass), gr-L1-pii-detection (pass — two specimen values replaced with placeholders before emission), gr-L1-citation-verifier (pass — 7 cited claims, 0 uncited).\n• Next: scenario-writer, adversarial-case-writer and case-writer mint case_ids against these acceptance criteria; task-generator then binds those case_ids as verification_ref."
+  }
+}

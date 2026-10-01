@@ -2,33 +2,39 @@ spec_version: "1.0"
 artifact_type: knowledge_base
 metadata:
   name: kb-L1-enterprise-architecture
-  version: "1.0.0"
+  version: "1.1.0"
   layer: L1
   owner: agentic-ai-coe
-  content_hash: "sha256:f2b43fb7a6b175e670c53cdd060167c0cbb0b282ca5f603773e88578d092fabb"
-  last_reviewed: "2026-08-07"
+  content_hash: "sha256:pending"   # recompute across BOTH content documents after any edit
+  last_reviewed: "2026-09-22"
   review_cadence: quarterly
 
 purpose:
   description: >
-    Thornbury Foods Group's technology landscape, existing systems, and
-    integration boundaries — for the reference scenario where HarvestLink
-    is built as a new digital product WITHIN an already-established
-    enterprise, not from a blank slate. Grounds L1-planning-impact-assessor
-    and L1-planning-dependency-mapper's existing-system impact checks, and
-    any later-phase design agent (HLD/LLD) that needs to know what a new
-    HarvestLink component might touch, integrate with, or must deliberately
-    avoid touching. Enterprise-wide and cross-phase by nature — not scoped
-    to Phase 1, unlike the domain-specific KBs under phase-0/phase-1. Cross
-    references kb-L1-enterprise-security for security/compliance standards
-    rather than duplicating them.
+    Two things a design agent needs about the enterprise it is building
+    inside. (1) The LANDSCAPE — Thornbury Foods Group's technology estate,
+    existing systems and integration boundaries, for the reference scenario
+    where HarvestLink is built as a new digital product WITHIN an
+    already-established enterprise, not from a blank slate. (2) The BINDING
+    PRINCIPLE CATALOGUE — the durable, product-independent architecture
+    principles (PRIN-01..PRIN-08), their conformance checks, FSA hooks and
+    precedence rules, added at v1.1.0 for the Phase 2.25 viewpoint
+    architects. The two are deliberately separate documents: the landscape
+    changes when a system is replaced, the catalogue when the enterprise
+    changes its mind. Grounds L1-planning-impact-assessor and
+    L1-planning-dependency-mapper's existing-system impact checks, and the
+    Cycle 0 viewpoint architects' principle application. Cross references
+    kb-L1-enterprise-security for security/compliance standards rather than
+    duplicating them.
 
 content:
   format: markdown
   documents:
     - path: content/enterprise-architecture.md
       sections: [organisation-overview, technology-stack, core-applications, architecture-patterns, service-domains, support-model-slas, infrastructure-scale, challenges-tech-debt, roadmap, operating-model]
-  total_tokens_estimate: 1798
+    - path: content/binding-principles.md
+      sections: [what-this-is, vocabulary, prin-01-business-outcome, prin-02-one-owner-one-source, prin-03-governed-interfaces, prin-04-bounded-contexts, prin-05-reuse-before-buy-before-build, prin-06-security-designed-in, prin-07-approved-platforms, prin-08-operability-observability, precedence-rules, resolution-file-contract, exception-handling, outcome-metrics, glossary]
+  total_tokens_estimate: 6400   # ~1,800 landscape + ~4,600 principle catalogue
   chunking: by-section
   embedding_model: text-embedding-3-small
 
@@ -37,6 +43,9 @@ consumers:
     - L1-planning-impact-assessor
     - L1-planning-dependency-mapper
     - L1-requirements-nfr-classifier
+    - L1-design-platform-architect       # binding-principles.md (PRIN-04/06/07/08) + landscape EA2/EA6/EA10
+    - L1-design-data-architect            # binding-principles.md (PRIN-02/06) + landscape EA3/EA5
+    - L1-design-integration-architect     # binding-principles.md (PRIN-03/08) + landscape EA2/EA3/EA4
   usage: >
     impact-assessor checks each proposed component against EA3's
     integration-relevance table before declaring existing-system impact;
@@ -46,17 +55,38 @@ consumers:
     conditions, but a tier assignment must still be confirmed for
     HarvestLink specifically, not assumed from the group default (EA6's own
     note: "new digital products define their own SLA tier").
+    The three Cycle 0 viewpoint architects read binding-principles.md for
+    the full text, conformance checks and FSA hooks of the principles their
+    resolution file (or the FSA § 4 PRIN rows) names as binding, and the
+    landscape document for the estate their decisions must sit inside.
+    BP8's standing note matters to them specifically: PRIN-07 resolved
+    NOT_APPLICABLE at FSA level is still MANDATORY for the Platform and Data
+    viewpoint documents, because they are the first artifacts permitted to
+    name a product.
 
 grounding_rules:
-  accessed_by: [L1-planning-impact-assessor, L1-planning-dependency-mapper, L1-requirements-nfr-classifier]
+  accessed_by: [L1-planning-impact-assessor, L1-planning-dependency-mapper, L1-requirements-nfr-classifier, L1-design-platform-architect, L1-design-data-architect, L1-design-integration-architect]
   visibility: "L1 — visible to all layers (L1/L2/L3/L4); enterprise-wide and cross-phase, not owned by any single phase directory"
+  boundary: >
+    This KB holds the principle CATALOGUE only. The per-product RESOLUTION
+    (binding-principles.json, authored against binding-principles.template.json)
+    is an input artifact supplied per run, never KB content — a resolution
+    baked into a KB would make one product's exceptions look like enterprise
+    policy. BP11 is the contract for reading that file.
 
 freshness:
-  trigger_for_update: "a system is decommissioned/replaced, an integration boundary changes, or a new Tier-1 system is added"
+  trigger_for_update: >
+    Landscape document: a system is decommissioned/replaced, an integration
+    boundary changes, or a new Tier-1 system is added. Principle catalogue:
+    the annual EA review, or an event-driven review (M&A, regulatory shift,
+    platform strategy change, or three or more exceptions accumulating
+    against one principle — see BP12's pattern signal).
   note: >
     Illustrative content for this reference scenario, not a real
-    organisation's actual architecture. If this framework is deployed
-    against a real enterprise, this file is replaced with that
-    organisation's real system landscape — the shape (organisation
-    overview, stack, integration-relevance table, SLA tiers, governance
-    model) is the reusable part, not this specific company's facts.
+    organisation's actual architecture or principle catalogue. If this
+    framework is deployed against a real enterprise, both files are replaced
+    with that organisation's real landscape and real principles — the shape
+    (organisation overview, stack, integration-relevance table, SLA tiers,
+    governance model; nine-field principle entries, binding levels,
+    conformance checks, hooks, precedence rules) is the reusable part, not
+    this specific company's facts.

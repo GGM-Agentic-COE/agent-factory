@@ -1,0 +1,128 @@
+{
+  "agent_id": "L1-design-data-architect",
+  "agent_version": "1.0.0",
+  "execution_id": "exec-datd-8a9b0c1e",
+  "workflow_execution_id": "wf-hl-pi1-3c4d5e6f",
+  "status": "success",
+  "content": {
+    "type": "data_architecture_delta",
+    "schema_version": "1.0",
+    "items": {
+      "delta_control": {
+        "invocation": "delta",
+        "cycle": "C1-producer-registration",
+        "target_document": "data-architecture.md",
+        "from_version": "1.0",
+        "to_version": "1.1",
+        "type": "extending",
+        "version_bump": "minor",
+        "structural": false,
+        "adr_required": false,
+        "structural_assessment": "Not structural. No entity was added, no ownership moved, no plane was created and no classification was downgraded. FoodSafetyRegistration gains a field and the event register records a state transition — both within an existing entity owned by an existing context. Nothing propagates to foundational-solution-architecture.md, so no ADR and no Enterprise Architect gate.",
+        "constrained_by_foundational": "The Cycle 0 invocation decided ownership, classification and planes. This invocation is bound by DAT-1.1 (Identity is sole writer), DAT-3.2 (append-only, 6-year retention, approved PII region) and DAT-6 (no unregistered replication). None of those was reopened."
+      },
+
+      "changes": [
+        {
+          "change_id": "DATD-01",
+          "section": "DAT-3.2",
+          "operation": "extend",
+          "resolves": "LLD-F02",
+          "content": "FoodSafetyRegistration gains register_reason — the competent authority's rejection reason, stored verbatim. Classified Regulated Evidence / Confidential, inheriting the entity's 6-year retention (ES3) and approved PII region (ES9).",
+          "rationale": "The field is stored on a Regulated Evidence entity and is supplied by a third party, so its content cannot be predicted: a register may return a reason naming an individual, a premises address or a commercial circumstance. Classifying it at the entity's level and adding Confidential is the only defensible answer without knowing what a given register returns. Classifying it as Internal because 'it is just a status message' would be a guess about someone else's data.",
+          "handling_rule": "register_reason is passed through to the producer verbatim and is never logged, never included in an outbound notification body, and never replicated. Notifications carry the reason to the addressee only, per the LLD's content boundary.",
+          "source": ["kb-L1-enterprise-security ES2", "ES3", "ES9", "lld LLD-F02"]
+        },
+        {
+          "change_id": "DATD-02",
+          "section": "DAT-2.2",
+          "operation": "extend",
+          "content": "identity.registration.verified transitions Planned -> Active on merge of this cycle. Its deduplication key is recorded as (producer_id, fbo_number, verified_on) — the business act.",
+          "rationale": "The event register records what the architecture knows; Active means the producing feature has landed. The transition is written here but takes effect at Phase 7.5 merge, not at design time — recording it as Active now would assert a capability that does not exist until the PR lands.",
+          "source": ["dat DAT-2.2", "int INT-3.2", "kb-L2-food-domain FD7"]
+        },
+        {
+          "change_id": "DATD-03",
+          "section": "DAT-6",
+          "operation": "no-op with recorded decision",
+          "resolves": "LLD-F01 (projection half)",
+          "content": "No read model registered. The current-status projection LLD-F01 raises is NOT created at Cycle 1. Decision trigger recorded as DAT-PEND-04.",
+          "rationale": "A projection of the latest FoodSafetyRegistration row would be a replicated attribute and would need a DAT-6 entry with a staleness budget — and the honest staleness budget for an eligibility decision is zero, which is another way of writing 'read the source'. At Cycle 1 volumes an index on the source satisfies the 250 ms budget. Creating a projection now would add a replication that DAT-C2 has to police, to solve a performance problem nobody has measured.",
+          "trigger": "Registered as DAT-PEND-04: revisit when registration history per producer exceeds a depth at which the indexed read misses the INT-4.3 p95 <= 250 ms budget in a production-shaped environment.",
+          "source": ["dat DAT-6", "lld LLD-F01", "int INT-4.3"]
+        },
+        {
+          "change_id": "DATD-04",
+          "section": "DAT-8",
+          "operation": "add",
+          "content": "DAT-PEND-04 — current-status projection for FoodSafetyRegistration. PENDING. Trigger: the indexed read on the append-only history misses the INT-4.3 p95 <= 250 ms budget in a production-shaped environment.",
+          "rationale": "A deferral with a trigger, not a silence. PRIN-01-C1 checks that every pending decision has one.",
+          "source": ["dat DAT-8"]
+        },
+        {
+          "change_id": "DATD-05",
+          "section": "DAT-9",
+          "operation": "no change",
+          "content": "DAT-C1, DAT-C2 and DAT-C3 are unchanged and were re-evaluated against the amended document. All three still pass: Identity remains the sole writer of FoodSafetyRegistration; no read model was registered and none is held; register_reason carries classification, retention and residency.",
+          "source": ["dat DAT-9"]
+        }
+      ],
+
+      "physical_schema_boundary": {
+        "note": "LLD-F01's other half — the index — is physical schema and does NOT appear in data-architecture.md. It is emitted in db-schema.sql, which is a separate artifact of this agent. The canonical document records the access pattern and the budget it must meet; the index that satisfies it is a schema decision that can change without the architecture changing.",
+        "index_emitted": "idx_fsr_producer_appended_desc on food_safety_registration (producer_id, appended_at DESC)",
+        "emitted_to": "db-schema.sql"
+      },
+
+      "db_schema_summary": {
+        "tables_created": ["producer", "food_safety_registration"],
+        "append_only_enforcement": "food_safety_registration has no UPDATE grant for the identity-service application role — the append-only rule is enforced at the grant level, not only by the repository omitting an update() method. Two independent mechanisms, because a future ORM or migration script would not know about the repository convention.",
+        "indexes": ["idx_fsr_producer_appended_desc (producer_id, appended_at DESC) — satisfies the INT-4.3 250 ms budget over the append-only history"],
+        "encryption": "Both tables in the approved PII region with at-rest encryption via the managed key capability (PLT-10). No application-held keys.",
+        "not_included": "No cross-context foreign keys. producer.id is referenced by other contexts as an identifier only, never joined across a schema boundary (DAT-1.b)."
+      },
+
+      "guardrail_evidence": {
+        "schema_validator": { "result": "pass", "note": "db-schema.sql parses; every column has a type; the append-only grant posture is expressible and was expressed." },
+        "pii_detection": {
+          "result": "pass_with_note",
+          "note": "register_reason is flagged as an unbounded third-party-supplied string on an entity that already holds PII. The detector cannot classify content it has not seen, which is exactly why DATD-01 classifies it defensively as Confidential rather than waiting to discover what a register actually returns. Flagged for the security review at Phase 5 rather than resolved by inspection."
+        }
+      },
+
+      "findings": [
+        {
+          "id": "DATD-F01",
+          "severity": "LOW",
+          "summary": "register_reason's classification is defensive, not evidenced.",
+          "detail": "No sample of the competent authority's reason strings was available. Confidential is the safe assignment given the entity it sits on, but it is a judgement about unseen data rather than a classification derived from a known payload.",
+          "resolution": "NOT_RESOLVED_BY_AGENT",
+          "resolution_note": "Recorded so it is revisited once real register responses exist — at which point the classification is either confirmed by evidence or corrected. A defensive classification that nobody revisits becomes a permanent guess."
+        }
+      ]
+    },
+
+    "artifacts": [
+      {
+        "id": "artifact-datd-8a9b0c1e",
+        "type": "delta",
+        "name": "data-architecture.delta.json",
+        "format": "json",
+        "storage": { "provider": "s3", "location": "s3://adlc-artifacts/wf-hl-pi1-3c4d5e6f/cycle-1/deltas/data-architecture.delta.json" },
+        "description": "Extending delta 1.0 -> 1.1, 5 changes, non-structural; canonical destination data-architecture.md",
+        "produced_by": "L1-design-data-architect"
+      },
+      {
+        "id": "artifact-datd-8a9b0c1e-sql",
+        "type": "schema",
+        "name": "db-schema.sql",
+        "format": "sql",
+        "storage": { "provider": "s3", "location": "s3://adlc-artifacts/wf-hl-pi1-3c4d5e6f/cycle-1/deltas/db-schema.sql" },
+        "description": "2 tables, 1 index, append-only grant posture on food_safety_registration. Physical schema, deliberately not in data-architecture.md.",
+        "produced_by": "L1-design-data-architect"
+      }
+    ],
+
+    "execution_summary": "• Emitted an extending delta, data-architecture.md 1.0 -> 1.1, with 5 changes and no structural impact. The structural test was applied and came back negative: no entity added, no ownership moved, no plane created, no classification downgraded.\n• This is the first delta this cycle against a canonical document that already exists. The HLD and LLD deltas were creating deltas against empty documents; this one amends the Cycle 0 data architecture and is constrained by it — DAT-1.1's sole-writer rule, DAT-3.2's append-only and retention decisions and DAT-6's no-unregistered-replication rule were binding inputs, not questions reopened.\n• Resolved both LLD escalations, and resolved them in different places on purpose. LLD-F02's register_reason field is a logical governance decision and lands in DAT-3.2 as Regulated Evidence / Confidential. LLD-F01 splits: the index is physical schema and goes in db-schema.sql, never in the canonical document, because the architecture records the access pattern and the budget while the index that satisfies it can change without the architecture changing.\n• Declined to create the current-status projection LLD-F01 raised. A projection would be a replicated attribute needing a DAT-6 entry, and the honest staleness budget for an eligibility decision is zero — which is another way of writing 'read the source'. An index satisfies the 250 ms budget at Cycle 1 volumes, and DAT-PEND-04 records the trigger for revisiting. Adding a replication that DAT-C2 must then police, to solve a performance problem nobody has measured, is the wrong trade at this point.\n• Append-only is now enforced twice and independently: the repository exposes no update() (LLD) and the application role holds no UPDATE grant (db-schema.sql). A future ORM or migration script would not know about the repository convention.\n• identity.registration.verified is recorded as transitioning Planned -> Active on merge, not now. Active means the producing feature has landed, and that happens at Phase 7.5.\n• DATD-F01 is worth keeping visible: register_reason's Confidential classification is defensive, made without seeing a single real register response. It should be confirmed or corrected once real payloads exist, or it quietly becomes a permanent guess.\n• tool-L1-db-schema-diff not invoked — identity-service has no deployed schema to diff against, and the diff would report a full creation as if it were a change.\n• Knowledge bases consulted: kb-L1-enterprise-architecture (BP-catalogue check ids); kb-L1-enterprise-security (ES2 classification, ES3 retention, ES9 residency, ES10 encryption and key handling).\n• Guardrails evaluated: gr-L1-schema-validator (pass), gr-L1-pii-detection (pass with a note — an unbounded third-party string on a PII-bearing entity is flagged for the Phase 5 security review rather than cleared by inspection)."
+  }
+}

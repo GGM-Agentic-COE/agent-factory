@@ -1,0 +1,156 @@
+{
+  "$comment": "A 'task' record is a Work Unit. tasks.json retains its name for tooling continuity; the ids use the WU- prefix.",
+  "schema_version": "1.0",
+  "produced_by": "L1-inception-task-generator@1.0.0",
+  "execution_id": "exec-tg-0e1f2a3b",
+  "workflow_execution_id": "wf-hl-pi1-3c4d5e6f",
+  "pi_id": "PI-2026-Q2",
+  "cycle": 1,
+  "thresholds_applied": { "T2_max_files_read": 12, "T2_max_context_tokens": 100000, "T5_max_hard_dependency_count": 2 },
+  "thresholds_source": "kb-L1-decomposition-standard (defaults; not overridden)",
+
+  "work_units": [
+    {
+      "work_unit_id": "WU-F5.1-01",
+      "feature_id": "F5.1",
+      "slice_id": null,
+      "title": "Producer registration via external IdP",
+      "layer": "integration",
+      "unit_points": 5,
+      "depends_on_unit": [],
+      "verification_ref": ["TC-F5.1-01"],
+      "rightsizing": { "T1": "PASS", "T2": "PASS", "T3": "PASS", "T4": "PASS", "T5": "PASS", "est_files_read": 7, "est_context_tokens": 41000, "hard_dependency_count": 0 },
+      "reads": ["external IdP integration spec", "kb-L1-enterprise-security ES1"]
+    },
+    {
+      "work_unit_id": "WU-F5.1-02",
+      "feature_id": "F5.1",
+      "slice_id": null,
+      "title": "OIDC token validation",
+      "layer": "business-logic",
+      "unit_points": 3,
+      "depends_on_unit": ["WU-F5.1-01"],
+      "verification_ref": ["TC-F5.1-03", "TC-ADV-F5.1-01"],
+      "rightsizing": { "T1": "PASS", "T2": "PASS", "T3": "PASS", "T4": "PASS", "T5": "PASS", "est_files_read": 5, "est_context_tokens": 28000, "hard_dependency_count": 1 },
+      "origin": "split from DRAFT-F5.1-02 by T1 block",
+      "reads": ["external IdP integration spec", "token validation rules"]
+    },
+    {
+      "work_unit_id": "WU-F5.1-03",
+      "feature_id": "F5.1",
+      "slice_id": null,
+      "title": "Role provisioning from the onboarding record",
+      "layer": "business-logic",
+      "unit_points": 5,
+      "depends_on_unit": ["WU-F5.1-02"],
+      "verification_ref": ["TC-F5.1-02"],
+      "rightsizing": { "T1": "PASS", "T2": "PASS", "T3": "PASS", "T4": "PASS", "T5": "PASS", "est_files_read": 6, "est_context_tokens": 33000, "hard_dependency_count": 1 },
+      "origin": "merged from the T1 split remainder and DRAFT-F5.1-03 by T5 merge",
+      "reads": ["onboarding record spec", "role model"]
+    },
+    {
+      "work_unit_id": "WU-F1.1-01",
+      "feature_id": "F1.1",
+      "slice_id": "S-F1.1-a",
+      "title": "Producer entity schema migration",
+      "layer": "data",
+      "unit_points": 3,
+      "depends_on_unit": [],
+      "verification_ref": ["TC-S-F1.1-a-05"],
+      "rightsizing": { "T1": "PASS", "T2": "PASS", "T3": "PASS", "T4": "PASS", "T5": "PASS", "est_files_read": 4, "est_context_tokens": 19000, "hard_dependency_count": 0 },
+      "origin": "split from DRAFT-F1.1-01 by T2 block",
+      "reads": ["data-architecture.md DAT-1.1 Producer ownership", "entity spec"],
+      "reads_note": "Never loads the FBO rules KB. The schema unit has no business asking how an FBO number is validated."
+    },
+    {
+      "work_unit_id": "WU-F1.1-02",
+      "feature_id": "F1.1",
+      "slice_id": "S-F1.1-a",
+      "title": "FBO number capture endpoint",
+      "layer": "api",
+      "unit_points": 5,
+      "depends_on_unit": ["WU-F1.1-01", "WU-F5.1-02"],
+      "verification_ref": ["TC-S-F1.1-a-01", "TC-S-F1.1-a-02", "TC-S-F1.1-a-03", "TC-ADV-S-F1.1-a-01"],
+      "rightsizing": { "T1": "PASS", "T2": "PASS", "T3": "PASS", "T4": "PASS", "T5": "PASS", "est_files_read": 9, "est_context_tokens": 52000, "hard_dependency_count": 2 },
+      "origin": "split from DRAFT-F1.1-01 by T2 block",
+      "reads": ["OpenAPI contract", "validation rules", "kb-L2-food-domain FBO format"],
+      "note": "hard_dependency_count is exactly at the T5 ceiling of 2."
+    },
+    {
+      "work_unit_id": "WU-F1.1-03",
+      "feature_id": "F1.1",
+      "slice_id": "S-F1.1-a",
+      "title": "Registration submission form",
+      "layer": "ui",
+      "unit_points": 3,
+      "depends_on_unit": ["WU-F1.1-02"],
+      "verification_ref": ["TC-S-F1.1-a-02"],
+      "rightsizing": { "T1": "PASS", "T2": "PASS", "T3": "PASS", "T4": "WARN", "T5": "PASS", "est_files_read": 5, "est_context_tokens": 24000, "hard_dependency_count": 1 },
+      "reads": ["wireframe", "API contract"],
+      "note": "T4 WARN carried, not actioned — splitting would leave a form with no validation and a validation unit with no form."
+    },
+    {
+      "work_unit_id": "WU-F1.1-04",
+      "feature_id": "F1.1",
+      "slice_id": "S-F1.1-a",
+      "title": "Publication gate on pending-verification",
+      "layer": "business-logic",
+      "unit_points": 3,
+      "depends_on_unit": ["WU-F1.1-01"],
+      "verification_ref": ["TC-S-F1.1-a-04"],
+      "rightsizing": { "T1": "PASS", "T2": "PASS", "T3": "PASS", "T4": "PASS", "T5": "PASS", "est_files_read": 4, "est_context_tokens": 21000, "hard_dependency_count": 1 },
+      "reads": ["slice AC", "registration state model"]
+    },
+    {
+      "work_unit_id": "WU-F1.1-05",
+      "feature_id": "F1.1",
+      "slice_id": "S-F1.1-b",
+      "title": "FBO register lookup integration",
+      "layer": "integration",
+      "unit_points": 5,
+      "depends_on_unit": ["WU-F1.1-01"],
+      "verification_ref": ["TC-S-F1.1-b-01", "TC-S-F1.1-b-03", "TC-ADV-S-F1.1-b-01"],
+      "rightsizing": { "T1": "PASS", "T2": "PASS", "T3": "PASS", "T4": "PASS", "T5": "PASS", "est_files_read": 8, "est_context_tokens": 44000, "hard_dependency_count": 1 },
+      "origin": "emitted only after two T3 blocks were cleared",
+      "reads": ["kb-L2-food-domain FBO rules", "integration spec", "stub register contract"]
+    },
+    {
+      "work_unit_id": "WU-F1.1-06",
+      "feature_id": "F1.1",
+      "slice_id": "S-F1.1-b",
+      "title": "Rejected-verification notification",
+      "layer": "business-logic",
+      "unit_points": 3,
+      "depends_on_unit": ["WU-F1.1-05"],
+      "verification_ref": ["TC-S-F1.1-b-02"],
+      "rightsizing": { "T1": "PASS", "T2": "PASS", "T3": "PASS", "T4": "PASS", "T5": "PASS", "est_files_read": 3, "est_context_tokens": 16000, "hard_dependency_count": 1 },
+      "reads": ["slice AC only"]
+    }
+  ],
+
+  "rightsizing_log": [
+    { "event": "T1_BLOCK", "draft_unit": "DRAFT-F5.1-02", "draft_title": "OIDC token validation & role provisioning", "finding": "Title contains a coordinating conjunction joining two primary verbs.", "verdict": "BLOCK -> split", "resolution": "WU-F5.1-02 (3 pts) + role-provisioning remainder (2 pts). Points preserved at 5." },
+    { "event": "T5_WARN_MERGE", "draft_units": ["role-provisioning remainder (2 pts)", "DRAFT-F5.1-03 Distributor/buyer role mapping (3 pts)"], "finding": "Neither is verifiable in isolation; each named the other as a hard dependency.", "verdict": "WARN -> merge", "resolution": "WU-F5.1-03 (5 pts)." },
+    { "event": "T2_BLOCK", "draft_unit": "DRAFT-F1.1-01", "draft_title": "FBO number capture endpoint + validation", "finding": "est_files_read 17 vs ceiling 12; est_context_tokens 108000 vs ceiling 100000.", "verdict": "BLOCK -> split", "resolution": "WU-F1.1-01 (data, 3) + WU-F1.1-02 (api, 5). Points preserved at 8." },
+    { "event": "T3_BLOCK", "draft_unit": "DRAFT-F1.1-05", "finding": "verification_ref was empty.", "verdict": "BLOCK -> add verifier", "resolution": "Bound to TC-S-F1.1-b-01 and TC-S-F1.1-b-03." },
+    { "event": "T3_BLOCK", "draft_unit": "DRAFT-F1.1-05", "finding": "verification_ref named TC-S-F1.1-b-99, which does not exist in the minted set. gr-L1-verification-ref-resolvable blocked it.", "verdict": "BLOCK -> add verifier", "resolution": "Corrected to TC-ADV-S-F1.1-b-01." },
+    { "event": "T4_WARN", "unit": "WU-F1.1-03", "finding": "Spans ui and api: client-side validation mirrors the contract WU-F1.1-02 owns.", "verdict": "WARN -> prefer split", "resolution": "NOT SPLIT — carried in reflection_notes." }
+  ],
+
+  "capacity_signal": {
+    "cycle": 1,
+    "capacity_points": 30,
+    "emitted_points": 35,
+    "fits": false,
+    "over_by": 5,
+    "breakdown": [{ "feature_id": "F5.1", "points": 13 }, { "feature_id": "F1.1", "points": 22 }],
+    "action": "FLAGGED_TO_PLANNER",
+    "note": "cycle and disposition are L1-planning-feature-cycle-planner's fields. Overflow units must carry disposition=overflow with a reflow_band, never be dropped. Natural candidate: S-F1.1-b (8 pts)."
+  },
+
+  "reflection_notes": [
+    "T4 WARN on WU-F1.1-03 carried unactioned with rationale.",
+    "WU-F1.1-02 sits exactly at the T5 hard-dependency ceiling of 2.",
+    "OQ-01 and OQ-02 remain open; neither blocks a Cycle 1 Work Unit."
+  ]
+}
