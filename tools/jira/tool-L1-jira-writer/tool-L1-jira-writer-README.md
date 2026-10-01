@@ -1,8 +1,4 @@
-<<<<<<<< HEAD:tools/jira/tool-L1-jira-writer/tool-L1-jira-writer-README.md
 # tool-L1-jira-writer
-========
-# tool-L1-jira-create-issue
->>>>>>>> main:tools/api-secrets-exposed/tool-L1-jira-create-issue/tool-L1-jira-create-issue-README.md
 
 ## What does it do?
 
