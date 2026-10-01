@@ -11,10 +11,9 @@ Creates Jira Epics and child Stories (or any issue types) from a structured payl
 | `base_url` | **AWS Secrets Manager** — secret `aava-secret-manager-jira-credentials`, key `base_url` | Jira instance base URL. Shared with `tool-L1-jira-reader` and `tool-L1-jira-writer`. |
 | `user_email` | **AWS Secrets Manager** — same secret, key `user_email` | Atlassian account email used for HTTP Basic Auth. |
 | `api_token` | **AWS Secrets Manager** — same secret, key `api_token` | Jira API token. Never appears in the code. |
-| `JIRA_PROJECT_KEY` | Set directly in code | Not a secret — the default Jira project this tool operates against. See "CHANGE THIS" comment at the top of the tool file. |
 | `ISSUE_TYPE_MAP` | Set directly in code | Not a secret — optional remap of issue types (e.g. if your project doesn't offer "Epic"/"Story"). |
 
-> Every value that *must* be reviewed before deploying this tool to a new environment or client — including `SECRET_NAME` and `region_name` on the `AWSSecretReaderPodIdentity` class, and `JIRA_PROJECT_KEY` — is tagged `SETUP-REQUIRED:` directly in `tool-L1-jira-epics-uploader-secrets-manager.py`. Search the file for that tag to find them all in one pass. (`ISSUE_TYPE_MAP` above is optional, not required, so it is intentionally left untagged.)
+> Every value that *must* be reviewed before deploying this tool to a new environment or client — including `SECRET_NAME` and `region_name` on the `AWSSecretReaderPodIdentity` class. Search the file for that tag to find them all in one pass. (`ISSUE_TYPE_MAP` above is optional, not required, so it is intentionally left untagged.)
 
 The production tool (`tool-L1-jira-epics-uploader-secrets-manager.py`) retrieves its credentials at import time:
 
@@ -40,7 +39,7 @@ JIRA_API_TOKEN = secrets.get("api_token")
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| projectKey | string | | Jira project key (e.g. `"GGMDEMOS"`). Falls back to the in-code `JIRA_PROJECT_KEY`. |
+| projectKey | string | | Jira project key (e.g. `"GGMDEMOS"`)|
 | issueType | string | | Default issue type. Falls back to `"Epic"`. Per-issue `issueType` overrides this. |
 | userEmail | string | | Atlassian account email; overrides the Secrets Manager value for this call. |
 | apiToken | string | | Jira API token; overrides the Secrets Manager value for this call. |
