@@ -1,32 +1,31 @@
-<!--
-kb-L1-regulatory-frameworks-index · content · regulatory-bodies-index.md
-Layer: L1 (enterprise, domain-agnostic). Micro-KB content rules apply:
-max 1 line/bullet, max 15 words, no explanations, numbers not words.
-
-JURISDICTION: India. This KB was UK-scoped until 2026-08-21 and was
-re-scoped when the deployment's target geography changed. The KB is
-domain-agnostic but NOT jurisdiction-agnostic — one geography per
-deployment. Serving two geographies needs two KBs, not merged rows.
-
-Two sections. #cross-domain-index maps an activity to its regulator.
-#coverage-categories is the sweep list: every category here is either a
-constraint or a declared not-applicable entry. Both the checker and its
-evaluator read this file, so the sweep and its audit are the same list.
-
-CENTRE/STATE: many Indian regimes bind at BOTH levels — food licensing,
-labour, factories, legal metrology, trade licences, professional tax. A
-central-law answer alone is incomplete. See the checker prompt's
-state-vs-centre edge case.
--->
-
 # Regulatory Bodies Index (Cross-Domain)
 
+## About this knowledge base
+
+- KB: kb-L1-regulatory-frameworks-index-ind
+- Layer: L1 — enterprise, domain-agnostic, but NOT jurisdiction-agnostic
+- Jurisdiction: India only. One geography per KB; two geographies need two KBs, never merged rows
+- Consumed by: L1-vision-regulatory-feasibility-checker and its evaluator — both read this same page
+- Sections: Jurisdiction (#jurisdiction), Cross-Domain Index (#cross-domain-index), Coverage Categories (#coverage-categories)
+- Cross-Domain Index maps an activity to its regulator
+- Coverage Categories is the sweep list: every category is a constraint or a not-applicable entry with a reason
+- Centre/state: food licensing, labour, factories, legal metrology, trade licences, professional tax bind at BOTH levels
+- A central-law answer alone is incomplete wherever a state or municipal layer also binds
+- History: UK-scoped until 2026-08-21, then re-scoped to India
+- Content rules: max 1 line per bullet, max 15 words, no explanations, numbers not words
+
 ## Jurisdiction
+
+Section anchor: #jurisdiction
 
 **Jurisdiction covered: India (ISO 3166-1 alpha-2: IN).**
 Sub-national layers in scope: states and union territories, municipal bodies.
 This index covers no other country. An idea targeting a different country
 cannot be assessed from it.
+
+## Cross-Domain Index
+
+Section anchor: #cross-domain-index
 
 Use to identify the correct regulator category before loading a
 domain-specific L2 regulatory KB for detailed rules.
@@ -59,9 +58,11 @@ domain-specific L2 regulatory KB for detailed rules.
 - Intellectual property → CGPDTM (patents, designs, trade marks) (→ CON-Regulatory)
 - Accessibility & disability rights → DEPwD (RPwD Act 2016) (→ CON-Regulatory)
 
-## Coverage Categories (sweep list)
+## Coverage Categories
 
-Sweep every category. Each is a constraint, or a not-applicable entry with a reason.
+Section anchor: #coverage-categories
+
+Sweep list — 21 categories. Sweep every one. Each is a constraint, or a not-applicable entry with a reason.
 
 - Authorisation, licensing, registration, permits — including state and municipal layers
 - Data protection & privacy — notice, consent, purpose limitation, retention, data principal rights
@@ -84,3 +85,5 @@ Sweep every category. Each is a constraint, or a not-applicable entry with a rea
 - Tax, e-invoicing, and statutory record-keeping — duties created by the transaction model
 - Competition & platform conduct — where the idea is a marketplace or intermediary
 - Age-restricted or conditional supply — where the product category implies it
+
+End of sweep list — 21 categories.

@@ -3,7 +3,7 @@
 ## Purpose
 
 This is the last automated checkpoint before a human (the Product Lead)
-reads `vision.md`. If a serious regulatory finding was dropped anywhere in
+reads the vision page in Confluence. If a serious regulatory finding was dropped anywhere in
 the pipeline, this is the last place it can still be caught before it
 reaches a person who will reasonably assume nothing was silently lost. This
 agent's entire job is verifying that reconciliation is real, not just
@@ -22,7 +22,7 @@ draft output from `L1-vision-statement-generator`, and produces:
 - An executive-summary integrity check: every sentence checked individually
   against the sections below it
 - A viability_score consistency check across `regulatory-feasibility.md`,
-  `original_input`, `items` and `vision.md` — plus a narrative check that a
+  `original_input`, `items` and the Confluence vision page — plus a narrative check that a
   capped score is matched by an executive summary naming the constraint that
   caused the cap
 - Fixes for mechanically-recoverable gaps (built from the constraint's own
@@ -31,14 +31,16 @@ draft output from `L1-vision-statement-generator`, and produces:
 ## How does it work?
 
 1. Ingests the generator's original input and draft output
-2. Reads `vision.md`, `regulatory-feasibility.md`, `idea-brief.json` and
-   (optionally) `market-analysis.md` in a single blob-storage call. The brief
-   is **JSON**, parsed by key path
+2. Reads the vision page the generator wrote from **Confluence** with
+   `tool-L1-confluence-reader` (`space_key = 514162689`, page picked by its
+   title `<Product Name>-vision.md`), and `regulatory-feasibility.md`,
+   `idea-brief.json` and (optionally) `market-analysis.md` in a single
+   blob-storage call. The brief is **JSON**, parsed by key path
 3. Reads `L1-vision-statement-generator/evaluation.md` from GitHub with
    `tool-L1-github-reader-using-app` as the scoring source of truth, plus this
    evaluator's `examples/` folder for shape — repo, branch and folders all from
    the request. An unreadable rubric fails with `REFERENCE_UNAVAILABLE` rather
-   than scoring against a remembered bar; corrections go back to blob storage
+   than scoring against a remembered bar; corrections go back to Confluence
 4. Computes the coverage-gap set (Amber/Red constraint_ids minus covered ids)
 5. Checks each executive_summary sentence for grounding elsewhere in the document
 6. Checks viability_score wasn't silently altered — against
@@ -46,8 +48,13 @@ draft output from `L1-vision-statement-generator`, and produces:
    re-derived here**: that already happened in
    `L1-vision-regulatory-feasibility-checker-evaluator`, and a discrepancy at
    this point is a finding to report, not arithmetic to redo
-7. Fixes what's mechanically recoverable and writes changes back into
-   `vision.md`; escalates anything requiring new analysis rather than
+6a. Checks the Product Name: a user-supplied name appears verbatim
+   everywhere; an agent-proposed one is labelled as proposed. It restores or
+   labels a name, and never picks one of its own
+7. Fixes what's mechanically recoverable and rewrites the Confluence page with
+   `tool-L1-confluence-writer` (`title`, full corrected XHTML `content`,
+   `space_key = 514162689`) — only when a fix changed the document, never to
+   blob storage; escalates anything requiring new analysis rather than
    inventing content
 
 ## Input
@@ -63,8 +70,8 @@ draft output from `L1-vision-statement-generator`, and produces:
 - **Items:** the generator's full item sections, plus `evaluation` carrying
   `scores`, `overall_score`, `pass`, `findings[]`, `fixes_applied[]`,
   `reconciliation_check`, `final_decision` — see `output_schema.json`
-- **Artifacts:** `vision.md` — re-saved if corrected, otherwise referenced at
-  its original location
+- **Artifacts:** the Confluence page `<Product Name>-vision.md` — rewritten if
+  corrected (new version from the writer), otherwise the generator's page as it stands
 - **Summary:** overall score, coverage-gap result, executive-summary
   integrity result, viability_score consistency, guardrail results
 

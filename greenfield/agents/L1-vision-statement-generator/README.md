@@ -24,10 +24,22 @@ statement:
   not just summarization
 - An executive summary, written last, that introduces no new claims
 
-It produces the `vision.md` artifact only. It does **not** publish it —
-that's a separate Utility agent (`L1-confluence-publisher`), per the
-Core/Utility split: this agent's logic must not break if the client swaps
-Confluence for Notion.
+It writes the vision document straight to **Confluence** with
+`tool-L1-confluence-writer`, as a Draft page:
+
+| Writer parameter | Value |
+|---|---|
+| `title` | `<Product Name>-vision.md` |
+| `content` | the filled template, converted to Confluence storage format (XHTML) |
+| `space_key` | `514162689` — fixed in the prompt, never from the request |
+
+Nothing goes to blob storage any more. Writing the page is not approval: the
+Status row reads "Draft — pending Product Lead sign-off".
+
+**Product Name.** The user fills the `{{product_name}}` placeholder; that value
+is used verbatim in the H1, the Product Name row and the page title. If no
+name is supplied, the agent proposes one from the idea brief and labels it
+"(proposed by agent — … confirm or replace)" in the Product Name row.
 
 ## How does it work?
 
@@ -38,7 +50,8 @@ Confluence for Notion.
 1a. Reads its `examples/` folder from GitHub with `tool-L1-github-reader-using-app`
    (`reference_repo`, `reference_branch`, `examples_folder` — all from the request).
    Shape guidance only: an example's numbers are never a source, and an unavailable
-   folder is tolerated. The repository is read-only — `vision.md` goes to blob storage
+   folder is tolerated. The repository is read-only — the vision document goes to Confluence
+1b. Resolves the Product Name — the user's verbatim, or a proposed one, labelled as proposed
 2. Carries problem/users/value-proposition forward verbatim in substance
 3. Condenses market SWOT into one paragraph — or, when no market analysis
    ran, writes Market Context as "Not assessed" rather than inferring one
@@ -50,8 +63,10 @@ Confluence for Notion.
    constraint produced exactly one entry here
 7. Writes the executive summary last, as a pure condensation
 8. Reports viability_score exactly as received; does not compute, re-derive,
-   round, or adjust it, and does not decide whether to publish (that's the
+   round, or adjust it, and does not decide what follows (that's the
    workflow's `qg-L1-viability-score` gate, not this agent)
+9. Converts the filled template to Confluence storage format and writes it
+   with `tool-L1-confluence-writer` (one call, one retry on failure)
 
 ## Where the viability score comes from
 
@@ -75,14 +90,15 @@ pipeline version and is ignored.
   run. Its absence is never a failure: Market Context reads "Not assessed",
   `market_context` is emitted with confidence 0 and `traced_to` "none", and
   no market-sourced open risks are carried
+- **Optional:** `product_name` — proposed by the agent when absent
 
 ## Output
 
 - **Type:** `vision_statement`
-- **Items:** `executive_summary`, `problem_statement`, `target_users`,
+- **Items:** `product_name`, `executive_summary`, `problem_statement`, `target_users`,
   `value_proposition`, `market_context`, `regulatory_posture`,
   `north_star_metrics[]`, `roadmap[]`, `open_risks[]` — see `output_schema.json`
-- **Artifacts:** `vision.md`
+- **Artifacts:** the Confluence page `<Product Name>-vision.md` (space_key `514162689`) — storage carries the page id, version and URL the writer returned
 - **Metadata:** every item carries `confidence` and `reasoning`; carried-forward
   items are checked against their upstream source for drift instead of citation
 - **Summary:** metric/roadmap/risk counts, reconciliation decisions,

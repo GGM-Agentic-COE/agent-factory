@@ -45,24 +45,27 @@ Accepts the original input and draft output from
 1. Ingests the generator's original input and draft output
 2. Reads `regulatory-feasibility.md` and `idea-brief.json` from blob storage
    — the brief is **JSON**, parsed by key path, not scanned as markdown
-3. Reads from GitHub with `tool-L1-github-reader-using-app` — one call per
+3. Reads both regulatory KBs from **Confluence** with `tool-L1-confluence-reader`
+   — `space_key = 514981889`, fixed in the prompt, the same location the
+   generator reads — to sanity-check citations and re-run the category sweep.
+   Because both agents read the same location, the audit and the sweep cannot
+   diverge. Anchors are matched as headings in the returned XHTML
+4. Reads from GitHub with `tool-L1-github-reader-using-app` — one call per
    folder, every repo/branch/path from the request:
    `L1-vision-regulatory-feasibility-checker/evaluation.md` as the scoring
-   source of truth, plus the regulatory frameworks index and domain regulatory
-   KBs to sanity-check citations and re-run the category sweep, and this
-   evaluator's `examples/` folder for shape. Pointed at the same repo, branch
-   and folders the generator ran against, so the audit and the sweep cannot
-   diverge; an unreadable rubric or index KB fails with `REFERENCE_UNAVAILABLE`.
-   Corrections still go back to blob storage, never to the repository
-4. Checks every constraint's citation, mitigation/legal-review status, and
+   source of truth, and this evaluator's `examples/` folder for shape. An
+   unreadable rubric, or no KB carrying `#coverage-categories`, fails with
+   `REFERENCE_UNAVAILABLE`. Corrections still go back to blob storage, never
+   to the repository or Confluence
+5. Checks every constraint's citation, mitigation/legal-review status, and
    whether its severity label actually matches its rationale
-5. Validates any claimed overall_status discount against its precondition
-6. Re-derives viability: `regulatory_posture × 0.60 + idea_clarity × 0.40`,
+6. Validates any claimed overall_status discount against its precondition
+7. Re-derives viability: `regulatory_posture × 0.60 + idea_clarity × 0.40`,
    then the lowest of that and every cap (`red_constraint` 6.0,
    `regulatory_overall_red` 6.0, `requires_legal_review` 6.5). A score at or
    above 7 emitted while a Red or legal-review constraint stands is both a
    fail finding and an automatic `escalate_to_hitl`
-7. Fixes mechanical issues and writes any content change back into
+8. Fixes mechanical issues and writes any content change back into
    `regulatory-feasibility.md` — a viability correction touches **both** the
    header table and the Viability Score section; escalates anything
    requiring a mitigation this evaluator can't independently justify

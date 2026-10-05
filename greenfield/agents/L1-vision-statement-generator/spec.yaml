@@ -8,12 +8,12 @@ metadata:
   phase: vision
   owner: agentic-ai-coe
   created: "2026-08-02"
-  updated: "2026-08-21"
+  updated: "2026-10-05"
 
 purpose:
-  description: "Synthesizes idea, market, and regulatory findings into one reconciled vision statement and roadmap outline. Produces the vision.md artifact only — publishing is a separate Utility agent's job (L1-confluence-publisher), per the Core/Utility split."
-  input: "idea-brief.json items, regulatory_feasibility items, and the viability_score owned by L1-vision-regulatory-feasibility-checker at qg-L1-viability-score; market_analysis items optionally, when the market analyzer ran."
-  output: "vision.md artifact plus structured items reconciling the upstream inputs."
+  description: "Synthesizes idea, market, and regulatory findings into one reconciled vision statement and roadmap outline, and writes it as a Draft Confluence page (title '<Product Name>-vision.md', space_key 514162689) with tool-L1-confluence-writer. Writing the page is not approval — Product Lead sign-off is still required before Phase 1."
+  input: "idea-brief.json items, regulatory_feasibility items, and the viability_score owned by L1-vision-regulatory-feasibility-checker at qg-L1-viability-score; market_analysis items optionally, when the market analyzer ran; product_name optionally, from the user."
+  output: "The vision document as a Confluence page (storage-format XHTML) plus structured items reconciling the upstream inputs."
   business_value: "Three separate analyses aren't a decision — the Product Lead needs one document with a north-star metric and roadmap outline to approve or reject. This agent is also the last chance to catch a dropped regulatory finding before it reaches a human."
 
 prompt:
@@ -37,6 +37,7 @@ contract:
       reference_repo: { type: string, description: "Repository holding this agent's worked examples — bare name or 'owner/repo'. Read with tool-L1-github-reader-using-app; never defaulted or inferred" }
       reference_branch: { type: string, description: "Branch to read the examples from (e.g. 'main')" }
     optional_parameters:
+      product_name: { type: string, default: null, description: "The product's name, supplied by the user into the {{product_name}} placeholder. Used VERBATIM in the H1, the Product Name row and the Confluence title '<product_name>-vision.md'. Absent, empty, or still template text → the agent proposes a name from the idea brief and labels it '(proposed by agent — … confirm or replace)' in the Product Name row; never a failure" }
       examples_folder: { type: string, default: null, description: "Repo folder holding this agent's worked input/output examples (greenfield/agents/L1-vision-statement-generator/examples in this repository). Shape and depth guidance only — an example's numbers, risks and dates are never sourced for this run, and Processing Rule 7 treats anything lifted from one as an invention. Unavailable is tolerated" }
       market_analysis_items: { type: object, description: "Full items object from L1-vision-market-analyzer. OPTIONAL — the market analyzer may not have run. When absent, vision.md's Market Context reads 'Not assessed', items.market_context is emitted with confidence 0 and traced_to 'none', and no market-sourced open risks are carried. The viability score is unaffected: it carries no market component" }
 
@@ -52,10 +53,10 @@ context:
     - gr-L1-hallucination-check
     - gr-L1-consistency-check   # checks reconciliation: no upstream Amber/Red item silently dropped
   tools:
-    - tool-L1-github-reader-using-app  # reads the examples folder from GitHub — repo/branch/path all from the request; read-only, vision.md still goes to blob
+    - tool-L1-github-reader-using-app  # reads the examples folder from GitHub — repo/branch/path all from the request; read-only
     - tool-L1-azure-blob-reader      # reads idea-brief.json/regulatory-feasibility.md/market-analysis.md from blob storage in one call
-    - tool-L1-azure-blob-writer      # writes vision.md to blob storage; publishing itself is still L1-confluence-publisher's job
-    - tool-L1-system-current-date    # called with timezone UTC — the only way this agent can date vision.md without guessing
+    - tool-L1-confluence-writer      # writes the vision document: title "<product_name>-vision.md", content as storage-format XHTML, space_key 514162689 (fixed in the prompt). Replaces the blob writer — the vision document no longer goes to blob
+    - tool-L1-system-current-date    # called with timezone UTC — the only way this agent can date the vision document without guessing
 
 quality:
   evaluation_ref: "evaluation.md"

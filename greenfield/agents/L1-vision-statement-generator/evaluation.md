@@ -6,9 +6,10 @@
 - [ ] problem_statement/target_users/value_proposition do not contradict idea-brief.json (the upstream source of record)
 - [ ] roadmap phase 1 addresses the single most severe open risk
 - [ ] executive_summary introduces no claim absent from the sections below it
-- [ ] viability_score in items and in vision.md matches regulatory-feasibility.md and the input parameter exactly — carried, never recomputed, re-derived, rounded, or averaged
+- [ ] viability_score in items and in the Confluence vision page matches regulatory-feasibility.md and the input parameter exactly — carried, never recomputed, re-derived, rounded, or averaged
 - [ ] Where the score was capped upstream by a Red or legal-review constraint, that constraint is covered in open_risks and named as the biggest open risk in the executive summary — the number and the narrative describe the same situation
-- [ ] No Confluence/publishing tool was invoked by this agent (that's L1-confluence-publisher's job)
+- [ ] Product Name: a user-supplied product_name appears verbatim in the H1, the Product Name row, the Confluence title ("<name>-vision.md") and items.product_name with source user_provided. With none supplied, the name is agent_proposed AND the Product Name row labels it as proposed — a proposed name presented as the user's is a fail
+- [ ] The vision document was written to Confluence with tool-L1-confluence-writer — space_key 514162689, content in Confluence storage format (no markdown syntax left in it) — and the artifact's storage carries the page id and URL the writer returned. Nothing was written to blob storage or GitHub
 
 ## Scores (≥ threshold to pass)
 | Evaluator | ≥ | Checks |

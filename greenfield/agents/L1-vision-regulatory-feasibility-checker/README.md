@@ -12,10 +12,15 @@ mandatory, structured, and impossible to silently drop a serious finding.
 ## Jurisdiction
 
 **The agent is jurisdiction-neutral. The KBs are not.** Nothing in the prompt
-names a country, and no KB is attached at runtime — both are read from GitHub
-with `tool-L1-github-reader-using-app`, from the folders the request names
-(`reference_repo`, `reference_branch`, `regulatory_frameworks_index_kb_folder`,
-`domain_regulatory_kb_folder`). Each regulatory KB declares the jurisdiction it
+names a country. Both KBs are **read from Confluence** with
+`tool-L1-confluence-reader`, one call with `space_key = 514981889` fixed in the
+prompt. The pages hold the content of `kb-L1-regulatory-frameworks-index-ind`
+and `kb-L2-domain-regulatory-ind`. They are not attached at runtime and not read
+from GitHub. Only the worked examples come from GitHub, via
+`tool-L1-github-reader-using-app` (`reference_repo`, `reference_branch`,
+`examples_folder`; all optional). The two KBs are told apart
+by their anchors, never by name, and are kept separate so their jurisdiction
+declarations can be compared. Each regulatory KB declares the jurisdiction it
 covers in its own `#jurisdiction` section, and the agent resolves that at
 runtime against the brief's `target_geography` **before assessing anything**.
 
@@ -97,12 +102,20 @@ be the agent that sets it.
 ## How does it work?
 
 1. Reads and parses `idea-brief.json` — by key path, never scanned as markdown
-1a. Reads its reference material from GitHub with `tool-L1-github-reader-using-app`:
-   the regulatory frameworks index KB, the domain regulatory KB, and this agent's
-   `examples/` folder — one call per folder, every repo/branch/path taken from the
-   request. An unreadable index KB fails the run with `REFERENCE_UNAVAILABLE`
-   rather than falling back on remembered categories. The repository is read-only:
-   `regulatory-feasibility.md` still goes to blob storage
+1a. Reads the two knowledge bases (the frameworks index and the domain
+   regulatory facts) from **Confluence** — `tool-L1-confluence-reader`,
+   `space_key = 514981889`, one call, retried once on failure. The return is
+   Confluence XHTML, so anchors are matched as headings. They are identified by their anchors —
+   `#coverage-categories` / `#cross-domain-index` for the index, domain facts
+   for the other — never by name, and are never merged, since each declares its
+   own `#jurisdiction`. The sweep list must be retrieved in full; a fragment is
+   a degraded run, never the whole list. No KB carrying `#coverage-categories`
+   or `#jurisdiction` fails the run with `REFERENCE_UNAVAILABLE` rather than
+   falling back on remembered categories; the index KB alone is a degraded run,
+   with `requires_legal_review: true` on every affected constraint. The worked
+   examples are the only thing read from GitHub (`examples_folder`, one call);
+   if they're unavailable the run continues without them. GitHub and
+   Confluence are read-only here: `regulatory-feasibility.md` still goes to blob storage
 2. Uses the regulatory frameworks index KB to identify which regulator
    categories apply at all
 3. Walks the **sweep list** in that KB's `#coverage-categories` section —

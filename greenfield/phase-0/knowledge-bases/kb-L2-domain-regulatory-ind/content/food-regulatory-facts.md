@@ -1,27 +1,35 @@
-<!--
-kb-L2-domain-regulatory · content · food-regulatory-facts.md
-Layer: L2 (domain: food production & distribution). Consumed by:
-L1-vision-regulatory-feasibility-checker. Micro-KB content rules apply:
-max 1 line/bullet, max 15 words, no explanations, numbers not words,
-annotated with target category.
-
-
-
-VERIFY BEFORE RELIANCE: thresholds and turnover limits below change often
-and several regimes (DPDP rules, labour codes) were phasing in at the time
-of writing. Confirm against current FSSAI notifications before this KB
-gates a real funding or build decision.
--->
-
 # Food Production & Distribution — Regulatory Facts
 
+## About this knowledge base
+
+- KB: kb-L2-domain-regulatory-ind
+- Layer: L2 — domain: food production & distribution
+- Jurisdiction: India only (see #jurisdiction)
+- Consumed by: L1-vision-regulatory-feasibility-checker and its evaluator
+- Each fact is annotated with its target constraint category
+- Content rules: max 1 line per bullet, max 15 words, no explanations, numbers not words
+- VERIFY BEFORE RELIANCE: thresholds and turnover limits change often
+- DPDP rules and labour codes were phasing in at the time of writing
+- Confirm against current FSSAI notifications before this KB gates a real funding or build decision
+
 ## Jurisdiction
+
+Section anchor: #jurisdiction
 
 **Jurisdiction covered: India (ISO 3166-1 alpha-2: IN).**
 Sub-national layers in scope: states and union territories, municipal bodies.
 Every statute, regulator and threshold below is Indian. This KB covers no
 other country — an idea targeting a different country cannot be assessed
 from it, and no rule here may be translated onto one.
+
+## Who Is a Food Business Operator
+
+- Food business: manufacture, processing, packaging, storage, transport, distribution, import, sale or catering of food — FSS Act s.3(1)(n) (→ Constraint: Authorization)
+- FBO: the person carrying on that food business; licensing duties attach to them — s.3(1)(o) (→ Constraint: Authorization)
+- Transporter or storage provider handling food is an FBO, even without owning it (→ Constraint: Authorization)
+- Marketplace facilitating food sale is an e-commerce FBO — needs its own FSSAI licence (→ Constraint: Authorization)
+- Vendor supplying only software, data or advice, never handling food, is not an FBO (→ Constraint: Authorization · interpretation — confirm per operating model)
+- Its FBO customers keep their own licences; vendor may carry derived record-keeping duties (→ Constraint: Traceability)
 
 ## Registration & Licensing
 - Food Safety and Standards Act, 2006 is the governing statute (→ Constraint: Authorization)
@@ -64,10 +72,11 @@ from it, and no rule here may be translated onto one.
 - Health and nutrition claims restricted — FSS (Advertising and Claims) Regulations, 2018 (→ Constraint: Advertising)
 - E-commerce food sellers carry additional FSSAI duties, incl. licence display (→ Constraint: Authorization)
 
----
-*Jurisdiction: India · Last reviewed: 2026-08-21 · Review cadence: quarterly
-(food regulation changes more frequently than most domains — verify against
-current FSSAI notifications before use in a real regulatory-feasibility
-assessment, not just against this KB alone). Turnover thresholds are in INR
-and are revised periodically; treat the figures above as indicative and
-confirm the current limits.*
+## Review
+
+- Jurisdiction: India
+- Last reviewed against FSSAI sources: 2026-08-21
+- Last edited: 2026-10-05 — added "Who Is a Food Business Operator"; not yet reviewed against current FSSAI notifications
+- Review cadence: quarterly — food regulation changes more often than most domains
+- Verify against current FSSAI notifications before use in a real assessment, not this KB alone
+- Turnover thresholds are in INR and revised periodically; treat figures as indicative

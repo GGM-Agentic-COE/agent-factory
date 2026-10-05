@@ -8,7 +8,7 @@ metadata:
   phase: vision
   owner: agentic-ai-coe
   created: "2026-08-02"
-  updated: "2026-08-21"
+  updated: "2026-10-05"
 
 purpose:
   description: "Independently verifies that L1-vision-statement-generator's reconciliation is real — every Amber/Red regulatory constraint is covered by open_risks, executive_summary introduces no new claims, and the viability_score it received (owned by L1-vision-regulatory-feasibility-checker and re-derived at qg-L1-viability-score during that agent's evaluator run) is reported honestly, not silently overridden."
@@ -31,10 +31,10 @@ contract:
     accepts_file_upload:
       enabled: false
     required_parameters:
-      original_input: { type: object, description: "The upstream item sets and the viability_score L1-vision-statement-generator received" }
-      generator_output: { type: object, description: "L1-vision-statement-generator's draft items output" }
+      original_input: { type: object, description: "The upstream item sets, the viability_score and the product_name (if the user supplied one) that L1-vision-statement-generator received" }
+      generator_output: { type: object, description: "L1-vision-statement-generator's draft items output, including items.product_name and the Confluence page (title, page_id, URL) in its artifact storage" }
       # GitHub reference material — nothing defaulted or inferred. A rubric read from the
-      # wrong path silently changes the bar at the last checkpoint before a human reads vision.md.
+      # wrong path silently changes the bar at the last checkpoint before a human reads the vision page.
       reference_repo: { type: string, description: "Repository holding the rubric and examples — bare name or 'owner/repo'. Read with tool-L1-github-reader-using-app" }
       reference_branch: { type: string, description: "Branch to read the reference material from (e.g. 'main')" }
       evaluation_rubric_kb_folder: { type: string, description: "Repo folder holding L1-vision-statement-generator's evaluation.md rubric content. Unavailable → REFERENCE_UNAVAILABLE: a gate that invented its own bar is worse than no gate" }
@@ -57,8 +57,9 @@ context:
     - gr-L1-vision-statement-quality-gate   # fires when THIS evaluator concludes; validates L1-vision-statement-generator's RESULTANT output against its own schema+evaluation.md, above all the reconciliation-coverage BLOCKER (guardrails/gr-L1-vision-statement-quality-gate)
   tools:
     - tool-L1-github-reader-using-app  # reads the rubric and the examples folder from GitHub — one call per folder, repo/branch/paths all from the request
-    - tool-L1-azure-blob-reader      # reads vision.md, regulatory-feasibility.md, idea-brief.json and market-analysis.md in one call
-    - tool-L1-azure-blob-writer      # re-saves vision.md when a fix changes its content
+    - tool-L1-azure-blob-reader      # reads regulatory-feasibility.md, idea-brief.json and market-analysis.md in one call — the vision document is no longer in blob
+    - tool-L1-confluence-reader      # reads the vision page the generator wrote — space_key 514162689 (fixed in the prompt), page picked by title "<product_name>-vision.md"
+    - tool-L1-confluence-writer      # rewrites the vision page ONLY when a fix changes its content — title, full corrected XHTML content, space_key 514162689. Replaces the blob writer
 
 quality:
   evaluation_ref: "evaluation.md"
