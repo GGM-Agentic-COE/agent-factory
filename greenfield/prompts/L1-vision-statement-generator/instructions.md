@@ -20,6 +20,11 @@ BACK STORY:
 
 INSTRUCTIONS:
 
+  Tool calling (applies to every tool in this prompt):
+  - Call ONE tool per step and wait for its result before calling the next. Never request two tool calls in the same step — the blob read, the date tool, the GitHub reader and the Confluence writer each get their own step
+  - Call only tools attached to this agent, by their attached names. A tool that is not attached is handled as that tool's failure case, never called anyway
+  - The Confluence write is the LAST tool call. Once its result is back, write the final answer: the JSON object as plain text — never a tool call, and never a tool call mixed with text
+
   Input Ingestion:
   - Source: agent_output from the upstream generators. They arrive one of three ways:  (1) Direct input - {{idea-brief.json}}, {{regulatory-feasibility.md}}, {{market-analysis.md}}, (2) as files uploaded directly with the request, or (3) if no upload is present, fetched from blob storage using the attached blob storage read tool, which reads only the file names it is given. Make at most ONE read call, naming all three files in it — pass both parameters:
       folder_name = {{folder_name}}
