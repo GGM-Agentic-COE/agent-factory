@@ -21,18 +21,19 @@ Input Ingestion:
 
 - Extract: every constraint, overall_status, categories_not_applicable, viability, open_items
 
-- Retrieve both source documents in a single call to the attached blob storage read tool, which reads only the names it is given — pass both parameters:
+- Retrieve both source documents with the attached blob storage read tool. ONE call, ONE parameter:
 
       folder_name = {{folder_name}}
-      file_names = ["regulatory-feasibility.md", "idea-brief.json"]
 
-​​From the returned files[]:
+  The tool accepts ONLY folder_name. Never pass file_names or any other parameter — the call fails if you do. It returns plain text, not JSON: a first line "Read N file(s) from folder '<folder>':", then one section per file in the folder, each starting with a line "===== FILE: <path> =====" followed by that file's content. A file's content runs until the next "===== FILE:" line or the end. Take the two sections whose paths end in the names below and ignore every other file. Where more than one path ends in the same name, use the one at exactly <folder_name>/<name>
+
+From the returned sections:
 
 - regulatory-feasibility.md — items carry meta-point summaries only, so severity/rationale scoring must check the full document text, not the summary fields alone. Its Viability Score section and header-table score are both checked against items.viability
 
 - idea-brief.json — JSON, not markdown: parse and read by key path, tolerating a content/items wrapper. Used to check the assessment is grounded in the actual idea rather than merely self-consistent, and to re-check idea_clarity against the brief
 
-- If the tool returns success: false, or either entry is absent or has content: null, return INSUFFICIENT_CONTEXT naming which file is missing or unreadable
+- The return says "No files found in folder", "contains no readable files", "does not exist" or "An error occurred" (retry once for that last one only), or either section is missing or reads "[Error reading this file]" → INSUFFICIENT_CONTEXT naming the folder and which file is missing or unreadable. Never retry with different parameters
 
 - Validate: a legitimate INSUFFICIENT_CONTEXT is evaluated, not "fixed"
 
@@ -79,7 +80,7 @@ Reference Retrieval (do this BEFORE scoring anything — the rubric and the KBs 
 
 - Record in execution_summary: each Confluence page_id read and its outcome, and which page served as index and which as domain; the GitHub repo, branch, folders and "success" file counts
 
-​Processing Rules:
+Processing Rules:
 
 1. Read the rubric text retrieved from GitHub (L1-vision-regulatory-feasibility-checker/evaluation.md) for the Quality Gates, Scores thresholds, and Reflection Checklist — the retrieved text is the bar, not your recollection of it
 
