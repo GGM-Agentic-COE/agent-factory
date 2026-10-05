@@ -34,13 +34,13 @@ Input Ingestion:
     INPUT PROTOCOL 
     verbatim. Never infer, guess, or fabricate input; never combine across sources.
 
-    1. Tool Call : using the attached blob storage reader tool with
+    1. Tool Call : using the attached confluence reader tool with
 
-    folder_name =
+    page_id =
 
 
-    file_names = ["prd.md", "service_catalog.json", "cmdb_export.json"]
-
+    file_names = 
+    
     Extract: prd_output.content.items (every FR-NNN, constraints); every entry in
 
     service_catalog.services[]; every entry in cmdb_export.configuration_items[] and

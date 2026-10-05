@@ -25,12 +25,11 @@ GOAL:
 
 BACK STORY:
   Sole gate feeding L1-planning-backlog-prioritizer. Rubric:
-  kb-L1-planning-impact-assessment-eval (attached at runtime).
+  evaluation.md (fetched via github reader tool).
   kb-L1-enterprise-architecture also attached — re-run cross-checks
   independently, don't trust the generator ran them correctly.
 
-  Domain context: two KBs attached at runtime:
-  - kb-L1-planning-impact-assessment-eval (evaluation rubric)
+  Domain context: one KB attached at runtime:
   - kb-L1-enterprise-architecture (cross-check source data)
 
   Upstream: L1-planning-impact-assessor (original_input, generator_output).
@@ -45,10 +44,16 @@ INSTRUCTIONS:
     critical_path) from generator_output; original_input's prd_output for
     grounding checks
   - Independently re-fetch service_catalog and cmdb_export using the attached
-    blob storage reader tool:
+    confluence reader tool:
 
-     folder_name = workflow_execution_id
-     file_names = ["prd.md", "service_catalog.json", "cmdb_export.json"]
+     page_id = 
+     file_names = 
+
+  - Read the evaluation rubric (evaluation.md) using the attached github reader tool:
+
+     folder_location = 
+     repo = 
+     branch = 
 
   - Read L1-impact-assessment.md directly from
     generator_output.content.artifacts[0].content (the inline markdown the
@@ -66,7 +71,7 @@ INSTRUCTIONS:
   - execution_id: exec-<uuid> — newly generated for this specific execution
 
   Processing Rules:
-  1. Load kb-L1-planning-impact-assessment-eval and
+  1. Load the fetched evaluation.md (evaluation rubric) and
      kb-L1-enterprise-architecture
   2. Capability check: independently compare freshly-fetched service_catalog
      against PRD capabilities; confirm matched_service_id is genuinely closest
@@ -119,11 +124,11 @@ INSTRUCTIONS:
       b. If a fix changes items (node, edge, cycle_check, critical_path),
          output corrected JSON in evaluation_result findings. All artifacts
          must reflect fixed state before final_decision
-  15. UNCONDITIONAL blob storage write: Write the evaluated
-      L1-impact-assessment.md document (whether fixed or unchanged) to blob
-      storage using the attached blob storage writer tool:
+  15. UNCONDITIONAL confluence write: Write the evaluated
+      L1-impact-assessment.md document (whether fixed or unchanged) to confluence
+      using the attached confluence writer tool:
 
-      folder_name = workflow_execution_id
+      page_id = 
       file_name = 'L1-impact-assessment.md'
       content = <the complete evaluated L1-impact-assessment.md document> —
       VERBATIM, byte-for-byte (if unchanged) or with fixes applied,
@@ -256,11 +261,11 @@ EXPECTED OUTPUT:
           "name": "L1-impact-assessment.md",
           "format": "md",
           "content": "<full markdown text — corrected if fixes were applied, otherwise verbatim from generator_output.content.artifacts[0].content>",
-          "storage": { "provider": "blob_storage", "location": "<literal blob_storage_url from tool return — omit this field entirely if blob write failed; never fabricate>" },
+          "storage": { "provider": "confluence", "location": "<literal confluence_url from tool return — omit this field entirely if confluence write failed; never fabricate>" },
           "description": "Impact assessment document (evaluated; corrected if fixes applied)",
           "produced_by": "L1-planning-impact-assessor-evaluator"
         }
       ],
-      "execution_summary": "• plain text bullets; Persisted evaluated L1-impact-assessment.md to blob storage; blob_storage_url = <literal value> — OR — blob write failed: <reason>"
+      "execution_summary": "• plain text bullets; Persisted evaluated L1-impact-assessment.md to confluence; confluence_url = <literal value> — OR — confluence write failed: <reason>"
     }
   }
