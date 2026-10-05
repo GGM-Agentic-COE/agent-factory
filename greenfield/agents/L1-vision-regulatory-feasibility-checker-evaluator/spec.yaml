@@ -47,13 +47,13 @@ contract:
 
 context:
   # No KB is attached at runtime. Both regulatory KBs are READ FROM CONFLUENCE with
-  # tool-L1-confluence-reader, space_key 514981889 fixed in the prompt — the SAME location
+  # tool-L1-confluence-reader, page ids 518422550 and 519012353 fixed in the prompt — the SAME two pages
   # L1-vision-regulatory-feasibility-checker reads, so the coverage audit and the generator's
   # sweep cannot diverge. The rubric (evaluation.md) and examples are still READ FROM GITHUB.
   # Jurisdiction is read from each KB's own #jurisdiction section at runtime, never assumed here.
   knowledge_bases: []
   knowledge_base_sources:
-    confluence_space_key: "514981889"
+    confluence_page_ids: ["518422550", "519012353"]   # one reader call per page; which page holds which KB is worked out from content
     content:
       - kb-L1-regulatory-frameworks-index-ind   # #jurisdiction, #cross-domain-index, #coverage-categories (sweep list)
       - kb-L2-domain-regulatory-ind             # #jurisdiction + domain regulatory facts
@@ -63,7 +63,7 @@ context:
     - gr-L1-citation-verifier
     - gr-L1-regulatory-feasibility-quality-gate   # fires when THIS evaluator concludes; validates L1-vision-regulatory-feasibility-checker's RESULTANT output against its own schema+evaluation.md, zero-tolerance mitigation rule re-checked directly (guardrails/gr-L1-regulatory-feasibility-quality-gate)
   tools:
-    - tool-L1-confluence-reader        # reads BOTH regulatory KBs — space_key 514981889, fixed in the prompt, same as the generator; read-only
+    - tool-L1-confluence-reader        # reads BOTH regulatory KBs — page ids 518422550 and 519012353, fixed in the prompt, same as the generator; read-only
     - tool-L1-github-reader-using-app  # reads the rubric (evaluation.md) and the examples folder from GitHub — one call per folder, repo/branch/paths all from the request
     - tool-L1-azure-blob-reader      # reads regulatory-feasibility.md and idea-brief.json for full-text and groundedness checks
     - tool-L1-azure-blob-writer      # re-saves regulatory-feasibility.md when a fix changes its content

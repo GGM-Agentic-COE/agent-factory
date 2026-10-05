@@ -13,7 +13,7 @@ mandatory, structured, and impossible to silently drop a serious finding.
 
 **The agent is jurisdiction-neutral. The KBs are not.** Nothing in the prompt
 names a country. Both KBs are **read from Confluence** with
-`tool-L1-confluence-reader`, one call with `space_key = 514981889` fixed in the
+`tool-L1-confluence-reader`, two calls, `page_id = 518422550` and `page_id = 519012353`, fixed in the
 prompt. The pages hold the content of `kb-L1-regulatory-frameworks-index-ind`
 and `kb-L2-domain-regulatory-ind`. They are not attached at runtime and not read
 from GitHub. Only the worked examples come from GitHub, via
@@ -104,7 +104,7 @@ be the agent that sets it.
 1. Reads and parses `idea-brief.json` — by key path, never scanned as markdown
 1a. Reads the two knowledge bases (the frameworks index and the domain
    regulatory facts) from **Confluence** — `tool-L1-confluence-reader`,
-   `space_key = 514981889`, one call, retried once on failure. The return is
+   `page_id = 518422550` and `page_id = 519012353`, one call per page, each retried once on failure. The return is
    Confluence XHTML, so anchors are matched as headings. They are identified by their anchors —
    `#coverage-categories` / `#cross-domain-index` for the index, domain facts
    for the other — never by name, and are never merged, since each declares its

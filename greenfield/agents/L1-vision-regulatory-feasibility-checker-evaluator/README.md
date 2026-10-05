@@ -46,7 +46,7 @@ Accepts the original input and draft output from
 2. Reads `regulatory-feasibility.md` and `idea-brief.json` from blob storage
    — the brief is **JSON**, parsed by key path, not scanned as markdown
 3. Reads both regulatory KBs from **Confluence** with `tool-L1-confluence-reader`
-   — `space_key = 514981889`, fixed in the prompt, the same location the
+   — `page_id = 518422550` and `page_id = 519012353`, fixed in the prompt, the same pages the
    generator reads — to sanity-check citations and re-run the category sweep.
    Because both agents read the same location, the audit and the sweep cannot
    diverge. Anchors are matched as headings in the returned XHTML

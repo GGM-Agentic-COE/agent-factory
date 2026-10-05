@@ -19,7 +19,7 @@ purpose:
 prompt:
   ref: "prompts/L1-vision-regulatory-feasibility-checker/instructions.md"
   version: "2.0.0"
-  description: "Walks the coverage-category sweep list held in the regulatory frameworks index KB — both regulatory KBs are read from Confluence (space_key 514981889) with the Confluence reader; only the examples are read from GitHub — against a domain-specific regulatory KB; every constraint is cited, every Amber/Red carries a mitigation or legal-review flag, and the viability score is derived from the regulatory posture plus idea clarity with unresolved blockers applied as hard caps. The sweep list lives in the KB so the evaluator's coverage audit reads the identical list; the scenario-pattern behaviours stay in the prompt."
+  description: "Walks the coverage-category sweep list held in the regulatory frameworks index KB — both regulatory KBs are read from Confluence (page ids 518422550 and 519012353) with the Confluence reader; only the examples are read from GitHub — against a domain-specific regulatory KB; every constraint is cited, every Amber/Red carries a mitigation or legal-review flag, and the viability score is derived from the regulatory posture plus idea clarity with unresolved blockers applied as hard caps. The sweep list lives in the KB so the evaluator's coverage audit reads the identical list; the scenario-pattern behaviours stay in the prompt."
 
 contract:
   input_schema: "$ref: schemas/agent-input-contract-schema.json"
@@ -60,19 +60,19 @@ context:
   # another country means pointing at that country's two KB pages instead — the prompt
   # is unchanged.
   # Both knowledge bases are READ FROM CONFLUENCE with tool-L1-confluence-reader,
-  # one call with space_key fixed at 514981889 in the prompt (never from the request).
+  # two calls, page_id 518422550 and 519012353, fixed in the prompt (never from the request).
   # They are NOT attached at runtime and NOT read from GitHub. The Confluence pages hold
   # the same content as the two KB folders below, which stay in the repo as the source
   # those pages are maintained from. The agent tells them apart by their headings
   # (Jurisdiction / Cross-Domain Index / Coverage Categories), never by page title, and
   # keeps them separate so their #jurisdiction declarations can be compared; both must
   # declare the same jurisdiction, or the agent fails with JURISDICTION_MISMATCH.
-  # L1-vision-regulatory-feasibility-checker-evaluator reads the SAME Confluence space_key,
+  # L1-vision-regulatory-feasibility-checker-evaluator reads the SAME two Confluence pages,
   # so its coverage audit reads the identical sweep list this agent walked.
   # Only the worked examples are read from GitHub (examples_folder).
   knowledge_bases: []
   knowledge_base_sources:
-    confluence_space_key: "514981889"
+    confluence_page_ids: ["518422550", "519012353"]   # one reader call per page; which page holds which KB is worked out from content
     content:
       - kb-L1-regulatory-frameworks-index-ind   # #jurisdiction, #cross-domain-index, #coverage-categories (sweep list)
       - kb-L2-domain-regulatory-ind             # #jurisdiction + food production & distribution regulatory facts
@@ -82,7 +82,7 @@ context:
     - gr-L1-hallucination-check
     - gr-L1-citation-verifier   # BLOCKER — every constraint must cite a specific regulation/section
   tools:
-    - tool-L1-confluence-reader        # reads BOTH regulatory KBs — space_key 514981889, fixed in the prompt; read-only
+    - tool-L1-confluence-reader        # reads BOTH regulatory KBs — page ids 518422550 and 519012353, fixed in the prompt; read-only
     - tool-L1-github-reader-using-app  # reads the examples folder ONLY — KBs come from Confluence; repo/branch/path all from the request
     - tool-L1-regulatory-db-lookup   # read-only; invoked directly, per the Core/Utility split
     - tool-L1-system-current-date    # reads the host clock — the only way this agent can date the artifact without guessing
