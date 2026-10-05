@@ -36,8 +36,8 @@ contract:
       target_geography: { type: string, description: "Target geography for the idea — a country, or a country plus sub-national regions. Resolved at runtime against the jurisdiction the attached KBs declare; a country they do not cover fails with JURISDICTION_MISMATCH rather than being translated" }
     optional_parameters:
       # GitHub is used for the worked examples ONLY — the KBs are read from Confluence (context.knowledge_base_sources).
-      # Nothing below is defaulted in the prompt: if any of the three is missing the agent runs
-      # without examples rather than guessing a repo, a branch, or a path.
+      # Examples are optional. No examples_folder from the user → the GitHub reader is not called
+      # at all. examples_folder given → one call with reference_repo/reference_branch; a failure is ignored.
       reference_repo: { type: string, default: null, description: "Repository holding this agent's worked examples — bare name or 'owner/repo'. Read with tool-L1-github-reader-using-app. Not used for KBs" }
       reference_branch: { type: string, default: null, description: "Branch to read the examples from (e.g. 'main')" }
       # No date parameter is required. The run date comes from tool-L1-system-current-date,
