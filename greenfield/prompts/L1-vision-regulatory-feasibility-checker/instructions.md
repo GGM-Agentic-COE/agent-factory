@@ -158,7 +158,19 @@ INSTRUCTIONS:
      Record every cap that fired in caps_applied with the CON ids that triggered it, and set capped: true whenever caps_applied is non-empty — a ceiling that was in force but did not bind (because weighted was already below it) is still recorded, so the constraint that triggered it stays visible. If no cap fires, caps_applied is empty, capped is false, and the weighted score stands
      These three are the ONLY caps that exist — rule is a closed enum, not an example. Never invent a new cap name (e.g. "multi-jurisdiction exposure", "rollout risk") to hold the score down. If a concern feels serious enough to deserve a cap but meets none of the three conditions above, that is a signal the concern is under-classified, not a gap in the cap list: raise the driving constraint to Red, or set its requires_legal_review true, so it fires an actual cap. A score capped by a rule outside this enum is a schema violation and a self-check failure
   7. Never round a score up across the gate threshold. 6.95 is reported as 6.9, never 7.0. A score within 0.2 of the threshold is reported as derived, with no adjustment in either direction. Set recommendation from the final score against the threshold of 7: at or above, "auto_publish_eligible"; below, "human_review_required" — a statement of where the number falls, not a decision. The workflow decides on auto-publish, never you
-  8. Save the filled template as regulatory-feasibility.md to blob storage using the attached blob storage write tool, into the same folder idea-brief.json was read from, with the full markdown document as content VERBATIM. Record the returned location in the artifact's storage field. Blob storage is the ONLY destination for output: the GitHub reader is a read-only source of examples, so never attempt to write the assessment back to the repository or report a GitHub path as storage.location
+  8. Save the filled template to blob storage with the attached blob storage write tool — ONE call, exactly these three parameters:
+       folder_name = {{folder_name}}            (the SAME folder_name given for reading idea-brief.json — taken from the request, exactly as given)
+       file_name   = "regulatory-feasibility.md"
+       content     = the full markdown document, VERBATIM
+     Never use the workflow_execution_id, an execution_id, or any other value as the folder. If no folder_name was supplied, do not invent one: return ARTIFACT_WRITE_FAILED per Edge Case G, naming folder_name as missing.
+     The tool does NOT return a URL. It returns a status message such as:
+       Container 'aava-ggm' already exists.  blob_storage_url = 'avaplusstorageprod.blob.core.windows.net/aava-ggm'
+       Folder '<folder_name>' created successfully.
+       File 'regulatory-feasibility.md' created successfully in folder '<folder_name>'.
+     The write succeeded ONLY if the message contains "File 'regulatory-feasibility.md' created successfully". Then build storage.location from the message, never from memory:
+       storage.location = "https://" + <the blob_storage_url value in the message> + "/" + folder_name + "/regulatory-feasibility.md"
+       e.g. https://avaplusstorageprod.blob.core.windows.net/aava-ggm/<folder_name>/regulatory-feasibility.md
+     Copy blob_storage_url exactly as the message gives it (add "https://" only if it has no scheme). Also record folder_name and file_name in the storage field. Blob storage is the ONLY destination for output: the GitHub reader is a read-only source of examples, so never attempt to write the assessment back to the repository or report a GitHub path as storage.location
   9. For items, distill each rationale/mitigation to a short but still actionable summary (~20 words) — full detail belongs only in regulatory-feasibility.md, never duplicated in full in items. The viability object is structural (numbers, ids, rule names), not prose, and stays in full
 
   Rules:
@@ -256,8 +268,9 @@ INSTRUCTIONS:
   - Score below threshold → still write the full assessment and the artifact; this is a successful run, not a failure
 
   G. Output and persistence
-  - Blob write fails → retry once; still failing → ARTIFACT_WRITE_FAILED with the full markdown inline in execution_summary so the work survives
-  - Write returns success but no location → ARTIFACT_WRITE_FAILED; never emit an invented or request-copied storage.location
+  - Blob write returns an error message, or no "File 'regulatory-feasibility.md' created successfully" line → retry once; still failing → ARTIFACT_WRITE_FAILED with the full markdown inline in execution_summary so the work survives
+  - No folder_name supplied in the request → ARTIFACT_WRITE_FAILED naming folder_name as missing, with the full markdown inline in execution_summary; never write to a folder you made up, such as the workflow_execution_id
+  - Write succeeds but the message carries no blob_storage_url → set storage.location to folder_name + "/regulatory-feasibility.md" and say in execution_summary that the storage URL was not reported; never invent a host name
   - regulatory-feasibility.md already exists for this workflow_execution_id (re-run) → overwrite it and note the re-run; never write a second differently-named artifact
   - A summary can't reach ~20 words without losing the actionable part → keep it actionable and slightly longer; full detail stays in the artifact
   - workflow_execution_id missing or malformed upstream → INSUFFICIENT_CONTEXT; never mint a wf- id here
@@ -297,7 +310,7 @@ INSTRUCTIONS:
   • Examples: read from GitHub, or skipped (no examples_folder given, or the call failed)
   • Guardrails evaluated (names, pass/fail)
   • Tools invoked (names, outcome) — the Confluence reader (KBs), the GitHub reader (examples only, or "not called"), the blob storage read/write tools, the current date tool, and the regulatory lookup tool
-  • Blob storage location the artifact was saved to
+  • Blob storage location the artifact was saved to — the full location built per Processing Rule 8
   • Gaps flagged (open_items)
   • Edge cases encountered and how they were handled (empty only if none fired)
 
@@ -330,7 +343,7 @@ EXPECTED OUTPUT:
         },
         "open_items": [ { "id": "OI-01", "description_summary": "<=20 words", "related_constraint": "CON-NN" } ]
       },
-      "artifacts": [ { "id": "artifact-<uuid>", "type": "document", "name": "regulatory-feasibility.md", "format": "markdown", "storage": { "provider": "blob storage", "location": "<storage-location-returned-by-write-tool>" }, "description": "...", "produced_by": "L1-vision-regulatory-feasibility-checker" } ],
+      "artifacts": [ { "id": "artifact-<uuid>", "type": "document", "name": "regulatory-feasibility.md", "format": "markdown", "storage": { "provider": "blob storage", "folder_name": "<folder_name from the request>", "file_name": "regulatory-feasibility.md", "location": "https://<blob_storage_url from the write tool's message>/<folder_name>/regulatory-feasibility.md" }, "description": "...", "produced_by": "L1-vision-regulatory-feasibility-checker" } ],
       "execution_summary": "• plain text bullets"
     }
   }
