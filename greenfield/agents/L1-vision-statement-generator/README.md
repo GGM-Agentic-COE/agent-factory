@@ -24,20 +24,20 @@ statement:
   not just summarization
 - An executive summary, written last, that introduces no new claims
 
-It writes the vision document straight to **Confluence** with
-`tool-L1-confluence-writer`, as a Draft page:
+It saves the vision document to **blob storage** as `vision.md`, with
+`tool-L1-azure-blob-writer`, in the request's `folder_name`. It calls no
+Confluence tool. The flow is:
 
-| Writer parameter | Value |
-|---|---|
-| `title` | `<Product Name>-vision.md` |
-| `content` | the filled template, converted to Confluence storage format (XHTML) |
-| `space_key` | `514162689` — fixed in the prompt, never from the request |
+```
+generator ──► blob: <folder_name>/vision.md ──► evaluator (evaluate + fix) ──► Confluence: <Product Name>-vision.md
+```
 
-Nothing goes to blob storage any more. Writing the page is not approval: the
-Status row reads "Draft — pending Product Lead sign-off".
+The document is a Draft: the Status row reads "Draft — pending Product Lead
+sign-off".
 
 **Product Name.** The user fills the `{{product_name}}` placeholder; that value
-is used verbatim in the H1, the Product Name row and the page title. If no
+is used verbatim in the H1 and the Product Name row, and becomes the
+Confluence title when the evaluator publishes. If no
 name is supplied, the agent proposes one from the idea brief and labels it
 "(proposed by agent — … confirm or replace)" in the Product Name row.
 
@@ -50,7 +50,7 @@ name is supplied, the agent proposes one from the idea brief and labels it
 1a. Reads its `examples/` folder from GitHub with `tool-L1-github-reader-using-app`
    (`reference_repo`, `reference_branch`, `examples_folder` — all from the request).
    Shape guidance only: an example's numbers are never a source, and an unavailable
-   folder is tolerated. The repository is read-only — the vision document goes to Confluence
+   folder is tolerated. The repository is read-only — the vision document goes to blob storage
 1b. Resolves the Product Name — the user's verbatim, or a proposed one, labelled as proposed
 2. Carries problem/users/value-proposition forward verbatim in substance
 3. Condenses market SWOT into one paragraph — or, when no market analysis
@@ -65,8 +65,8 @@ name is supplied, the agent proposes one from the idea brief and labels it
 8. Reports viability_score exactly as received; does not compute, re-derive,
    round, or adjust it, and does not decide what follows (that's the
    workflow's `qg-L1-viability-score` gate, not this agent)
-9. Converts the filled template to Confluence storage format and writes it
-   with `tool-L1-confluence-writer` (one call, one retry on failure)
+9. Saves the filled template to blob storage as `vision.md` with
+   `tool-L1-azure-blob-writer` (one call, one retry on failure)
 
 ## Where the viability score comes from
 
@@ -98,7 +98,7 @@ pipeline version and is ignored.
 - **Items:** `product_name`, `executive_summary`, `problem_statement`, `target_users`,
   `value_proposition`, `market_context`, `regulatory_posture`,
   `north_star_metrics[]`, `roadmap[]`, `open_risks[]` — see `output_schema.json`
-- **Artifacts:** the Confluence page `<Product Name>-vision.md` (space_key `514162689`) — storage carries the page id, version and URL the writer returned
+- **Artifacts:** `vision.md` in blob storage — storage carries folder_name, file_name and the full URL built from the write tool's message
 - **Metadata:** every item carries `confidence` and `reasoning`; carried-forward
   items are checked against their upstream source for drift instead of citation
 - **Summary:** metric/roadmap/risk counts, reconciliation decisions,

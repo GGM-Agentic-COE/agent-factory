@@ -1,17 +1,17 @@
 # Evaluation — L1-vision-statement-generator
 
-## Quality Gates
+## Checks
 - [ ] All required fields present (see output_schema.json's top-level required list)
 - [ ] **BLOCKER — Reconciliation:** every constraint_id in regulatory_posture.constraint_summaries appears in at least one open_risks entry's related_ids — coverage, not 1:1 count; grouping related Amber items into one combined risk is fine, a constraint_id appearing in NO entry is not
 - [ ] problem_statement/target_users/value_proposition do not contradict idea-brief.json (the upstream source of record)
 - [ ] roadmap phase 1 addresses the single most severe open risk
 - [ ] executive_summary introduces no claim absent from the sections below it
-- [ ] viability_score in items and in the Confluence vision page matches regulatory-feasibility.md and the input parameter exactly — carried, never recomputed, re-derived, rounded, or averaged
+- [ ] viability_score in items and in vision.md matches regulatory-feasibility.md and the input parameter exactly — carried, never recomputed, re-derived, rounded, or averaged
 - [ ] Where the score was capped upstream by a Red or legal-review constraint, that constraint is covered in open_risks and named as the biggest open risk in the executive summary — the number and the narrative describe the same situation
-- [ ] Product Name: a user-supplied product_name appears verbatim in the H1, the Product Name row, the Confluence title ("<name>-vision.md") and items.product_name with source user_provided. With none supplied, the name is agent_proposed AND the Product Name row labels it as proposed — a proposed name presented as the user's is a fail
-- [ ] The vision document was written to Confluence with tool-L1-confluence-writer — space_key 514162689, content in Confluence storage format (no markdown syntax left in it) — and the artifact's storage carries the page id and URL the writer returned. Nothing was written to blob storage or GitHub
+- [ ] Product Name: the H1 and the Product Name row carry the same name. A name the agent proposed is labelled as proposed in the Product Name row — a proposed name presented as the user's is a fail
+- [ ] vision.md was saved to blob storage in the request's folder_name, and the artifact's storage.location was built from the write tool's message. No Confluence tool was called by the generator — publishing is the evaluator's step, after evaluation. Nothing was written to GitHub
 
-## Scores (≥ threshold to pass)
+## Scores (minimum per dimension)
 | Evaluator | ≥ | Checks |
 |-----------|---|--------|
 | Faithfulness | 0.90 | Every carried-forward item matches its upstream source |
@@ -30,7 +30,7 @@ reference to either is a stale artifact of an earlier pipeline version.
 ## Reflection Checklist
 - [ ] Zero regulatory Amber/Red items missing from open_risks
 - [ ] executive_summary written last, after all other sections finalized
-- [ ] viability_score reported honestly even if below threshold — not omitted or softened
+- [ ] viability_score reported honestly even if low — not omitted or softened
 
 ## Reflection Process
 1. Generate → 2. Check all items above → 3. Fix silently → 4. Deliver final only
