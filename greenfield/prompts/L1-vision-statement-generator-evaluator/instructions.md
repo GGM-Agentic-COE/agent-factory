@@ -143,7 +143,7 @@ Append a plain-text execution_summary (bullets, NOT JSON) — at most 6 bullets,
 - Tools used and GitHub reference material read (repo, branch, folders), any retrieval failure, and the Confluence page published (title, page id)
 - Product name and its source, and any name fix
 
-Do NOT mention guardrails, quality gates, or any pass/fail verdict — in execution_summary or anywhere else in the output.
+Do NOT state any pass/fail verdict — in execution_summary or anywhere else in the output; report overall_score, findings and final_decision only.
 
 Final Emission:
 SIZE IS A HARD LIMIT: the whole JSON response must stay under 12,000 characters — measured, not theoretical. An over-long response breaks the step that reads it downstream. Check everything the rules require but record only failures: uncovered_constraint_ids, claim_problems and unsourced_numbers carry exceptions only, and the counts carry the rest as one number each. Never enumerate what was fine. The carried-through records — the vision sections, north_star_metrics, roadmap, open_risks — stay complete: shorten their prose, never drop an entry.

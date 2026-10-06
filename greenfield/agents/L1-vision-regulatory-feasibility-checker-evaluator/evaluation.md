@@ -3,7 +3,7 @@
 This covers THIS evaluator's own meta-quality — not the generator's rubric
 (loaded at runtime from `../L1-vision-regulatory-feasibility-checker/evaluation.md`).
 
-## Quality Gates
+## Checks
 - [ ] Every constraint's severity label was checked against its own rationale, not accepted at face value
 - [ ] Any overall_status "discount" claim was independently validated (every Amber/Red item genuinely has a non-legal-review mitigation) before being approved
 - [ ] No mitigation was invented to rescue a Red constraint from escalation
@@ -18,7 +18,7 @@ This covers THIS evaluator's own meta-quality — not the generator's rubric
 - [ ] Where a fix changed a severity, the score moved with it — a corrected constraint whose cap was never applied is a defect in this evaluator, not only in the generator
 - [ ] A legitimate INSUFFICIENT_CONTEXT failure is evaluated, not "fixed"
 
-## Scores (≥ threshold to pass)
+## Scores (minimum per dimension)
 | Evaluator | ≥ | Checks |
 |-----------|---|--------|
 | Faithfulness | 0.97 | Findings accurately re-derive severity from each constraint's own rationale; the viability derivation follows the constraints rather than the reported number |

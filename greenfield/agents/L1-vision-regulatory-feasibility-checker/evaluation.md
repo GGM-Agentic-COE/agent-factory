@@ -1,6 +1,6 @@
 # Evaluation — L1-vision-regulatory-feasibility-checker
 
-## Quality Gates
+## Checks
 - [ ] All required fields present: constraints (≥1), overall_status, categories_not_applicable, viability, open_items
 - [ ] Every constraint has a citation naming a specific regulation/section — no generic citations
 - [ ] **BLOCKER — Jurisdiction:** the brief's `target_geography` and the jurisdiction each KB declares in its `#jurisdiction` section were compared before any assessment began, and every citation belongs to the resolved jurisdiction. An out-of-jurisdiction instrument is a fabricated citation in effect, not a near-miss — it reads as complete and well-sourced while binding nothing, and it passes both an existence check and a plausibility check. A geography the KBs do not cover is a `JURISDICTION_MISMATCH` failure, never a translated assessment
@@ -14,7 +14,7 @@
 - [ ] **BLOCKER — Viability derivation:** weighted_score equals (regulatory_posture × 0.60) + (idea_clarity × 0.40) to one decimal; every qualifying cap appears in caps_applied; final_score is the LOWEST of weighted_score and every cap; recommendation agrees with final_score against the threshold of 7
 - [ ] The score in regulatory-feasibility.md's header table, its Viability Score section, and items.viability.viability_score are the same number
 
-## Scores (≥ threshold to pass)
+## Scores (minimum per dimension)
 | Evaluator | ≥ | Checks |
 |-----------|---|--------|
 | Faithfulness | 0.95 | Every constraint traces to a real KB/lookup citation (higher bar than other agents — compliance risk) |
@@ -22,7 +22,7 @@
 | Consistency | 0.90 | overall_status is justified by, not contradicted by, the individual constraints; viability_score is justified by, not contradicted by, overall_status and the caps |
 | Relevance | 0.85 | Constraints assessed are the ones actually applicable to the stated activity/geography |
 | Reasoning quality | 0.85 | Every mitigation is concrete and actionable, not generic ("comply with regulations"); every viability component names what it was traced to |
-| Citation completeness | 1.00 | 100% required — this is the one agent where citation completeness is a hard gate, not a soft score |
+| Citation completeness | 1.00 | 100% required — this is the one agent where citation completeness is a hard requirement, not a soft score |
 
 ## Reflection Checklist
 - [ ] No Red constraint downgraded to Amber to avoid writing a mitigation, or to avoid firing the red_constraint cap
@@ -30,7 +30,7 @@
 - [ ] overall_status logic (worst-item vs. one-level-better-if-all-mitigated) is explicitly justified, not asserted
 - [ ] The regulatory scenario patterns that applied (not-yet-in-force rules, transition relief, thresholds, extraterritorial reach, third-party permissions, pre-approval regimes, ongoing duties, overlapping regulators) are handled per the prompt's Edge Cases Section D, not flattened into a single generic constraint. These stay in the prompt, not the KB — they are behaviours, not facts
 - [ ] idea_clarity is scored from idea-brief.json's own content, never from how well this assessment was written
-- [ ] A below-threshold score is reported exactly as derived — not rounded up, not softened, no cap dropped to clear the gate
+- [ ] A below-threshold score is reported exactly as derived — not rounded up, not softened, no cap dropped to lift it above 7
 
 ## Reflection Process
 1. Generate → 2. Check all items above → 3. Fix silently → 4. Deliver final only
