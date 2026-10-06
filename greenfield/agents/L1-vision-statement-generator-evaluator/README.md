@@ -54,14 +54,15 @@ generator ──► blob: <folder_name>/vision.md ──► this evaluator (eval
 6. Checks the Product Name: the H1 and the Product Name row carry the same
    name, and an agent-proposed name is labelled as proposed. It aligns or
    labels a name, and never picks one of its own
-7. Fixes what's mechanically recoverable and, only when a fix changed the
-   text, re-saves `vision.md` to blob storage; escalates anything requiring
-   new analysis rather than inventing content
-8. **Publishes** the evaluated document to Confluence with
+7. Fixes what's mechanically recoverable in its working copy of the
+   document; escalates anything requiring new analysis rather than
+   inventing content. Nothing is written back to blob storage — the blob
+   `vision.md` stays as the generator's draft
+8. **Publishes** the corrected document to Confluence with
    `tool-L1-confluence-writer` — `title = <Product Name>-vision.md`, content
-   converted to XHTML, `space_key = 514162689` — only when the decision is
-   `approved` or `fixed_and_approved`. On `escalate_to_hitl` it does not
-   publish; the document stays in blob storage for the human reviewer
+   converted to XHTML, `space_key = 514162689` — for **every** decision,
+   including `escalate_to_hitl`. The human reviews it in Confluence; issues
+   that couldn't be fixed are listed in the findings
 
 ## Input
 
@@ -75,10 +76,9 @@ generator ──► blob: <folder_name>/vision.md ──► this evaluator (eval
   re-emits the corrected result with the evaluation attached under
   `items.evaluation`, not a separate evaluation-only shape
 - **Items:** the generator's full item sections, plus `evaluation` carrying
-  `scores`, `overall_score`, `pass`, `findings[]`, `fixes_applied[]`,
+  `scores`, `overall_score`, `findings[]`, `fixes_applied[]`,
   `reconciliation_check`, `final_decision` — see `output_schema.json`
-- **Artifacts:** `vision.md` in blob storage (re-saved if corrected), plus the
-  Confluence page `<Product Name>-vision.md` when published
+- **Artifacts:** the Confluence page `<Product Name>-vision.md`, always published
 - **Summary:** overall score, coverage-gap result, executive-summary
   integrity result, viability_score consistency, guardrail results
 

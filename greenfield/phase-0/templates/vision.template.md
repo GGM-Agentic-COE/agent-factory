@@ -1,9 +1,9 @@
 <!--
 TEMPLATE: vision.md — FINAL OUTCOME OF PHASE 0
 Produced by: L1-vision-statement-generator (Core) — saved to blob storage as <folder_name>/vision.md
-Evaluated by: L1-vision-statement-generator-evaluator — reads vision.md from blob, fixes it (re-saving
-             vision.md), then publishes it to Confluence as "<Product Name>-vision.md" (space_key
-             514162689) with tool-L1-confluence-writer — only on approved / fixed_and_approved
+Evaluated by: L1-vision-statement-generator-evaluator — reads vision.md from blob, fixes it, and
+             publishes the corrected document to Confluence as "<Product Name>-vision.md" (space_key
+             514162689) with tool-L1-confluence-writer — always; corrections never go back to blob
 Consumes: idea-brief.json + regulatory-feasibility.md (which carries the viability_score) + market-analysis.md where one was produced
 Consumed by: L1-requirements-elicitor (Phase 1) — REFUSES to run without a recorded
              human-approval comment on this document (see Approval section)
