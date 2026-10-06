@@ -31,14 +31,14 @@ contract:
     accepts_file_upload:
       enabled: false
     required_parameters:
-      original_input: { type: object, description: "The upstream item sets, the viability_score and the product_name (if the user supplied one) that L1-vision-statement-generator received" }
-      generator_output: { type: object, description: "L1-vision-statement-generator's draft items output, including items.product_name and the Confluence page (title, page_id, URL) in its artifact storage" }
       # GitHub reference material — nothing defaulted or inferred. A rubric read from the
       # wrong path silently changes the bar at the last checkpoint before a human reads the vision page.
       reference_repo: { type: string, description: "Repository holding the rubric and examples — bare name or 'owner/repo'. Read with tool-L1-github-reader-using-app" }
       reference_branch: { type: string, description: "Branch to read the reference material from (e.g. 'main')" }
       evaluation_rubric_kb_folder: { type: string, description: "Repo folder holding L1-vision-statement-generator's evaluation.md rubric content. Unavailable → REFERENCE_UNAVAILABLE: a gate that invented its own bar is worse than no gate" }
     optional_parameters:
+      # No agent output is passed in. The vision document is read from Confluence,
+      # page_id 519110668 (fixed in the prompt), and items are built from that page.
       examples_folder: { type: string, default: null, description: "Repo folder holding this evaluator's worked input/output examples (greenfield/agents/L1-vision-statement-generator-evaluator/examples in this repository). Shape guidance only — never a source of findings, numbers or verdicts. Unavailable is tolerated" }
 
   output:
@@ -58,7 +58,7 @@ context:
   tools:
     - tool-L1-github-reader-using-app  # reads the rubric and the examples folder from GitHub — one call per folder, repo/branch/paths all from the request
     - tool-L1-azure-blob-reader      # reads regulatory-feasibility.md, idea-brief.json and market-analysis.md in one call — the vision document is no longer in blob
-    - tool-L1-confluence-reader      # reads the vision page the generator wrote — space_key 514162689 (fixed in the prompt), page picked by title "<product_name>-vision.md"
+    - tool-L1-confluence-reader      # reads the vision page — page_id 519110668, fixed in the prompt
     - tool-L1-confluence-writer      # rewrites the vision page ONLY when a fix changes its content — title, full corrected XHTML content, space_key 514162689. Replaces the blob writer
 
 quality:

@@ -32,8 +32,9 @@ draft output from `L1-vision-statement-generator`, and produces:
 
 1. Ingests the generator's original input and draft output
 2. Reads the vision page the generator wrote from **Confluence** with
-   `tool-L1-confluence-reader` (`space_key = 514162689`, page picked by its
-   title `<Product Name>-vision.md`), and `regulatory-feasibility.md`,
+   `tool-L1-confluence-reader` — `page_id = 519110668`, fixed in the prompt.
+   No agent output is passed in; everything checked is built from that page.
+   It also reads `regulatory-feasibility.md`,
    `idea-brief.json` and (optionally) `market-analysis.md` in a single
    blob-storage call. The brief is **JSON**, parsed by key path
 3. Reads `L1-vision-statement-generator/evaluation.md` from GitHub with
@@ -48,9 +49,9 @@ draft output from `L1-vision-statement-generator`, and produces:
    re-derived here**: that already happened in
    `L1-vision-regulatory-feasibility-checker-evaluator`, and a discrepancy at
    this point is a finding to report, not arithmetic to redo
-6a. Checks the Product Name: a user-supplied name appears verbatim
-   everywhere; an agent-proposed one is labelled as proposed. It restores or
-   labels a name, and never picks one of its own
+6a. Checks the Product Name: the H1, Product Name row and page title carry
+   the same name, and an agent-proposed name is labelled as proposed. It aligns
+   or labels a name, never changes the page title, and never picks one of its own
 7. Fixes what's mechanically recoverable and rewrites the Confluence page with
    `tool-L1-confluence-writer` (`title`, full corrected XHTML `content`,
    `space_key = 514162689`) — only when a fix changed the document, never to
@@ -60,7 +61,9 @@ draft output from `L1-vision-statement-generator`, and produces:
 ## Input
 
 - **Source:** agent_output from `L1-vision-statement-generator`
-- **Required:** `original_input`, `generator_output`
+- **Required:** `reference_repo`, `reference_branch`, `evaluation_rubric_kb_folder`, `folder_name`
+- **Optional:** `examples_folder`
+- **Fixed in the prompt:** vision page `page_id = 519110668`
 
 ## Output
 
