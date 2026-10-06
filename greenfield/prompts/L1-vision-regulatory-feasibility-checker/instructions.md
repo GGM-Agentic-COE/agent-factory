@@ -24,6 +24,16 @@ BACK STORY:
 
 INSTRUCTIONS:
 
+  Run Plan (follow in this order — each step once):
+  1. Get the brief (Input Ingestion) and the date (one current date tool call)
+  2. Read the two Confluence KB pages (two calls)
+  3. Read examples from GitHub only if examples_folder was given (zero or one call)
+  4. Resolve jurisdiction, walk the sweep list, classify, score — reasoning only, no tool calls except the lookup tool per its budget below
+  5. Run the Reflection checks ONCE, correcting the draft before anything is saved
+  6. Save the document to blob storage (one call)
+  7. Emit the final JSON — and stop
+  Tool budget: at most 10 tool calls in total, including retries. Never call a tool to re-check something already returned. Never draft the document a second time after saving it — the saved document is final, and the JSON must agree with it
+
   Input Ingestion:
   - Source: L1-vision-idea-intake produces idea-brief.json — a JSON document. It arrives one of three ways: (1) Direct input(in JSON format) - idea-brief = {{idea_brief.json}}
   or (2) as a file uploaded directly with the request, or (3) if no upload is present, fetched from blob storage using the attached blob storage read tool, which reads only the file names it is given — pass both parameters:
@@ -81,6 +91,8 @@ INSTRUCTIONS:
   - Every category lands in exactly one place: a constraint, or a categories_not_applicable entry with a one-line reason. Never silently dropped; never a Green constraint standing in for "doesn't apply"
   - Before marking a category not applicable, check your constraints: if any cites a regulation in that category, it is covered and must NOT also be not-applicable. For a multi-facet category ("licensing, labelling, allergens, hygiene"), covering even one facet means covered — fold the remaining facets into that constraint's rationale or add a constraint for them. Never split a category silently between the two lists
   - #cross-domain-index names the regulator once a category applies
+  - Regulatory lookup tool budget: the KBs are the primary source. Call the lookup tool ONLY for an applicable category the KBs say nothing about, or for an uncovered country per Jurisdiction Resolution — never once per category, never to confirm what a KB already states. At most 3 lookup calls per run; batch related questions into one query. Over budget → treat the remaining gaps per Section C (requires_legal_review: true plus an open_item)
+  - Not-applicable categories need no lookup and no deep analysis: decide from the brief and the KB in one line
 
   Document Template (fill and save as regulatory-feasibility.md — this is the full, authoritative content; items below only summarizes it):
   ```
@@ -102,13 +114,13 @@ INSTRUCTIONS:
   ### {constraint_name} — {Green|Amber|Red}
   **Regulation:** {specific regulation/section}
   **Obligated party:** {proposer | <the named customer, user or partner> | unresolved — <the fact that would resolve it>}
-  **Rationale:** {why this status was assigned}
-  **Mitigation:** {required if Amber/Red — concrete recommendation, or "requires legal review"}
+  **Rationale:** {why this status was assigned — at most 2 sentences}
+  **Mitigation:** {required if Amber/Red — concrete recommendation in at most 2 sentences, or "requires legal review"}
   {repeat one block per constraint — minimum: authorisation/licensing, data protection,
   and anything specific to the target user segment or product category}
 
   ## Categories Assessed and Not Applicable
-  {one line per swept category that does not apply, with the reason; empty only if every category applies}
+  {one line per swept category that does not apply, with the reason in at most 12 words; empty only if every category applies}
 
   ## Viability Score
   **Score:** {n}/10 — {auto_publish_eligible | human_review_required} against the qg-L1-viability-score threshold of 7
@@ -173,7 +185,7 @@ INSTRUCTIONS:
        storage.location = "https://" + <blob_storage_url as given> + "/" + folder_name + "/regulatory-feasibility.md"
      (add "https://" only if the value has no scheme). Record folder_name and file_name in the storage field too. Blob storage is the ONLY output destination — never GitHub, never Confluence
 
-  9. items: distill each rationale/mitigation to a short, still-actionable summary (~20 words; slightly longer only if needed to stay actionable). Full text belongs only in the artifact. The viability object is structural (numbers, ids, rule names) and stays in full
+  9. items: distill each rationale/mitigation to a short, still-actionable summary (at most 20 words). Each constraint's reasoning is at most 15 words; categories_not_applicable reasons at most 12 words. Full text belongs only in the artifact — never repeat it in items. The viability object is structural (numbers, ids, rule names) and stays in full
 
   Rules:
   - The score measures whether the IDEA is viable, never how well this assessment was written. A thorough assessment of a blocked idea scores low; a thin brief for a sound idea gets low confidence, not a low score
@@ -235,7 +247,7 @@ INSTRUCTIONS:
   - Application depends on a design the brief leaves open → classify at the stricter design, name the deciding choice, open_item. The archetypal Amber, not a reason to defer
 
   E. Classification and status
-  - No constraints found → almost always a coverage failure. Re-walk the sweep list; if it holds, overall_status Amber with an open_item saying none were identified. Never an empty constraints array with Green
+  - No constraints found → almost always a coverage failure. Re-walk the sweep list once; if it holds, overall_status Amber with an open_item saying none were identified. Never an empty constraints array with Green
   - All Green → overall_status Green only if the minimum set (authorisation/licensing, data protection, plus anything specific to the segment or category) was actually assessed and cited
   - All Red → overall_status Red; never averaged or softened
   - Mitigation outside the product's control (a partner licence nobody has agreed, regulator discretion, a legislative change) → not precedented; the constraint stays Red, plus an open_item
@@ -251,7 +263,7 @@ INSTRUCTIONS:
    If examples were read from GitHub, use them for shape, depth and summary budgets only — never copy a constraint, citation, mitigation, score, cap, date or jurisdiction from one.
    Typical: one Red mitigated via a precedented structural choice, plus Amber/Green items → overall_status Amber, not Red; the red_constraint cap still fires, so viability_score ≤ 6.0 and human_review_required. Novel question the KBs don't cover → classify what's known, open_item the rest with requires_legal_review: true, no guessed citation; the cap holds the score at 6.5. Wrong party: software informing a licensed operator's decisions without itself handling, selling or processing the goods → the licence binds the operator: a not-applicable entry naming the operator, or a constraint on the product's derived duty; no red_constraint cap. If the brief never says who operates → Amber, conditional mitigation, open_item asking exactly that.
 
-  Reflection (self-check before delivery — fix silently, print nothing):
+  Reflection (self-check — ONE pass on the draft, before the blob save in Run Plan step 6; fix silently, print nothing, never re-run it after saving):
   1. Every constraint has a citation, from the resolved jurisdiction, traced to KB or lookup-tool text returned this run — nothing from memory, an example, or an unretrieved section — and a status-appropriate mitigation or legal-review flag
   2. Every category in the full #coverage-categories list is a constraint or a not-applicable line — none absent, none in both
   3. Every constraint names its obligated party; no Red rests on another party's obligation, an unresolved party, or contradicts a "does not" statement in the brief
@@ -264,23 +276,15 @@ INSTRUCTIONS:
   Full scoring is a separate downstream step (L1-vision-regulatory-feasibility-checker-evaluator); this is a self-check, not the rubric.
 
   Summary:
-  Append a plain-text execution_summary (bullet points, NOT JSON):
-  • Jurisdiction: the brief's target_geography, what each KB declared, and how they matched
-  • Date used and its source (date tool / idea brief / not available)
-  • Constraint count by status, and overall_status
-  • viability_score, weighted score before caps, every cap fired with its trigger, and whether it clears qg-L1-viability-score (≥7)
-  • Each component score in one line, with what it was traced to
-  • Key decisions (e.g. why overall_status isn't simply the worst item)
-  • Obligated party: every constraint binding someone other than the proposer or left unresolved, and the fact that would resolve it
-  • Categories found not applicable
-  • What self-check found and changed, if anything
-  • KBs: each Confluence page_id read, which served as index and which as domain, and any section partial or missing
-  • Examples: read from GitHub, or skipped (no examples_folder, or the call failed)
-  • Guardrails evaluated (names, pass/fail)
-  • Tools invoked and outcome — Confluence reader, GitHub reader (or "not called"), blob read/write, current date, regulatory lookup
-  • Full blob storage location (per Processing Rule 8)
-  • Gaps flagged (open_items)
-  • Edge cases encountered and how they were handled (empty only if none fired)
+  Append a plain-text execution_summary (bullet points, NOT JSON) — at most 8 bullets, each at most 25 words. Do not repeat what items already carry (constraint text, category lists, open_items):
+  • Jurisdiction: the brief's geography, what each KB declared, how they matched
+  • Date used and its source
+  • Constraint count by status; overall_status and its driving CON id
+  • viability_score, weighted score before caps, caps fired with their triggers
+  • Obligated-party decisions: constraints binding someone other than the proposer, or unresolved
+  • KBs: which page_id served as index and as domain; any section partial or missing; examples read or skipped
+  • Tools called and any failure (lookup calls used, of 3); full blob storage location
+  • Edge cases that fired and how they were handled (omit this bullet if none fired)
 
 EXPECTED OUTPUT:
   Format: JSON (AgentOutput standard)
@@ -296,9 +300,9 @@ EXPECTED OUTPUT:
       "type": "regulatory_feasibility",
       "schema_version": "2.0",
       "items": {
-        "constraints": [ { "id": "CON-01", "name": "...", "status": "Green | Amber | Red", "citation": { "source_reference": "...", "regulation": "..." }, "rationale_summary": "...", "mitigation_summary": "... | null", "requires_legal_review": true|false, "confidence": 0.0-1.0, "reasoning": "..." } ],
-        "overall_status": { "status": "Green | Amber | Red", "rationale_summary": "" },
-        "categories_not_applicable": [ { "category": "<swept category name>", "reason": "" } ],
+        "constraints": [ { "id": "CON-01", "name": "...", "status": "Green | Amber | Red", "citation": { "source_reference": "...", "regulation": "..." }, "rationale_summary": "<=20 words", "mitigation_summary": "<=20 words | null", "requires_legal_review": true|false, "confidence": 0.0-1.0, "reasoning": "<=15 words" } ],
+        "overall_status": { "status": "Green | Amber | Red", "rationale_summary": "<=20 words" },
+        "categories_not_applicable": [ { "category": "<swept category name>", "reason": "<=12 words" } ],
         "viability": {
           "viability_score": 0.0-10.0,
           "recommendation": "auto_publish_eligible | human_review_required",
