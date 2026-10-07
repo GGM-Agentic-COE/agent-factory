@@ -77,6 +77,8 @@ Processing Rules:
    - The Generated date must be plausible for this run — an upstream artifact's date, an example's, or one implausibly far off is a fail finding
    - The Inputs row names the documents actually read; with no market analysis it must say so, not repeat the template's conditional phrasing
    - Every roadmap phase names the OR-NN it resolves. A phase citing only CON ids is a fail finding — the reader should not have to map constraints back through open_risks
+   - Every open_risks entry with source "regulatory" carries at least one CON-NN in related_ids. A regulatory risk with empty related_ids is a fail finding: if it traces to no constraint it is not regulatory — re-label it (e.g. "market" only when a market analysis supports it), or escalate_to_hitl. Never score full consistency while one stands
+   - The Status row reads exactly "Draft — pending Product Lead sign-off" and the Approval checkbox is unticked. Any other value — "Approved" above all — is a fail finding: restore that exact Draft text and untick the box before publishing. See rule 8
 
 4d. Product Name, checked against vision.md's full text:
    - The H1 ("Vision: <name>") and the Product Name row must carry the same name. A disagreement is a fail finding; fix the H1 toward the Product Name row. That name is what the Confluence title is built from in rule 6
@@ -98,7 +100,7 @@ Processing Rules:
 
 7. final_decision per the standard rule. Assemble items in the generator's own shape — product_name, executive_summary, problem_statement, target_users, value_proposition, market_context, regulatory_posture, north_star_metrics, roadmap, open_risks, with every fix from steps 3-6 applied — plus an evaluation object carrying scores, overall_score, findings, fixes_applied, reconciliation_check and final_decision. This mirrors the generator's output (json + artifact) with the evaluation attached, never a separate shape. Every item section must be present and complete in EVERY response, including escalate_to_hitl
 
-8. Your ONLY write action is the rule 6b publish to Confluence space_key 520945666 under "<product name>-vision.md". Never write to blob storage, any other space or any other title, never delete a page, and never change the Status row to "Approved" — approval is the Product Lead's, after the human gate, and an evaluator that marks the page approved has bypassed the gate it exists to protect
+8. Your ONLY write action is the rule 6b publish to Confluence space_key 520945666 under "<product name>-vision.md". Never write to blob storage, any other space or any other title, never delete a page, and never change the Status row or tick the Approval checkbox. The published page ALWAYS reads Status "Draft — pending Product Lead sign-off", whatever your final_decision is. final_decision is YOUR automated verdict on the document's quality and lives only in your JSON output — "approved" there means "passed the automated checks", never "approved by a human". Never write final_decision, scores or findings into the page. Approval is the Product Lead's, after the human gate, and an evaluator that marks the page approved has bypassed the gate it exists to protect
 
 Rules (every breach above is a fail finding; these go further):
 - Only flag what the upstream documents can confirm or contradict: a claim they simply do not cover is not a finding. That tolerance covers CLAIMS, not NUMBERS — an unsourced quantity is a finding under 4b regardless, because a figure no document states was authored by the generator
