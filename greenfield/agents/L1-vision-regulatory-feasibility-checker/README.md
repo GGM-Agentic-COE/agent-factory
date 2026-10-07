@@ -16,9 +16,7 @@ names a country. Both KBs are **read from Confluence** with
 `tool-L1-confluence-reader`, two calls, `page_id = 518422550` and `page_id = 519012353`, fixed in the
 prompt. The pages hold the content of `kb-L1-regulatory-frameworks-index-ind`
 and `kb-L2-domain-regulatory-ind`. They are not attached at runtime and not read
-from GitHub. Only the worked examples come from GitHub, via
-`tool-L1-github-reader-using-app` (`reference_repo`, `reference_branch`,
-`examples_folder`; all optional). The two KBs are told apart
+from GitHub. This agent reads nothing from GitHub. The two KBs are told apart
 by their anchors, never by name, and are kept separate so their jurisdiction
 declarations can be compared. Each regulatory KB declares the jurisdiction it
 covers in its own `#jurisdiction` section, and the agent resolves that at
@@ -112,10 +110,8 @@ be the agent that sets it.
    a degraded run, never the whole list. No KB carrying `#coverage-categories`
    or `#jurisdiction` fails the run with `REFERENCE_UNAVAILABLE` rather than
    falling back on remembered categories; the index KB alone is a degraded run,
-   with `requires_legal_review: true` on every affected constraint. The worked
-   examples are the only thing read from GitHub (`examples_folder`, one call);
-   if they're unavailable the run continues without them. GitHub and
-   Confluence are read-only here: `regulatory-feasibility.md` still goes to blob storage
+   with `requires_legal_review: true` on every affected constraint.
+   Confluence is read-only here: `regulatory-feasibility.md` goes to blob storage
 2. Uses the regulatory frameworks index KB to identify which regulator
    categories apply at all
 3. Walks the **sweep list** in that KB's `#coverage-categories` section —

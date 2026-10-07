@@ -19,7 +19,7 @@ purpose:
 prompt:
   ref: "prompts/L1-vision-regulatory-feasibility-checker/instructions.md"
   version: "2.0.0"
-  description: "Walks the coverage-category sweep list held in the regulatory frameworks index KB — both regulatory KBs are read from Confluence (page ids 518422550 and 519012353) with the Confluence reader; only the examples are read from GitHub — against a domain-specific regulatory KB; every constraint is cited, every Amber/Red carries a mitigation or legal-review flag, and the viability score is derived from the regulatory posture plus idea clarity with unresolved blockers applied as hard caps. The sweep list lives in the KB so the evaluator's coverage audit reads the identical list; the scenario-pattern behaviours stay in the prompt."
+  description: "Walks the coverage-category sweep list held in the regulatory frameworks index KB — both regulatory KBs are read from Confluence (page ids 518422550 and 519012353) with the Confluence reader — against a domain-specific regulatory KB; every constraint is cited, every Amber/Red carries a mitigation or legal-review flag, and the viability score is derived from the regulatory posture plus idea clarity with unresolved blockers applied as hard caps. The sweep list lives in the KB so the evaluator's coverage audit reads the identical list; the scenario-pattern behaviours stay in the prompt."
 
 contract:
   input_schema: "$ref: schemas/agent-input-contract-schema.json"
@@ -35,11 +35,6 @@ contract:
       problem_statement: { type: string, description: "From L1-vision-idea-intake's idea-brief.json" }
       target_geography: { type: string, description: "Target geography for the idea — a country, or a country plus sub-national regions. Resolved at runtime against the jurisdiction the attached KBs declare; a country they do not cover fails with JURISDICTION_MISMATCH rather than being translated" }
     optional_parameters:
-      # GitHub is used for the worked examples ONLY — the KBs are read from Confluence (context.knowledge_base_sources).
-      # Examples are optional. No examples_folder from the user → the GitHub reader is not called
-      # at all. examples_folder given → one call with reference_repo/reference_branch; a failure is ignored.
-      reference_repo: { type: string, default: null, description: "Repository holding this agent's worked examples — bare name or 'owner/repo'. Read with tool-L1-github-reader-using-app. Not used for KBs" }
-      reference_branch: { type: string, default: null, description: "Branch to read the examples from (e.g. 'main')" }
       # No date parameter is required. The run date comes from tool-L1-system-current-date,
       # because the agent has no clock and an unaided model fills a date slot with a
       # confident guess. generated_date below is only the fallback for a tool failure.
@@ -47,7 +42,6 @@ contract:
       product_category: { type: string, default: null, description: "Product/activity category, if known, to narrow the regulator lookup" }
       target_users: { type: string, default: null, description: "Target user segment from idea-brief.json — feeds both the segment-specific constraint sweep and the idea_clarity viability component" }
       value_proposition: { type: string, default: null, description: "Value proposition from idea-brief.json — feeds claim-substantiation constraints and the idea_clarity viability component" }
-      examples_folder: { type: string, default: null, description: "Repo folder holding this agent's worked input/output examples — e.g. planning/vision-regulatory-feasibility/examples. Shape guidance only — never a source of constraints, citations, scores or dates. Unavailable is tolerated" }
 
   output:
     $ref: "output_schema.json"
@@ -69,7 +63,6 @@ context:
   # declare the same jurisdiction, or the agent fails with JURISDICTION_MISMATCH.
   # L1-vision-regulatory-feasibility-checker-evaluator reads the SAME two Confluence pages,
   # so its coverage audit reads the identical sweep list this agent walked.
-  # Only the worked examples are read from GitHub (examples_folder).
   knowledge_bases: []
   knowledge_base_sources:
     confluence_page_ids: ["518422550", "519012353"]   # one reader call per page; which page holds which KB is worked out from content
@@ -83,7 +76,6 @@ context:
     - gr-L1-citation-verifier   # BLOCKER — every constraint must cite a specific regulation/section
   tools:
     - tool-L1-confluence-reader        # reads BOTH regulatory KBs — page ids 518422550 and 519012353, fixed in the prompt; read-only
-    - tool-L1-github-reader-using-app  # reads the examples folder ONLY — KBs come from Confluence; repo/branch/path all from the request
     - tool-L1-regulatory-db-lookup   # read-only; invoked directly, per the Core/Utility split
     - tool-L1-system-current-date    # reads the host clock — the only way this agent can date the artifact without guessing
     - tool-L1-azure-blob-reader      # reads idea-brief.json from blob storage

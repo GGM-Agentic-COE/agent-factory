@@ -33,14 +33,10 @@ contract:
     required_parameters:
       original_input: { type: object, description: "The input L1-vision-regulatory-feasibility-checker received" }
       generator_output: { type: object, description: "L1-vision-regulatory-feasibility-checker's draft items output, including constraints, overall_status, categories_not_applicable, viability and open_items" }
-      # GitHub reference material — the rubric and examples ONLY. Nothing here is defaulted
-      # or inferred: a rubric read from elsewhere silently changes the bar this gate enforces.
-      # The KBs are NOT a request parameter — they come from Confluence (context.knowledge_base_sources).
-      reference_repo: { type: string, description: "Repository holding the rubric and the examples — bare name or 'owner/repo'. Read with tool-L1-github-reader-using-app. Not used for KBs" }
-      reference_branch: { type: string, description: "Branch to read the rubric and examples from (e.g. 'main')" }
-      evaluation_rubric_kb_folder: { type: string, description: "Repo folder holding L1-vision-regulatory-feasibility-checker's evaluation.md rubric content. Unavailable → REFERENCE_UNAVAILABLE: scoring against a remembered rubric is not an independent audit" }
-    optional_parameters:
-      examples_folder: { type: string, default: null, description: "Repo folder holding this evaluator's worked input/output examples — e.g. planning/vision-regulatory-feasibility/examples. Shape guidance only — never a source of findings or verdicts. Unavailable is tolerated" }
+      # The rubric is NOT a request parameter. It is read from GitHub with fixed values in the prompt:
+      #   repo agentic-sdlc-knowledge-bases, branch main,
+      #   folder planning/vision-regulatory-feasiblity/L1-vision-regulatory-feasibility-checker (file evaluation.md).
+      # The KBs are NOT a request parameter either — they come from Confluence (context.knowledge_base_sources).
 
   output:
     $ref: "output_schema.json"
@@ -49,7 +45,7 @@ context:
   # No KB is attached at runtime. Both regulatory KBs are READ FROM CONFLUENCE with
   # tool-L1-confluence-reader, page ids 518422550 and 519012353 fixed in the prompt — the SAME two pages
   # L1-vision-regulatory-feasibility-checker reads, so the coverage audit and the generator's
-  # sweep cannot diverge. The rubric (evaluation.md) and examples are still READ FROM GITHUB.
+  # sweep cannot diverge. The rubric (evaluation.md) is READ FROM GITHUB at a fixed location (see contract.input).
   # Jurisdiction is read from each KB's own #jurisdiction section at runtime, never assumed here.
   knowledge_bases: []
   knowledge_base_sources:
@@ -64,7 +60,7 @@ context:
     - gr-L1-regulatory-feasibility-quality-gate   # fires when THIS evaluator concludes; validates L1-vision-regulatory-feasibility-checker's RESULTANT output against its own schema+evaluation.md, zero-tolerance mitigation rule re-checked directly (guardrails/gr-L1-regulatory-feasibility-quality-gate)
   tools:
     - tool-L1-confluence-reader        # reads BOTH regulatory KBs — page ids 518422550 and 519012353, fixed in the prompt, same as the generator; read-only
-    - tool-L1-github-reader-using-app  # reads the rubric (evaluation.md) and the examples folder from GitHub — one call per folder, repo/branch/paths all from the request
+    - tool-L1-github-reader-using-app  # reads the rubric (evaluation.md) ONLY — repo agentic-sdlc-knowledge-bases, branch main, fixed folder; one call
     - tool-L1-azure-blob-reader      # reads regulatory-feasibility.md and idea-brief.json for full-text and groundedness checks
     - tool-L1-azure-blob-writer      # re-saves regulatory-feasibility.md when a fix changes its content
 

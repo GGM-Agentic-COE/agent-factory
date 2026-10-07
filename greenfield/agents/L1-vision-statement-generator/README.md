@@ -47,11 +47,7 @@ name is supplied, the agent proposes one from the idea brief and labels it
    `idea-brief.json`, `regulatory-feasibility.md` and (optionally)
    `market-analysis.md` in a single blob-storage call. The brief is **JSON**,
    parsed by key path, not scanned as markdown
-1a. Reads its `examples/` folder from GitHub with `tool-L1-github-reader-using-app`
-   (`reference_repo`, `reference_branch`, `examples_folder` — all from the request).
-   Shape guidance only: an example's numbers are never a source, and an unavailable
-   folder is tolerated. The repository is read-only — the vision document goes to blob storage
-1b. Resolves the Product Name — the user's verbatim, or a proposed one, labelled as proposed
+1a. Resolves the Product Name — the user's verbatim, or a proposed one, labelled as proposed
 2. Carries problem/users/value-proposition forward verbatim in substance
 3. Condenses market SWOT into one paragraph — or, when no market analysis
    ran, writes Market Context as "Not assessed" rather than inferring one

@@ -50,11 +50,11 @@ Accepts the original input and draft output from
    generator reads — to sanity-check citations and re-run the category sweep.
    Because both agents read the same location, the audit and the sweep cannot
    diverge. Anchors are matched as headings in the returned XHTML
-4. Reads from GitHub with `tool-L1-github-reader-using-app` — one call per
-   folder, every repo/branch/path from the request:
-   `L1-vision-regulatory-feasibility-checker/evaluation.md` as the scoring
-   source of truth, and this evaluator's `examples/` folder for shape. An
-   unreadable rubric, or no KB carrying `#coverage-categories`, fails with
+4. Reads the scoring rubric (`evaluation.md`) from GitHub with
+   `tool-L1-github-reader-using-app` — one call, fixed in the prompt: repo
+   `agentic-sdlc-knowledge-bases`, branch `main`, folder
+   `planning/vision-regulatory-feasiblity/L1-vision-regulatory-feasibility-checker`.
+   No examples are read. An unreadable rubric, or no KB carrying `#coverage-categories`, fails with
    `REFERENCE_UNAVAILABLE`. Corrections still go back to blob storage, never
    to the repository or Confluence
 5. Checks every constraint's citation, mitigation/legal-review status, and

@@ -39,11 +39,12 @@ generator ──► blob: <folder_name>/vision.md ──► this evaluator (eval
    storage** in a single call, from the request's `folder_name`. No agent
    output is passed in; everything checked is built from `vision.md`. The
    brief is **JSON**, parsed by key path
-2. Reads `L1-vision-statement-generator/evaluation.md` from GitHub with
-   `tool-L1-github-reader-using-app` as the scoring source of truth, plus this
-   evaluator's `examples/` folder for shape — repo, branch and folders all from
-   the request. An unreadable rubric fails with `REFERENCE_UNAVAILABLE` rather
-   than scoring against a remembered bar
+2. Reads the scoring rubric (`evaluation.md`) from GitHub with
+   `tool-L1-github-reader-using-app` — one call, fixed in the prompt: repo
+   `agentic-sdlc-knowledge-bases`, branch `main`, folder
+   `planning/vision-statement-generator/L1-vision-statement-generator`. No
+   examples are read. An unreadable rubric fails with `REFERENCE_UNAVAILABLE`
+   rather than scoring against a remembered bar
 3. Computes the coverage-gap set (Amber/Red constraint_ids minus covered ids)
 4. Checks each executive_summary sentence for grounding elsewhere in the document
 5. Checks viability_score wasn't silently altered — against
@@ -67,8 +68,8 @@ generator ──► blob: <folder_name>/vision.md ──► this evaluator (eval
 ## Input
 
 - **Source:** `vision.md` in blob storage, written by `L1-vision-statement-generator`
-- **Required:** `reference_repo`, `reference_branch`, `evaluation_rubric_kb_folder`, `folder_name`
-- **Optional:** `examples_folder`
+- **Required:** `folder_name`
+- **Fixed in the prompt:** the rubric's GitHub repo, branch and folder
 
 ## Output
 

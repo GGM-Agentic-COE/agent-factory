@@ -31,24 +31,19 @@ contract:
     accepts_file_upload:
       enabled: false
     required_parameters:
-      # GitHub reference material — nothing defaulted or inferred. A rubric read from the
-      # wrong path silently changes the bar at the last checkpoint before a human reads the vision document.
-      reference_repo: { type: string, description: "Repository holding the rubric and examples — bare name or 'owner/repo'. Read with tool-L1-github-reader-using-app" }
-      reference_branch: { type: string, description: "Branch to read the reference material from (e.g. 'main')" }
-      evaluation_rubric_kb_folder: { type: string, description: "Repo folder holding L1-vision-statement-generator's evaluation.md rubric content. Unavailable → REFERENCE_UNAVAILABLE: a gate that invented its own bar is worse than no gate" }
-    optional_parameters:
+      folder_name: { type: string, description: "Blob storage folder holding vision.md, regulatory-feasibility.md, idea-brief.json and (optionally) market-analysis.md" }
       # No agent output is passed in. vision.md is read from blob storage (folder_name),
       # items are built from it, and the evaluated document is published to Confluence.
-      examples_folder: { type: string, default: null, description: "Repo folder holding this evaluator's worked input/output examples (greenfield/agents/L1-vision-statement-generator-evaluator/examples in this repository). Shape guidance only — never a source of findings, numbers or verdicts. Unavailable is tolerated" }
+      # The rubric is NOT a request parameter. It is read from GitHub with fixed values in the prompt:
+      #   repo agentic-sdlc-knowledge-bases, branch main,
+      #   folder planning/vision-statement-generator/L1-vision-statement-generator (file evaluation.md).
 
   output:
     $ref: "output_schema.json"
 
 context:
   # No KB is attached at runtime. The rubric (L1-vision-statement-generator/evaluation.md)
-  # and this evaluator's examples are READ FROM GITHUB with tool-L1-github-reader-using-app,
-  # from evaluation_rubric_kb_folder and examples_folder — the repository is the single
-  # source of truth, so no runtime copy can drift from it.
+  # is READ FROM GITHUB with tool-L1-github-reader-using-app at the fixed location above.
   knowledge_bases: []
   guardrails:
     - gr-L1-output-schema-validator
@@ -56,7 +51,7 @@ context:
     - gr-L1-consistency-check   # re-checked independently — the reconciliation coverage check
     - gr-L1-vision-statement-quality-gate   # fires when THIS evaluator concludes; validates L1-vision-statement-generator's RESULTANT output against its own schema+evaluation.md, above all the reconciliation-coverage BLOCKER (guardrails/gr-L1-vision-statement-quality-gate)
   tools:
-    - tool-L1-github-reader-using-app  # reads the rubric and the examples folder from GitHub — one call per folder, repo/branch/paths all from the request
+    - tool-L1-github-reader-using-app  # reads the rubric (evaluation.md) ONLY — repo agentic-sdlc-knowledge-bases, branch main, fixed folder; one call
     - tool-L1-azure-blob-reader      # reads vision.md, regulatory-feasibility.md, idea-brief.json and market-analysis.md in one call
     - tool-L1-confluence-writer      # publishes the evaluated (corrected) vision document — title "<product_name>-vision.md", XHTML content, space_key 514162689. Always, including escalate_to_hitl — the human reviews it in Confluence. The ONLY write: nothing goes back to blob
 

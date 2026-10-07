@@ -35,11 +35,7 @@ contract:
       regulatory_feasibility_items: { type: object, description: "Full items object from L1-vision-regulatory-feasibility-checker as corrected by its evaluator, including its viability object" }
       viability_score: { type: number, description: "Owned by L1-vision-regulatory-feasibility-checker and re-derived by its evaluator at qg-L1-viability-score. Carried here as a parameter and reported exactly as received — this agent may not compute, re-derive, round, or adjust it" }
     optional_parameters:
-      # Examples are optional. No examples_folder from the user → the GitHub reader is not called at all.
-      reference_repo: { type: string, default: null, description: "Repository holding this agent's worked examples. Used only when examples_folder is given" }
-      reference_branch: { type: string, default: null, description: "Branch to read the examples from. Used only when examples_folder is given" }
       product_name: { type: string, default: null, description: "The product's name, supplied by the user into the {{product_name}} placeholder. Used VERBATIM in the H1 and the Product Name row (the evaluator later publishes it to Confluence as '<product_name>-vision.md'). Absent, empty, or still template text → the agent proposes a name from the idea brief and labels it '(proposed by agent — … confirm or replace)' in the Product Name row; never a failure" }
-      examples_folder: { type: string, default: null, description: "Repo folder holding this agent's worked input/output examples (greenfield/agents/L1-vision-statement-generator/examples in this repository). Shape and depth guidance only — an example's numbers, risks and dates are never sourced for this run, and Processing Rule 7 treats anything lifted from one as an invention. Unavailable is tolerated" }
       market_analysis_items: { type: object, description: "Full items object from L1-vision-market-analyzer. OPTIONAL — the market analyzer may not have run. When absent, vision.md's Market Context reads 'Not assessed', items.market_context is emitted with confidence 0 and traced_to 'none', and no market-sourced open risks are carried. The viability score is unaffected: it carries no market component" }
 
   output:
@@ -47,14 +43,12 @@ contract:
 
 context:
   knowledge_bases: []   # vision structure is embedded in instructions.md per S4 — this agent synthesizes purely from upstream artifacts.
-                        # Worked examples are READ FROM GITHUB with tool-L1-github-reader-using-app (examples_folder), never attached as a KB.
   guardrails:
     - gr-L1-output-schema-validator
     - gr-L1-pii-detection
     - gr-L1-hallucination-check
     - gr-L1-consistency-check   # checks reconciliation: no upstream Amber/Red item silently dropped
   tools:
-    - tool-L1-github-reader-using-app  # reads the examples folder from GitHub — repo/branch/path all from the request; read-only
     - tool-L1-azure-blob-reader      # reads idea-brief.json/regulatory-feasibility.md/market-analysis.md from blob storage in one call
     - tool-L1-azure-blob-writer      # saves vision.md to blob storage (folder_name from the request). This agent calls no Confluence tool — the evaluator publishes
     - tool-L1-system-current-date    # called with timezone UTC — the only way this agent can date the vision document without guessing
