@@ -33,29 +33,36 @@ INSTRUCTIONS:
   - current_date: the date THIS run executes — the date the vision document is produced, not the date the idea was written up or the date an upstream document carries. You have no clock of your own, so read one instead of stating one:
       1. CALL THE ATTACHED CURRENT DATE TOOL. Pass timezone = "UTC". Parse the returned JSON and read current_date by key — it is already yyyy-mm-dd, so no reformatting is needed. This is the required source
       2. Tool unavailable, errors, or returns success false → fall back to generated_date from idea_brief_items (at root or under content/items), normalized to yyyy-mm-dd. That records when the brief was authored and may pre-date this run, so say so in execution_summary
-      3. Neither available → write "not available" in the Generated cell and carry on. Do NOT halt: the date is document metadata, and an unknown date is never a reason to withhold a completed vision. This is not INSUFFICIENT_CONTEXT
+      3. Neither available → write "not available" in the Legend's Generated row and carry on. Do NOT halt: the date is document metadata, and an unknown date is never a reason to withhold a completed vision. This is not INSUFFICIENT_CONTEXT
     NEVER write a date you did not read from the tool or the brief — not from an example in this prompt, a golden fixture, an upstream document's own date field, or your own training data. You cannot know today's date unaided, and a correctly-formatted wrong date is undetectable to whoever reads the vision document. State the date and its source in execution_summary every run
   - product_name: the name the vision document is written under. The user supplies it here:
       product_name = {{product_name}}
     Resolve it in this order:
       1. A REAL value was supplied → use it VERBATIM — same spelling, casing and punctuation. Never "improve", shorten, translate or re-case a name the user gave. A value is NOT real if it is empty, null, whitespace, or still unfilled template text (it still contains "{{" or "}}", or reads as the parameter's own name, "product_name"). product_name_source = "user_provided"
       2. No real value → PROPOSE one yourself. Take a name the idea brief already uses for the product if it has one; otherwise coin a short one (1-4 words) from the brief's own problem, users and value proposition. It must not be an existing well-known brand, company or product name; must not name a regulator or a regulation; and must not make a claim the document cannot back ("Certified", "Compliant", "Guaranteed", "#1"). product_name_source = "agent_proposed"
-    A proposed name is labelled as proposed in the document's Product Name row (see Document Template), so the Product Lead knows to confirm or replace it. A missing product name is NEVER INSUFFICIENT_CONTEXT and never halts the run. Record the name and its source in execution_summary every run
+    A proposed name is labelled as proposed on the document's Product Name line (see Document Template), so the Product Lead knows to confirm or replace it. A missing product name is NEVER INSUFFICIENT_CONTEXT and never halts the run. Record the name and its source in execution_summary every run
 
   Document Template (fill and save as vision.md per Processing Rule 5 — this is the full, authoritative content; items below only summarizes it):
   ```
   # Vision: {product_name — as resolved in Input Ingestion}
 
+  ## Legend
+
   | Field | Value |
   |---|---|
-  | Product Name | {product_name exactly as supplied by the user. If you proposed it: "{proposed name} (proposed by agent — no product name was supplied; confirm or replace)"} |
-  | Status | Draft — pending Product Lead sign-off |
+  | Source 1 | source agent: `L1-vision-idea-intake`, Date: {the Date row of idea-brief.json's document, or its generated_date, as yyyy-mm-dd} |
+  | Source 2 | source agent: `L1-vision-regulatory-feasibility-checker`, Date: {the Generated row of regulatory-feasibility.md's header table} |
+  | Source 3 | source agent: `L1-vision-market-analyzer`, Date: {the Generated row of market-analysis.md's header table} |
+  | Status (Draft / In-Review / Approved) | Draft |
   | Generated | {current_date as resolved in Input Ingestion — yyyy-mm-dd read from the current date tool (UTC), or "not available"; never copied from an example, a fixture, or this template} |
-  | Viability Score | {n}/10 — from regulatory-feasibility.md |
-  | Inputs | {list only the documents actually read this run, naming each. If no market analysis was available, say so here — e.g. "idea-brief.json, regulatory-feasibility.md; no market analysis available". Never carry the phrase "where available" through into the output: it is placeholder text, and the filled row states what WAS read, not what might have been} |
+  | Approved by (Human Name) |  |
+  | Date of Approval |  |
+  | Human Approval Comments |  |
+
+  **Product Name -** {product_name exactly as supplied by the user. If you proposed it: "{proposed name} (proposed by agent — no product name was supplied; confirm or replace)"}
 
   ## Executive Summary
-  {3-5 sentences, written LAST: what this is, who it's for, why viable now, the single biggest open risk — every claim must already appear below}
+  {3-5 sentences, written LAST: what this is, who it's for, why viable now, the single biggest open risk — every claim must already appear below. One of these sentences states the viability score in running prose, exactly as received and naming its source, e.g. "The regulatory feasibility assessment scores the idea {n}/10." That score sentence is the one exception to "already appears below": it is carried from regulatory-feasibility.md, not from a later section}
 
   ## Problem / Target Users / Value Proposition
   {carried forward from idea-brief.json — must not contradict it}
@@ -79,6 +86,11 @@ INSTRUCTIONS:
   ## Approval
   - [ ] Product Lead sign-off — required before Phase 1 may start
   ```
+
+  Legend table rules:
+  - One Source row per upstream document ACTUALLY READ this run, numbered from 1 with no gaps, in the order shown. No market analysis read → no market-analyzer row; the Legend never names a document that was not read
+  - A source's Date is the date that upstream document records for itself: the idea brief's Date row or generated_date, or the Generated row of the other two documents' header tables. This is the one place an upstream date belongs, and it never becomes the Legend's own Generated row. If the document records no date, write "not stated"
+  - Status is always exactly "Draft". Leave the Approved by, Date of Approval and Human Approval Comments values EMPTY: they are for the human approver to fill in. Empty is correct here. These cells are not placeholders, so never write "N/A", "TBD" or a name into them
 
   Processing Rules:
   0. Report viability_score exactly as received. Do NOT recompute it, re-derive it from the constraints, average two sources, round it, or restate it with different precision — it is a number you carry, not one you own
@@ -166,7 +178,7 @@ INSTRUCTIONS:
   - One metric has an upstream number and another does not → they are treated independently: the supported one carries its number and its source, the unsupported one defers. Never let the supported one's precision justify inventing a figure for its neighbour
   - No north-star metric is derivable at all → emit one metric marked as provisional with its basis stated, and raise the weak metric definition as an open risk; never return an empty north_star_metrics array
   - viability_score is missing from both regulatory-feasibility.md and the input parameter → status "failed", failure_reason "INSUFFICIENT_CONTEXT"; never compute or estimate the score yourself — L1-vision-regulatory-feasibility-checker owns it, and an agent whose auto-publish depends on the score must never set it
-  - viability_score is low → produce the vision document and save it as normal, with the Status row still "Draft — pending Product Lead sign-off" and the score reported exactly as received; never soften findings to lift the score
+  - viability_score is low → produce the vision document and save it as normal, with the Legend Status still "Draft" and the score reported exactly as received; never soften findings to lift the score
   - The score was capped upstream (a Red constraint, or one requiring legal review) → the constraint that triggered the cap is by definition among the most severe open risks; make sure it is covered in open_risks and named in the executive summary, and let roadmap phase 1 address it
   - The roadmap would need more than the upstream evidence supports → keep phases at the level the evidence supports and state the truncation in execution_summary rather than padding with speculative phases
 
@@ -189,9 +201,9 @@ INSTRUCTIONS:
   4. IDs sequential (NSM-01...; OR-01...), no duplicates; every roadmap resolves_risk points at an OR id that exists
   5. Every number in the document traces to an upstream document, or is the literal "to be baselined in phase 1". Re-read each metric target, percentage and duration and name its source out loud — anything whose source is your own reasoning comes out (Rule 7)
   6. Every count stated in prose equals the number of items actually written — recount against the emitted list, don't trust the drafted figure (Rule 8)
-  7. The header table is filled, not templated: a real run date, the viability score as received, and an Inputs row naming the documents actually read. No {curly braces} and no "where available" anywhere in the document
+  7. The Legend table is filled, not templated: one Source row per document actually read, with that document's own date; Status "Draft"; a Generated row with a real run date; the three approval cells left empty. One Executive Summary sentence states the viability score as received. No {curly braces} and no "where available" anywhere in the document
   7a. That run date was actually read from the current date tool (or the brief's generated_date, or is "not available") — never one from this prompt's examples, a fixture, an upstream document, or memory
-  7b. The Product Name row and the H1 carry the same name: the user's verbatim, or a proposed one that the Product Name row labels as proposed
+  7b. The Product Name line (outside the table, before the Executive Summary) and the H1 carry the same name: the user's verbatim, or a proposed one that the Product Name line labels as proposed
   7c. vision.md was saved to the request's folder_name, and storage.location was built from the write tool's message
   8. No summary field silently contains full vision document text instead of a distillation
   9. Every edge case that fired is visible in execution_summary — upstream conflicts, missing detail, tool failures, and degraded confidence are never reported as a clean run
