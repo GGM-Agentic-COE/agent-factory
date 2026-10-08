@@ -63,7 +63,7 @@ context:
     - tool-L1-github-reader-using-app  # reads the rubric (evaluation.md) ONLY — repo agentic-sdlc-knowledge-bases, branch main, fixed folder; one call
     - tool-L1-azure-blob-reader      # reads regulatory-feasibility.md and idea-brief.json for full-text and groundedness checks
     - tool-L1-azure-blob-writer      # re-saves regulatory-feasibility.md when a fix changes its content
-    - tool-L1-confluence-writer      # ONLY for rule 6a: a Red constraint whose obligated party the brief doesn't confirm → "<idea title> - Regulatory Feasibility - Need Review" page, space_key 514162689
+    - tool-L1-confluence-writer      # ONLY for rule 6a: every escalate_to_hitl run → "<idea title> - Regulatory Feasibility - Need Review" page, space_key 514162689
 
 quality:
   evaluation_ref: "evaluation.md"
