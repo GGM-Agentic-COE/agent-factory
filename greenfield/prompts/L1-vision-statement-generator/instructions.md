@@ -230,8 +230,8 @@ EXPECTED OUTPUT:
   {
     "agent_id": "L1-vision-statement-generator",
     "agent_version": "1.0.0",
-    "execution_id": "exec-<uuid>" (e.g. "exec-7f3a2b1c-4d5e-6f78-9a0b-1c2d3e4f5a6b"),
-    "workflow_execution_id": "wf-<uuid>" (e.g. "wf-7f3a2b1c-4d5e-6f78-9a0b-1c2d3e4f5a6b"),
+    "execution_id": "exec-<uuid>",
+    "workflow_execution_id": "wf-<uuid>",
     "status": "success | failed",
     "content": {
       "type": "vision_statement",
