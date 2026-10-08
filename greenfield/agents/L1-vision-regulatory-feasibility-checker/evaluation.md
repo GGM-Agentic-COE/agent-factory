@@ -8,10 +8,12 @@
 - [ ] Where a regime binds at sub-national as well as national level (licensing, labour, workplace safety, weights and measures, local trading permissions), that layer is a constraint or an open_item — not silently folded into the national answer
 - [ ] Every Amber/Red constraint has a non-null mitigation OR requires_legal_review: true — schema-enforced, must not be bypassed
 - [ ] overall_status.rationale references the specific constraint(s) driving the verdict, not a vague summary
-- [ ] Every applicable category in `kb-L1-regulatory-frameworks-index#coverage-categories` is either a constraint or a categories_not_applicable entry — a silently absent category is a coverage failure, not a shorter output. That KB section is the single source for both the sweep and its audit; neither agent keeps its own copy
+- [ ] Every applicable category in the index KB page's `#coverage-categories` (read from Confluence) is either a constraint or a categories_not_applicable entry — a silently absent category is a coverage failure, not a shorter output. That KB section is the single source for both the sweep and its audit; neither agent keeps its own copy
 - [ ] IDs sequential (CON-01...; OI-01...; VC-01, VC-02), no gaps or duplicates
 - [ ] **BLOCKER:** no Red constraint present in reasoning/analysis is missing from the final constraints list — cross-check against KB coverage
 - [ ] **BLOCKER — Viability derivation:** weighted_score equals (regulatory_posture × 0.60) + (idea_clarity × 0.40) to one decimal; every qualifying cap appears in caps_applied; final_score is the LOWEST of weighted_score and every cap; recommendation agrees with final_score against the threshold of 7
+- [ ] **BLOCKER — Fixed component values:** regulatory_posture is exactly the fixed value of the lowest band any constraint qualifies for (Band A = 9, B = 8, C = 5, D = 2), never a number inside a range; idea_clarity is exactly the sum of its four answers (Q1-Q4, each Yes = 2.5, Partly = 1.25, No = 0), and the reasoning lists the four answers
+- [ ] Every constraint's Obligated party line quotes the brief sentence that decides who performs the activity, or says "brief does not say". A party resolved from the product type alone ("it is software") is a fail. With no deciding sentence the constraint is unresolved Amber, never Red and never not-applicable
 - [ ] The score in regulatory-feasibility.md's header table, its Viability Score section, and items.viability.viability_score are the same number
 
 ## Scores (minimum per dimension)

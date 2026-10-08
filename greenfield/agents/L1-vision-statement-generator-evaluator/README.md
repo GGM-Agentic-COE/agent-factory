@@ -61,7 +61,7 @@ generator ──► blob: <folder_name>/vision.md ──► this evaluator (eval
    `vision.md` stays as the generator's draft
 8. **Publishes** the corrected document to Confluence with
    `tool-L1-confluence-writer` — `title = <Product Name>-vision.md`, content
-   converted to XHTML, `space_key = GGMDEMOS` — for **every** decision,
+   converted to XHTML, `space_key = 514162689` — for **every** decision,
    including `escalate_to_hitl`. The human reviews it in Confluence; issues
    that couldn't be fixed are listed in the findings
 

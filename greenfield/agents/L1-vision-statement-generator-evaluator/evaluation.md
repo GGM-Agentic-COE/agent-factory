@@ -11,7 +11,6 @@ This covers THIS evaluator's own meta-quality — not the generator's rubric
 - [ ] A capped score was matched against the narrative: the constraint that triggered the cap is covered in open_risks and named in the executive summary
 - [ ] Any fix to close a coverage gap was built from the constraint's own mitigation_summary, never invented from nothing
 - [ ] `idea-brief.json` was parsed as JSON and read by key path, never scanned as markdown
-- [ ] A stale `viability-assessment.md` in the folder, if present, was ignored rather than read as a source
 
 ## Scores (≥ threshold to pass)
 | Evaluator | ≥ | Checks |

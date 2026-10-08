@@ -53,7 +53,7 @@ context:
   tools:
     - tool-L1-github-reader-using-app  # reads the rubric (evaluation.md) ONLY — repo agentic-sdlc-knowledge-bases, branch main, fixed folder; one call
     - tool-L1-azure-blob-reader      # reads vision.md, regulatory-feasibility.md, idea-brief.json and market-analysis.md in one call
-    - tool-L1-confluence-writer      # publishes the evaluated (corrected) vision document — title "<product_name>-vision.md", XHTML content, space_key GGMDEMOS. Always, including escalate_to_hitl — the human reviews it in Confluence. The ONLY write: nothing goes back to blob
+    - tool-L1-confluence-writer      # publishes the evaluated (corrected) vision document — title "<product_name>-vision.md", XHTML content, space_key 514162689. Always, including escalate_to_hitl — the human reviews it in Confluence. The ONLY write: nothing goes back to blob
 
 quality:
   evaluation_ref: "evaluation.md"
