@@ -107,7 +107,7 @@ INSTRUCTIONS:
   ## Constraints Assessed
   ### {constraint_name} — {Green|Amber|Red}
   **Regulation:** {specific regulation/section}
-  **Obligated party:** {proposer | <the named customer, user or partner> | unresolved — <the fact that would resolve it>}
+  **Obligated party:** {proposer | <the named customer, user or partner> | unresolved — <the fact that would resolve it>} — {for proposer or a named party: the brief's own sentence that decides it, quoted; for unresolved: "brief does not say"}
   **Rationale:** {why this status was assigned — at most 2 sentences}
   **Mitigation:** {required if Amber/Red — concrete recommendation in at most 2 sentences, or "requires legal review"}
   {repeat one block per constraint — minimum: authorisation/licensing, data protection,
@@ -138,26 +138,28 @@ INSTRUCTIONS:
   1a. Obligated party — decide WHO each regime binds BEFORE classifying it. A regime applying to the idea's domain is not one binding the proposer. Read what the proposer itself does — handles, stores, processes, sells, transports or advertises the regulated goods/service, or supplies software, data or advice to an operator who does — and match it to the party the KB names as obligated ("every Food Business Operator", "every data fiduciary"). Then:
      - BINDS THE PROPOSER (the brief says or necessarily implies it performs the activity) → classify by rule 2
      - BINDS A CUSTOMER, USER OR PARTNER (the brief says the product does not perform the activity; a separate operator does) → NEVER Red against this idea. If the proposer carries a derived duty — records or alerts the customer relies on, a contract allocating the duty, data processed on the customer's behalf — the constraint is about THAT duty, at the proposer's actual exposure. Otherwise the category is not applicable, naming who holds the obligation. Never a Green constraint mitigating someone else's obligation
-     - UNRESOLVED (the brief doesn't say who performs it) → Amber, never Red, and never assumed either way. Cite the regulation, write the mitigation conditionally ("if the proposer operates: obtain <approval> before trading; if a licensed customer operates: <derived duty>"), name the fact that resolves it, and raise an open_item. A conditional mitigation scores in the 4-6 band (rule 4), holding the score down honestly without firing a cap for a blocker the brief never established
+     - UNRESOLVED (the brief doesn't say who performs it) → Amber, never Red, and never assumed either way. Cite the regulation, write the mitigation conditionally ("if the proposer operates: obtain <approval> before trading; if a licensed customer operates: <derived duty>"), name the fact that resolves it, and raise an open_item. A conditional mitigation puts the regulatory component in Band C = 5 (rule 4), holding the score down honestly without firing a cap for a blocker the brief never established
+     The decision rests on a SENTENCE IN THE BRIEF, quoted in the Obligated party line, never on judgment. A party is resolved only when a brief sentence says what the proposer does or does not do for that activity ("we do not store or transport food", "we operate the warehouses"). Find no such sentence → UNRESOLVED. Never resolve it from the product type ("it is software, so it cannot be the operator"), from what similar products usually do, or from the absence of a mention. Two runs on the same brief must reach the same answer, and only a quoted sentence makes that possible
      A brief's statement that the product does NOT perform an activity ("does not process", "does not hold funds") is evidence: a Red contradicting it is a classification error. Conversely, where the brief establishes the proposer performs the activity, never relabel its obligation as the customer's to avoid a Red. Record the outcome in every Obligated party line
 
   2. Fill the template completely. Every constraint cites a specific regulation/section; every Amber/Red carries a mitigation_summary or requires_legal_review: true (schema-enforced — never bypassed by mislabelling severity). Red: the idea requires the PROPOSER to hold a status/registration it isn't structured for (per 1a — never another party's obligation, never while unresolved). Amber: feasible but needs a design decision. Green: a standard, non-blocking obligation. requires_legal_review only when no precedented mitigation exists — rare, never a default escape hatch. Never downgrade a Red to Amber to avoid writing a mitigation or firing a cap
 
   3. overall_status = the WORST constraint, unless every Red/Amber has a precedented, non-legal-review mitigation — then one level better, justified explicitly (an all-mitigated Red is Amber; the red_constraint cap still fires). The rationale names the driving CON id and its obligated party, and only concerns that already exist as a constraint or open_item — never a new one first raised in the rationale. Nowhere in the artifact or items write "not assessed", "out of scope here" or similar: every gap is a constraint or an open_item
 
-  4. Regulatory posture component (weight 0.60) — take the LOWEST band any constraint qualifies for:
-     - 9-10: overall_status Green, no Amber or Red
-     - 7-8: overall_status Amber, every Amber carrying a concrete mitigation
-     - 4-6: any Red with a precedented, non-legal-review mitigation; or any Amber with no mitigation, or one that reads as a recommendation rather than a decision taken
-     - 0-3: any Red with no mitigation, or any constraint requiring legal review
-     Score the band the constraints honestly sit in and let the rule 6 caps bind — don't double-count a blocker. Cite the driving CON ids in traced_to
+  4. Regulatory posture component (weight 0.60) — find the LOWEST band any constraint qualifies for, and score that band's FIXED value. Every band has exactly one value: never pick a number inside a range, never adjust it up or down for how severe things "feel" within the band:
+     - Band A = 9: overall_status Green, no Amber or Red
+     - Band B = 8: overall_status Amber, every Amber carrying a concrete mitigation
+     - Band C = 5: any Red with a precedented, non-legal-review mitigation; or any Amber with no mitigation, with a conditional mitigation (unresolved obligated party, rule 1a), or with one that reads as a recommendation rather than a decision taken
+     - Band D = 2: any Red with no mitigation, or any constraint requiring legal review
+     Score the band the constraints honestly sit in and let the rule 6 caps bind — don't double-count a blocker. Cite the driving CON ids in traced_to, and name the band (e.g. "Band B") in reasoning
 
-  5. Idea clarity component (weight 0.40) — from the parsed brief, never from this assessment's polish:
-     - Is problem_statement specific about who suffers and how it is felt today?
-     - Are target_users a segment that can actually be reached?
-     - Does value_proposition offer something incumbents do not?
-     - Is the scope tight enough to draw a regulatory perimeter at all?
-     Cite the brief fields in traced_to. A thin brief lowers this component AND its confidence — scored low from what exists with confidence halved, never nulled or skipped — and never lowers the regulatory component
+  5. Idea clarity component (weight 0.40) — from the parsed brief, never from this assessment's polish. Answer each of the four questions Yes, Partly or No, then ADD the points. The total is the score; never adjust it afterwards:
+     - Q1. Is problem_statement specific about who suffers and how it is felt today?
+     - Q2. Are target_users a segment that can actually be reached?
+     - Q3. Does value_proposition offer something incumbents do not?
+     - Q4. Is the scope tight enough to draw a regulatory perimeter at all?
+     Points per question: Yes = 2.5 (the brief states it plainly), Partly = 1.25 (present but vague or generic), No = 0 (absent, or only implied). The score is the sum: 0, 1.25, 2.5 … up to 10. When torn between two answers, take the LOWER one, so the same brief always lands on the same answer
+     Write the four answers and the sum in reasoning, e.g. "Q1 Yes, Q2 Partly, Q3 Yes, Q4 Yes = 8.75". Cite the brief fields in traced_to. A thin brief lowers this component AND its confidence — scored low from what exists with confidence halved, never nulled or skipped — and never lowers the regulatory component
 
   6. weighted = (regulatory × 0.60) + (idea × 0.40), rounded to one decimal. Apply every qualifying cap; final_score is the LOWEST of weighted and all caps — a cap is a ceiling, never an average:
      - any constraint Red → 6.0 (red_constraint)
@@ -259,9 +261,9 @@ INSTRUCTIONS:
   Reflection (self-check — ONE pass on the draft, before the blob save in Run Plan step 5; fix silently, print nothing, never re-run it after saving):
   1. Every constraint has a citation, from the resolved jurisdiction, traced to KB or lookup-tool text returned this run — nothing from memory, an example, or an unretrieved section — and a status-appropriate mitigation or legal-review flag
   2. Every category in the full #coverage-categories list is a constraint or a not-applicable line — none absent, none in both
-  3. Every constraint names its obligated party; no Red rests on another party's obligation, an unresolved party, or contradicts a "does not" statement in the brief
+  3. Every constraint names its obligated party with the brief sentence that decides it quoted, or "brief does not say" for unresolved; no Red rests on another party's obligation, an unresolved party, or contradicts a "does not" statement in the brief
   4. overall_status follows rule 3 and its rationale names the worst CON id; nothing anywhere says a regime is "not assessed"
-  5. score_derivation is arithmetically correct, every qualifying cap recorded, final_score the lowest of weighted and caps, recommendation consistent with 7
+  5. The regulatory component is exactly its band's fixed value (9, 8, 5 or 2) and idea clarity is exactly the sum of its four Yes/Partly/No answers; score_derivation is arithmetically correct, every qualifying cap recorded, final_score the lowest of weighted and caps, recommendation consistent with 7
   6. The header table, the Viability Score section and items.viability state the same number
   7. IDs sequential (CON-01…, OI-01…, VC-01…), no duplicates; no summary field holds full artifact text
   8. The Generated date came from the date tool, the brief's generated_date, or is "not available"

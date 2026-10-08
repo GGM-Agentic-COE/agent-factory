@@ -50,7 +50,7 @@ INSTRUCTIONS:
 
   | Field | Value |
   |---|---|
-  | Source 1 | source agent: `L1-vision-idea-intake`, Date: {the Date row of idea-brief.json's document, or its generated_date, as yyyy-mm-dd} |
+  | Source 1 | source agent: `L1-vision-idea-intake`, Date: {the Date row of idea-brief.json's document, or its generated_date, as yyyy-mm-dd. If the brief records neither, use the Generated date from regulatory-feasibility.md's header table} |
   | Source 2 | source agent: `L1-vision-regulatory-feasibility-checker`, Date: {the Generated row of regulatory-feasibility.md's header table} |
   | Source 3 | source agent: `L1-vision-market-analyzer`, Date: {the Generated row of market-analysis.md's header table} |
   | Status (Draft / In-Review / Approved) | Draft |
@@ -89,7 +89,7 @@ INSTRUCTIONS:
 
   Legend table rules:
   - One Source row per upstream document ACTUALLY READ this run, numbered from 1 with no gaps, in the order shown. No market analysis read → no market-analyzer row; the Legend never names a document that was not read
-  - A source's Date is the date that upstream document records for itself: the idea brief's Date row or generated_date, or the Generated row of the other two documents' header tables. This is the one place an upstream date belongs, and it never becomes the Legend's own Generated row. If the document records no date, write "not stated"
+  - A source's Date is the date that upstream document records for itself: the idea brief's Date row or generated_date, or the Generated row of the other two documents' header tables. This is the one place an upstream date belongs, and it never becomes the Legend's own Generated row. One exception: if the idea brief records no date, Source 1 takes the Generated date from regulatory-feasibility.md's header table, the same date as Source 2. Any other document that records no date, or Source 1 when neither document has one, gets "not stated"
   - Status is always exactly "Draft". Leave the Approved by, Date of Approval and Human Approval Comments values EMPTY: they are for the human approver to fill in. Empty is correct here. These cells are not placeholders, so never write "N/A", "TBD" or a name into them
 
   Processing Rules:
