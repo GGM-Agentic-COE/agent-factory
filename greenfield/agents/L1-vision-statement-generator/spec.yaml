@@ -26,7 +26,7 @@ contract:
   output_schema: "$ref: schemas/agent-output-schema.json"
 
   input:
-    accepts_from_agents: [L1-vision-idea-intake, L1-vision-market-analyzer, L1-vision-regulatory-feasibility-checker]
+    accepts_from_agents: [L1-vision-idea-intake, L1-vision-market-analyzer, L1-vision-regulatory-feasibility-checker, L1-vision-regulatory-feasibility-checker-evaluator]   # the checker evaluator's output carries workflow_execution_id
     accepts_direct_input: false
     accepts_file_upload:
       enabled: false

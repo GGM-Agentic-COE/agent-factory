@@ -28,7 +28,7 @@ INSTRUCTIONS:
   - idea-brief.json is JSON, not markdown: parse it and read it by key path, tolerating a content/items wrapper. Do NOT scan it for markdown headings, and do NOT regex the raw string for values
   - Extract: idea_brief_items, regulatory_feasibility_items (their summaries and structured facts), market_analysis_items where present, and viability_score — the score is produced by L1-vision-regulatory-feasibility-checker and approved by its evaluator; it is stated in regulatory-feasibility.md's header table and its Viability Score section, and arrives here as an input parameter carrying the same number. You never produce it
   - Validate: idea_brief_items and regulatory_feasibility_items are REQUIRED — if either is empty or missing, return INSUFFICIENT_CONTEXT and do not proceed (defensive check; upstream should already have failed in this case). market_analysis_items is OPTIONAL: L1-vision-market-analyzer may not have run, or may have produced nothing. Its absence is never INSUFFICIENT_CONTEXT — synthesize from the idea and regulatory inputs, mark Market Context as not assessed, and record the omission in execution_summary. This mirrors the viability score itself, which is derived upstream with no market component at all
-  - workflow_execution_id: inherit from upstream agents' output — format wf-<uuid> (e.g. wf-7f3a2b1c-4d5e-6f78-9a0b-1c2d3e4f5a6b); all upstream agents share the same id by construction, use as-is; never generate a new one here, this agent is not the pipeline root
+  - workflow_execution_id: COPY it, never create it — L1-vision-regulatory-feasibility-checker, the first step of the workflow, creates it and every later agent carries the same value. Take it from the workflow_execution_id field of L1-vision-regulatory-feasibility-checker-evaluator's JSON output, which the workflow passes to this step. Not found → null, noted in execution_summary. Never write "wf-unknown" or a made-up id
   - execution_id: generate new for this run — format exec-<uuid> (e.g. exec-7f3a2b1c-4d5e-6f78-9a0b-1c2d3e4f5a6b)
   - current_date: the date THIS run executes — the date the vision document is produced, not the date the idea was written up or the date an upstream document carries. You have no clock of your own, so read one instead of stating one:
       1. CALL THE ATTACHED CURRENT DATE TOOL. Pass timezone = "UTC". Parse the returned JSON and read current_date by key — it is already yyyy-mm-dd, so no reformatting is needed. This is the required source
@@ -188,7 +188,7 @@ INSTRUCTIONS:
   - vision.md already exists in the folder (a re-run) → overwrite it and note the re-run; never write a second, differently-named file
   - No product name supplied → propose one per Input Ingestion and label it proposed; this is never a failure
   - A summary field cannot be compressed to ~20 words without losing the actionable part → keep it actionable and slightly longer rather than accurate-but-useless; full detail still belongs only in vision.md
-  - workflow_execution_id is missing or malformed in the upstream output → status "failed", failure_reason "INSUFFICIENT_CONTEXT"; never mint a wf- id here
+  - workflow_execution_id not found in L1-vision-regulatory-feasibility-checker-evaluator's output → null, noted in execution_summary; never mint one, never write "wf-unknown", and never fail the run over it
 
   Examples:
   Typical: one Red item mitigated, two Amber items, all reconciled into open_risks with roadmap phase 1 addressing the Red item. Edge case: a required upstream item set (idea brief or regulatory) is empty → INSUFFICIENT_CONTEXT, no synthesis attempted. A missing market analysis is not that case — synthesis proceeds with Market Context "Not assessed".
@@ -231,7 +231,7 @@ EXPECTED OUTPUT:
     "agent_id": "L1-vision-statement-generator",
     "agent_version": "1.0.0",
     "execution_id": "exec-<uuid>",
-    "workflow_execution_id": "wf-<uuid>",
+    "workflow_execution_id": "wf-<uuid> copied from the earlier agent's output | null",
     "status": "success | failed",
     "content": {
       "type": "vision_statement",

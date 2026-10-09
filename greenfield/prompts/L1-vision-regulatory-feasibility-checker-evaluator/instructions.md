@@ -36,7 +36,7 @@ From the returned files[]:
 
 - Validate: a legitimate INSUFFICIENT_CONTEXT is evaluated, not "fixed"
 
-- workflow_execution_id: inherit from generator_output.workflow_execution_id
+- workflow_execution_id: COPY it, never create it — from generator_output.workflow_execution_id. Absent or not a wf- value → null, noted in execution_summary. Never write "wf-unknown" or a made-up id, and never fail the run over it
 
 Reference Retrieval (do this BEFORE scoring anything — the rubric and the KBs are what you audit against, and neither can be recalled):
 
@@ -194,7 +194,7 @@ Word counts below are ceilings, not targets.
 
 {
   "agent_id": "L1-vision-regulatory-feasibility-checker-evaluator", "agent_version": "2.0.0",
-  "execution_id": "exec-<uuid>", "workflow_execution_id": "wf-<uuid>", "status": "success | failed",
+  "execution_id": "exec-<uuid>", "workflow_execution_id": "wf-<uuid> copied from the earlier agent's output | null", "status": "success | failed",
   "content": { "type": "regulatory_feasibility", "schema_version": "2.0",
     "items": {
       "constraints": [ { "id": "CON-01", "name": "...", "status": "Green | Amber | Red", "citation": { "source_reference": "<act/section>", "regulation": "<regulator>" }, "rationale_summary": "<=12 words", "mitigation_summary": "<=12 words | null", "requires_legal_review": true|false, "confidence": 0.0-1.0, "reasoning": "<=20 words" } ],

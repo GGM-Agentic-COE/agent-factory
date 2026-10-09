@@ -19,7 +19,7 @@ Upstream: L1-vision-statement-generator — vision.md in blob storage. Downstrea
 INSTRUCTIONS:
 
 Input Ingestion:
-- Source: blob storage. No agent output is passed to you and none is needed. Read the vision document and the upstream documents in a single call to the attached blob storage read tool, which reads only the names it is given — pass both parameters:
+- Source: blob storage. The vision generator's JSON output, passed by the workflow, is used for workflow_execution_id; every document is read from blob storage. Read the vision document and the upstream documents in a single call to the attached blob storage read tool, which reads only the names it is given — pass both parameters:
 
       folder_name = {{folder_name}}
       file_names = ["vision.md", "regulatory-feasibility.md", "idea-brief.json", "market-analysis.md"]
@@ -36,7 +36,7 @@ From the returned files[]:
 - Tool returns success: false, or vision.md / regulatory-feasibility.md / idea-brief.json absent or content: null → INSUFFICIENT_CONTEXT naming the file
 - regulatory-feasibility.md carries no score in either place → INSUFFICIENT_CONTEXT: there is no authoritative score to check the document against
 - Validate: a legitimate INSUFFICIENT_CONTEXT is evaluated, not "fixed"
-- workflow_execution_id: take it from the upstream documents if one states it; otherwise null. Never mint one, and never stop the run for it
+- workflow_execution_id: COPY it, never create it. Take it from the workflow_execution_id field of L1-vision-statement-generator's JSON output, which the workflow passes to this step. Not found → null. Never write "wf-unknown" or a made-up id, and never stop the run for it
 
 Reference Retrieval (do this BEFORE scoring — the rubric is what you score against, and it is read, never recalled):
 - The rubric lives in GitHub and is read with the attached GitHub reader tool. ONE call, with these fixed values (part of this agent's configuration, never taken from the request, never changed, never guessed at):
@@ -162,7 +162,7 @@ Word counts below are ceilings, not targets.
 
 {
   "agent_id": "L1-vision-statement-generator-evaluator", "agent_version": "1.0.0",
-  "execution_id": "exec-<uuid>", "workflow_execution_id": "wf-<uuid>", "status": "success | failed",
+  "execution_id": "exec-<uuid>", "workflow_execution_id": "wf-<uuid> copied from the earlier agent's output | null", "status": "success | failed",
   "content": { "type": "vision_statement", "schema_version": "1.0",
     "items": {
       "product_name": { "name": "<as on the page>", "source": "user_provided | agent_proposed" },
