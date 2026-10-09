@@ -1,0 +1,28 @@
+{
+  "agent_id": "L1-design-hld",
+  "agent_version": "2.0.0",
+  "execution_id": "exec-7e1a9c3d-4444-4b6f-8a0c-3d9b7e1f5a26",
+  "workflow_execution_id": "wf-3c7a9e1d-5b2f-4e64-8a0c-6d3b7f9e1c48",
+  "status": "failed",
+  "content": {
+    "type": "high_level_design",
+    "schema_version": "1.0",
+    "items": {
+      "components": [],
+      "integrations": [],
+      "data_flows": [],
+      "nfr_mappings": [],
+      "gaps": []
+    },
+    "execution_summary": "• Produced 0 items — INSUFFICIENT_CONTEXT.\n• requirements_document contains no identifiable functional requirement — it is a placeholder note ('TBD — will add requirements after the kickoff meeting'), not a requirements document.\n• There is nothing to group into components or design against; NFR-relevant language, dependency signals, and integration signals are equally absent.\n• Suggested: re-invoke once an actual Requirements.md (or PRD / impact assessment) with identifiable requirements is available.\n• Reflection: correctly returned an empty result rather than fabricating placeholder components or inventing requirements to fill the gap.\n• Knowledge bases consulted: kb-L1-enterprise-architecture — not used, no content to design against.\n• Guardrails evaluated: gr-L1-output-schema-validator (pass), gr-L1-pii-detection (pass).\n• Gaps or issues flagged: entire input — see reason above."
+  },
+  "evaluation_criteria": {
+    "must_pass_gates": [
+      "status is 'failed'",
+      "components, integrations, data_flows, nfr_mappings, and gaps are all empty arrays, never fabricated",
+      "execution_summary explicitly states INSUFFICIENT_CONTEXT and the reason",
+      "no artifacts array is produced, since there is no content to render into hld.md"
+    ],
+    "min_scores": { "faithfulness": 0.90, "hallucination_max": 0.0, "consistency": 0.90 }
+  }
+}

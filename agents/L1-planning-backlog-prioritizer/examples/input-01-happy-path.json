@@ -1,0 +1,24 @@
+{
+  "workflow_execution_id": "wf-3a1e2b90-11aa-4c2d-9f10-8e2a1b0c9d44",
+  "scoring_method": "WSJF",
+  "features": [
+    { "feature_id": "F-01.1", "name": "Unified customer identity service", "description": "Single identity record merging web, mobile, and call-center accounts." },
+    { "feature_id": "F-01.2", "name": "SSO login for mobile app", "description": "Mobile app authenticates against the unified identity service." },
+    { "feature_id": "F-01.3", "name": "Consolidated order history view", "description": "Customers see orders from all channels in one screen." },
+    { "feature_id": "F-01.4", "name": "Loyalty points migration", "description": "Migrate legacy loyalty balances onto the unified identity record." }
+  ],
+  "dependency_graph": {
+    "edges": [
+      { "from": "F-01.1", "blocks": "F-01.2" },
+      { "from": "F-01.1", "blocks": "F-01.3" },
+      { "from": "F-01.1", "blocks": "F-01.4" }
+    ]
+  },
+  "value_scoring_inputs": [
+    { "feature_id": "F-01.1", "business_value": 8, "time_criticality": 7, "risk_reduction": 6, "job_size": 8, "source": "value-scoring-sheet.xlsx:row2" },
+    { "feature_id": "F-01.2", "business_value": 6, "time_criticality": 5, "risk_reduction": 3, "job_size": 3, "source": "value-scoring-sheet.xlsx:row3" },
+    { "feature_id": "F-01.3", "business_value": 5, "time_criticality": 3, "risk_reduction": 2, "job_size": 5, "source": "value-scoring-sheet.xlsx:row4" },
+    { "feature_id": "F-01.4", "business_value": 4, "time_criticality": 2, "risk_reduction": 2, "job_size": 2, "source": "value-scoring-sheet.xlsx:row5" }
+  ],
+  "adjacent_backlog_check": false
+}

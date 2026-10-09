@@ -1,0 +1,42 @@
+{
+  "agent_id": "L1-inception-task-generator-evaluator",
+  "agent_version": "1.0.0",
+  "execution_id": "exec-a3d7c1e9-1111-4b5f-8a0c-6d3e9f1b7c42",
+  "workflow_execution_id": "wf-5d2a9c47-3e1b-4f68-8a0c-6b3d1e9f2c85",
+  "status": "success",
+  "content": {
+    "type": "task_breakdown_evaluation",
+    "schema_version": "1.0",
+    "items": {
+      "verification_results": [
+        { "task_id": "T-02.1.01", "feature_id": "F-02.1", "generator_task_type": "infra", "task_type_justified": true, "generator_effort_hours": 4, "effort_within_ceiling": true, "dependency_correct": true, "match": true, "severity": "none", "confidence": 0.9, "summary": "Bucket provisioning correctly blocks the endpoint that writes to it.", "citation": { "source_reference": "features.json", "source_location": "F-02.1" } },
+        { "task_id": "T-02.1.02", "feature_id": "F-02.1", "generator_task_type": "backend", "task_type_justified": true, "generator_effort_hours": 10, "effort_within_ceiling": true, "dependency_correct": true, "match": true, "severity": "none", "confidence": 0.9, "summary": "Endpoint task correctly blocked by infra, correctly blocks frontend and qa.", "citation": { "source_reference": "acceptance-criteria.json", "source_location": "F-02.1[0:2]" } },
+        { "task_id": "T-02.1.03", "feature_id": "F-02.1", "generator_task_type": "frontend", "task_type_justified": true, "generator_effort_hours": 12, "effort_within_ceiling": true, "dependency_correct": true, "match": true, "severity": "none", "confidence": 0.9, "summary": "Frontend correctly blocked by the backend contract it consumes.", "citation": { "source_reference": "acceptance-criteria.json", "source_location": "F-02.1[0:1]" } },
+        { "task_id": "T-02.1.04", "feature_id": "F-02.1", "generator_task_type": "qa", "task_type_justified": true, "generator_effort_hours": 6, "effort_within_ceiling": true, "dependency_correct": true, "match": true, "severity": "none", "confidence": 0.9, "summary": "QA correctly blocked by both implementation tasks it tests.", "citation": { "source_reference": "acceptance-criteria.json", "source_location": "F-02.1[0:2]" } },
+        { "task_id": "T-02.2.01", "feature_id": "F-02.2", "generator_task_type": "data", "task_type_justified": true, "generator_effort_hours": 5, "effort_within_ceiling": true, "dependency_correct": true, "match": true, "severity": "none", "confidence": 0.9, "summary": "Schema task correctly blocks the backend job querying it.", "citation": { "source_reference": "features.json", "source_location": "F-02.2" } },
+        { "task_id": "T-02.2.02", "feature_id": "F-02.2", "generator_task_type": "backend", "task_type_justified": true, "generator_effort_hours": 14, "effort_within_ceiling": true, "dependency_correct": true, "match": true, "severity": "none", "confidence": 0.85, "summary": "14h is under the 16h ceiling; correctly blocked by schema, blocks devops and qa.", "citation": { "source_reference": "acceptance-criteria.json", "source_location": "F-02.2[1:2]" } },
+        { "task_id": "T-02.2.03", "feature_id": "F-02.2", "generator_task_type": "devops", "task_type_justified": true, "generator_effort_hours": 3, "effort_within_ceiling": true, "dependency_correct": true, "match": true, "severity": "none", "confidence": 0.9, "summary": "Scheduling correctly blocked by the job logic it schedules.", "citation": { "source_reference": "acceptance-criteria.json", "source_location": "F-02.2[0]" } },
+        { "task_id": "T-02.2.04", "feature_id": "F-02.2", "generator_task_type": "qa", "task_type_justified": true, "generator_effort_hours": 6, "effort_within_ceiling": true, "dependency_correct": true, "match": true, "severity": "none", "confidence": 0.85, "summary": "QA correctly blocked by both the job logic and its scheduling.", "citation": { "source_reference": "acceptance-criteria.json", "source_location": "F-02.2[1:2]" } }
+      ],
+      "feature_coverage": [
+        { "feature_id": "F-02.1", "covered": true, "task_ids": ["T-02.1.01", "T-02.1.02", "T-02.1.03", "T-02.1.04"], "confidence": 0.9, "summary": "Fully covered: infra, backend, frontend, and qa tasks present and correctly linked." },
+        { "feature_id": "F-02.2", "covered": true, "task_ids": ["T-02.2.01", "T-02.2.02", "T-02.2.03", "T-02.2.04"], "confidence": 0.9, "summary": "Fully covered: data, backend, devops, and qa tasks present and correctly linked." }
+      ],
+      "fixes_applied": [],
+      "guardrail_rechecks": [
+        { "guardrail": "gr-L3-consistency-checker", "generator_claimed_result": "pass", "evaluator_result": "pass", "notes": "Re-applied the KB's dependency-inference patterns to all 8 tasks; every link is correct and no task exceeds the ceiling." },
+        { "guardrail": "gr-L3-hallucination-detector", "generator_claimed_result": "pass", "evaluator_result": "pass", "notes": "All 8 tasks trace to features.json or acceptance-criteria.json; no invented scope." },
+        { "guardrail": "gr-L3-citation-validator", "generator_claimed_result": "pass", "evaluator_result": "pass", "notes": "All citations resolve to real feature ids or acceptance-criteria indices." }
+      ]
+    },
+    "verdict": {
+      "final_decision": "approved",
+      "overall_score": 1.0,
+      "faithfulness_score": 1.0,
+      "hallucination_score": 0.0,
+      "consistency_score": 1.0,
+      "citation_completeness_score": 1.0
+    },
+    "execution_summary": "• Verified 8/8 tasks and 2/2 features; 0 mismatches, 0 omissions, 0 fixes needed.\n• Every task's type, effort estimate, and dependency links were independently re-judged against kb-L1-task-decomposition-best-practices and matched the generator's claims.\n• Both features fully covered — no silently dropped scope.\n• Guardrails re-checked independently: gr-L3-consistency-checker (pass), gr-L3-hallucination-detector (pass), gr-L3-citation-validator (pass) — all matched the generator's own claims.\n• Tools invoked: none (adjacent_backlog_check was false).\n• Final verdict: approved — no corrections needed, document left as-is."
+  }
+}

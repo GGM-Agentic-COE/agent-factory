@@ -1,0 +1,27 @@
+{
+  "generator_output": {
+    "agent_id": "L1-inception-task-generator",
+    "agent_version": "1.0.0",
+    "execution_id": "exec-e3b7c9a5-6666-4d8f-8a1e-7c3b9d5f2a06",
+    "workflow_execution_id": "wf-8e2a7c1d-5b3f-4e94-8a0c-6f7b9d3e1c48",
+    "status": "success",
+    "content": {
+      "type": "task_breakdown",
+      "schema_version": "1.0",
+      "items": {
+        "tasks": [
+          { "task_id": "T-09.1.01", "feature_id": "F-09.1", "title": "Build report generation endpoint", "task_type": "backend", "effort_hours": 10, "blocks_task_ids": [], "blocked_by_task_ids": [], "confidence": 0.8, "summary": "Generates the requested report.", "citation": { "source_reference": "features.json", "source_location": "F-09.1" } }
+        ],
+        "gaps": []
+      },
+      "artifacts": [
+        { "id": "artifact-2e9b7c3a-6d1f-4e58-8a0c-3f9b7d1e5c26", "type": "document", "name": "task-breakdown.md", "format": "markdown", "storage": { "provider": "local", "location": "wf-8e2a7c1d-5b3f-4e94-8a0c-6f7b9d3e1c48/task-breakdown.md" }, "description": "1-task breakdown.", "produced_by": "L1-inception-task-generator" }
+      ],
+      "execution_summary": "• Generated 1 task for 1/1 feature; 0 gaps."
+    }
+  },
+  "features": [],
+  "acceptance_criteria": [],
+  "max_task_effort_hours": 16,
+  "adjacent_backlog_check": false
+}

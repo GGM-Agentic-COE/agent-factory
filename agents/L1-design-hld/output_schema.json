@@ -1,0 +1,143 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.internal/agents/L1-design-hld/output_schema.json",
+  "title": "L1-design-hld Output",
+  "description": "Full AgentOutput envelope. content.items carries per-component/integration/data-flow/NFR-mapping meta-points only (structural fields stay full: ids, types, protocols, traceability arrays). The full architecture narrative — C4 diagrams, component rationale, NFR approach detail — lives ONLY in content.artifacts[0] (hld.md). Any *_summary/summary string in items is a distillation (<=150 chars), never a copy of the artifact text.",
+  "type": "object",
+  "required": ["agent_id", "agent_version", "execution_id", "workflow_execution_id", "status", "content"],
+  "properties": {
+    "agent_id": { "type": "string", "const": "L1-design-hld" },
+    "agent_version": { "type": "string", "description": "Semver, e.g. '1.0.0'." },
+    "execution_id": { "type": "string", "pattern": "^exec-.+$" },
+    "workflow_execution_id": { "type": "string", "pattern": "^wf-.+$" },
+    "status": { "type": "string", "enum": ["success", "failed"] },
+    "content": {
+      "type": "object",
+      "required": ["type", "schema_version", "items", "execution_summary"],
+      "properties": {
+        "type": { "type": "string", "const": "high_level_design" },
+        "schema_version": { "type": "string", "const": "1.0" },
+        "items": {
+          "type": "object",
+          "required": ["components", "integrations", "data_flows", "nfr_mappings", "gaps"],
+          "properties": {
+            "components": { "type": "array", "items": { "$ref": "#/$defs/Component" } },
+            "integrations": { "type": "array", "items": { "$ref": "#/$defs/Integration" } },
+            "data_flows": { "type": "array", "items": { "$ref": "#/$defs/DataFlow" } },
+            "nfr_mappings": {
+              "type": "array",
+              "description": "One entry per NFR that was mapped to a design approach.",
+              "items": { "$ref": "#/$defs/NfrMapping" }
+            },
+            "gaps": {
+              "type": "array",
+              "description": "Requirements or NFRs that could not be mapped to a component/approach — missing dependency info, too vague, or contradictory.",
+              "items": { "$ref": "#/$defs/Gap" }
+            }
+          }
+        },
+        "artifacts": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/Artifact" },
+          "minItems": 1,
+          "maxItems": 1
+        },
+        "execution_summary": {
+          "type": "string",
+          "description": "Plain-text bullet summary — not JSON."
+        }
+      }
+    }
+  },
+  "$defs": {
+    "Citation": {
+      "type": "object",
+      "required": ["source_reference", "source_location"],
+      "properties": {
+        "source_reference": { "type": "string", "const": "Requirements.md", "description": "Always the single source document — there is no separate requirements.json/nfr-spec.json/dependency-graph.json/api-spec.json in the v2 (single-document) input contract." },
+        "source_location": { "type": "string", "description": "Locator within Requirements.md, e.g. a heading, a table row, or the FR-{seq}/NFR-{seq} id assigned during extraction." }
+      }
+    },
+    "Component": {
+      "type": "object",
+      "required": ["component_id", "name", "component_type", "satisfies_requirement_ids", "satisfies_nfr_ids", "confidence", "summary", "citation"],
+      "properties": {
+        "component_id": { "type": "string", "pattern": "^C-[0-9]{2}$" },
+        "name": { "type": "string", "maxLength": 80 },
+        "component_type": { "type": "string", "enum": ["service", "ui", "datastore", "queue", "gateway", "external_system", "batch_job"] },
+        "satisfies_requirement_ids": { "type": "array", "items": { "type": "string", "pattern": "^FR-[0-9]{2,4}$" } },
+        "satisfies_nfr_ids": { "type": "array", "items": { "type": "string", "pattern": "^NFR-[0-9]{2,4}$" } },
+        "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+        "summary": { "type": "string", "maxLength": 150, "description": "Distilled one-line responsibility. Full rationale is in the artifact's Component detail section only." },
+        "citation": { "$ref": "#/$defs/Citation" }
+      }
+    },
+    "Integration": {
+      "type": "object",
+      "required": ["integration_id", "from_component_id", "to_component_id", "protocol", "confidence", "summary", "citation"],
+      "properties": {
+        "integration_id": { "type": "string", "pattern": "^INT-[0-9]{2}$" },
+        "from_component_id": { "type": "string", "pattern": "^C-[0-9]{2}$" },
+        "to_component_id": { "type": "string", "pattern": "^C-[0-9]{2}$" },
+        "protocol": { "type": "string", "enum": ["REST", "gRPC", "event", "message_queue", "database", "file", "batch"] },
+        "api_spec_ref": { "type": "string", "description": "Endpoint path+method this integration corresponds to, if it maps to one in api_spec. Omit if there is none (e.g. a direct DB connection)." },
+        "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+        "summary": { "type": "string", "maxLength": 150 },
+        "citation": { "$ref": "#/$defs/Citation" }
+      }
+    },
+    "DataFlow": {
+      "type": "object",
+      "required": ["data_flow_id", "source_component_id", "target_component_id", "contains_pii", "confidence", "summary", "citation"],
+      "properties": {
+        "data_flow_id": { "type": "string", "pattern": "^DF-[0-9]{2}$" },
+        "source_component_id": { "type": "string", "pattern": "^C-[0-9]{2}$" },
+        "target_component_id": { "type": "string", "pattern": "^C-[0-9]{2}$" },
+        "contains_pii": { "type": "boolean", "description": "True if this flow carries personally identifiable information — drives which NFR/compliance mapping applies." },
+        "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+        "summary": { "type": "string", "maxLength": 150, "description": "Distilled description of what data moves and why." },
+        "citation": { "$ref": "#/$defs/Citation" }
+      }
+    },
+    "NfrMapping": {
+      "type": "object",
+      "required": ["nfr_id", "addressed_by_component_ids", "confidence", "summary", "citation"],
+      "properties": {
+        "nfr_id": { "type": "string", "pattern": "^NFR-[0-9]{2,4}$" },
+        "addressed_by_component_ids": { "type": "array", "items": { "type": "string", "pattern": "^C-[0-9]{2}$" } },
+        "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+        "summary": { "type": "string", "maxLength": 150, "description": "Distilled approach. Full rationale is in the artifact's NFR Mapping section only." },
+        "citation": { "$ref": "#/$defs/Citation" }
+      }
+    },
+    "Gap": {
+      "type": "object",
+      "required": ["ref_id", "issue", "question"],
+      "properties": {
+        "ref_id": { "type": "string", "description": "The FR/NFR id that could not be mapped." },
+        "issue": { "type": "string", "maxLength": 150 },
+        "question": { "type": "string", "maxLength": 150 }
+      }
+    },
+    "Artifact": {
+      "type": "object",
+      "required": ["id", "type", "name", "format", "storage", "description", "produced_by"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^artifact-.+$" },
+        "type": { "type": "string", "const": "document" },
+        "name": { "type": "string", "const": "hld.md" },
+        "format": { "type": "string", "const": "markdown" },
+        "storage": {
+          "type": "object",
+          "required": ["provider", "location"],
+          "properties": {
+            "provider": { "type": "string", "enum": ["s3", "local", "confluence", "github", "jira_attachment"] },
+            "location": { "type": "string", "description": "{workflow_execution_id}/hld.md" }
+          }
+        },
+        "description": { "type": "string" },
+        "produced_by": { "type": "string", "const": "L1-design-hld" }
+      }
+    }
+  }
+}

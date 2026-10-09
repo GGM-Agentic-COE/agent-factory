@@ -1,0 +1,67 @@
+{
+  "agent_id": "L1-planning-backlog-prioritizer",
+  "agent_version": "1.0.0",
+  "execution_id": "exec-1d9a3c5e-7f21-4b6a-8c0d-5e2a9f4b3c17",
+  "workflow_execution_id": "wf-9c4d7f21-2a5b-4e88-8b0a-3d6e1c9a4f77",
+  "status": "success",
+  "content": {
+    "type": "prioritized_backlog",
+    "schema_version": "1.0",
+    "items": {
+      "prioritized_features": [
+        {
+          "feature_id": "F-02.1",
+          "rank": 1,
+          "scoring_method": "WSJF",
+          "priority_score": 3.6,
+          "wsjf_components": { "business_value": 7, "time_criticality": 6, "risk_reduction_opportunity_enablement": 5, "job_size": 5 },
+          "value_score": 72,
+          "effort_estimate": 5,
+          "dependency_unblocking_score": 40,
+          "blocks_feature_ids": ["F-02.2"],
+          "blocked_by_feature_ids": [],
+          "confidence": 0.9,
+          "summary": "Highest WSJF and blocks F-02.2 — sequencing and value agree, no adjustment needed.",
+          "citation": { "source_reference": "value-scoring-sheet.xlsx", "source_location": "row2" }
+        },
+        {
+          "feature_id": "F-02.2",
+          "rank": 2,
+          "scoring_method": "WSJF",
+          "priority_score": 2.333,
+          "wsjf_components": { "business_value": 4, "time_criticality": 2, "risk_reduction_opportunity_enablement": 1, "job_size": 3 },
+          "value_score": 28,
+          "effort_estimate": 3,
+          "dependency_unblocking_score": 5,
+          "blocks_feature_ids": [],
+          "blocked_by_feature_ids": ["F-02.1"],
+          "confidence": 0.85,
+          "summary": "Lower value and blocked by F-02.1; correctly ranks second.",
+          "citation": { "source_reference": "value-scoring-sheet.xlsx", "source_location": "row3" }
+        }
+      ],
+      "gaps": [
+        {
+          "feature_id": "F-02.3",
+          "issue": "No entry found in value_scoring_inputs for F-02.3.",
+          "question": "Please provide WSJF fields (business_value, time_criticality, risk_reduction, job_size) for F-02.3 via the value-scoring sheet or Jira custom fields."
+        }
+      ]
+    },
+    "artifacts": [
+      {
+        "id": "artifact-6a2d8f0e-3c17-4b9a-9d5e-1f7b2a4c8e05",
+        "type": "document",
+        "name": "prioritized-backlog.md",
+        "format": "markdown",
+        "storage": {
+          "provider": "local",
+          "location": "wf-9c4d7f21-2a5b-4e88-8b0a-3d6e1c9a4f77/prioritized-backlog.md"
+        },
+        "description": "Ranked backlog of 2 fully-scored refund features, with F-02.3 listed under Gaps pending value-scoring input.",
+        "produced_by": "L1-planning-backlog-prioritizer"
+      }
+    ],
+    "execution_summary": "• Scored and ranked 2/3 features using WSJF; 1 gap.\n• F-02.3 excluded from ranking — no value_scoring_inputs entry was supplied for it; not estimated.\n• No rank adjustments needed: raw WSJF order already matched dependency order (F-02.1 blocks F-02.2).\n• Reflection: verified rank sequence 1-2 for scored features, no duplicates, gap correctly excluded rather than guessed.\n• Knowledge bases consulted: kb-L1-sdlc-templates — used for the prioritized-backlog.md table/rationale/gaps layout.\n• Guardrails evaluated: gr-L1-output-schema-validator (pass), gr-L1-pii-detection (pass), gr-L3-hallucination-detector (pass), gr-L3-citation-validator (pass), gr-L1-consistency-check (pass).\n• Tools invoked: none (adjacent_backlog_check was false).\n• Gaps or issues flagged: F-02.3 — missing value-scoring inputs, needs Product Lead input."
+  }
+}

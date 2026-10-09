@@ -1,0 +1,133 @@
+{
+  "agent_id": "L1-planning-backlog-prioritizer",
+  "agent_version": "1.0.0",
+  "execution_id": "exec-4f2b9d1a-6e7c-4a83-9c1f-3d8b5e2a7f60",
+  "workflow_execution_id": "wf-7e5a2c14-9b3d-4f61-a8c0-2d9e6b1f4a73",
+  "status": "success",
+  "content": {
+    "type": "prioritized_backlog",
+    "schema_version": "1.0",
+    "items": {
+      "prioritized_features": [
+        {
+          "feature_id": "F-05.6",
+          "rank": 1,
+          "scoring_method": "RICE",
+          "priority_score": 2550,
+          "rice_components": { "reach": 9000, "impact": 2, "confidence_pct": 85, "effort": 6 },
+          "value_score": 84,
+          "effort_estimate": 6,
+          "dependency_unblocking_score": 100,
+          "blocks_feature_ids": ["F-05.1"],
+          "blocked_by_feature_ids": [],
+          "confidence": 0.85,
+          "summary": "Moved above F-05.1: it directly blocks F-05.1, which transitively blocks 3 more features.",
+          "citation": { "source_reference": "value-scoring-sheet.xlsx", "source_location": "row7" },
+          "duplicate_flag": true
+        },
+        {
+          "feature_id": "F-05.1",
+          "rank": 2,
+          "scoring_method": "RICE",
+          "priority_score": 3037.5,
+          "rice_components": { "reach": 9000, "impact": 3, "confidence_pct": 90, "effort": 8 },
+          "value_score": 100,
+          "effort_estimate": 8,
+          "dependency_unblocking_score": 95,
+          "blocks_feature_ids": ["F-05.2", "F-05.3", "F-05.5"],
+          "blocked_by_feature_ids": ["F-05.6"],
+          "confidence": 0.9,
+          "summary": "Highest raw RICE and blocks 3 downstream features, but must follow F-05.6 which blocks it.",
+          "citation": { "source_reference": "value-scoring-sheet.xlsx", "source_location": "row2" }
+        },
+        {
+          "feature_id": "F-05.3",
+          "rank": 3,
+          "scoring_method": "RICE",
+          "priority_score": 504,
+          "rice_components": { "reach": 1200, "impact": 3, "confidence_pct": 70, "effort": 5 },
+          "value_score": 17,
+          "effort_estimate": 5,
+          "dependency_unblocking_score": 5,
+          "blocks_feature_ids": [],
+          "blocked_by_feature_ids": ["F-05.1"],
+          "confidence": 0.7,
+          "summary": "Third-highest raw RICE; correctly ranked below its blocker F-05.1.",
+          "citation": { "source_reference": "value-scoring-sheet.xlsx", "source_location": "row4" }
+        },
+        {
+          "feature_id": "F-05.2",
+          "rank": 4,
+          "scoring_method": "RICE",
+          "priority_score": 320,
+          "rice_components": { "reach": 400, "impact": 2, "confidence_pct": 80, "effort": 2 },
+          "value_score": 11,
+          "effort_estimate": 2,
+          "dependency_unblocking_score": 5,
+          "blocks_feature_ids": [],
+          "blocked_by_feature_ids": ["F-05.1"],
+          "confidence": 0.8,
+          "summary": "Low effort but limited reach; ranked below its blocker F-05.1.",
+          "citation": { "source_reference": "value-scoring-sheet.xlsx", "source_location": "row3" }
+        },
+        {
+          "feature_id": "F-05.5",
+          "rank": 5,
+          "scoring_method": "RICE",
+          "priority_score": 195,
+          "rice_components": { "reach": 800, "impact": 3, "confidence_pct": 65, "effort": 8 },
+          "value_score": 6,
+          "effort_estimate": 8,
+          "dependency_unblocking_score": 25,
+          "blocks_feature_ids": ["F-05.4"],
+          "blocked_by_feature_ids": ["F-05.1"],
+          "confidence": 0.65,
+          "summary": "High effort relative to reach keeps raw score low; blocks only F-05.4.",
+          "citation": { "source_reference": "value-scoring-sheet.xlsx", "source_location": "row6" }
+        },
+        {
+          "feature_id": "F-05.4",
+          "rank": 6,
+          "scoring_method": "RICE",
+          "priority_score": 30,
+          "rice_components": { "reach": 150, "impact": 1, "confidence_pct": 60, "effort": 3 },
+          "value_score": 1,
+          "effort_estimate": 3,
+          "dependency_unblocking_score": 0,
+          "blocks_feature_ids": [],
+          "blocked_by_feature_ids": ["F-05.5"],
+          "confidence": 0.6,
+          "summary": "Lowest reach and impact of the set; correctly last.",
+          "citation": { "source_reference": "value-scoring-sheet.xlsx", "source_location": "row5" }
+        }
+      ],
+      "gaps": []
+    },
+    "artifacts": [
+      {
+        "id": "artifact-2b7e9c4a-5f1d-4e83-8a6c-9d0b3f7e1a52",
+        "type": "document",
+        "name": "prioritized-backlog.md",
+        "format": "markdown",
+        "storage": {
+          "provider": "local",
+          "location": "wf-7e5a2c14-9b3d-4f61-a8c0-2d9e6b1f4a73/prioritized-backlog.md"
+        },
+        "description": "Ranked backlog of 6 warehouse-inventory features (RICE), with the F-05.6/F-05.1 dependency-forced reorder and the F-05.6 duplicate-ticket flag documented in full.",
+        "produced_by": "L1-planning-backlog-prioritizer"
+      }
+    ],
+    "execution_summary": "• Scored and ranked 6/6 features using RICE; 0 gaps.\n• Rank adjustment: F-05.6 moved above F-05.1 (its raw RICE was 2nd-highest) because F-05.6 directly blocks F-05.1, which itself transitively blocks 3 more features — outranking a blocker would have violated the dependency graph.\n• F-05.1 kept its high rank (blocks F-05.2, F-05.3, F-05.5 — 3 downstream features, meeting the >=3-blocks uplift rule) but could not pass F-05.6.\n• Remaining 4 features ranked by raw RICE score with no further dependency conflicts.\n• Reflection: verified rank sequence 1-6, no duplicates, no remaining blocked-by/rank contradictions, no summary field copied full artifact text.\n• Knowledge bases consulted: kb-L1-sdlc-templates — used for the prioritized-backlog.md table/rationale layout.\n• Guardrails evaluated: gr-L1-output-schema-validator (pass), gr-L1-pii-detection (pass), gr-L3-hallucination-detector (pass), gr-L3-citation-validator (pass), gr-L1-consistency-check (pass), gr-L2-tool-permissions (pass), gr-L3-agent-rate-limit (pass).\n• Tools invoked: tool-L1-jira-fetch-issue — checked all 6 feature names against the adjacent backlog; found 1 likely duplicate (F-05.6 vs existing ticket WMS-142).\n• Gaps or issues flagged: none."
+  },
+  "evaluation_criteria": {
+    "must_pass_gates": [
+      "All 6 input features appear exactly once in prioritized_features",
+      "rank is sequential 1-6 with no duplicates",
+      "F-05.1 does not outrank F-05.6 (F-05.6 blocks F-05.1) — reorder must be present and documented in F-05.6's summary",
+      "F-05.1's summary documents the >=3-blocks uplift alongside the reorder constraint",
+      "Every value_score and dependency_unblocking_score carries a citation",
+      "duplicate_flag is true only for F-05.6, given adjacent_backlog_check=true"
+    ],
+    "min_scores": { "faithfulness": 0.90, "hallucination_max": 0.10, "consistency": 0.90 }
+  }
+}

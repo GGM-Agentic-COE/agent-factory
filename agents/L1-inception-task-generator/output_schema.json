@@ -1,1 +1,96 @@
-
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.internal/agents/L1-inception-task-generator/output_schema.json",
+  "title": "L1-inception-task-generator Output",
+  "description": "Items carry per-task meta-points only (structural fields stay full: ids, type, effort, dependency links). The full task breakdown narrative (why a feature was split this way, detailed task descriptions) lives ONLY in artifacts[0] (task-breakdown.md). Any *_summary/summary string here is a distillation (<=150 chars), never a copy of the artifact text.",
+  "type": "object",
+  "required": ["items", "execution_summary"],
+  "properties": {
+    "items": {
+      "type": "object",
+      "required": ["tasks", "gaps"],
+      "properties": {
+        "tasks": {
+          "type": "array",
+          "description": "One entry per generated task, grouped implicitly by feature_id.",
+          "items": { "$ref": "#/$defs/Task" }
+        },
+        "gaps": {
+          "type": "array",
+          "description": "Features that could not be decomposed (too vague, contradictory, or missing description).",
+          "items": { "$ref": "#/$defs/Gap" }
+        }
+      }
+    },
+    "artifacts": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/Artifact" },
+      "minItems": 1,
+      "maxItems": 1
+    },
+    "execution_summary": {
+      "type": "string",
+      "description": "Plain-text bullet summary — not JSON."
+    }
+  },
+  "$defs": {
+    "Citation": {
+      "type": "object",
+      "required": ["source_reference", "source_location"],
+      "properties": {
+        "source_reference": { "type": "string", "description": "Which input this task was derived from, e.g. 'features.json' or 'acceptance-criteria.json'." },
+        "source_location": { "type": "string", "description": "Locator within that source, e.g. feature id or acceptance-criteria index." }
+      }
+    },
+    "Task": {
+      "type": "object",
+      "required": [
+        "task_id", "feature_id", "title", "task_type", "effort_hours",
+        "blocks_task_ids", "blocked_by_task_ids",
+        "confidence", "summary", "citation"
+      ],
+      "properties": {
+        "task_id": { "type": "string", "pattern": "^T-[0-9]{2}\\.[0-9]+\\.[0-9]{2,3}$", "description": "Task id, format T-{epic}.{feature_seq}.{task_seq}, e.g. T-01.1.01. Prefix before the final segment matches the parent feature_id." },
+        "feature_id": { "type": "string", "pattern": "^F-[0-9]{2}\\.[0-9]+$", "description": "Parent feature id from features.json." },
+        "title": { "type": "string", "maxLength": 100, "description": "Short imperative task title, e.g. 'Build POST /identity/merge endpoint'." },
+        "task_type": { "type": "string", "enum": ["frontend", "backend", "qa", "infra", "data", "design", "devops", "documentation"] },
+        "effort_hours": { "type": "number", "exclusiveMinimum": 0, "description": "Estimated effort in hours. Must not exceed max_task_effort_hours — if it would, the feature must be split into more tasks instead." },
+        "blocks_task_ids": { "type": "array", "items": { "type": "string" }, "description": "Task ids that cannot start until this one is done (intra- or cross-feature)." },
+        "blocked_by_task_ids": { "type": "array", "items": { "type": "string" }, "description": "Task ids this task is waiting on." },
+        "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+        "summary": { "type": "string", "maxLength": 150, "description": "Distilled one-line description of the task. Full detail is in the artifact only." },
+        "citation": { "$ref": "#/$defs/Citation" },
+        "duplicate_flag": { "type": "boolean", "description": "True if tool-L1-jira-fetch-issue found a likely-duplicate task in the adjacent backlog (only set when adjacent_backlog_check=true)." }
+      }
+    },
+    "Gap": {
+      "type": "object",
+      "required": ["feature_id", "issue", "question"],
+      "properties": {
+        "feature_id": { "type": "string" },
+        "issue": { "type": "string", "maxLength": 150 },
+        "question": { "type": "string", "maxLength": 150 }
+      }
+    },
+    "Artifact": {
+      "type": "object",
+      "required": ["id", "type", "name", "format", "storage", "description", "produced_by"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^artifact-.+$" },
+        "type": { "type": "string", "const": "document" },
+        "name": { "type": "string", "const": "task-breakdown.md" },
+        "format": { "type": "string", "const": "markdown" },
+        "storage": {
+          "type": "object",
+          "required": ["provider", "location"],
+          "properties": {
+            "provider": { "type": "string", "enum": ["s3", "local", "confluence", "github", "jira_attachment"] },
+            "location": { "type": "string", "description": "{workflow_execution_id}/task-breakdown.md" }
+          }
+        },
+        "description": { "type": "string" },
+        "produced_by": { "type": "string", "const": "L1-inception-task-generator" }
+      }
+    }
+  }
+}

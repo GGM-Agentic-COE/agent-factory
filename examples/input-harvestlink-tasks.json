@@ -1,0 +1,37 @@
+{
+  "workflow_execution_id": "wf-2f8b3e91-6a1d-4c72-9e0b-5d3a8f1c6b94",
+  "max_task_effort_hours": 16,
+  "features": [
+    {
+      "feature_id": "F-10.1",
+      "name": "Onboarding Service",
+      "description": "Producers and distributors complete FBO attestation and onboarding, authenticated via an external-party identity provider, before they can trade on HarvestLink."
+    },
+    {
+      "feature_id": "F-10.4",
+      "name": "Compliance Documentation Service",
+      "description": "Producers submit self-attested allergen declarations; drives the compliance-completeness score consumed by Discovery & Matching and Transaction Limit Enforcement."
+    }
+  ],
+  "acceptance_criteria": [
+    {
+      "feature_id": "F-10.1",
+      "criteria": [
+        "FBO attestation must be explicitly confirmed before producer/distributor onboarding completes",
+        "Attestation records are retained for 6 years, segregated with extended lifecycle policies distinct from the standard 3-year transactional retention",
+        "Producer/distributor identity is authenticated via the external-party identity provider — Azure AD is employee-only and cannot be used",
+        "Onboarding requires cohort-eligibility confirmation from the Cohort Management Service before completing, since this is pilot-phase only"
+      ]
+    },
+    {
+      "feature_id": "F-10.4",
+      "criteria": [
+        "Allergen declaration requires producer_attestation before status transitions from pending to finalised",
+        "Compliance-completeness score is calculated from finalised declarations only",
+        "The finalised score is exposed to Discovery & Matching Service and Transaction Limit Enforcement Service",
+        "Declarations are stored independently within this service — no integration with the group's central Compliance Document Store, to preserve facilitation-only legal posture"
+      ]
+    }
+  ],
+  "adjacent_backlog_check": false
+}

@@ -1,0 +1,105 @@
+{
+  "agent_id": "L1-inception-task-generator-evaluator",
+  "agent_version": "1.0.0",
+  "execution_id": "exec-c9e3a7b5-3333-4d8f-8a1e-6b3c9d5f2a04",
+  "workflow_execution_id": "wf-4c9e2a7d-6b1f-4e83-8a0c-5d7b3f9e1c26",
+  "status": "success",
+  "content": {
+    "type": "task_breakdown_evaluation",
+    "schema_version": "1.0",
+    "items": {
+      "verification_results": [
+        {
+          "task_id": "T-04.1.01",
+          "feature_id": "F-04.1",
+          "generator_task_type": "backend",
+          "task_type_justified": true,
+          "generator_effort_hours": 20,
+          "effort_within_ceiling": false,
+          "dependency_correct": true,
+          "match": false,
+          "severity": "blocker",
+          "confidence": 0.9,
+          "summary": "20h exceeds the 16h ceiling with no split — combines aggregation and PDF rendering in one task.",
+          "citation": { "source_reference": "acceptance-criteria.json", "source_location": "F-04.1[0:1]" }
+        },
+        {
+          "task_id": "T-04.1.02",
+          "feature_id": "F-04.1",
+          "generator_task_type": "qa",
+          "task_type_justified": true,
+          "generator_effort_hours": 6,
+          "effort_within_ceiling": true,
+          "dependency_correct": false,
+          "match": false,
+          "severity": "minor",
+          "confidence": 0.85,
+          "summary": "Correct as originally scoped, but must depend on both halves once T-04.1.01 is split.",
+          "citation": { "source_reference": "acceptance-criteria.json", "source_location": "F-04.1[0:1]" }
+        }
+      ],
+      "feature_coverage": [
+        { "feature_id": "F-04.1", "covered": true, "task_ids": ["T-04.1.01", "T-04.1.02", "T-04.1.03"], "confidence": 0.85, "summary": "Covered, but required a split fix to bring T-04.1.01 under the effort ceiling." }
+      ],
+      "fixes_applied": [
+        {
+          "ref_id": "T-04.1.01",
+          "field": "effort_hours",
+          "generator_value": "20",
+          "corrected_value": "12",
+          "reason": "Split into aggregation + PDF rendering per the KB's split guidance; this half covers data aggregation only.",
+          "document_updated": true
+        },
+        {
+          "ref_id": "F-04.1",
+          "field": "new_task_created",
+          "generator_value": "none",
+          "corrected_value": "T-04.1.02 — Render aggregated data to PDF format (backend, 8h, blocked_by T-04.1.01)",
+          "reason": "Second half of the split: PDF rendering is a distinct concern from data aggregation and was folded into the oversized original task.",
+          "document_updated": true
+        },
+        {
+          "ref_id": "T-04.1.02",
+          "field": "task_id",
+          "generator_value": "T-04.1.02",
+          "corrected_value": "T-04.1.03",
+          "reason": "Renumbered because the split inserted a new task at position 02.",
+          "document_updated": true
+        },
+        {
+          "ref_id": "T-04.1.03",
+          "field": "blocked_by_task_ids",
+          "generator_value": "[T-04.1.01]",
+          "corrected_value": "[T-04.1.01, T-04.1.02]",
+          "reason": "QA must wait on both the aggregation and the PDF-rendering halves of the split backend work.",
+          "document_updated": true
+        }
+      ],
+      "guardrail_rechecks": [
+        { "guardrail": "gr-L3-consistency-checker", "generator_claimed_result": "pass", "evaluator_result": "fail", "notes": "Missed T-04.1.01 exceeding the 16h effort ceiling without a split." },
+        { "guardrail": "gr-L3-hallucination-detector", "generator_claimed_result": "pass", "evaluator_result": "pass", "notes": "No invented scope — the split only re-divides work already implied by F-04.1's description and AC." },
+        { "guardrail": "gr-L3-citation-validator", "generator_claimed_result": "pass", "evaluator_result": "pass", "notes": "Both original citations resolve to real acceptance-criteria indices." }
+      ]
+    },
+    "verdict": {
+      "final_decision": "fixed_and_approved",
+      "overall_score": 0.8,
+      "faithfulness_score": 0.9,
+      "hallucination_score": 0.0,
+      "consistency_score": 0.5,
+      "citation_completeness_score": 1.0
+    },
+    "artifacts": [
+      {
+        "id": "artifact-6b2e9d1c-7a3f-4d85-9c0e-4f7b1e9a5c62",
+        "type": "document",
+        "name": "task-breakdown.md",
+        "format": "markdown",
+        "storage": { "provider": "local", "location": "wf-4c9e2a7d-6b1f-4e83-8a0c-5d7b3f9e1c26/task-breakdown.md" },
+        "description": "Re-uploaded with T-04.1.01 split into T-04.1.01 (aggregation, 12h) and T-04.1.02 (PDF rendering, 8h); QA renumbered to T-04.1.03 and now blocked by both.",
+        "produced_by": "L1-inception-task-generator-evaluator"
+      }
+    ],
+    "execution_summary": "• Verified 2/2 tasks and 1/1 feature; 1 effort-ceiling violation found, 4 fields corrected.\n• Root cause: T-04.1.01 combined data aggregation and PDF rendering into a single 20h backend task, exceeding the 16h ceiling with no split documented.\n• Fix: split into T-04.1.01 (aggregation, 12h) and a newly-inserted T-04.1.02 (PDF rendering, 8h, blocked_by T-04.1.01); the original QA task renumbered to T-04.1.03 and its blocked_by_task_ids updated to depend on both halves. Both items AND the re-uploaded task-breakdown.md were corrected — same artifact id and storage location as the generator's original.\n• Task type and original dependency direction were correct — the error was isolated to sizing/splitting, not scope or task type.\n• Guardrails re-checked independently: gr-L3-consistency-checker (generator claimed pass, evaluator found fail), gr-L3-hallucination-detector (pass/pass), gr-L3-citation-validator (pass/pass).\n• Tools invoked: none (adjacent_backlog_check was false).\n• Final verdict: fixed_and_approved — corrected document reflects the fix, safe to proceed to sprint planning."
+  }
+}

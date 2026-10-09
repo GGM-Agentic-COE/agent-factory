@@ -1,0 +1,8 @@
+{
+  "workflow_execution_id": "wf-1f6b8d3a-4c2e-4a91-9d7f-6a3b2e8c1f05",
+  "scoring_method": "WSJF",
+  "features": [],
+  "dependency_graph": { "edges": [] },
+  "value_scoring_inputs": [],
+  "adjacent_backlog_check": false
+}

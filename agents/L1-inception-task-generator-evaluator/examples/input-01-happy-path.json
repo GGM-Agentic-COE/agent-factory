@@ -1,0 +1,40 @@
+{
+  "generator_output": {
+    "agent_id": "L1-inception-task-generator",
+    "agent_version": "1.0.0",
+    "execution_id": "exec-2c8b4f1a-9d3e-4a76-8f0c-1e5b3a9d7c62",
+    "workflow_execution_id": "wf-5d2a9c47-3e1b-4f68-8a0c-6b3d1e9f2c85",
+    "status": "success",
+    "content": {
+      "type": "task_breakdown",
+      "schema_version": "1.0",
+      "items": {
+        "tasks": [
+          { "task_id": "T-02.1.01", "feature_id": "F-02.1", "title": "Provision profile-photo storage bucket", "task_type": "infra", "effort_hours": 4, "blocks_task_ids": ["T-02.1.02"], "blocked_by_task_ids": [], "confidence": 0.85, "summary": "New bucket + CDN config needed before upload endpoint can be built.", "citation": { "source_reference": "features.json", "source_location": "F-02.1" } },
+          { "task_id": "T-02.1.02", "feature_id": "F-02.1", "title": "Build profile update + photo upload endpoint", "task_type": "backend", "effort_hours": 10, "blocks_task_ids": ["T-02.1.03", "T-02.1.04"], "blocked_by_task_ids": ["T-02.1.01"], "confidence": 0.85, "summary": "PATCH endpoint for name/email plus multipart upload with resize-to-CDN, per AC.", "citation": { "source_reference": "acceptance-criteria.json", "source_location": "F-02.1[0:2]" } },
+          { "task_id": "T-02.1.03", "feature_id": "F-02.1", "title": "Build profile edit UI with inline validation", "task_type": "frontend", "effort_hours": 12, "blocks_task_ids": ["T-02.1.04"], "blocked_by_task_ids": ["T-02.1.02"], "confidence": 0.85, "summary": "Edit form + photo picker consuming the update endpoint, inline validation errors per AC.", "citation": { "source_reference": "acceptance-criteria.json", "source_location": "F-02.1[0:1]" } },
+          { "task_id": "T-02.1.04", "feature_id": "F-02.1", "title": "QA: profile edit and photo upload test cases", "task_type": "qa", "effort_hours": 6, "blocks_task_ids": [], "blocked_by_task_ids": ["T-02.1.02", "T-02.1.03"], "confidence": 0.85, "summary": "Covers validation errors, upload size/type limits, and 2s CDN serve-time AC.", "citation": { "source_reference": "acceptance-criteria.json", "source_location": "F-02.1[0:2]" } },
+          { "task_id": "T-02.2.01", "feature_id": "F-02.2", "title": "Add balance table schema for loyalty sync", "task_type": "data", "effort_hours": 5, "blocks_task_ids": ["T-02.2.02"], "blocked_by_task_ids": [], "confidence": 0.85, "summary": "Schema to hold reconciled balances, migration for the new nightly-sync target table.", "citation": { "source_reference": "features.json", "source_location": "F-02.2" } },
+          { "task_id": "T-02.2.02", "feature_id": "F-02.2", "title": "Build ledger-to-balance reconciliation job", "task_type": "backend", "effort_hours": 14, "blocks_task_ids": ["T-02.2.03", "T-02.2.04"], "blocked_by_task_ids": ["T-02.2.01"], "confidence": 0.8, "summary": "Core sync/reconciliation logic, flags discrepancies >$1 for review per AC.", "citation": { "source_reference": "acceptance-criteria.json", "source_location": "F-02.2[1:2]" } },
+          { "task_id": "T-02.2.03", "feature_id": "F-02.2", "title": "Schedule nightly job at 02:00 UTC", "task_type": "devops", "effort_hours": 3, "blocks_task_ids": ["T-02.2.04"], "blocked_by_task_ids": ["T-02.2.02"], "confidence": 0.85, "summary": "Cron/scheduler wiring for the reconciliation job per AC's 02:00 UTC requirement.", "citation": { "source_reference": "acceptance-criteria.json", "source_location": "F-02.2[0]" } },
+          { "task_id": "T-02.2.04", "feature_id": "F-02.2", "title": "QA: balance sync accuracy and discrepancy logging", "task_type": "qa", "effort_hours": 6, "blocks_task_ids": [], "blocked_by_task_ids": ["T-02.2.02", "T-02.2.03"], "confidence": 0.8, "summary": "Verifies 99.9% match rate and discrepancy logging AC across a sample account set.", "citation": { "source_reference": "acceptance-criteria.json", "source_location": "F-02.2[1:2]" } }
+        ],
+        "gaps": []
+      },
+      "artifacts": [
+        { "id": "artifact-9a3d7e1c-4b6f-4c82-8e1a-3d9b6f2a7c05", "type": "document", "name": "task-breakdown.md", "format": "markdown", "storage": { "provider": "local", "location": "wf-5d2a9c47-3e1b-4f68-8a0c-6b3d1e9f2c85/task-breakdown.md" }, "description": "8-task breakdown across 2 features (profile edit UI, loyalty balance sync) with full dependency chains.", "produced_by": "L1-inception-task-generator" }
+      ],
+      "execution_summary": "• Generated 8 tasks across 2/2 features; 0 gaps.\n• No task exceeded the 16-hour ceiling."
+    }
+  },
+  "features": [
+    { "feature_id": "F-02.1", "name": "Customer profile edit UI with photo upload", "description": "Customer can edit name, email, and upload a profile photo. Photo is stored and served from a new bucket." },
+    { "feature_id": "F-02.2", "name": "Loyalty points balance nightly sync job", "description": "A nightly job reconciles loyalty point balances between the legacy ledger and the new balance table." }
+  ],
+  "acceptance_criteria": [
+    { "feature_id": "F-02.1", "criteria": ["User can update name/email and see validation errors inline", "User can upload a JPG/PNG under 5MB as profile photo", "Photo is resized and served via CDN within 2s"] },
+    { "feature_id": "F-02.2", "criteria": ["Job runs nightly at 02:00 UTC", "Discrepancies over $1 are logged for manual review", "Balance table matches ledger for 99.9% of accounts after sync"] }
+  ],
+  "max_task_effort_hours": 16,
+  "adjacent_backlog_check": false
+}

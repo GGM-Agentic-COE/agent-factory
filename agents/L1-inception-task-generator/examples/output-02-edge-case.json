@@ -1,0 +1,61 @@
+{
+  "agent_id": "L1-inception-task-generator",
+  "agent_version": "1.0.0",
+  "execution_id": "exec-6b1e9c3a-4f7d-4a52-8c0e-2d9b6a3f1e75",
+  "workflow_execution_id": "wf-8f1c3a56-2d7e-4b91-9a0c-5e3d8b1f7a24",
+  "status": "success",
+  "content": {
+    "type": "task_breakdown",
+    "schema_version": "1.0",
+    "items": {
+      "tasks": [
+        {
+          "task_id": "T-03.1.01",
+          "feature_id": "F-03.1",
+          "title": "Build checkout error state + retry button UI",
+          "task_type": "frontend",
+          "effort_hours": 8,
+          "blocks_task_ids": ["T-03.1.02"],
+          "blocked_by_task_ids": [],
+          "confidence": 0.85,
+          "summary": "Reason-specific error messages and a retry button that re-submits the attempt, per AC.",
+          "citation": { "source_reference": "acceptance-criteria.json", "source_location": "F-03.1[0:1]" }
+        },
+        {
+          "task_id": "T-03.1.02",
+          "feature_id": "F-03.1",
+          "title": "QA: checkout failure and retry test cases",
+          "task_type": "qa",
+          "effort_hours": 4,
+          "blocks_task_ids": [],
+          "blocked_by_task_ids": ["T-03.1.01"],
+          "confidence": 0.85,
+          "summary": "Covers declined, network, and timeout error paths plus retry re-submission.",
+          "citation": { "source_reference": "acceptance-criteria.json", "source_location": "F-03.1[0:1]" }
+        }
+      ],
+      "gaps": [
+        {
+          "feature_id": "F-03.2",
+          "issue": "Description 'Make the app better' has no identifiable scope or acceptance criteria.",
+          "question": "Please clarify what 'Improve things' covers — which screen, workflow, or metric is it meant to improve?"
+        }
+      ]
+    },
+    "artifacts": [
+      {
+        "id": "artifact-3e7b1a9d-6c2f-4d85-9a1e-7f3b2c9d5e08",
+        "type": "document",
+        "name": "task-breakdown.md",
+        "format": "markdown",
+        "storage": {
+          "provider": "local",
+          "location": "wf-8f1c3a56-2d7e-4b91-9a0c-5e3d8b1f7a24/task-breakdown.md"
+        },
+        "description": "2-task breakdown for the checkout error-state feature; F-03.2 listed under Gaps pending scope clarification.",
+        "produced_by": "L1-inception-task-generator"
+      }
+    ],
+    "execution_summary": "• Generated 2 tasks for 1/2 features; 1 gap.\n• F-03.1 decomposed into frontend -> qa (no backend/infra/data task needed — payment failure reasons are already assumed available from the existing checkout API).\n• F-03.2 excluded from task generation — 'Make the app better' has no identifiable scope, screen, or acceptance criteria to decompose from; not guessed.\n• No task exceeded the 16-hour ceiling.\n• Reflection: verified task_id sequencing, no duplicates, gap correctly excluded rather than guessed, no forced task types.\n• Knowledge bases consulted: kb-L1-sdlc-templates — used for the task-breakdown.md table/detail/gaps layout.\n• Guardrails evaluated: gr-L1-output-schema-validator (pass), gr-L1-pii-detection (pass), gr-L3-hallucination-detector (pass), gr-L3-citation-validator (pass), gr-L3-consistency-checker (pass).\n• Tools invoked: none (adjacent_backlog_check was false).\n• Gaps or issues flagged: F-03.2 — needs scope clarification from Product."
+  }
+}

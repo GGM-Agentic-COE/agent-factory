@@ -1,0 +1,92 @@
+{
+  "generator_output": {
+    "agent_id": "L1-planning-backlog-prioritizer",
+    "agent_version": "1.0.0",
+    "execution_id": "exec-b4d8e2a6-3333-4c7e-9b1d-6f2a8c4e1b93",
+    "workflow_execution_id": "wf-9a3d7c1e-5b2f-4e64-8a0c-7d3b1e9f5a28",
+    "status": "success",
+    "content": {
+      "type": "prioritized_backlog",
+      "schema_version": "1.0",
+      "items": {
+        "prioritized_features": [
+          {
+            "feature_id": "F-08.2",
+            "rank": 1,
+            "scoring_method": "WSJF",
+            "priority_score": 5.0,
+            "wsjf_components": { "business_value": 5, "time_criticality": 3, "risk_reduction_opportunity_enablement": 2, "job_size": 2 },
+            "value_score": 40,
+            "effort_estimate": 2,
+            "dependency_unblocking_score": 0,
+            "blocks_feature_ids": [],
+            "blocked_by_feature_ids": ["F-08.1"],
+            "confidence": 0.85,
+            "summary": "Highest raw WSJF; small job size relative to value.",
+            "citation": { "source_reference": "value-scoring-sheet.xlsx", "source_location": "row2" }
+          },
+          {
+            "feature_id": "F-08.1",
+            "rank": 2,
+            "scoring_method": "WSJF",
+            "priority_score": 3.0,
+            "wsjf_components": { "business_value": 8, "time_criticality": 7, "risk_reduction_opportunity_enablement": 6, "job_size": 7 },
+            "value_score": 84,
+            "effort_estimate": 7,
+            "dependency_unblocking_score": 70,
+            "blocks_feature_ids": ["F-08.2", "F-08.3"],
+            "blocked_by_feature_ids": [],
+            "confidence": 0.85,
+            "summary": "Blocks 2 downstream features; lower raw WSJF than F-08.2.",
+            "citation": { "source_reference": "value-scoring-sheet.xlsx", "source_location": "row1" }
+          },
+          {
+            "feature_id": "F-08.3",
+            "rank": 3,
+            "scoring_method": "WSJF",
+            "priority_score": 2.0,
+            "wsjf_components": { "business_value": 4, "time_criticality": 2, "risk_reduction_opportunity_enablement": 2, "job_size": 4 },
+            "value_score": 32,
+            "effort_estimate": 4,
+            "dependency_unblocking_score": 0,
+            "blocks_feature_ids": [],
+            "blocked_by_feature_ids": ["F-08.1"],
+            "confidence": 0.85,
+            "summary": "Lowest raw WSJF; blocked by F-08.1.",
+            "citation": { "source_reference": "value-scoring-sheet.xlsx", "source_location": "row3" }
+          }
+        ],
+        "gaps": []
+      },
+      "artifacts": [
+        {
+          "id": "artifact-7c1e9a3d-6b2f-4d85-9a0c-4e7b1d9f3a56",
+          "type": "document",
+          "name": "prioritized-backlog.md",
+          "format": "markdown",
+          "storage": { "provider": "local", "location": "wf-9a3d7c1e-5b2f-4e64-8a0c-7d3b1e9f5a28/prioritized-backlog.md" },
+          "description": "Ranked backlog of 3 feature-flag-rollout features (WSJF).",
+          "produced_by": "L1-planning-backlog-prioritizer"
+        }
+      ],
+      "execution_summary": "• Scored and ranked 3/3 features using WSJF; 0 gaps.\n• No rank adjustment applied.\n• Gaps or issues flagged: none."
+    }
+  },
+  "features": [
+    { "feature_id": "F-08.1", "name": "Feature flag rollout service", "description": "Core service evaluating flags and serving rollout percentages." },
+    { "feature_id": "F-08.2", "name": "Gradual rollout UI", "description": "Ops UI to configure and monitor a gradual rollout percentage, built on the rollout service." },
+    { "feature_id": "F-08.3", "name": "Rollout audit log", "description": "Audit trail of every rollout percentage change, sourced from the rollout service." }
+  ],
+  "dependency_graph": {
+    "edges": [
+      { "from": "F-08.1", "blocks": "F-08.2" },
+      { "from": "F-08.1", "blocks": "F-08.3" }
+    ]
+  },
+  "value_scoring_inputs": [
+    { "feature_id": "F-08.1", "business_value": 8, "time_criticality": 7, "risk_reduction": 6, "job_size": 7, "source": "value-scoring-sheet.xlsx:row1" },
+    { "feature_id": "F-08.2", "business_value": 5, "time_criticality": 3, "risk_reduction": 2, "job_size": 2, "source": "value-scoring-sheet.xlsx:row2" },
+    { "feature_id": "F-08.3", "business_value": 4, "time_criticality": 2, "risk_reduction": 2, "job_size": 4, "source": "value-scoring-sheet.xlsx:row3" }
+  ],
+  "adjacent_backlog_check": false
+}

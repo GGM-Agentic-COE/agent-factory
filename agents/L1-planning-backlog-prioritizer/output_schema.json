@@ -1,0 +1,119 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.internal/agents/L1-planning-backlog-prioritizer/output_schema.json",
+  "title": "L1-planning-backlog-prioritizer Output",
+  "description": "Items carry per-feature scoring meta-points only (structural fields stay full: ids, scores, ranks, dependency links). The full ranked narrative, per-feature rationale, and sequencing writeup live ONLY in the artifacts[0] document (prioritized-backlog.md). Any *_summary/summary string here is a distillation (<=150 chars), never a copy of the artifact text.",
+  "type": "object",
+  "required": ["items", "execution_summary"],
+  "properties": {
+    "items": {
+      "type": "object",
+      "required": ["prioritized_features", "gaps"],
+      "properties": {
+        "prioritized_features": {
+          "type": "array",
+          "description": "One entry per input feature, ranked descending by priority score.",
+          "items": { "$ref": "#/$defs/PrioritizedFeature" }
+        },
+        "gaps": {
+          "type": "array",
+          "description": "Features that could not be fully scored (missing value inputs, unresolved dependency reference, etc).",
+          "items": { "$ref": "#/$defs/Gap" }
+        }
+      }
+    },
+    "artifacts": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/Artifact" },
+      "minItems": 1,
+      "maxItems": 1
+    },
+    "execution_summary": {
+      "type": "string",
+      "description": "Plain-text bullet summary — not JSON."
+    }
+  },
+  "$defs": {
+    "Citation": {
+      "type": "object",
+      "required": ["source_reference", "source_location"],
+      "properties": {
+        "source_reference": { "type": "string", "description": "Which input artifact this value came from, e.g. 'features.json' or 'value-scoring-sheet.xlsx'." },
+        "source_location": { "type": "string", "description": "Locator within that source, e.g. feature id or row/cell reference." }
+      }
+    },
+    "PrioritizedFeature": {
+      "type": "object",
+      "required": [
+        "feature_id", "rank", "scoring_method", "priority_score",
+        "value_score", "effort_estimate", "dependency_unblocking_score",
+        "blocks_feature_ids", "blocked_by_feature_ids",
+        "confidence", "summary", "citation"
+      ],
+      "properties": {
+        "feature_id": { "type": "string", "pattern": "^F-[0-9]{2}\\.[0-9]+$", "description": "Feature id, format F-{epic}.{seq}, matching feature-decomposer output." },
+        "rank": { "type": "integer", "minimum": 1, "description": "1 = highest priority. Sequential, no duplicates or gaps." },
+        "scoring_method": { "type": "string", "enum": ["WSJF", "RICE"] },
+        "priority_score": { "type": "number", "description": "Final composite score used for ranking (WSJF quotient or RICE score)." },
+        "wsjf_components": { "$ref": "#/$defs/WsjfComponents" },
+        "rice_components": { "$ref": "#/$defs/RiceComponents" },
+        "value_score": { "type": "number", "description": "Normalized business value input (0-100), as supplied or derived from Product Lead inputs." },
+        "effort_estimate": { "type": "number", "description": "Effort/job size, in the same unit supplied in value_scoring_inputs (points or size tier)." },
+        "dependency_unblocking_score": { "type": "number", "minimum": 0, "maximum": 100, "description": "How much delivering this feature unblocks downstream features, derived from the dependency graph fan-out." },
+        "blocks_feature_ids": { "type": "array", "items": { "type": "string" }, "description": "Feature ids that cannot start until this one is delivered." },
+        "blocked_by_feature_ids": { "type": "array", "items": { "type": "string" }, "description": "Feature ids this feature is waiting on." },
+        "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+        "summary": { "type": "string", "maxLength": 150, "description": "Distilled one-line rationale. Full rationale is in the artifact only." },
+        "citation": { "$ref": "#/$defs/Citation" },
+        "duplicate_flag": { "type": "boolean", "description": "True if tool-L1-jira-fetch-issue found a likely-duplicate issue in the adjacent backlog (only set when adjacent_backlog_check=true)." }
+      }
+    },
+    "WsjfComponents": {
+      "type": "object",
+      "properties": {
+        "business_value": { "type": "number" },
+        "time_criticality": { "type": "number" },
+        "risk_reduction_opportunity_enablement": { "type": "number" },
+        "job_size": { "type": "number" }
+      }
+    },
+    "RiceComponents": {
+      "type": "object",
+      "properties": {
+        "reach": { "type": "number" },
+        "impact": { "type": "number" },
+        "confidence_pct": { "type": "number" },
+        "effort": { "type": "number" }
+      }
+    },
+    "Gap": {
+      "type": "object",
+      "required": ["feature_id", "issue", "question"],
+      "properties": {
+        "feature_id": { "type": "string" },
+        "issue": { "type": "string", "maxLength": 150 },
+        "question": { "type": "string", "maxLength": 150 }
+      }
+    },
+    "Artifact": {
+      "type": "object",
+      "required": ["id", "type", "name", "format", "storage", "description", "produced_by"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^artifact-.+$" },
+        "type": { "type": "string", "const": "document" },
+        "name": { "type": "string", "const": "prioritized-backlog.md" },
+        "format": { "type": "string", "const": "markdown" },
+        "storage": {
+          "type": "object",
+          "required": ["provider", "location"],
+          "properties": {
+            "provider": { "type": "string", "enum": ["s3", "local", "confluence", "github", "jira_attachment"] },
+            "location": { "type": "string", "description": "{workflow_execution_id}/prioritized-backlog.md" }
+          }
+        },
+        "description": { "type": "string" },
+        "produced_by": { "type": "string", "const": "L1-planning-backlog-prioritizer" }
+      }
+    }
+  }
+}

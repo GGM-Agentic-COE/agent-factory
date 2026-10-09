@@ -1,0 +1,34 @@
+{
+  "agent_id": "L1-planning-backlog-prioritizer-evaluator",
+  "agent_version": "1.0.0",
+  "execution_id": "exec-a2f6c8b4-7777-4d9e-9a1c-5b3f7d9e1a48",
+  "workflow_execution_id": "wf-1d5a8c2e-4f9b-4e73-8a1c-6b3d9e2f5a17",
+  "status": "failed",
+  "content": {
+    "type": "backlog_evaluation",
+    "schema_version": "1.0",
+    "items": {
+      "verification_results": [],
+      "fixes_applied": [],
+      "guardrail_rechecks": []
+    },
+    "verdict": {
+      "final_decision": "rejected",
+      "overall_score": 0.0,
+      "faithfulness_score": 0.0,
+      "hallucination_score": 0.0,
+      "consistency_score": 0.0,
+      "citation_completeness_score": 0.0
+    },
+    "execution_summary": "• Produced 0 verification_results — INSUFFICIENT_CONTEXT.\n• generator_output claims 2 scored features (F-09.1, F-09.2), but the features, dependency_graph, and value_scoring_inputs provided for independent recomputation were all empty.\n• Cannot verify a claim without the original source data to re-derive it from — reporting the generator's numbers as correct without recomputation would be trusting its self-check, which this agent must never do.\n• Suggested: re-invoke with the SAME features/dependency_graph/value_scoring_inputs that were originally passed to L1-planning-backlog-prioritizer for this workflow_execution_id.\n• Reflection: correctly returned zero findings and a 'rejected' verdict rather than fabricating a recomputation or assuming the generator's claims were correct.\n• Guardrails re-checked: none — no source data to re-check hallucination, citation, or consistency against.\n• Tools invoked: none.\n• Final verdict: rejected — cannot confirm or deny the generator's output without its source data."
+  },
+  "evaluation_criteria": {
+    "must_pass_gates": [
+      "status is 'failed' and verdict.final_decision is 'rejected'",
+      "verification_results, fixes_applied, and guardrail_rechecks are all empty arrays — never fabricated",
+      "execution_summary explicitly states the source data was insufficient to independently recompute anything",
+      "no artifacts array is produced, since no fix was made or could be made"
+    ],
+    "min_scores": { "faithfulness": 0.90, "hallucination_max": 0.0, "consistency": 0.90 }
+  }
+}

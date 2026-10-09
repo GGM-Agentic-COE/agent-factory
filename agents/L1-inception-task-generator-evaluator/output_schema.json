@@ -1,0 +1,158 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.internal/agents/L1-inception-task-generator-evaluator/output_schema.json",
+  "title": "L1-inception-task-generator-evaluator Output",
+  "description": "Full AgentOutput envelope. content.items.verification_results holds one independently-rejudged entry per task the generator produced (structural fields stay full: ids, booleans, hours). content.items.feature_coverage holds one entry per input feature, catching silently-dropped features. content.items.fixes_applied lists any correction made to items and/or the artifact. content.verdict is the overall pass/fail call. If a fix touched the document, content.artifacts[0] carries the SAME artifact id and storage location as the generator's, re-uploaded — never a new artifact.",
+  "type": "object",
+  "required": ["agent_id", "agent_version", "execution_id", "workflow_execution_id", "status", "content"],
+  "properties": {
+    "agent_id": { "type": "string", "const": "L1-inception-task-generator-evaluator" },
+    "agent_version": { "type": "string", "description": "Semver, e.g. '1.0.0'." },
+    "execution_id": { "type": "string", "pattern": "^exec-.+$" },
+    "workflow_execution_id": { "type": "string", "pattern": "^wf-.+$", "description": "MUST match the workflow_execution_id of the generator_output being evaluated." },
+    "status": { "type": "string", "enum": ["success", "failed"] },
+    "content": {
+      "type": "object",
+      "required": ["type", "schema_version", "items", "verdict", "execution_summary"],
+      "properties": {
+        "type": { "type": "string", "const": "task_breakdown_evaluation" },
+        "schema_version": { "type": "string", "const": "1.0" },
+        "items": {
+          "type": "object",
+          "required": ["verification_results", "feature_coverage", "fixes_applied", "guardrail_rechecks"],
+          "properties": {
+            "verification_results": {
+              "type": "array",
+              "description": "One entry per task_id present in generator_output.content.items.tasks.",
+              "items": { "$ref": "#/$defs/VerificationResult" }
+            },
+            "feature_coverage": {
+              "type": "array",
+              "description": "One entry per feature in the original features input — catches features silently dropped from both tasks and gaps.",
+              "items": { "$ref": "#/$defs/FeatureCoverage" }
+            },
+            "fixes_applied": {
+              "type": "array",
+              "description": "Empty if verdict.final_decision is 'approved'.",
+              "items": { "$ref": "#/$defs/FixApplied" }
+            },
+            "guardrail_rechecks": {
+              "type": "array",
+              "description": "Independent re-check of each BLOCKER-relevant guardrail the generator owns — never a copy of the generator's own pass/fail claim.",
+              "items": { "$ref": "#/$defs/GuardrailRecheck" }
+            }
+          }
+        },
+        "verdict": {
+          "type": "object",
+          "required": ["final_decision", "overall_score", "faithfulness_score", "hallucination_score", "consistency_score", "citation_completeness_score"],
+          "properties": {
+            "final_decision": { "type": "string", "enum": ["approved", "fixed_and_approved", "rejected"], "description": "'fixed_and_approved' MUST NOT be reported while the artifact still holds pre-fix text." },
+            "overall_score": { "type": "number", "minimum": 0, "maximum": 1 },
+            "faithfulness_score": { "type": "number", "minimum": 0, "maximum": 1 },
+            "hallucination_score": { "type": "number", "minimum": 0, "maximum": 1, "description": "Lower is better — rate of unsupported/invented tasks or scope found." },
+            "consistency_score": { "type": "number", "minimum": 0, "maximum": 1, "description": "Rate of tasks whose type/effort/dependencies correctly follow kb-L1-task-decomposition-best-practices." },
+            "citation_completeness_score": { "type": "number", "minimum": 0, "maximum": 1 }
+          }
+        },
+        "artifacts": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/Artifact" },
+          "maxItems": 1,
+          "description": "Present ONLY if a fix touched the document. Same artifact id and storage.location as the generator's — re-uploaded, not a new artifact."
+        },
+        "execution_summary": {
+          "type": "string",
+          "description": "Plain-text bullet summary — not JSON."
+        }
+      }
+    }
+  },
+  "$defs": {
+    "Citation": {
+      "type": "object",
+      "required": ["source_reference", "source_location"],
+      "properties": {
+        "source_reference": { "type": "string", "description": "e.g. 'features.json' or 'acceptance-criteria.json' — the ORIGINAL source, re-checked independently, not the generator's citation copied verbatim." },
+        "source_location": { "type": "string" }
+      }
+    },
+    "VerificationResult": {
+      "type": "object",
+      "required": [
+        "task_id", "feature_id", "generator_task_type", "task_type_justified",
+        "generator_effort_hours", "effort_within_ceiling", "dependency_correct",
+        "match", "severity", "confidence", "summary", "citation"
+      ],
+      "properties": {
+        "task_id": { "type": "string", "pattern": "^T-[0-9]{2}\\.[0-9]+\\.[0-9]{2,3}$" },
+        "feature_id": { "type": "string", "pattern": "^F-[0-9]{2}\\.[0-9]+$" },
+        "generator_task_type": { "type": "string", "enum": ["frontend", "backend", "qa", "infra", "data", "design", "devops", "documentation"] },
+        "task_type_justified": { "type": "boolean", "description": "True if this task type is independently justified by the feature's description/acceptance criteria per the KB's selection rule." },
+        "generator_effort_hours": { "type": "number", "description": "As claimed in generator_output." },
+        "effort_within_ceiling": { "type": "boolean", "description": "False if generator_effort_hours exceeds max_task_effort_hours and no split was documented." },
+        "dependency_correct": { "type": "boolean", "description": "True if blocks_task_ids/blocked_by_task_ids independently match the KB's dependency-inference patterns for this task's role." },
+        "duplicate_flag_verified": { "type": "boolean", "description": "Present only when adjacent_backlog_check=true; result of an independent tool-L1-jira-fetch-issue call, not the generator's stored flag." },
+        "match": { "type": "boolean", "description": "True only if task_type_justified AND effort_within_ceiling AND dependency_correct are all true." },
+        "severity": { "type": "string", "enum": ["none", "minor", "major", "blocker"] },
+        "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+        "summary": { "type": "string", "maxLength": 150, "description": "Distilled finding. Full reasoning for a mismatch lives in its paired fixes_applied entry, never restated here." },
+        "citation": { "$ref": "#/$defs/Citation" }
+      }
+    },
+    "FeatureCoverage": {
+      "type": "object",
+      "required": ["feature_id", "covered", "task_ids", "confidence", "summary"],
+      "properties": {
+        "feature_id": { "type": "string", "pattern": "^F-[0-9]{2}\\.[0-9]+$" },
+        "covered": { "type": "boolean", "description": "True if this feature has >=1 task in generator_output OR a gap entry the evaluator judges legitimate." },
+        "task_ids": { "type": "array", "items": { "type": "string" }, "description": "Task ids generated for this feature, if any." },
+        "gap_legitimate": { "type": "boolean", "description": "Present only if the generator reported this feature as a gap; whether that gap holds up against the KB's 'when a feature can't be decomposed' criteria." },
+        "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+        "summary": { "type": "string", "maxLength": 150 }
+      }
+    },
+    "FixApplied": {
+      "type": "object",
+      "required": ["ref_id", "field", "generator_value", "corrected_value", "reason", "document_updated"],
+      "properties": {
+        "ref_id": { "type": "string", "description": "The task_id (or feature_id, for a newly-inserted task) this fix applies to." },
+        "field": { "type": "string", "description": "e.g. 'effort_hours', 'task_id', 'blocked_by_task_ids', 'new_task_created'." },
+        "generator_value": { "type": "string", "description": "Stringified original value for a uniform diff view." },
+        "corrected_value": { "type": "string" },
+        "reason": { "type": "string", "maxLength": 150 },
+        "document_updated": { "type": "boolean", "description": "True if this field also appears in task-breakdown.md and was corrected there at the same location." }
+      }
+    },
+    "GuardrailRecheck": {
+      "type": "object",
+      "required": ["guardrail", "generator_claimed_result", "evaluator_result"],
+      "properties": {
+        "guardrail": { "type": "string" },
+        "generator_claimed_result": { "type": "string", "enum": ["pass", "fail"] },
+        "evaluator_result": { "type": "string", "enum": ["pass", "fail"] },
+        "notes": { "type": "string", "maxLength": 150 }
+      }
+    },
+    "Artifact": {
+      "type": "object",
+      "required": ["id", "type", "name", "format", "storage", "description", "produced_by"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^artifact-.+$", "description": "MUST equal the generator's artifact id — this is a re-upload, not a new artifact." },
+        "type": { "type": "string", "const": "document" },
+        "name": { "type": "string", "const": "task-breakdown.md" },
+        "format": { "type": "string", "const": "markdown" },
+        "storage": {
+          "type": "object",
+          "required": ["provider", "location"],
+          "properties": {
+            "provider": { "type": "string", "enum": ["s3", "local", "confluence", "github", "jira_attachment"] },
+            "location": { "type": "string", "description": "MUST equal the generator's storage.location — same {workflow_execution_id}/task-breakdown.md path." }
+          }
+        },
+        "description": { "type": "string" },
+        "produced_by": { "type": "string", "const": "L1-inception-task-generator-evaluator" }
+      }
+    }
+  }
+}

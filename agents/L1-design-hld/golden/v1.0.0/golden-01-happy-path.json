@@ -1,0 +1,673 @@
+{
+  "agent_id": "L1-design-hld",
+  "agent_version": "2.0.0",
+  "execution_id": "exec-6d3a9c1e-3333-4b7f-8a0c-5e9b3d7f1a64",
+  "workflow_execution_id": "wf-8a3c9e1d-4b7f-4e62-8c0d-6d3b9f7e1a58",
+  "status": "success",
+  "content": {
+    "type": "high_level_design",
+    "schema_version": "1.0",
+    "items": {
+      "components": [
+        {
+          "component_id": "C-01",
+          "name": "Onboarding Service",
+          "component_type": "service",
+          "satisfies_requirement_ids": [
+            "FR-001"
+          ],
+          "satisfies_nfr_ids": [
+            "NFR-02",
+            "NFR-03"
+          ],
+          "confidence": 0.9,
+          "summary": "FBO attestation + onboarding, authenticated via external-party IDP; owns 6-year attestation retention.",
+          "citation": {
+            "source_reference": "Requirements.md",
+            "source_location": "Components Identified: FR-001"
+          }
+        },
+        {
+          "component_id": "C-02",
+          "name": "Discovery & Matching Service",
+          "component_type": "service",
+          "satisfies_requirement_ids": [
+            "FR-002"
+          ],
+          "satisfies_nfr_ids": [],
+          "confidence": 0.85,
+          "summary": "Buyer search/discovery driven by compliance-completeness scores from Compliance Documentation Service.",
+          "citation": {
+            "source_reference": "Requirements.md",
+            "source_location": "Components Identified: FR-002"
+          }
+        },
+        {
+          "component_id": "C-03",
+          "name": "Traceability Service",
+          "component_type": "service",
+          "satisfies_requirement_ids": [
+            "FR-003"
+          ],
+          "satisfies_nfr_ids": [
+            "NFR-01",
+            "NFR-03"
+          ],
+          "confidence": 0.9,
+          "summary": "Immutable dual-signed trade records at 99.9% availability; isolated from CI-APP-004.",
+          "citation": {
+            "source_reference": "Requirements.md",
+            "source_location": "Components Identified: FR-003; SLA Impact"
+          }
+        },
+        {
+          "component_id": "C-04",
+          "name": "Compliance Documentation Service",
+          "component_type": "service",
+          "satisfies_requirement_ids": [
+            "FR-004"
+          ],
+          "satisfies_nfr_ids": [
+            "NFR-03"
+          ],
+          "confidence": 0.9,
+          "summary": "Producer-attested allergen declarations, stored independently of CI-APP-004.",
+          "citation": {
+            "source_reference": "Requirements.md",
+            "source_location": "Components Identified: FR-004"
+          }
+        },
+        {
+          "component_id": "C-05",
+          "name": "Transaction Limit Enforcement Service",
+          "component_type": "service",
+          "satisfies_requirement_ids": [
+            "FR-005"
+          ],
+          "satisfies_nfr_ids": [],
+          "confidence": 0.85,
+          "summary": "Server-side transaction-value limits based on compliance-completeness score.",
+          "citation": {
+            "source_reference": "Requirements.md",
+            "source_location": "Components Identified: FR-005"
+          }
+        },
+        {
+          "component_id": "C-06",
+          "name": "Transaction Routing Service",
+          "component_type": "service",
+          "satisfies_requirement_ids": [
+            "FR-005",
+            "FR-006"
+          ],
+          "satisfies_nfr_ids": [
+            "NFR-03"
+          ],
+          "confidence": 0.85,
+          "summary": "Facilitation-only routing; document links payment-gateway dependency to FR-005 in prose but to this FR-006 service in the diagram \u2014 both cited.",
+          "citation": {
+            "source_reference": "Requirements.md",
+            "source_location": "Components Identified: FR-006; Integration Landscape Third-party Services #3"
+          }
+        },
+        {
+          "component_id": "C-07",
+          "name": "Cohort Management Service",
+          "component_type": "service",
+          "satisfies_requirement_ids": [
+            "FR-007"
+          ],
+          "satisfies_nfr_ids": [],
+          "confidence": 0.85,
+          "summary": "Restricts pilot-phase onboarding/trading to a designated cohort.",
+          "citation": {
+            "source_reference": "Requirements.md",
+            "source_location": "Components Identified: FR-007"
+          }
+        },
+        {
+          "component_id": "C-08",
+          "name": "Reporting Service",
+          "component_type": "service",
+          "satisfies_requirement_ids": [
+            "FR-008",
+            "FR-009"
+          ],
+          "satisfies_nfr_ids": [],
+          "confidence": 0.8,
+          "summary": "Publishes time-to-first-compliant-trade and completeness metrics; availability target is unresolved \u2014 see Gaps.",
+          "citation": {
+            "source_reference": "Requirements.md",
+            "source_location": "Components Identified: FR-008, FR-009"
+          }
+        },
+        {
+          "component_id": "C-09",
+          "name": "External-party Identity Provider",
+          "component_type": "external_system",
+          "satisfies_requirement_ids": [
+            "FR-001",
+            "FR-003",
+            "FR-004"
+          ],
+          "satisfies_nfr_ids": [],
+          "confidence": 0.85,
+          "summary": "Newly surfaced gap: Azure AD is employee-only; a separate IDP (e.g. Azure AD B2C, Auth0) is required.",
+          "citation": {
+            "source_reference": "Requirements.md",
+            "source_location": "Technical touch check: CI-APP-005; Integration Landscape Upstream Data Sources #1"
+          }
+        },
+        {
+          "component_id": "C-10",
+          "name": "Kong API Gateway routing configuration",
+          "component_type": "gateway",
+          "satisfies_requirement_ids": [
+            "FR-001",
+            "FR-002",
+            "FR-003",
+            "FR-004",
+            "FR-005",
+            "FR-006",
+            "FR-007",
+            "FR-008",
+            "FR-009"
+          ],
+          "satisfies_nfr_ids": [],
+          "confidence": 0.9,
+          "summary": "Mandatory entry point for all HarvestLink traffic per EA4; routes to every service.",
+          "citation": {
+            "source_reference": "Requirements.md",
+            "source_location": "Technical touch check: CI-APP-007"
+          }
+        },
+        {
+          "component_id": "C-11",
+          "name": "Payment Gateway",
+          "component_type": "external_system",
+          "satisfies_requirement_ids": [
+            "FR-005",
+            "FR-006"
+          ],
+          "satisfies_nfr_ids": [],
+          "confidence": 0.75,
+          "summary": "Not yet selected third-party provider (e.g. Stripe, Adyen); dependency confirmed by the diagram from Transaction Routing Service.",
+          "citation": {
+            "source_reference": "Requirements.md",
+            "source_location": "Integration Landscape Third-party Services #3; Dependency Graph diagram"
+          }
+        },
+        {
+          "component_id": "C-12",
+          "name": "Snowflake Data Warehouse",
+          "component_type": "external_system",
+          "satisfies_requirement_ids": [
+            "FR-008",
+            "FR-009"
+          ],
+          "satisfies_nfr_ids": [],
+          "confidence": 0.85,
+          "summary": "Existing group data warehouse; receives HarvestLink metrics via Kong, not directly.",
+          "citation": {
+            "source_reference": "Requirements.md",
+            "source_location": "Technical touch check: CI-APP-006; Downstream Consumers #2"
+          }
+        }
+      ],
+      "integrations": [
+        {
+          "integration_id": "INT-01",
+          "from_component_id": "C-10",
+          "to_component_id": "C-01",
+          "protocol": "REST",
+          "confidence": 0.85,
+          "summary": "Kong routes all HarvestLink API traffic per EA4 mandate.",
+          "citation": {
+            "source_reference": "Requirements.md",
+            "source_location": "Technical touch check: CI-APP-007"
+          }
+        },
+        {
+          "integration_id": "INT-02",
+          "from_component_id": "C-10",
+          "to_component_id": "C-02",
+          "protocol": "REST",
+          "confidence": 0.85,
+          "summary": "Kong routes all HarvestLink API traffic per EA4 mandate.",
+          "citation": {
+            "source_reference": "Requirements.md",
+            "source_location": "Technical touch check: CI-APP-007"
+          }
+        },
+        {
+          "integration_id": "INT-03",
+          "from_component_id": "C-10",
+          "to_component_id": "C-03",
+          "protocol": "REST",
+          "confidence": 0.85,
+          "summary": "Kong routes all HarvestLink API traffic per EA4 mandate.",
+          "citation": {
+            "source_reference": "Requirements.md",
+            "source_location": "Technical touch check: CI-APP-007"
+          }
+        },
+        {
+          "integration_id": "INT-04",
+          "from_component_id": "C-10",
+          "to_component_id": "C-04",
+          "protocol": "REST",
+          "confidence": 0.85,
+          "summary": "Kong routes all HarvestLink API traffic per EA4 mandate.",
+          "citation": {
+            "source_reference": "Requirements.md",
+            "source_location": "Technical touch check: CI-APP-007"
+          }
+        },
+        {
+          "integration_id": "INT-05",
+          "from_component_id": "C-10",
+          "to_component_id": "C-05",
+          "protocol": "REST",
+          "confidence": 0.85,
+          "summary": "Kong routes all HarvestLink API traffic per EA4 mandate.",
+          "citation": {
+            "source_reference": "Requirements.md",
+            "source_location": "Technical touch check: CI-APP-007"
+          }
+        },
+        {
+          "integration_id": "INT-06",
+          "from_component_id": "C-10",
+          "to_component_id": "C-06",
+          "protocol": "REST",
+          "confidence": 0.85,
+          "summary": "Kong routes all HarvestLink API traffic per EA4 mandate.",
+          "citation": {
+            "source_reference": "Requirements.md",
+            "source_location": "Technical touch check: CI-APP-007"
+          }
+        },
+        {
+          "integration_id": "INT-07",
+          "from_component_id": "C-10",
+          "to_component_id": "C-07",
+          "protocol": "REST",
+          "confidence": 0.85,
+          "summary": "Kong routes all HarvestLink API traffic per EA4 mandate.",
+          "citation": {
+            "source_reference": "Requirements.md",
+            "source_location": "Technical touch check: CI-APP-007"
+          }
+        },
+        {
+          "integration_id": "INT-08",
+          "from_component_id": "C-10",
+          "to_component_id": "C-08",
+          "protocol": "REST",
+          "confidence": 0.85,
+          "summary": "Kong routes all HarvestLink API traffic per EA4 mandate.",
+          "citation": {
+            "source_reference": "Requirements.md",
+            "source_location": "Technical touch check: CI-APP-007"
+          }
+        },
+        {
+          "integration_id": "INT-09",
+          "from_component_id": "C-09",
+          "to_component_id": "C-01",
+          "protocol": "REST",
+          "confidence": 0.7,
+          "summary": "Authentication call to the external-party IDP; protocol inferred (typical OIDC/REST), not explicitly named.",
+          "citation": {
+            "source_reference": "Requirements.md",
+            "source_location": "Technical touch check: CI-APP-005"
+          }
+        },
+        {
+          "integration_id": "INT-10",
+          "from_component_id": "C-09",
+          "to_component_id": "C-03",
+          "protocol": "REST",
+          "confidence": 0.7,
+          "summary": "Authentication call to the external-party IDP; protocol inferred (typical OIDC/REST), not explicitly named.",
+          "citation": {
+            "source_reference": "Requirements.md",
+            "source_location": "Technical touch check: CI-APP-005"
+          }
+        },
+        {
+          "integration_id": "INT-11",
+          "from_component_id": "C-09",
+          "to_component_id": "C-04",
+          "protocol": "REST",
+          "confidence": 0.7,
+          "summary": "Authentication call to the external-party IDP; protocol inferred (typical OIDC/REST), not explicitly named.",
+          "citation": {
+            "source_reference": "Requirements.md",
+            "source_location": "Technical touch check: CI-APP-005"
+          }
+        },
+        {
+          "integration_id": "INT-12",
+          "from_component_id": "C-07",
+          "to_component_id": "C-01",
+          "protocol": "REST",
+          "confidence": 0.75,
+          "summary": "Onboarding depends on cohort-eligibility confirmation per the dependency diagram. Protocol inferred, not explicitly named.",
+          "citation": {
+            "source_reference": "Requirements.md",
+            "source_location": "Dependency Graph diagram"
+          }
+        },
+        {
+          "integration_id": "INT-13",
+          "from_component_id": "C-01",
+          "to_component_id": "C-04",
+          "protocol": "REST",
+          "confidence": 0.75,
+          "summary": "Compliance Documentation depends on Onboarding per the dependency diagram. Protocol inferred, not explicitly named.",
+          "citation": {
+            "source_reference": "Requirements.md",
+            "source_location": "Dependency Graph diagram"
+          }
+        },
+        {
+          "integration_id": "INT-14",
+          "from_component_id": "C-01",
+          "to_component_id": "C-03",
+          "protocol": "REST",
+          "confidence": 0.75,
+          "summary": "Traceability depends on Onboarding per the dependency diagram. Protocol inferred, not explicitly named.",
+          "citation": {
+            "source_reference": "Requirements.md",
+            "source_location": "Dependency Graph diagram"
+          }
+        },
+        {
+          "integration_id": "INT-15",
+          "from_component_id": "C-04",
+          "to_component_id": "C-02",
+          "protocol": "REST",
+          "confidence": 0.75,
+          "summary": "Discovery & Matching depends on the compliance-completeness score, per FR-002's rationale and the diagram. Protocol inferred, not explicitly named.",
+          "citation": {
+            "source_reference": "Requirements.md",
+            "source_location": "Dependency Graph diagram"
+          }
+        },
+        {
+          "integration_id": "INT-16",
+          "from_component_id": "C-04",
+          "to_component_id": "C-05",
+          "protocol": "REST",
+          "confidence": 0.75,
+          "summary": "Transaction Limit Enforcement depends on the compliance score, per FR-005 and the diagram. Protocol inferred.",
+          "citation": {
+            "source_reference": "Requirements.md",
+            "source_location": "Dependency Graph diagram"
+          }
+        },
+        {
+          "integration_id": "INT-17",
+          "from_component_id": "C-01",
+          "to_component_id": "C-06",
+          "protocol": "REST",
+          "confidence": 0.75,
+          "summary": "Transaction Routing depends on Onboarding per the dependency diagram. Protocol inferred, not explicitly named.",
+          "citation": {
+            "source_reference": "Requirements.md",
+            "source_location": "Dependency Graph diagram"
+          }
+        },
+        {
+          "integration_id": "INT-18",
+          "from_component_id": "C-11",
+          "to_component_id": "C-06",
+          "protocol": "REST",
+          "confidence": 0.75,
+          "summary": "Transaction Routing depends on the payment gateway per the dependency diagram. Protocol inferred, not explicitly named.",
+          "citation": {
+            "source_reference": "Requirements.md",
+            "source_location": "Dependency Graph diagram"
+          }
+        },
+        {
+          "integration_id": "INT-19",
+          "from_component_id": "C-04",
+          "to_component_id": "C-08",
+          "protocol": "REST",
+          "confidence": 0.75,
+          "summary": "Reporting depends on Compliance Documentation per the dependency diagram. Protocol inferred, not explicitly named.",
+          "citation": {
+            "source_reference": "Requirements.md",
+            "source_location": "Dependency Graph diagram"
+          }
+        },
+        {
+          "integration_id": "INT-20",
+          "from_component_id": "C-03",
+          "to_component_id": "C-08",
+          "protocol": "REST",
+          "confidence": 0.75,
+          "summary": "Reporting depends on Traceability per the dependency diagram. Protocol inferred, not explicitly named.",
+          "citation": {
+            "source_reference": "Requirements.md",
+            "source_location": "Dependency Graph diagram"
+          }
+        },
+        {
+          "integration_id": "INT-21",
+          "from_component_id": "C-08",
+          "to_component_id": "C-12",
+          "protocol": "event",
+          "confidence": 0.75,
+          "summary": "Reporting publishes metrics to Snowflake; document states this is routed via Kong API Gateway per EA4, not a direct or ESB connection.",
+          "citation": {
+            "source_reference": "Requirements.md",
+            "source_location": "Downstream Consumers #2; Technical touch check CI-APP-006"
+          }
+        }
+      ],
+      "data_flows": [
+        {
+          "data_flow_id": "DF-01",
+          "source_component_id": "C-09",
+          "target_component_id": "C-01",
+          "contains_pii": true,
+          "confidence": 0.75,
+          "summary": "Producer/distributor authentication credentials.",
+          "citation": {
+            "source_reference": "Requirements.md",
+            "source_location": "Technical touch check: CI-APP-005"
+          }
+        },
+        {
+          "data_flow_id": "DF-02",
+          "source_component_id": "C-01",
+          "target_component_id": "C-04",
+          "contains_pii": true,
+          "confidence": 0.75,
+          "summary": "Producer identity linkage for compliance declarations.",
+          "citation": {
+            "source_reference": "Requirements.md",
+            "source_location": "Components Identified: FR-004"
+          }
+        },
+        {
+          "data_flow_id": "DF-03",
+          "source_component_id": "C-01",
+          "target_component_id": "C-03",
+          "contains_pii": true,
+          "confidence": 0.75,
+          "summary": "Producer/distributor identity for dual-signed trade records.",
+          "citation": {
+            "source_reference": "Requirements.md",
+            "source_location": "Components Identified: FR-003"
+          }
+        },
+        {
+          "data_flow_id": "DF-04",
+          "source_component_id": "C-04",
+          "target_component_id": "C-02",
+          "contains_pii": true,
+          "confidence": 0.75,
+          "summary": "Compliance-completeness score tied to producer identity, exposed to buyer discovery.",
+          "citation": {
+            "source_reference": "Requirements.md",
+            "source_location": "Components Identified: FR-002"
+          }
+        },
+        {
+          "data_flow_id": "DF-05",
+          "source_component_id": "C-04",
+          "target_component_id": "C-05",
+          "contains_pii": true,
+          "confidence": 0.75,
+          "summary": "Compliance-completeness score tied to producer identity, drives transaction_value_limit.",
+          "citation": {
+            "source_reference": "Requirements.md",
+            "source_location": "Components Identified: FR-005"
+          }
+        },
+        {
+          "data_flow_id": "DF-06",
+          "source_component_id": "C-01",
+          "target_component_id": "C-06",
+          "contains_pii": true,
+          "confidence": 0.75,
+          "summary": "Producer identity context for facilitation-only routing enforcement.",
+          "citation": {
+            "source_reference": "Requirements.md",
+            "source_location": "Components Identified: FR-006"
+          }
+        },
+        {
+          "data_flow_id": "DF-07",
+          "source_component_id": "C-11",
+          "target_component_id": "C-06",
+          "contains_pii": true,
+          "confidence": 0.75,
+          "summary": "Transaction value and buyer identity for payment processing.",
+          "citation": {
+            "source_reference": "Requirements.md",
+            "source_location": "Integration Landscape Third-party Services #3"
+          }
+        },
+        {
+          "data_flow_id": "DF-08",
+          "source_component_id": "C-03",
+          "target_component_id": "C-08",
+          "contains_pii": false,
+          "confidence": 0.75,
+          "summary": "Aggregate time-to-first-compliant-trade metric, not a raw record.",
+          "citation": {
+            "source_reference": "Requirements.md",
+            "source_location": "Components Identified: FR-008"
+          }
+        },
+        {
+          "data_flow_id": "DF-09",
+          "source_component_id": "C-04",
+          "target_component_id": "C-08",
+          "contains_pii": false,
+          "confidence": 0.75,
+          "summary": "Aggregate compliance-completeness score metric, not a raw record.",
+          "citation": {
+            "source_reference": "Requirements.md",
+            "source_location": "Components Identified: FR-009"
+          }
+        },
+        {
+          "data_flow_id": "DF-10",
+          "source_component_id": "C-08",
+          "target_component_id": "C-12",
+          "contains_pii": false,
+          "confidence": 0.75,
+          "summary": "Published aggregate metrics only, routed via Kong.",
+          "citation": {
+            "source_reference": "Requirements.md",
+            "source_location": "Downstream Consumers #2"
+          }
+        }
+      ],
+      "nfr_mappings": [
+        {
+          "nfr_id": "NFR-01",
+          "addressed_by_component_ids": [
+            "C-03"
+          ],
+          "confidence": 0.85,
+          "summary": "Redundant deployment and health-checked failover on Traceability Service for the 99.9% target; Reporting Service's target is unresolved (see Gaps).",
+          "citation": {
+            "source_reference": "Requirements.md",
+            "source_location": "Non-Functional & Regulatory Impact: SLA Impact"
+          }
+        },
+        {
+          "nfr_id": "NFR-02",
+          "addressed_by_component_ids": [
+            "C-01"
+          ],
+          "confidence": 0.85,
+          "summary": "FBO attestation records segregated with an extended 6-year lifecycle policy distinct from standard 3-year transactional retention.",
+          "citation": {
+            "source_reference": "Requirements.md",
+            "source_location": "Non-Functional & Regulatory Impact: Data Retention Impact"
+          }
+        },
+        {
+          "nfr_id": "NFR-03",
+          "addressed_by_component_ids": [
+            "C-01",
+            "C-03",
+            "C-04",
+            "C-06"
+          ],
+          "confidence": 0.85,
+          "summary": "Each service maintains its own records independently rather than integrating with CI-APP-003/CI-APP-004, preserving facilitation-only posture.",
+          "citation": {
+            "source_reference": "Requirements.md",
+            "source_location": "Non-Functional & Regulatory Impact: Regulatory Boundaries"
+          }
+        }
+      ],
+      "gaps": [
+        {
+          "ref_id": "FR-008",
+          "issue": "SLA Impact says FR-008 needs 99.9% availability, but Components Identified calls FR-008's service best-effort \u2014 contradiction.",
+          "question": "Which availability target applies to the Reporting Service: 99.9% (SLA Impact) or best-effort (Components Identified)?"
+        }
+      ]
+    },
+    "artifacts": [
+      {
+        "id": "artifact-4a9c7e1d-3b6f-4e85-9c0d-7f3b9e1a5c62",
+        "type": "document",
+        "name": "hld.md",
+        "format": "markdown",
+        "storage": {
+          "provider": "local",
+          "location": "wf-8a3c9e1d-4b7f-4e62-8c0d-6d3b9f7e1a58/hld.md"
+        },
+        "description": "HLD for HarvestLink: 12 components (8 core services + IDP, Kong routing, payment gateway, Snowflake), 21 integrations, 10 data flows, 3 NFRs mapped, 1 gap (FR-008 availability contradiction).",
+        "produced_by": "L1-design-hld"
+      }
+    ],
+    "execution_summary": "\u2022 Extracted 9 explicitly-tagged FRs (FR-001..FR-009, preserving the document's own 3-digit numbering) and 3 NFR-relevant statements (availability, retention, regulatory-boundary \u2014 none explicitly tagged NFR-xx in source, assigned NFR-01..NFR-03 in document order) from Requirements.md.\n\u2022 Produced 12 components (8 core services per Components Identified, plus 4 grounded-but-unlisted infra/external components: External-party IDP, Kong routing config, Payment Gateway, Snowflake \u2014 each cited to Technical touch check / Integration Landscape, not invented), 21 integrations, 10 data flows, 3 NFR mappings; 1 gap.\n\u2022 Key decision: Transaction Routing Service (C-06) cites BOTH FR-005 (per Integration Landscape prose) and FR-006 (per the dependency diagram) for its payment-gateway link, since the source document attributes it differently in two places \u2014 both are preserved rather than arbitrarily picking one.\n\u2022 Key decision: Reporting Service's Snowflake publish (DF-10, INT-21) is modeled as routed via Kong API Gateway, not direct, per EA4 and the Downstream Consumers section \u2014 even though the dependency diagram draws a direct dotted line.\n\u2022 Gap: SLA Impact claims FR-008 needs 99.9% availability, but Components Identified calls the same FR-008 best-effort \u2014 a genuine contradiction in the source, flagged rather than silently resolved in either direction; NFR-01 is mapped only to C-03 (Traceability), not C-08 (Reporting).\n\u2022 Reflection: verified all ids well-formed, sequential per category, and in document order; no ungrounded components (all 12 trace to explicit document text); checked against kb-L1-enterprise-architecture's component-type taxonomy (service/external_system/gateway) and integration-pattern conventions.\n\u2022 Knowledge bases consulted: kb-L1-enterprise-architecture \u2014 used to classify all 12 component types and confirm REST/event integration patterns, and to validate the Kong-routing (not direct/ESB) pattern against EA4.\n\u2022 Guardrails evaluated: gr-L1-output-schema-validator (pass), gr-L1-pii-detection (pass \u2014 7 of 10 data flows correctly flagged PII, 3 correctly identified as aggregate/non-PII metrics), gr-L1-consistency-check (pass), gr-L1-hallucination-check (pass).\n\u2022 Gaps or issues flagged: FR-008 availability target contradiction (99.9% vs best-effort) \u2014 needs clarification from the source document's author."
+  },
+  "evaluation_criteria": {
+    "must_pass_gates": [
+      "All 9 FRs (FR-001..FR-009) and all 3 NFRs appear in at least one item's traceability array or in gaps",
+      "Component ids C-01..C-12 well-formed and sequential",
+      "C-10 (Kong) blocks/routes all 8 core services (C-01..C-08) \u2014 matches 'entry point for all HarvestLink services'",
+      "FR-008 availability contradiction (SLA Impact vs Components Identified) is surfaced as a gap, not silently resolved",
+      "NFR-03 (facilitation-only posture) addressed_by includes exactly the 4 FRs the source names: C-01, C-03, C-04, C-06",
+      "DF-08/DF-09/DF-10 (metrics into/out of Reporting Service) are contains_pii=false; the other 7 data flows are contains_pii=true"
+    ],
+    "min_scores": {
+      "faithfulness": 0.9,
+      "hallucination_max": 0.1,
+      "consistency": 0.9
+    }
+  }
+}

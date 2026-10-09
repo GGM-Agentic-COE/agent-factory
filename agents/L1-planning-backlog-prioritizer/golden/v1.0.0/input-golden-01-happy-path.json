@@ -1,0 +1,30 @@
+{
+  "workflow_execution_id": "wf-7e5a2c14-9b3d-4f61-a8c0-2d9e6b1f4a73",
+  "scoring_method": "RICE",
+  "adjacent_backlog_check": true,
+  "features": [
+    { "feature_id": "F-05.1", "name": "Warehouse inventory event bus", "description": "Central event stream for stock-level changes across all warehouses." },
+    { "feature_id": "F-05.2", "name": "Real-time low-stock alerts", "description": "Ops team notified when SKU stock crosses a threshold." },
+    { "feature_id": "F-05.3", "name": "Store replenishment auto-suggest", "description": "Suggests replenishment orders from inventory events." },
+    { "feature_id": "F-05.4", "name": "Supplier lead-time dashboard", "description": "Visualizes supplier lead times against current stock trends." },
+    { "feature_id": "F-05.5", "name": "Inventory forecasting model v1", "description": "Forecasts demand per SKU using historical + event-bus data." },
+    { "feature_id": "F-05.6", "name": "Legacy WMS event adapter", "description": "Bridges the legacy warehouse management system into the new event bus." }
+  ],
+  "dependency_graph": {
+    "edges": [
+      { "from": "F-05.1", "blocks": "F-05.2" },
+      { "from": "F-05.1", "blocks": "F-05.3" },
+      { "from": "F-05.1", "blocks": "F-05.5" },
+      { "from": "F-05.6", "blocks": "F-05.1" },
+      { "from": "F-05.5", "blocks": "F-05.4" }
+    ]
+  },
+  "value_scoring_inputs": [
+    { "feature_id": "F-05.1", "reach": 9000, "impact": 3, "confidence": 90, "effort": 8, "source": "value-scoring-sheet.xlsx:row2" },
+    { "feature_id": "F-05.2", "reach": 400, "impact": 2, "confidence": 80, "effort": 2, "source": "value-scoring-sheet.xlsx:row3" },
+    { "feature_id": "F-05.3", "reach": 1200, "impact": 3, "confidence": 70, "effort": 5, "source": "value-scoring-sheet.xlsx:row4" },
+    { "feature_id": "F-05.4", "reach": 150, "impact": 1, "confidence": 60, "effort": 3, "source": "value-scoring-sheet.xlsx:row5" },
+    { "feature_id": "F-05.5", "reach": 800, "impact": 3, "confidence": 65, "effort": 8, "source": "value-scoring-sheet.xlsx:row6" },
+    { "feature_id": "F-05.6", "reach": 9000, "impact": 2, "confidence": 85, "effort": 6, "source": "value-scoring-sheet.xlsx:row7" }
+  ]
+}

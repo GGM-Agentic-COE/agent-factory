@@ -1,0 +1,91 @@
+{
+  "agent_id": "L1-planning-backlog-prioritizer",
+  "agent_version": "1.0.0",
+  "execution_id": "exec-8b2f6e10-4c1a-4d7e-9a3b-1f0c2d5e7a91",
+  "workflow_execution_id": "wf-3a1e2b90-11aa-4c2d-9f10-8e2a1b0c9d44",
+  "status": "success",
+  "content": {
+    "type": "prioritized_backlog",
+    "schema_version": "1.0",
+    "items": {
+      "prioritized_features": [
+        {
+          "feature_id": "F-01.1",
+          "rank": 1,
+          "scoring_method": "WSJF",
+          "priority_score": 2.625,
+          "wsjf_components": { "business_value": 8, "time_criticality": 7, "risk_reduction_opportunity_enablement": 6, "job_size": 8 },
+          "value_score": 84,
+          "effort_estimate": 8,
+          "dependency_unblocking_score": 90,
+          "blocks_feature_ids": ["F-01.2", "F-01.3", "F-01.4"],
+          "blocked_by_feature_ids": [],
+          "confidence": 0.9,
+          "summary": "Moved to #1: raw WSJF is 3rd, but it blocks all 3 other features, so it must ship first.",
+          "citation": { "source_reference": "value-scoring-sheet.xlsx", "source_location": "row2" }
+        },
+        {
+          "feature_id": "F-01.2",
+          "rank": 2,
+          "scoring_method": "WSJF",
+          "priority_score": 4.667,
+          "wsjf_components": { "business_value": 6, "time_criticality": 5, "risk_reduction_opportunity_enablement": 3, "job_size": 3 },
+          "value_score": 56,
+          "effort_estimate": 3,
+          "dependency_unblocking_score": 10,
+          "blocks_feature_ids": [],
+          "blocked_by_feature_ids": ["F-01.1"],
+          "confidence": 0.9,
+          "summary": "Highest raw WSJF score; small job size relative to value. No downstream dependents.",
+          "citation": { "source_reference": "value-scoring-sheet.xlsx", "source_location": "row3" }
+        },
+        {
+          "feature_id": "F-01.4",
+          "rank": 3,
+          "scoring_method": "WSJF",
+          "priority_score": 4.0,
+          "wsjf_components": { "business_value": 4, "time_criticality": 2, "risk_reduction_opportunity_enablement": 2, "job_size": 2 },
+          "value_score": 32,
+          "effort_estimate": 2,
+          "dependency_unblocking_score": 10,
+          "blocks_feature_ids": [],
+          "blocked_by_feature_ids": ["F-01.1"],
+          "confidence": 0.9,
+          "summary": "Second-highest raw WSJF; low job size makes it cheap to slot in early.",
+          "citation": { "source_reference": "value-scoring-sheet.xlsx", "source_location": "row5" }
+        },
+        {
+          "feature_id": "F-01.3",
+          "rank": 4,
+          "scoring_method": "WSJF",
+          "priority_score": 2.0,
+          "wsjf_components": { "business_value": 5, "time_criticality": 3, "risk_reduction_opportunity_enablement": 2, "job_size": 5 },
+          "value_score": 40,
+          "effort_estimate": 5,
+          "dependency_unblocking_score": 10,
+          "blocks_feature_ids": [],
+          "blocked_by_feature_ids": ["F-01.1"],
+          "confidence": 0.9,
+          "summary": "Lowest raw WSJF: moderate value but largest job size among dependents.",
+          "citation": { "source_reference": "value-scoring-sheet.xlsx", "source_location": "row4" }
+        }
+      ],
+      "gaps": []
+    },
+    "artifacts": [
+      {
+        "id": "artifact-f4c1a9d2-6b3e-4a71-9e0d-2c8b5a1f7d63",
+        "type": "document",
+        "name": "prioritized-backlog.md",
+        "format": "markdown",
+        "storage": {
+          "provider": "local",
+          "location": "wf-3a1e2b90-11aa-4c2d-9f10-8e2a1b0c9d44/prioritized-backlog.md"
+        },
+        "description": "Ranked backlog of 4 identity-platform features with WSJF scores and dependency-unblocking rationale.",
+        "produced_by": "L1-planning-backlog-prioritizer"
+      }
+    ],
+    "execution_summary": "• Scored and ranked 4/4 features using WSJF; 0 gaps.\n• Rank adjustment: F-01.1 moved from raw rank 3 to final rank 1 because it blocks 3 downstream features (F-01.2, F-01.3, F-01.4) — documented in its summary.\n• Reflection: verified rank sequence 1-4, no duplicate ranks, dependency order respected with the one adjustment documented; no placeholder text found.\n• Knowledge bases consulted: kb-L1-sdlc-templates — used for the prioritized-backlog.md table/rationale layout.\n• Guardrails evaluated: gr-L1-output-schema-validator (pass), gr-L1-pii-detection (pass), gr-L3-hallucination-detector (pass), gr-L3-citation-validator (pass), gr-L1-consistency-check (pass).\n• Tools invoked: none (adjacent_backlog_check was false).\n• Gaps or issues flagged: none."
+  }
+}

@@ -1,0 +1,51 @@
+{
+  "agent_id": "L1-design-hld",
+  "agent_version": "2.0.0",
+  "execution_id": "exec-8c3a7e1d-2222-4b6f-8a0c-4d9b7e3f1c62",
+  "workflow_execution_id": "wf-9e2b7c4a-3d1f-4e68-8a0c-6f3b9d7e1c54",
+  "status": "success",
+  "content": {
+    "type": "high_level_design",
+    "schema_version": "1.0",
+    "items": {
+      "components": [
+        { "component_id": "C-01", "name": "Support Logging Service", "component_type": "service", "satisfies_requirement_ids": ["FR-01"], "satisfies_nfr_ids": [], "confidence": 0.85, "summary": "Records support interactions and enriches entries with case metadata.", "citation": { "source_reference": "Requirements.md", "source_location": "Functional Requirements: FR-01" } },
+        { "component_id": "C-02", "name": "Support Ticketing API", "component_type": "external_system", "satisfies_requirement_ids": ["FR-01"], "satisfies_nfr_ids": [], "confidence": 0.85, "summary": "Existing API the logging service calls to enrich entries with case metadata.", "citation": { "source_reference": "Requirements.md", "source_location": "Functional Requirements: FR-01" } },
+        { "component_id": "C-03", "name": "Log Store", "component_type": "datastore", "satisfies_requirement_ids": ["FR-01"], "satisfies_nfr_ids": [], "confidence": 0.7, "summary": "Persists support interaction records for later audit — implied by FR-01, not explicitly named.", "citation": { "source_reference": "Requirements.md", "source_location": "Functional Requirements: FR-01" } }
+      ],
+      "integrations": [
+        { "integration_id": "INT-01", "from_component_id": "C-01", "to_component_id": "C-02", "protocol": "REST", "confidence": 0.75, "summary": "Document states the service 'will call' the Support Ticketing API; REST inferred from 'call' language.", "citation": { "source_reference": "Requirements.md", "source_location": "Functional Requirements: FR-01" } },
+        { "integration_id": "INT-02", "from_component_id": "C-01", "to_component_id": "C-03", "protocol": "database", "confidence": 0.7, "summary": "Logging service writes interaction records directly to its store; inferred, not explicitly named.", "citation": { "source_reference": "Requirements.md", "source_location": "Functional Requirements: FR-01" } }
+      ],
+      "data_flows": [
+        { "data_flow_id": "DF-01", "source_component_id": "C-01", "target_component_id": "C-02", "contains_pii": true, "confidence": 0.7, "summary": "Case metadata enrichment request, likely including a customer identifier.", "citation": { "source_reference": "Requirements.md", "source_location": "Functional Requirements: FR-01" } },
+        { "data_flow_id": "DF-02", "source_component_id": "C-01", "target_component_id": "C-03", "contains_pii": true, "confidence": 0.7, "summary": "Support interaction records likely include customer identifiers.", "citation": { "source_reference": "Requirements.md", "source_location": "Functional Requirements: FR-01" } }
+      ],
+      "nfr_mappings": [],
+      "gaps": [
+        {
+          "ref_id": "FR-02",
+          "issue": "No integration or dependency detail is given anywhere in the document for how push notifications would be delivered.",
+          "question": "Which push provider (e.g. FCM/APNs) should this integrate with, and via which component?"
+        },
+        {
+          "ref_id": "NFR-01",
+          "issue": "'Should be fast and responsive' has no measurable target (e.g. latency SLA) to design an approach against.",
+          "question": "What specific performance target (e.g. p95 latency under 200ms) does this require?"
+        }
+      ]
+    },
+    "artifacts": [
+      {
+        "id": "artifact-5b9d7c3a-6f2e-4c85-9a0c-3d7b1f9e5c26",
+        "type": "document",
+        "name": "hld.md",
+        "format": "markdown",
+        "storage": { "provider": "local", "location": "wf-9e2b7c4a-3d1f-4e68-8a0c-6f3b9d7e1c54/hld.md" },
+        "description": "HLD for the Support Logging System: 3 components fully designed for FR-01; FR-02 and the vague performance NFR listed under Gaps.",
+        "produced_by": "L1-design-hld"
+      }
+    ],
+    "execution_summary": "• Extracted 2 FRs (explicitly tagged) and 1 NFR-relevant statement (untagged, no measurable target) from Requirements.md.\n• FR-01 fully designed: Support Logging Service + Support Ticketing API integration + Log Store, all cited to FR-01's own text.\n• FR-02 (push notifications) excluded — no integration or dependency detail anywhere in the document for how it would be delivered; not guessed.\n• NFR-01 (performance) excluded — 'should be fast and responsive' has no measurable target to design an approach against; not guessed.\n• Reflection: verified ids well-formed, sequential, and in document order; no ungrounded components; gaps correctly reported rather than guessed.\n• Knowledge bases consulted: kb-L1-enterprise-architecture — used to classify the 3 components and confirm the REST/database integration patterns.\n• Guardrails evaluated: gr-L1-output-schema-validator (pass), gr-L1-pii-detection (pass), gr-L1-consistency-check (pass), gr-L1-hallucination-check (pass).\n• Gaps or issues flagged: FR-02 needs a push-provider decision; NFR-01 needs a measurable target."
+  }
+}

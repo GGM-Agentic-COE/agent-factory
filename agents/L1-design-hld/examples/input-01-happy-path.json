@@ -1,0 +1,5 @@
+{
+  "workflow_execution_id": "wf-6c3a9e1d-2b7f-4a58-8c0e-5d3b9f1a7c26",
+  "system_name": "Customer Notification System",
+  "requirements_document": "# Requirements: Customer Notification System\n\n## Overview\nThe Customer Notification System keeps customers informed of order status changes via email and SMS, and lets them manage which channels they receive notifications on.\n\n## Functional Requirements\nFR-01: System sends email notifications to customers for order status changes.\nFR-02: System sends SMS notifications to customers for order status changes, if opted in.\nFR-03: Customers can view and update their notification channel preferences (email/SMS) via a UI.\n\n## Non-Functional Considerations\nNotification delivery must maintain 99.9% uptime, since delayed order-status notifications directly affect customer trust during checkout disputes.\n\n## Existing System Integration\nThe notification service will publish delivery events to the existing Snowflake data warehouse for reporting, and will call the group's existing SMS Gateway service for outbound SMS delivery."
+}

@@ -1,0 +1,28 @@
+{
+  "generator_output": {
+    "agent_id": "L1-planning-backlog-prioritizer",
+    "agent_version": "1.0.0",
+    "execution_id": "exec-e7c3a9f5-6666-4b2d-8e0c-9f3a7b5d1e84",
+    "workflow_execution_id": "wf-1d5a8c2e-4f9b-4e73-8a1c-6b3d9e2f5a17",
+    "status": "success",
+    "content": {
+      "type": "prioritized_backlog",
+      "schema_version": "1.0",
+      "items": {
+        "prioritized_features": [
+          { "feature_id": "F-09.1", "rank": 1, "scoring_method": "WSJF", "priority_score": 4.5, "wsjf_components": { "business_value": 7, "time_criticality": 6, "risk_reduction_opportunity_enablement": 5, "job_size": 4 }, "value_score": 72, "effort_estimate": 4, "dependency_unblocking_score": 20, "blocks_feature_ids": [], "blocked_by_feature_ids": [], "confidence": 0.85, "summary": "Highest WSJF in the set.", "citation": { "source_reference": "value-scoring-sheet.xlsx", "source_location": "row2" } },
+          { "feature_id": "F-09.2", "rank": 2, "scoring_method": "WSJF", "priority_score": 2.5, "wsjf_components": { "business_value": 4, "time_criticality": 3, "risk_reduction_opportunity_enablement": 3, "job_size": 4 }, "value_score": 40, "effort_estimate": 4, "dependency_unblocking_score": 0, "blocks_feature_ids": [], "blocked_by_feature_ids": [], "confidence": 0.8, "summary": "Lower WSJF, no dependency involvement.", "citation": { "source_reference": "value-scoring-sheet.xlsx", "source_location": "row3" } }
+        ],
+        "gaps": []
+      },
+      "artifacts": [
+        { "id": "artifact-9e3b7d1f-5a2c-4e64-8a0c-3f7b9d1e5a26", "type": "document", "name": "prioritized-backlog.md", "format": "markdown", "storage": { "provider": "local", "location": "wf-1d5a8c2e-4f9b-4e73-8a1c-6b3d9e2f5a17/prioritized-backlog.md" }, "description": "Ranked backlog of 2 features.", "produced_by": "L1-planning-backlog-prioritizer" }
+      ],
+      "execution_summary": "• Scored and ranked 2/2 features using WSJF; 0 gaps."
+    }
+  },
+  "features": [],
+  "dependency_graph": { "edges": [] },
+  "value_scoring_inputs": [],
+  "adjacent_backlog_check": false
+}

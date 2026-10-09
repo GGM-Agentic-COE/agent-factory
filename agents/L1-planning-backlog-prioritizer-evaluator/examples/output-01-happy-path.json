@@ -1,0 +1,72 @@
+{
+  "agent_id": "L1-planning-backlog-prioritizer-evaluator",
+  "agent_version": "1.0.0",
+  "execution_id": "exec-f3a7c1e9-2222-4b6d-8a0c-5e3b9f1a7c62",
+  "workflow_execution_id": "wf-6c2e9a4b-7d1f-4b83-9a0c-3e6b1f9a2d54",
+  "status": "success",
+  "content": {
+    "type": "backlog_evaluation",
+    "schema_version": "1.0",
+    "items": {
+      "verification_results": [
+        {
+          "feature_id": "F-07.3",
+          "generator_priority_score": 5.333,
+          "recomputed_priority_score": 5.333,
+          "generator_dependency_unblocking_score": 30,
+          "recomputed_dependency_unblocking_score": 30,
+          "generator_rank": 1,
+          "rank_respects_dependency_graph": true,
+          "score_match": true,
+          "severity": "none",
+          "confidence": 0.95,
+          "summary": "Recomputed (5+6+5)/3=5.333 matches; blocks F-07.1 and correctly ranks above it.",
+          "citation": { "source_reference": "value-scoring-sheet.xlsx", "source_location": "row4" }
+        },
+        {
+          "feature_id": "F-07.1",
+          "generator_priority_score": 3.0,
+          "recomputed_priority_score": 3.0,
+          "generator_dependency_unblocking_score": 0,
+          "recomputed_dependency_unblocking_score": 0,
+          "generator_rank": 2,
+          "rank_respects_dependency_graph": true,
+          "score_match": true,
+          "severity": "none",
+          "confidence": 0.95,
+          "summary": "Recomputed (6+5+4)/5=3.0 matches; correctly ranked below its blocker F-07.3.",
+          "citation": { "source_reference": "value-scoring-sheet.xlsx", "source_location": "row2" }
+        },
+        {
+          "feature_id": "F-07.2",
+          "generator_priority_score": 2.333,
+          "recomputed_priority_score": 2.333,
+          "generator_dependency_unblocking_score": 0,
+          "recomputed_dependency_unblocking_score": 0,
+          "generator_rank": 3,
+          "rank_respects_dependency_graph": true,
+          "score_match": true,
+          "severity": "none",
+          "confidence": 0.95,
+          "summary": "Recomputed (7+4+3)/6=2.333 matches; no dependency involvement to check.",
+          "citation": { "source_reference": "value-scoring-sheet.xlsx", "source_location": "row3" }
+        }
+      ],
+      "fixes_applied": [],
+      "guardrail_rechecks": [
+        { "guardrail": "gr-L1-consistency-check", "generator_claimed_result": "pass", "evaluator_result": "pass", "notes": "Re-walked dependency graph independently; rank order confirmed consistent." },
+        { "guardrail": "gr-L3-hallucination-detector", "generator_claimed_result": "pass", "evaluator_result": "pass", "notes": "All 3 scores trace to value-scoring-sheet.xlsx rows 2-4." },
+        { "guardrail": "gr-L3-citation-validator", "generator_claimed_result": "pass", "evaluator_result": "pass", "notes": "All citations resolve to real rows in the source sheet." }
+      ]
+    },
+    "verdict": {
+      "final_decision": "approved",
+      "overall_score": 1.0,
+      "faithfulness_score": 1.0,
+      "hallucination_score": 0.0,
+      "consistency_score": 1.0,
+      "citation_completeness_score": 1.0
+    },
+    "execution_summary": "• Verified 3/3 features; 0 mismatches, 0 fixes needed.\n• Every priority_score and dependency_unblocking_score independently recomputed and matched the generator's claims exactly.\n• Dependency check: F-07.3 blocks F-07.1 and correctly outranks it — no violation.\n• Guardrails re-checked independently: gr-L1-consistency-check (pass), gr-L3-hallucination-detector (pass), gr-L3-citation-validator (pass) — all matched the generator's own claims.\n• Tools invoked: none (adjacent_backlog_check was false).\n• Final verdict: approved — no corrections needed, document left as-is."
+  }
+}

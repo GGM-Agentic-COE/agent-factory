@@ -1,0 +1,55 @@
+{
+  "workflow_execution_id": "wf-2f8b3e91-6a1d-4c72-9e0b-5d3a8f1c6b94",
+  "scoring_method": "WSJF",
+  "features": [
+    { "feature_id": "F-10.1", "name": "Onboarding Service", "description": "Producers and distributors complete FBO attestation and onboarding, authenticated via an external-party identity provider, before they can trade on HarvestLink. FR-001." },
+    { "feature_id": "F-10.2", "name": "Discovery & Matching Service", "description": "Foodservice buyers discover producers via compliance-completeness-driven search and matching. FR-002." },
+    { "feature_id": "F-10.3", "name": "Traceability Service", "description": "Immutable, dual-signed traceability records for producer-distributor trades, at 99.9% availability per ES4. FR-003." },
+    { "feature_id": "F-10.4", "name": "Compliance Documentation Service", "description": "Producers submit self-attested allergen declarations; drives the compliance-completeness score used elsewhere. FR-004." },
+    { "feature_id": "F-10.5", "name": "Transaction Limit Enforcement Service", "description": "Server-side enforcement of transaction-value limits based on a producer's compliance-completeness score. FR-005." },
+    { "feature_id": "F-10.6", "name": "Transaction Routing Service", "description": "Enforces facilitation-only routing so HarvestLink never records itself as taking possession or title of goods. FR-006." },
+    { "feature_id": "F-10.7", "name": "Cohort Management Service", "description": "Restricts pilot-phase onboarding and trading to a designated cohort. FR-007." },
+    { "feature_id": "F-10.8", "name": "Reporting Service", "description": "Publishes time-to-first-compliant-trade and compliance-completeness metrics to Snowflake via Kong API Gateway. FR-008, FR-009." },
+    { "feature_id": "F-10.9", "name": "External-party identity provider integration", "description": "Newly surfaced gap: Azure AD is employee-only, so HarvestLink needs a separate external-party identity provider (e.g. Azure AD B2C, Auth0) for producer/distributor/buyer authentication." },
+    { "feature_id": "F-10.10", "name": "Kong API Gateway routing configuration for HarvestLink", "description": "Mandatory per EA4: all HarvestLink API traffic (mobile app, external integrations, Snowflake publishing) must route through the existing Kong API Gateway (CI-APP-007)." },
+    { "feature_id": "F-10.11", "name": "Payment gateway integration", "description": "Third-party payment provider (not yet selected — e.g. Stripe, Adyen) required for the transaction flow enforced by Transaction Routing Service." }
+  ],
+  "dependency_graph": {
+    "edges": [
+      { "from": "F-10.10", "blocks": "F-10.1" },
+      { "from": "F-10.10", "blocks": "F-10.2" },
+      { "from": "F-10.10", "blocks": "F-10.3" },
+      { "from": "F-10.10", "blocks": "F-10.4" },
+      { "from": "F-10.10", "blocks": "F-10.5" },
+      { "from": "F-10.10", "blocks": "F-10.6" },
+      { "from": "F-10.10", "blocks": "F-10.7" },
+      { "from": "F-10.10", "blocks": "F-10.8" },
+      { "from": "F-10.9", "blocks": "F-10.1" },
+      { "from": "F-10.9", "blocks": "F-10.3" },
+      { "from": "F-10.9", "blocks": "F-10.4" },
+      { "from": "F-10.7", "blocks": "F-10.1" },
+      { "from": "F-10.1", "blocks": "F-10.4" },
+      { "from": "F-10.1", "blocks": "F-10.3" },
+      { "from": "F-10.4", "blocks": "F-10.2" },
+      { "from": "F-10.4", "blocks": "F-10.5" },
+      { "from": "F-10.1", "blocks": "F-10.6" },
+      { "from": "F-10.11", "blocks": "F-10.6" },
+      { "from": "F-10.4", "blocks": "F-10.8" },
+      { "from": "F-10.3", "blocks": "F-10.8" }
+    ]
+  },
+  "value_scoring_inputs": [
+    { "feature_id": "F-10.1", "business_value": 7, "time_criticality": 8, "risk_reduction": 6, "job_size": 6, "source": "L1-impact-assessment(HarvestLink):Components Identified FR-001" },
+    { "feature_id": "F-10.2", "business_value": 8, "time_criticality": 5, "risk_reduction": 3, "job_size": 6, "source": "L1-impact-assessment(HarvestLink):Components Identified FR-002" },
+    { "feature_id": "F-10.3", "business_value": 6, "time_criticality": 6, "risk_reduction": 8, "job_size": 7, "source": "L1-impact-assessment(HarvestLink):Non-Functional & Regulatory Impact (SLA), Components Identified FR-003" },
+    { "feature_id": "F-10.4", "business_value": 7, "time_criticality": 6, "risk_reduction": 7, "job_size": 6, "source": "L1-impact-assessment(HarvestLink):Components Identified FR-004" },
+    { "feature_id": "F-10.5", "business_value": 5, "time_criticality": 4, "risk_reduction": 5, "job_size": 4, "source": "L1-impact-assessment(HarvestLink):Components Identified FR-005" },
+    { "feature_id": "F-10.6", "business_value": 7, "time_criticality": 6, "risk_reduction": 8, "job_size": 6, "source": "L1-impact-assessment(HarvestLink):Non-Functional & Regulatory Impact (Regulatory Boundaries), Components Identified FR-006" },
+    { "feature_id": "F-10.7", "business_value": 4, "time_criticality": 5, "risk_reduction": 2, "job_size": 3, "source": "L1-impact-assessment(HarvestLink):Components Identified FR-007" },
+    { "feature_id": "F-10.8", "business_value": 3, "time_criticality": 2, "risk_reduction": 1, "job_size": 4, "source": "L1-impact-assessment(HarvestLink):Components Identified FR-008/FR-009" },
+    { "feature_id": "F-10.9", "business_value": 8, "time_criticality": 9, "risk_reduction": 5, "job_size": 7, "source": "L1-impact-assessment(HarvestLink):Integration Landscape & External Dependencies, Upstream Data Sources #1" },
+    { "feature_id": "F-10.10", "business_value": 9, "time_criticality": 9, "risk_reduction": 6, "job_size": 5, "source": "L1-impact-assessment(HarvestLink):Technical touch check CI-APP-007" },
+    { "feature_id": "F-10.11", "business_value": 6, "time_criticality": 5, "risk_reduction": 4, "job_size": 6, "source": "L1-impact-assessment(HarvestLink):Integration Landscape & External Dependencies, Third-party Services #3" }
+  ],
+  "adjacent_backlog_check": false
+}

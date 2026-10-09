@@ -1,0 +1,67 @@
+# Agent Specification Document
+spec_version: "1.0"
+artifact_type: agent
+metadata:
+  name: L1-planning-backlog-prioritizer
+  version: "1.0.0"
+  layer: L1
+  phase: planning
+  owner: agentic-ai-coe
+  created: "2026-08-12"
+
+purpose:
+  description: "Prioritizes decomposed features (not raw requirements) by business value, effort, and dependency-unblocking risk, scoring each at feature granularity using WSJF/RICE."
+  input: "A feature set, a dependency graph between those features, and business-value scoring inputs (RICE/WSJF fields)."
+  output: "prioritized-backlog.md — a ranked list of features with WSJF/RICE scores, dependency-unblocking risk, and rationale."
+  business_value: "Sequences engineering effort by value delivery and dependency-unblocking leverage, preventing backlog thrash, unscored guesswork, and sprints blocked on undiscovered upstream dependencies."
+
+prompt:
+  ref: "prompts/L1-planning-backlog-prioritizer/instructions.md"
+  version: "1.0.0"
+  description: "Scores and ranks features using WSJF/RICE at feature granularity, weighting dependency-unblocking risk, and produces a ranked backlog document plus per-feature scoring items."
+
+contract:
+  input_schema: "$ref: schemas/agent-input-contract-schema.json"
+  output_schema: "$ref: schemas/agent-output-schema.json"
+
+  input:
+    accepts_from_agents: [L1-design-feature-decomposer, L1-design-dependency-mapper]
+    accepts_direct_input: true
+    accepts_file_upload:
+      enabled: true
+      formats: [".json", ".csv", ".xlsx"]
+    required_parameters:
+      features: {type: array, description: "Feature list from L1-design-feature-decomposer's features.json (id, name, description)."}
+      dependency_graph: {type: object, description: "dependency-graph.json from L1-design-dependency-mapper — edges between feature ids (blocks / blocked_by)."}
+      value_scoring_inputs: {type: array, description: "Business-value scoring fields per feature supplied by the Product Lead (RICE: reach, impact, confidence, effort; or WSJF: business_value, time_criticality, risk_reduction, job_size), sourced from Jira custom fields or a value-scoring sheet."}
+    optional_parameters:
+      scoring_method: {type: string, default: "WSJF", description: "Which framework to apply: WSJF or RICE. Defaults to WSJF if unspecified."}
+      adjacent_backlog_check: {type: boolean, default: false, description: "If true, cross-check feature ids against an adjacent Jira backlog via tool-L1-jira-fetch-issue to flag possible duplicates."}
+
+  output:
+    $ref: "output_schema.json"
+
+context:
+  knowledge_bases:
+    - kb-L1-sdlc-templates
+  guardrails:
+    - gr-L1-output-schema-validator
+    - gr-L1-pii-detection
+    - gr-L3-hallucination-detector
+    - gr-L3-citation-validator
+    - gr-L1-consistency-check
+    - gr-L2-tool-permissions
+    - gr-L3-agent-rate-limit
+  tools:
+    - tool-L1-jira-fetch-issue   # read-only — checks an adjacent backlog for existing/duplicate issues; never writes
+
+quality:
+  evaluation_ref: "evaluation.md"
+  min_score: 7.0
+  hallucination_check: true
+  consistency_check: true
+
+versioning:
+  input_version: "1.0"
+  output_version: "1.0"
+  instruction_hash: "sha256:pending"

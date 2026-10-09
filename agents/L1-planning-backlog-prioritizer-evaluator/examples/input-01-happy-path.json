@@ -1,0 +1,91 @@
+{
+  "generator_output": {
+    "agent_id": "L1-planning-backlog-prioritizer",
+    "agent_version": "1.0.0",
+    "execution_id": "exec-a1b2c3d4-1111-4a2b-8c3d-4e5f6a7b8c9d",
+    "workflow_execution_id": "wf-6c2e9a4b-7d1f-4b83-9a0c-3e6b1f9a2d54",
+    "status": "success",
+    "content": {
+      "type": "prioritized_backlog",
+      "schema_version": "1.0",
+      "items": {
+        "prioritized_features": [
+          {
+            "feature_id": "F-07.3",
+            "rank": 1,
+            "scoring_method": "WSJF",
+            "priority_score": 5.333,
+            "wsjf_components": { "business_value": 5, "time_criticality": 6, "risk_reduction_opportunity_enablement": 5, "job_size": 3 },
+            "value_score": 64,
+            "effort_estimate": 3,
+            "dependency_unblocking_score": 30,
+            "blocks_feature_ids": ["F-07.1"],
+            "blocked_by_feature_ids": [],
+            "confidence": 0.85,
+            "summary": "Highest WSJF and blocks F-07.1; sequencing and value agree.",
+            "citation": { "source_reference": "value-scoring-sheet.xlsx", "source_location": "row4" }
+          },
+          {
+            "feature_id": "F-07.1",
+            "rank": 2,
+            "scoring_method": "WSJF",
+            "priority_score": 3.0,
+            "wsjf_components": { "business_value": 6, "time_criticality": 5, "risk_reduction_opportunity_enablement": 4, "job_size": 5 },
+            "value_score": 60,
+            "effort_estimate": 5,
+            "dependency_unblocking_score": 0,
+            "blocks_feature_ids": [],
+            "blocked_by_feature_ids": ["F-07.3"],
+            "confidence": 0.85,
+            "summary": "Second-highest WSJF; correctly ranked below its blocker F-07.3.",
+            "citation": { "source_reference": "value-scoring-sheet.xlsx", "source_location": "row2" }
+          },
+          {
+            "feature_id": "F-07.2",
+            "rank": 3,
+            "scoring_method": "WSJF",
+            "priority_score": 2.333,
+            "wsjf_components": { "business_value": 7, "time_criticality": 4, "risk_reduction_opportunity_enablement": 3, "job_size": 6 },
+            "value_score": 56,
+            "effort_estimate": 6,
+            "dependency_unblocking_score": 0,
+            "blocks_feature_ids": [],
+            "blocked_by_feature_ids": [],
+            "confidence": 0.85,
+            "summary": "Lowest WSJF, largest job size, no dependency involvement.",
+            "citation": { "source_reference": "value-scoring-sheet.xlsx", "source_location": "row3" }
+          }
+        ],
+        "gaps": []
+      },
+      "artifacts": [
+        {
+          "id": "artifact-5d8a2c1e-9b4f-4d67-8a0c-2e5b9d3f1a76",
+          "type": "document",
+          "name": "prioritized-backlog.md",
+          "format": "markdown",
+          "storage": { "provider": "local", "location": "wf-6c2e9a4b-7d1f-4b83-9a0c-3e6b1f9a2d54/prioritized-backlog.md" },
+          "description": "Ranked backlog of 3 order-fulfillment features (WSJF), no adjustments needed.",
+          "produced_by": "L1-planning-backlog-prioritizer"
+        }
+      ],
+      "execution_summary": "• Scored and ranked 3/3 features using WSJF; 0 gaps.\n• No rank adjustment needed: raw WSJF order already matched dependency order.\n• Gaps or issues flagged: none."
+    }
+  },
+  "features": [
+    { "feature_id": "F-07.1", "name": "Split shipment support", "description": "Allow an order to ship in multiple partial shipments." },
+    { "feature_id": "F-07.2", "name": "Delivery ETA prediction", "description": "Predict delivery date shown at checkout and in order tracking." },
+    { "feature_id": "F-07.3", "name": "Address validation at checkout", "description": "Validate and normalize shipping address before order is placed." }
+  ],
+  "dependency_graph": {
+    "edges": [
+      { "from": "F-07.3", "blocks": "F-07.1" }
+    ]
+  },
+  "value_scoring_inputs": [
+    { "feature_id": "F-07.1", "business_value": 6, "time_criticality": 5, "risk_reduction": 4, "job_size": 5, "source": "value-scoring-sheet.xlsx:row2" },
+    { "feature_id": "F-07.2", "business_value": 7, "time_criticality": 4, "risk_reduction": 3, "job_size": 6, "source": "value-scoring-sheet.xlsx:row3" },
+    { "feature_id": "F-07.3", "business_value": 5, "time_criticality": 6, "risk_reduction": 5, "job_size": 3, "source": "value-scoring-sheet.xlsx:row4" }
+  ],
+  "adjacent_backlog_check": false
+}

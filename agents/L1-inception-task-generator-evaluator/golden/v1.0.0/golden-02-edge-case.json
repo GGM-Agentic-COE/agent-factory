@@ -1,0 +1,35 @@
+{
+  "agent_id": "L1-inception-task-generator-evaluator",
+  "agent_version": "1.0.0",
+  "execution_id": "exec-f7c1a9e3-7777-4b5d-8a0c-9e3b7d1f5a48",
+  "workflow_execution_id": "wf-8e2a7c1d-5b3f-4e94-8a0c-6f7b9d3e1c48",
+  "status": "failed",
+  "content": {
+    "type": "task_breakdown_evaluation",
+    "schema_version": "1.0",
+    "items": {
+      "verification_results": [],
+      "feature_coverage": [],
+      "fixes_applied": [],
+      "guardrail_rechecks": []
+    },
+    "verdict": {
+      "final_decision": "rejected",
+      "overall_score": 0.0,
+      "faithfulness_score": 0.0,
+      "hallucination_score": 0.0,
+      "consistency_score": 0.0,
+      "citation_completeness_score": 0.0
+    },
+    "execution_summary": "• Produced 0 verification_results — INSUFFICIENT_CONTEXT.\n• generator_output claims 1 task (T-09.1.01) for feature F-09.1, but the features and acceptance_criteria provided for independent re-judgment were both empty.\n• Cannot verify a task's type, effort, or dependency justification without the original feature description to re-derive it from — reporting the generator's task as correct without recomputation would be trusting its self-check, which this agent must never do.\n• Suggested: re-invoke with the SAME features/acceptance_criteria that were originally passed to L1-inception-task-generator for this workflow_execution_id.\n• Reflection: correctly returned zero findings and a 'rejected' verdict rather than fabricating a judgment or assuming the generator's task was correct.\n• Guardrails re-checked: none — no source data to re-check hallucination, citation, or consistency against.\n• Tools invoked: none.\n• Final verdict: rejected — cannot confirm or deny the generator's output without its source data."
+  },
+  "evaluation_criteria": {
+    "must_pass_gates": [
+      "status is 'failed' and verdict.final_decision is 'rejected'",
+      "verification_results, feature_coverage, fixes_applied, and guardrail_rechecks are all empty arrays — never fabricated",
+      "execution_summary explicitly states the source data was insufficient to independently re-judge anything",
+      "no artifacts array is produced, since no fix was made or could be made"
+    ],
+    "min_scores": { "faithfulness": 0.90, "hallucination_max": 0.0, "consistency": 0.90 }
+  }
+}

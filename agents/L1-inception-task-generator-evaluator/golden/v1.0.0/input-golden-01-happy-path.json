@@ -1,0 +1,41 @@
+{
+  "generator_output": {
+    "agent_id": "L1-inception-task-generator",
+    "agent_version": "1.0.0",
+    "execution_id": "exec-7d1a3f9c-5b2e-4c86-9a0d-3f7b1e9c5a24",
+    "workflow_execution_id": "wf-4b7e2a91-6c3d-4f18-8a9c-2e5b7d1f3a60",
+    "status": "success",
+    "content": {
+      "type": "task_breakdown",
+      "schema_version": "1.0",
+      "items": {
+        "tasks": [
+          { "task_id": "T-06.1.01", "feature_id": "F-06.1", "title": "Build export filter UI (date range, status, region)", "task_type": "frontend", "effort_hours": 8, "blocks_task_ids": ["T-06.1.05"], "blocked_by_task_ids": [], "confidence": 0.85, "summary": "Filter form for the 3 export criteria in the AC; triggers the async export job.", "citation": { "source_reference": "acceptance-criteria.json", "source_location": "F-06.1[0]" }, "duplicate_flag": true },
+          { "task_id": "T-06.1.02", "feature_id": "F-06.1", "title": "Build async export job orchestration + permission-filtered querying", "task_type": "backend", "effort_hours": 14, "blocks_task_ids": ["T-06.1.03"], "blocked_by_task_ids": [], "confidence": 0.8, "summary": "Split from a ~24h export-generation unit to stay under the 16h ceiling; covers async trigger and region-scoped querying.", "citation": { "source_reference": "acceptance-criteria.json", "source_location": "F-06.1[1:3]" } },
+          { "task_id": "T-06.1.03", "feature_id": "F-06.1", "title": "Implement CSV and Excel (.xlsx) format writers", "task_type": "backend", "effort_hours": 10, "blocks_task_ids": ["T-06.1.04"], "blocked_by_task_ids": ["T-06.1.02"], "confidence": 0.8, "summary": "Other half of the split export-generation unit; format-specific output for both required file types.", "citation": { "source_reference": "acceptance-criteria.json", "source_location": "F-06.1[2]" } },
+          { "task_id": "T-06.1.04", "feature_id": "F-06.1", "title": "Provision export storage with 72h signed-link expiry and completion email", "task_type": "infra", "effort_hours": 6, "blocks_task_ids": ["T-06.1.05"], "blocked_by_task_ids": ["T-06.1.03"], "confidence": 0.85, "summary": "Signed URL storage with 72h expiry and the completion-email trigger, per AC.", "citation": { "source_reference": "acceptance-criteria.json", "source_location": "F-06.1[1,4]" } },
+          { "task_id": "T-06.1.05", "feature_id": "F-06.1", "title": "QA: filters, async threshold, formats, permission scoping, link expiry", "task_type": "qa", "effort_hours": 8, "blocks_task_ids": [], "blocked_by_task_ids": ["T-06.1.01", "T-06.1.04"], "confidence": 0.8, "summary": "End-to-end coverage of all 5 acceptance criteria, including the 5k-row async threshold.", "citation": { "source_reference": "acceptance-criteria.json", "source_location": "F-06.1[0:4]" } }
+        ],
+        "gaps": []
+      },
+      "artifacts": [
+        { "id": "artifact-1c9a3e7d-5f2b-4a86-9c0e-3d7b1f9a5c62", "type": "document", "name": "task-breakdown.md", "format": "markdown", "storage": { "provider": "local", "location": "wf-4b7e2a91-6c3d-4f18-8a9c-2e5b7d1f3a60/task-breakdown.md" }, "description": "5-task breakdown for bulk order export, including the ceiling-driven split and the frontend duplicate-ticket flag.", "produced_by": "L1-inception-task-generator" }
+      ],
+      "execution_summary": "• Generated 5 tasks for 1/1 feature; 0 gaps.\n• Split decision: the export-generation work was initially scoped as one ~24h backend task, split into T-06.1.02 (14h) and T-06.1.03 (10h).\n• Tools invoked: tool-L1-jira-fetch-issue — found 1 likely duplicate (T-06.1.01 vs existing ticket EXP-88)."
+    }
+  },
+  "features": [
+    { "feature_id": "F-06.1", "name": "Bulk order export to CSV/Excel", "description": "Ops users can export up to 100k orders with filters (date range, status, region) to CSV or Excel, generated asynchronously with an email link when ready." }
+  ],
+  "acceptance_criteria": [
+    { "feature_id": "F-06.1", "criteria": [
+      "User selects date range, status, and region filters before export",
+      "Export runs asynchronously for datasets over 5k rows; user gets an email with a download link",
+      "CSV and Excel (.xlsx) formats are both supported",
+      "Export respects row-level permissions — user only sees orders in their assigned regions",
+      "Download link expires after 72 hours"
+    ] }
+  ],
+  "max_task_effort_hours": 16,
+  "adjacent_backlog_check": true
+}

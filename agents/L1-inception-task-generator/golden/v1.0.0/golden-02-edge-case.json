@@ -1,0 +1,25 @@
+{
+  "agent_id": "L1-inception-task-generator",
+  "agent_version": "1.0.0",
+  "execution_id": "exec-5a3e9c1d-7b2f-4d64-8a0c-9e3b7d1f5a26",
+  "workflow_execution_id": "wf-2e9c4b17-8a3d-4f65-9c1e-6b2a8d3f1e70",
+  "status": "failed",
+  "content": {
+    "type": "task_breakdown",
+    "schema_version": "1.0",
+    "items": {
+      "tasks": [],
+      "gaps": []
+    },
+    "execution_summary": "• Produced 0 items — INSUFFICIENT_CONTEXT.\n• The features array was empty — there is nothing to decompose into tasks.\n• No acceptance criteria were usable without at least one feature.\n• Suggested: ask the requester to confirm features.json from L1-design-feature-decomposer was passed through, or provide the feature list directly.\n• Reflection: correctly returned an empty result rather than fabricating placeholder tasks.\n• Knowledge bases consulted: kb-L1-sdlc-templates — not used, no content to template.\n• Guardrails evaluated: gr-L1-output-schema-validator (pass), gr-L1-pii-detection (pass).\n• Tools invoked: none.\n• Gaps or issues flagged: entire input — see reason above."
+  },
+  "evaluation_criteria": {
+    "must_pass_gates": [
+      "status is 'failed'",
+      "tasks and gaps are both empty arrays, never fabricated tasks",
+      "execution_summary explicitly states INSUFFICIENT_CONTEXT and the reason",
+      "no artifacts array is produced, since there is no content to render into task-breakdown.md"
+    ],
+    "min_scores": { "faithfulness": 0.90, "hallucination_max": 0.0, "consistency": 0.90 }
+  }
+}

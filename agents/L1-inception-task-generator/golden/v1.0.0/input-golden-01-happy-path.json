@@ -1,0 +1,17 @@
+{
+  "workflow_execution_id": "wf-4b7e2a91-6c3d-4f18-8a9c-2e5b7d1f3a60",
+  "max_task_effort_hours": 16,
+  "adjacent_backlog_check": true,
+  "features": [
+    { "feature_id": "F-06.1", "name": "Bulk order export to CSV/Excel", "description": "Ops users can export up to 100k orders with filters (date range, status, region) to CSV or Excel, generated asynchronously with an email link when ready." }
+  ],
+  "acceptance_criteria": [
+    { "feature_id": "F-06.1", "criteria": [
+      "User selects date range, status, and region filters before export",
+      "Export runs asynchronously for datasets over 5k rows; user gets an email with a download link",
+      "CSV and Excel (.xlsx) formats are both supported",
+      "Export respects row-level permissions — user only sees orders in their assigned regions",
+      "Download link expires after 72 hours"
+    ] }
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "generator_output": {
+    "agent_id": "L1-inception-task-generator",
+    "agent_version": "1.0.0",
+    "execution_id": "exec-b8d2f4a6-2222-4c7e-9b1d-3f6a8c2e5b91",
+    "workflow_execution_id": "wf-4c9e2a7d-6b1f-4e83-8a0c-5d7b3f9e1c26",
+    "status": "success",
+    "content": {
+      "type": "task_breakdown",
+      "schema_version": "1.0",
+      "items": {
+        "tasks": [
+          { "task_id": "T-04.1.01", "feature_id": "F-04.1", "title": "Aggregate transaction data and generate PDF compliance report", "task_type": "backend", "effort_hours": 20, "blocks_task_ids": ["T-04.1.02"], "blocked_by_task_ids": [], "confidence": 0.8, "summary": "Pulls transaction data across tables and renders the quarterly compliance report as PDF.", "citation": { "source_reference": "features.json", "source_location": "F-04.1" } },
+          { "task_id": "T-04.1.02", "feature_id": "F-04.1", "title": "QA: compliance report accuracy and format", "task_type": "qa", "effort_hours": 6, "blocks_task_ids": [], "blocked_by_task_ids": ["T-04.1.01"], "confidence": 0.8, "summary": "Verifies report figures match source transactions and PDF renders correctly.", "citation": { "source_reference": "features.json", "source_location": "F-04.1" } }
+        ],
+        "gaps": []
+      },
+      "artifacts": [
+        { "id": "artifact-6b2e9d1c-7a3f-4d85-9c0e-4f7b1e9a5c62", "type": "document", "name": "task-breakdown.md", "format": "markdown", "storage": { "provider": "local", "location": "wf-4c9e2a7d-6b1f-4e83-8a0c-5d7b3f9e1c26/task-breakdown.md" }, "description": "2-task breakdown for the quarterly compliance report feature.", "produced_by": "L1-inception-task-generator" }
+      ],
+      "execution_summary": "• Generated 2 tasks for 1/1 feature; 0 gaps.\n• No task exceeded the 16-hour ceiling."
+    }
+  },
+  "features": [
+    { "feature_id": "F-04.1", "name": "Generate quarterly compliance report", "description": "Aggregate transaction data across accounts and produce a downloadable PDF compliance report each quarter." }
+  ],
+  "acceptance_criteria": [
+    { "feature_id": "F-04.1", "criteria": ["Report totals match the sum of underlying transactions for the quarter", "Report is downloadable as a formatted PDF with company letterhead"] }
+  ],
+  "max_task_effort_hours": 16,
+  "adjacent_backlog_check": false
+}

@@ -1,0 +1,13 @@
+{
+  "workflow_execution_id": "wf-5d2a9c47-3e1b-4f68-8a0c-6b3d1e9f2c85",
+  "max_task_effort_hours": 16,
+  "features": [
+    { "feature_id": "F-02.1", "name": "Customer profile edit UI with photo upload", "description": "Customer can edit name, email, and upload a profile photo. Photo is stored and served from a new bucket." },
+    { "feature_id": "F-02.2", "name": "Loyalty points balance nightly sync job", "description": "A nightly job reconciles loyalty point balances between the legacy ledger and the new balance table." }
+  ],
+  "acceptance_criteria": [
+    { "feature_id": "F-02.1", "criteria": ["User can update name/email and see validation errors inline", "User can upload a JPG/PNG under 5MB as profile photo", "Photo is resized and served via CDN within 2s"] },
+    { "feature_id": "F-02.2", "criteria": ["Job runs nightly at 02:00 UTC", "Discrepancies over $1 are logged for manual review", "Balance table matches ledger for 99.9% of accounts after sync"] }
+  ],
+  "adjacent_backlog_check": false
+}

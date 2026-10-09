@@ -1,0 +1,142 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.internal/agents/L1-planning-backlog-prioritizer-evaluator/output_schema.json",
+  "title": "L1-planning-backlog-prioritizer-evaluator Output",
+  "description": "Full AgentOutput envelope. content.items.verification_results holds one independently-recomputed entry per feature the generator scored (structural fields stay full: ids, scores, booleans). content.items.fixes_applied lists any correction made to items and/or the artifact. content.verdict is the overall pass/fail call. If a fix touched the document itself, content.artifacts[0] carries the SAME artifact id and storage location as the generator's, re-uploaded with corrected content — never a new id.",
+  "type": "object",
+  "required": ["agent_id", "agent_version", "execution_id", "workflow_execution_id", "status", "content"],
+  "properties": {
+    "agent_id": { "type": "string", "const": "L1-planning-backlog-prioritizer-evaluator" },
+    "agent_version": { "type": "string", "description": "Semver, e.g. '1.0.0'." },
+    "execution_id": { "type": "string", "pattern": "^exec-.+$" },
+    "workflow_execution_id": { "type": "string", "pattern": "^wf-.+$", "description": "MUST match the workflow_execution_id of the generator_output being evaluated." },
+    "status": { "type": "string", "enum": ["success", "failed"] },
+    "content": {
+      "type": "object",
+      "required": ["type", "schema_version", "items", "verdict", "execution_summary"],
+      "properties": {
+        "type": { "type": "string", "const": "backlog_evaluation" },
+        "schema_version": { "type": "string", "const": "1.0" },
+        "items": {
+          "type": "object",
+          "required": ["verification_results", "fixes_applied", "guardrail_rechecks"],
+          "properties": {
+            "verification_results": {
+              "type": "array",
+              "description": "One entry per feature_id present in generator_output.content.items.prioritized_features.",
+              "items": { "$ref": "#/$defs/VerificationResult" }
+            },
+            "fixes_applied": {
+              "type": "array",
+              "description": "Empty if verdict.final_decision is 'approved'.",
+              "items": { "$ref": "#/$defs/FixApplied" }
+            },
+            "guardrail_rechecks": {
+              "type": "array",
+              "description": "Independent re-check of each BLOCKER-relevant guardrail the generator owns — never a copy of the generator's own pass/fail claim.",
+              "items": { "$ref": "#/$defs/GuardrailRecheck" }
+            }
+          }
+        },
+        "verdict": {
+          "type": "object",
+          "required": ["final_decision", "overall_score", "faithfulness_score", "hallucination_score", "consistency_score", "citation_completeness_score"],
+          "properties": {
+            "final_decision": { "type": "string", "enum": ["approved", "fixed_and_approved", "rejected"], "description": "'fixed_and_approved' MUST NOT be reported while the artifact still holds pre-fix text — see Don'ts." },
+            "overall_score": { "type": "number", "minimum": 0, "maximum": 1 },
+            "faithfulness_score": { "type": "number", "minimum": 0, "maximum": 1 },
+            "hallucination_score": { "type": "number", "minimum": 0, "maximum": 1, "description": "Lower is better — rate of unsupported/invented values found." },
+            "consistency_score": { "type": "number", "minimum": 0, "maximum": 1, "description": "Rate of rank orders that correctly respect the dependency graph." },
+            "citation_completeness_score": { "type": "number", "minimum": 0, "maximum": 1 }
+          }
+        },
+        "artifacts": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/Artifact" },
+          "maxItems": 1,
+          "description": "Present ONLY if a fix touched the document. Same artifact id and storage.location as the generator's — re-uploaded, not a new artifact."
+        },
+        "execution_summary": {
+          "type": "string",
+          "description": "Plain-text bullet summary — not JSON."
+        }
+      }
+    }
+  },
+  "$defs": {
+    "Citation": {
+      "type": "object",
+      "required": ["source_reference", "source_location"],
+      "properties": {
+        "source_reference": { "type": "string", "description": "e.g. 'features.json' or 'value-scoring-sheet.xlsx' — the ORIGINAL source, re-checked independently, not the generator's citation copied verbatim." },
+        "source_location": { "type": "string" }
+      }
+    },
+    "VerificationResult": {
+      "type": "object",
+      "required": [
+        "feature_id", "generator_priority_score", "recomputed_priority_score",
+        "generator_dependency_unblocking_score", "recomputed_dependency_unblocking_score",
+        "generator_rank", "rank_respects_dependency_graph",
+        "score_match", "severity", "confidence", "summary", "citation"
+      ],
+      "properties": {
+        "feature_id": { "type": "string", "pattern": "^F-[0-9]{2}\\.[0-9]+$" },
+        "generator_priority_score": { "type": "number", "description": "As claimed in generator_output." },
+        "recomputed_priority_score": { "type": "number", "description": "Independently recomputed from features/value_scoring_inputs using the stated scoring_method formula." },
+        "generator_dependency_unblocking_score": { "type": "number" },
+        "recomputed_dependency_unblocking_score": { "type": "number", "description": "Independently recomputed by walking dependency_graph directly, not read from generator_output." },
+        "generator_rank": { "type": "integer" },
+        "rank_respects_dependency_graph": { "type": "boolean", "description": "False if this feature outranks a feature that blocks it, with no documented trade-off in its summary." },
+        "duplicate_flag_verified": { "type": "boolean", "description": "Present only when adjacent_backlog_check=true; result of an independent tool-L1-jira-fetch-issue call, not the generator's stored flag." },
+        "score_match": { "type": "boolean", "description": "True if recomputed values match the generator's claims within rounding tolerance AND rank_respects_dependency_graph is true." },
+        "severity": { "type": "string", "enum": ["none", "minor", "major", "blocker"] },
+        "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+        "summary": { "type": "string", "maxLength": 150, "description": "Distilled finding. Full reasoning is in execution_summary or the fix entry, never restated here." },
+        "citation": { "$ref": "#/$defs/Citation" }
+      }
+    },
+    "FixApplied": {
+      "type": "object",
+      "required": ["feature_id", "field", "generator_value", "corrected_value", "reason", "document_updated"],
+      "properties": {
+        "feature_id": { "type": "string" },
+        "field": { "type": "string", "description": "e.g. 'rank', 'priority_score', 'dependency_unblocking_score'." },
+        "generator_value": { "type": "string", "description": "Stringified original value for a uniform diff view." },
+        "corrected_value": { "type": "string" },
+        "reason": { "type": "string", "maxLength": 150 },
+        "document_updated": { "type": "boolean", "description": "True if this field also appears in prioritized-backlog.md and was corrected there at the same location." }
+      }
+    },
+    "GuardrailRecheck": {
+      "type": "object",
+      "required": ["guardrail", "generator_claimed_result", "evaluator_result"],
+      "properties": {
+        "guardrail": { "type": "string" },
+        "generator_claimed_result": { "type": "string", "enum": ["pass", "fail"] },
+        "evaluator_result": { "type": "string", "enum": ["pass", "fail"] },
+        "notes": { "type": "string", "maxLength": 150 }
+      }
+    },
+    "Artifact": {
+      "type": "object",
+      "required": ["id", "type", "name", "format", "storage", "description", "produced_by"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^artifact-.+$", "description": "MUST equal the generator's artifact id — this is a re-upload, not a new artifact." },
+        "type": { "type": "string", "const": "document" },
+        "name": { "type": "string", "const": "prioritized-backlog.md" },
+        "format": { "type": "string", "const": "markdown" },
+        "storage": {
+          "type": "object",
+          "required": ["provider", "location"],
+          "properties": {
+            "provider": { "type": "string", "enum": ["s3", "local", "confluence", "github", "jira_attachment"] },
+            "location": { "type": "string", "description": "MUST equal the generator's storage.location — same {workflow_execution_id}/prioritized-backlog.md path." }
+          }
+        },
+        "description": { "type": "string" },
+        "produced_by": { "type": "string", "const": "L1-planning-backlog-prioritizer-evaluator" }
+      }
+    }
+  }
+}

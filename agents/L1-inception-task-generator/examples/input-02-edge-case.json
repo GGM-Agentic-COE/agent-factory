@@ -1,0 +1,12 @@
+{
+  "workflow_execution_id": "wf-8f1c3a56-2d7e-4b91-9a0c-5e3d8b1f7a24",
+  "max_task_effort_hours": 16,
+  "features": [
+    { "feature_id": "F-03.1", "name": "Checkout page error state", "description": "Show a clear error message and a retry button when payment authorization fails at checkout." },
+    { "feature_id": "F-03.2", "name": "Improve things", "description": "Make the app better." }
+  ],
+  "acceptance_criteria": [
+    { "feature_id": "F-03.1", "criteria": ["User sees a specific error message per failure reason (declined, network, timeout)", "Retry button re-submits the same payment attempt"] }
+  ],
+  "adjacent_backlog_check": false
+}
