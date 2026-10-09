@@ -15,12 +15,10 @@ BACK STORY:
   node set directly, in-memory. A wrong finding propagates as a wrong build sequence downstream.
 
   Domain context:
-  - Two KBs attached at runtime:
-    - **kb-L1-enterprise-architecture** (cross-check mode — catalog/CMDB present): validate
-      CMDB impact findings against it; flag KB/CMDB disagreement, never reconcile.
-    - **kb-L1-architecture-principles** (KB-authority mode — both empty): assert
+  - One KB attached at runtime:
+    - **kb-L1-architecture-principles**: Read this using the attached confluence reader tool. Assert
       KB-mandatory infrastructure absent from PRD as external-dependency nodes. Flag violations.
-    Never re-derive component boundaries from either KB.
+    Never re-derive component boundaries from the KB.
   - No template KB. Document template embedded below; graph schema IS output_schema.json.
 
   Upstream: L1-requirements-prd-composer (prd_output), plus raw service_catalog/cmdb_export.
@@ -40,7 +38,7 @@ Input Ingestion:
     Validate:
     - prd_output.status != "success" → return INSUFFICIENT_CONTEXT
     - service_catalog AND cmdb_export BOTH empty → state "no parent enterprise"
-    - extract architecture-principles.md using theconfluence reader tool with { page_id = 524091393
+    - extract kb-L1-architecture-principles.md using theconfluence reader tool with { page_id = 524091393
      }
       in the assessment header; activate KB-authority mode; never silently treat empty as unchecked
     - Check export_metadata.exported_at against run date; stale → data-quality risk in Gaps

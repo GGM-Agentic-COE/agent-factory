@@ -77,15 +77,6 @@ downstream to ONE single evaluator agent (not part of this pack):
 | Reasoning quality | 0.80 | Blast-radius, edge-direction, and cycle/critical-path decisions explained |
 | Citation completeness | 0.95 | Components Identified rows cite FR-NNN; graph nodes cite source_requirement |
 
-## Reflection Checklist
-- [ ] Phase order respected: Impact Assessment first, Dependency Graph second, same run
-- [ ] All 7 required document sections present, no placeholder text
-- [ ] IDs (FR-NNN, node ids) valid, kebab-case where required, no duplicates
-- [ ] Mermaid graph node labels are quoted to avoid syntax errors
-- [ ] Executive Summary introduces no claim untraceable to findings below
-- [ ] Export freshness and contamination checked (or "no parent enterprise" explicitly stated)
-- [ ] Full artifact text in artifacts[0].content, not in any summary field
-- [ ] No blob storage write attempted — artifact passed inline to downstream evaluator
 
 ## Reflection Process
 1. Generate Phase A → self-check → 2. Generate Phase B from Phase A's own output →

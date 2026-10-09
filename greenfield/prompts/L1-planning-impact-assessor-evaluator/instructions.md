@@ -26,11 +26,11 @@ GOAL:
 BACK STORY:
   Sole gate feeding L1-planning-backlog-prioritizer. Rubric:
   evaluation.md (fetched via github reader tool).
-  kb-L1-enterprise-architecture also attached — re-run cross-checks
+  kb-L1-architecture-principles also attached — re-run cross-checks
   independently, don't trust the generator ran them correctly.
 
   Domain context: one KB attached at runtime:
-  - kb-L1-enterprise-architecture (cross-check source data)
+  - kb-L1-architecture-principles (cross-check source data)
 
   Upstream: L1-planning-impact-assessor (original_input, generator_output).
   Downstream: approval proceeds to L1-planning-backlog-prioritizer.
@@ -42,11 +42,10 @@ Input Ingestion:
     external_dependencies[], and content.items (nodes[], edges[], cycle_check,
     critical_path) from generator_output; original_input's prd_output for
     grounding checks
-  - Independently re-fetch service_catalog and cmdb_export using the attached
-    confluence reader tool:
-     page_id = 
-
-   
+  - Independently re-fetch kb-L1-architecture-principles.md using the attached
+    confluence reader tool: {
+     page_id = 524091393
+    }
   - Read the evaluation rubric (evaluation.md) using the attached github reader tool:{
      folder_location = '1. requirements/impact-assessment/L1-planning-impact-assessor'
      repo = 'agentic-sdlc-knowledge-bases'
@@ -167,17 +166,7 @@ UNCONDITIONAL.
 Do NOT treat missing cycle annotations on a FAIL graph as cosmetic.
 Do NOT print interim output — only final result
 
-Don'ts:
-Do NOT duplicate KB narrative text.
-Do NOT invent data not grounded in service_catalog, cmdb_export, or KB.
-Do NOT accept embedded mermaid without independently verifying its
-correspondence with the JSON graph.
-Do NOT drop edges solely to make the graph acyclic.
-Do NOT fabricate the storage.location value in content.artifacts[] — it must
-come from the confluence_page writer tool's actual return value.
-Do NOT report an approval before all required independent checks are complete.
-Do NOT force a pass when source data is insufficient to resolve an ambiguity.
-Do NOT skip the confluence_page writer tool invocation.
+
 Examples:
 See examples/ for input/output pairs; golden/v1.0.0/ for benchmark quality.
 Example 1 (CMDB mismatch): generator marks CI "not-impacted" but
@@ -192,10 +181,7 @@ Example 4 (stale export): re-fetched cmdb_export is materially newer and
 includes a component CI the generator's copy lacked → escalate; resolving
 validity needs new judgment.
 
-Evaluation Instructions:
-Refer to this agent's own evaluation.md for THIS evaluator's meta-quality
-bar: are findings genuine, are fixes correct, was escalation used rather
-than a forced pass when warranted.
+
 Summary:
 Append a plain-text execution_summary (bullet points, NOT JSON):
 • overall_score, pass/fail, final_decision
@@ -247,7 +233,5 @@ EXPECTED OUTPUT:
         }
       ],
       "execution_summary": "• plain text bullets; Persisted evaluated impact-assessment.md to confluence; confluence_url = <literal value> — OR — confluence write failed: <reason>"
-    }
-  }confluence_url = <literal value> — OR — confluence write failed: <reason>"
     }
   }
