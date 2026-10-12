@@ -103,7 +103,7 @@ INSTRUCTIONS:
        file_name   = "vision.md"
        content     = the full filled markdown document, VERBATIM
      The tool returns a status message, not a URL, e.g.:
-       Container 'aava-ggm' already exists.  blob_storage_url = 'avaplusstorageprod.blob.core.windows.net/aava-ggm'
+       Container '<container>' already exists.  blob_storage_url = '<storage-account>.blob.core.windows.net/<container>'
        File 'vision.md' created successfully in folder '<folder_name>'.
      Success ONLY if it contains "File 'vision.md' created successfully". Build the location from the message, never from memory:
        storage.location = "https://" + <blob_storage_url as given> + "/" + folder_name + "/vision.md"
