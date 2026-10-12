@@ -40,7 +40,6 @@ single pass (the converter agent guarantees this ordering).
 # CONFIGURATION  --  edit these four (five) values for your Jira space
 # ============================================================================
 JIRA_BASE_URL     = "https://aavademo.atlassian.net"            # no trailing slash
-JIRA_PROJECT_KEY  = "GGMDEMOS"                                   # default project
 JIRA_USER_EMAIL   = "aava.demouser@ascendion.com"               # Atlassian account email
 JIRA_API_TOKEN    = "REDACTED-SECRET-KEY"
 DEFAULT_ISSUE_TYPE = "Epic"                                      # used if none given
@@ -266,7 +265,7 @@ class JiraIssueCreator(BaseTool):
             headers = {"Content-Type": "application/json", "Accept": "application/json"}
             auth = HTTPBasicAuth(jira_user, jira_token)
 
-            project_key = inputJSON.get("projectKey") or JIRA_PROJECT_KEY
+            project_key = inputJSON.get("projectKey") 
             default_type = inputJSON.get("issueType") or DEFAULT_ISSUE_TYPE
             issues = inputJSON.get("issues", [])
 
@@ -343,7 +342,7 @@ def create_issues(payload: Dict[str, Any], dry_run: bool = False) -> str:
 if __name__ == "__main__":
     # Quick self-test: build ADF for a tiny payload without hitting Jira.
     demo = {
-        "projectKey": JIRA_PROJECT_KEY,
+        "projectKey": "GGMDEMOS",
         "issueType": "Epic",
         "issues": [
             {

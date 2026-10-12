@@ -58,7 +58,6 @@ secrets = reader._run()
 # CONFIGURATION  --  edit these values for your Jira space (same as the creator)
 # ============================================================================
 JIRA_BASE_URL     = secrets.get("base_url")                     # from AWS Secrets Manager
-JIRA_PROJECT_KEY  = "GGMDEMOS"                                  # SETUP-REQUIRED: default Jira project key
 JIRA_USER_EMAIL   = secrets.get("user_email")                   #from AWS Secrets Manager
 JIRA_API_TOKEN    = secrets.get("api_token")                    #from AWS Secrets Manager
 DEFAULT_MAX_DEPTH = 5            # how many levels of children to walk

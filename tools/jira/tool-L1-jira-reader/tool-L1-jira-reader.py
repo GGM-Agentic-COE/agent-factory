@@ -27,7 +27,6 @@
 # CONFIGURATION  --  edit these values for your Jira space (same as the creator)
 # ============================================================================
 JIRA_BASE_URL     = "https://aavademo.atlassian.net"            # no trailing slash
-JIRA_PROJECT_KEY  = "GGMDEMOS"                                  # default project
 JIRA_USER_EMAIL   = "aava.demouser@ascendion.com"              # Atlassian account email
 JIRA_API_TOKEN    = "REDACTED-SECRET-KEY"
 DEFAULT_MAX_DEPTH = 5            # how many levels of children to walk

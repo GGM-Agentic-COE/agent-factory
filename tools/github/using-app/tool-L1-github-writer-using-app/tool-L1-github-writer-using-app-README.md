@@ -69,6 +69,23 @@ On failure:
 
 ## Standalone tool calling
 
+ Example JSON structure to paste in AAVA, under 'files' variable:
+```json
+[
+  {
+    "filename": "docs/summary.md",
+    "code": "# Summary\nSprint complete."
+  },
+  {
+    "src": {
+      "filename": "main.py",
+      "code": "print('hello')\n"
+    }
+  }
+]
+```
+
+python code to run locally on IDE, if needed:
 ```python
 from tool_L1_github_writer_secrets_manager_using_app import GithubCommitterTool
 

@@ -59,7 +59,6 @@ secrets = reader._run()
 # CONFIGURATION  --  edit these values for your Jira space
 # ============================================================================
 JIRA_BASE_URL      = secrets.get("base_url")                     # from AWS Secrets Manager
-JIRA_PROJECT_KEY   = "GGMDEMOS"                                  # SETUP-REQUIRED: default Jira project key
 JIRA_USER_EMAIL    = secrets.get("user_email")                   #from AWS Secrets Manager
 JIRA_API_TOKEN     = secrets.get("api_token")                    #from AWS Secrets Manager
 DEFAULT_ISSUE_TYPE = "Epic"                                     
@@ -177,7 +176,7 @@ class JiraIssueCreator(BaseTool):
             headers = {"Content-Type": "application/json", "Accept": "application/json"}
             auth = HTTPBasicAuth(jira_user, jira_token)
 
-            project_key = inputJSON.get("projectKey") or JIRA_PROJECT_KEY
+            project_key = inputJSON.get("projectKey")
             default_type = inputJSON.get("issueType") or DEFAULT_ISSUE_TYPE
             issues = inputJSON.get("issues", [])
 

@@ -11,7 +11,6 @@ Fetches one or more Jira issues with their complete nested child hierarchy, retu
 | `base_url` | **AWS Secrets Manager** — secret `aava-secret-manager-jira-credentials`, key `base_url` | Jira instance base URL. Shared with `tool-L1-jira-writer` and `tool-L1-jira-epics-uploader`. |
 | `user_email` | **AWS Secrets Manager** — same secret, key `user_email` | Atlassian account email used for HTTP Basic Auth. |
 | `api_token` | **AWS Secrets Manager** — same secret, key `api_token` | Jira API token. Never appears in the code. |
-| `JIRA_PROJECT_KEY` | Set directly in code | Not a secret — the default Jira project this tool operates against. See "SETUP-REQUIRED" comment at the top of the tool file. |
 
 > Every value that must be reviewed before deploying this tool to a new environment or client — including `SECRET_NAME` and `region_name` on the `AWSSecretReaderPodIdentity` class — is tagged `SETUP-REQUIRED:` directly in `tool-L1-jira-reader-secrets-manager.py`. Search the file for that tag to find them all in one pass.
 

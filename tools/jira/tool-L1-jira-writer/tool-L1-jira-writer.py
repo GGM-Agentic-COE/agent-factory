@@ -22,7 +22,6 @@ SAMPLE JSON FOR TESTING:
 # CONFIGURATION  --  edit these values for your Jira space
 # ============================================================================
 JIRA_BASE_URL      = "https://aavademo.atlassian.net"            # no trailing slash
-JIRA_PROJECT_KEY   = "GGMDEMOS"                                  # default project
 JIRA_USER_EMAIL    = "aava.demouser@ascendion.com"              # Atlassian account email
 JIRA_API_TOKEN     = "REDACTED-SECRET-KEY"
 DEFAULT_ISSUE_TYPE = "Epic"                                     # FIX #2: was missing
@@ -148,7 +147,7 @@ class JiraIssueCreator(BaseTool):
             headers = {"Content-Type": "application/json", "Accept": "application/json"}
             auth = HTTPBasicAuth(jira_user, jira_token)
 
-            project_key = inputJSON.get("projectKey") or JIRA_PROJECT_KEY
+            project_key = inputJSON.get("projectKey") 
             default_type = inputJSON.get("issueType") or DEFAULT_ISSUE_TYPE
             issues = inputJSON.get("issues", [])
 
