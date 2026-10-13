@@ -15,6 +15,7 @@
 - [ ] **BLOCKER — Fixed component values:** regulatory_posture is exactly the fixed value of the lowest band any constraint qualifies for (Band A = 9, B = 8, C = 5, D = 2), never a number inside a range; idea_clarity is exactly the sum of its four answers (Q1-Q4, each Yes = 2.5, Partly = 1.25, No = 0), and the reasoning lists the four answers
 - [ ] Every constraint's Obligated party line quotes the brief sentence that decides who performs the activity, or says "brief does not say". A party resolved from the product type alone ("it is software") is a fail. With no deciding sentence the constraint is unresolved Amber, never Red and never not-applicable
 - [ ] The score in regulatory-feasibility.md's header table, its Viability Score section, and items.viability.viability_score are the same number
+- [ ] Legend table comes first, with no heading above it: Source 1 (`L1-vision-idea-intake` with the brief's own date, or this run's Generated date when the brief has none), Status "Draft", Generated directly below Status, and the Approved by, Date of Approval and Human Approval Comments cells left empty
 
 ## Scores (minimum per dimension)
 | Evaluator | ≥ | Checks |

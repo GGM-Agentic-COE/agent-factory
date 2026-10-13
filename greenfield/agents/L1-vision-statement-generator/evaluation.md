@@ -8,9 +8,9 @@
 - [ ] executive_summary introduces no claim absent from the sections below it, apart from the one sentence stating the viability score (carried from regulatory-feasibility.md)
 - [ ] viability_score in items and in vision.md matches regulatory-feasibility.md and the input parameter exactly — carried, never recomputed, re-derived, rounded, or averaged
 - [ ] Where the score was capped upstream by a Red or legal-review constraint, that constraint is covered in open_risks and named as the biggest open risk in the executive summary — the number and the narrative describe the same situation
-- [ ] Product Name: written as a line ("**Product Name -** <name>") outside the Legend table, before the Executive Summary. The H1 and the Product Name line carry the same name. A name the agent proposed is labelled as proposed on that line — a proposed name presented as the user's is a fail
-- [ ] Legend table comes first: one Source row per upstream document actually read (agent name and that document's own date; Source 1 may carry regulatory-feasibility.md's date when the brief has none), Status "Draft", no Generated row, and the Approved by, Date of Approval and Human Approval Comments cells left empty. No Approval section or sign-off checkbox at the end of the document
-- [ ] vision.md was saved to blob storage in the same folder the inputs were read from, and the artifact's storage.location was built from the write tool's message. Nothing was written to GitHub
+- [ ] Product Name: taken verbatim from the first segment of the blob folder name (<product name>/<workflow id>), or proposed and labelled as proposed when the folder has none. Written as a line ("**Product Name -** <name>") outside the Legend table, before the Executive Summary. The H1 and the Product Name line carry the same name. A name the agent proposed is labelled as proposed on that line — a proposed name presented as the user's is a fail
+- [ ] Legend table comes first, with no heading above it: one Source row per upstream document actually read (agent name and that document's own date; Source 1 may carry regulatory-feasibility.md's date when the brief has none), Status "Draft", no Generated row, and the Approved by, Date of Approval and Human Approval Comments cells left empty. No Approval section or sign-off checkbox at the end of the document
+- [ ] The full vision document is the content of the vision.md artifact in the generator's JSON output. Nothing was written to blob storage or GitHub
 
 ## Scores (minimum per dimension)
 | Evaluator | ≥ | Checks |

@@ -11,9 +11,9 @@ metadata:
   updated: "2026-10-05"
 
 purpose:
-  description: "Synthesizes idea, market, and regulatory findings into one reconciled vision statement and roadmap outline, and saves it to blob storage as vision.md. L1-vision-statement-generator-evaluator evaluates it and publishes it to Confluence; Product Lead sign-off is still required before Phase 1."
+  description: "Synthesizes idea, market, and regulatory findings into one reconciled vision statement and roadmap outline, and returns the full vision.md inside its JSON output (nothing is written to blob storage). L1-vision-statement-generator-evaluator evaluates it and publishes it to Confluence; Product Lead sign-off is still required before Phase 1."
   input: "idea-brief.json items, regulatory_feasibility items, and the viability_score owned by L1-vision-regulatory-feasibility-checker at qg-L1-viability-score; market_analysis items optionally, when the market analyzer ran; product_name optionally, from the user."
-  output: "vision.md (markdown, in blob storage) plus structured items reconciling the upstream inputs."
+  output: "vision.md (markdown, as the content of an artifact in the JSON output) plus structured items reconciling the upstream inputs."
   business_value: "Three separate analyses aren't a decision — the Product Lead needs one document with a north-star metric and roadmap outline to approve or reject. This agent is also the last chance to catch a dropped regulatory finding before it reaches a human."
 
 prompt:
@@ -35,7 +35,6 @@ contract:
       regulatory_feasibility_items: { type: object, description: "Full items object from L1-vision-regulatory-feasibility-checker as corrected by its evaluator, including its viability object" }
       viability_score: { type: number, description: "Owned by L1-vision-regulatory-feasibility-checker and re-derived by its evaluator at qg-L1-viability-score. Carried here as a parameter and reported exactly as received — this agent may not compute, re-derive, round, or adjust it" }
     optional_parameters:
-      product_name: { type: string, default: null, description: "The product's name, supplied by the user into the {{product_name}} placeholder. Used VERBATIM in the H1 and the Product Name row (the evaluator later publishes it to Confluence as '<product_name>-vision.md'). Absent, empty, or still template text → the agent proposes a name from the idea brief and labels it '(proposed by agent — … confirm or replace)' in the Product Name row; never a failure" }
       market_analysis_items: { type: object, description: "Full items object from L1-vision-market-analyzer. OPTIONAL — the market analyzer may not have run. When absent, vision.md's Market Context reads 'Not assessed', items.market_context is emitted with confidence 0 and traced_to 'none', and no market-sourced open risks are carried. The viability score is unaffected: it carries no market component" }
 
   output:
@@ -50,8 +49,6 @@ context:
     - gr-L1-consistency-check   # checks reconciliation: no upstream Amber/Red item silently dropped
   tools:
     - tool-L1-azure-blob-reader      # reads idea-brief.json/regulatory-feasibility.md/market-analysis.md from blob storage in one call
-    - tool-L1-azure-blob-writer      # saves vision.md to blob storage (folder_name from the request). This agent calls no Confluence tool — the evaluator publishes
-    - tool-L1-system-current-date    # called with timezone UTC — the only way this agent can date the vision document without guessing
 
 quality:
   evaluation_ref: "evaluation.md"

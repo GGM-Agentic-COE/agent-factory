@@ -46,7 +46,7 @@ INSTRUCTIONS:
   - current_date — the date THIS run executes, not the date the idea was written up. You have no clock, so read one:
       1. Call the attached current date tool with timezone = "UTC"; read current_date from the returned JSON (already yyyy-mm-dd)
       2. Tool unavailable, errors, or success false → use generated_date from idea-brief.json (root or content/items), normalized to yyyy-mm-dd; note in execution_summary that it may pre-date this run
-      3. Neither → write "not available" in the Generated cell and carry on. A missing date never halts the run and is not INSUFFICIENT_CONTEXT
+      3. Neither → write "not available" in the Legend's Generated row and carry on. A missing date never halts the run and is not INSUFFICIENT_CONTEXT
     Never write a date from anywhere else — not this prompt's examples, a fixture, a KB, the brief's prose, or training data. A well-formatted wrong date is undetectable downstream. State the date and its source in execution_summary
 
   Reference Retrieval (BEFORE jurisdiction resolution or any classification — none of it can come from memory):
@@ -94,10 +94,17 @@ INSTRUCTIONS:
 
   | Field | Value |
   |---|---|
-  | Source idea brief | idea-brief.json ({idea_brief_artifact_id}) |
+  | Source 1 | source agent: `L1-vision-idea-intake`, Date: {a date field in idea-brief.json (generated_date or date, at the root or under content/items), as yyyy-mm-dd. idea-brief.json usually carries NO date, and then this is the Generated date below. Never leave it empty} |
+  | Status (Draft / In-Review / Approved) | Draft |
+  | Generated | {current_date as resolved in Input Ingestion — yyyy-mm-dd read from the current date tool (UTC), or "not available"; never copied from an example, a fixture, or this template} |
+  | Approved by (Human Name) |  |
+  | Date of Approval |  |
+  | Human Approval Comments |  |
+
+  | Field | Value |
+  |---|---|
   | Target geography | {geography, as stated in the brief} |
   | Jurisdiction assessed | {the country the KBs declare, plus any sub-national layer used as the basis} |
-  | Generated | {current_date as resolved in Input Ingestion — yyyy-mm-dd read from the current date tool (UTC), or "not available"; never copied from an example, a fixture, or this template} |
   | Viability score | {n}/10 |
 
   ## Feasibility Summary
@@ -131,6 +138,11 @@ INSTRUCTIONS:
   ## Open Items
   {every open question: anything flagged "requires legal review", every unresolved obligated party or threshold, every sub-national layer raised per Section B, and every item the brief itself deferred; empty only if none of these exist}
   ```
+
+  Legend table rules (the "Legend table" is the document's first table; it has no heading above it):
+  - Source 1's Date is the date idea-brief.json records for itself, found by key (generated_date or date). idea-brief.json is JSON and normally has NO date field: then Source 1 takes this run's Generated date. Source 1 is never left empty
+  - Status is always exactly "Draft". Leave the Approved by, Date of Approval and Human Approval Comments values EMPTY: they are for the human approver to fill in. Empty is correct here. These cells are not placeholders, so never write "N/A", "TBD" or a name into them
+  - Generated sits directly below Status
 
   Processing Rules:
   1. Work only from the retrieved KB text: walk the sweep list against this idea, name each applicable category's regulator from #cross-domain-index, then read the domain KB for the specific rules
@@ -266,6 +278,7 @@ INSTRUCTIONS:
   6. The header table, the Viability Score section and items.viability state the same number
   7. IDs sequential (CON-01…, OI-01…, VC-01…), no duplicates; no summary field holds full artifact text
   8. The Generated date came from the date tool, the brief's generated_date, or is "not available"
+  8a. The Legend table is first: Source 1 with a date, Status "Draft", Generated directly below Status, and the three approval cells left empty
   9. Every edge case that fired is in execution_summary — never reported as a clean run
   Full scoring is a separate downstream step (L1-vision-regulatory-feasibility-checker-evaluator); this is a self-check, not the rubric.
 
