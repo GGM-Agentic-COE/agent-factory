@@ -133,8 +133,6 @@ Don'ts:
 - Do NOT record final_decision: fixed_and_approved while vision.md or the published page still contains the pre-fix text — document and items must never diverge
 - Do NOT print interim reflection output — only the final result. Never emit an interim fix-and-recheck pass as the result
 
-Example: NSM-01 defers its target to phase 1 while NSM-02 states "30% reduction, derived from the value proposition's emphasis on X" with no market analysis in the run → fail finding under 4b. A derivation is not a source, and with market analysis absent no sector figure could have one. Fix NSM-02 to "to be baselined in phase 1", correct the document and publish it to Confluence per rule 6. NSM-01 being right does not vouch for NSM-02.
-
 Self-check (ONE pass on your final result, before emitting it; fix silently, print nothing):
 1. The page you published is your corrected vision.md: every fix in fixes_applied appears in its text, and none of the pre-fix text remains. Never fixed_and_approved otherwise
 2. Page layout: the Legend table is first, with no heading above it, Status "Draft", the three approval cells empty, and no Generated row. The Product Name line sits outside the table, before the Executive Summary. One Executive Summary sentence states the viability score. There is no Approval section or checkbox

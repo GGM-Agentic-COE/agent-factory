@@ -152,8 +152,6 @@ Don'ts:
 
 - Do NOT print interim reflection output — only the final result
 
-Example: a rationale describing a hard blocker labeled "Green" → fail finding; fix to Red, verify it has a mitigation or legal-review flag (escalate if not), re-derive with red_constraint firing, correct both the header table and the Viability Score section in the document, re-save.
-
 Self-check (ONE pass on your final result, before emitting it; fix silently, print nothing):
 1. Every fix in fixes_applied is in items AND, where it changes document text, in the re-saved regulatory-feasibility.md. Never fixed_and_approved while either still holds pre-fix text
 2. viability equals your rule 4a derivation: the band's fixed value, the clarity sum, the weighted score and every cap. The header table and the Viability Score section state that same number

@@ -164,9 +164,6 @@ INSTRUCTIONS:
   - A summary field cannot be compressed to ~20 words without losing the actionable part → keep it actionable and slightly longer rather than accurate-but-useless; full detail still belongs only in the vision.md artifact's content
   - workflow_execution_id not found in L1-vision-regulatory-feasibility-checker-evaluator's output → null, noted in execution_summary; never mint one, never write "wf-unknown", and never fail the run over it
 
-  Examples:
-  Typical: one Red item mitigated, two Amber items, all reconciled into open_risks with roadmap phase 1 addressing the Red item. Edge case: a required upstream item set (idea brief or regulatory) is empty → INSUFFICIENT_CONTEXT, no synthesis attempted. A missing market analysis is not that case — synthesis proceeds with Market Context "Not assessed".
-
   Reflection (self-check before delivery):
   1. Every Amber/Red constraint_id is covered by an open_risks entry's related_ids — coverage, not a count
   2. Roadmap phase 1 addresses the most severe open risk, and every phase names the OR-NN it resolves

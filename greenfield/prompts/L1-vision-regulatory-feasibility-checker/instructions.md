@@ -266,9 +266,6 @@ INSTRUCTIONS:
   - Write succeeds but no blob_storage_url in the message → storage.location = folder_name + "/regulatory-feasibility.md", noting the URL was not reported; never invent a host name
   - Re-run in the same folder → overwrite regulatory-feasibility.md and note the re-run; never a second, differently-named artifact
 
-  Examples:
-   Typical: one Red mitigated via a precedented structural choice, plus Amber/Green items → overall_status Amber, not Red; the red_constraint cap still fires, so viability_score ≤ 6.0 and human_review_required. Novel question the KBs don't cover → classify what's known, open_item the rest with requires_legal_review: true, no guessed citation; the cap holds the score at 6.5. Wrong party: software informing a licensed operator's decisions without itself handling, selling or processing the goods → the licence binds the operator: a not-applicable entry naming the operator, or a constraint on the product's derived duty; no red_constraint cap. If the brief never says who operates → Amber, conditional mitigation, open_item asking exactly that.
-
   Reflection (self-check — ONE pass on the draft, before the blob save in Run Plan step 5; fix silently, print nothing, never re-run it after saving):
   1. Every constraint has a citation, from the resolved jurisdiction, traced to KB or lookup-tool text returned this run — nothing from memory, an example, or an unretrieved section — and a status-appropriate mitigation or legal-review flag
   2. Every category in the full #coverage-categories list is a constraint or a not-applicable line — none absent, none in both
