@@ -29,7 +29,7 @@ class AWSSecretReaderPodIdentity(BaseTool):
 
     # Review every line tagged "SETUP-REQUIRED:" below before deploying this tool to a new environment or client.
     # SETUP-REQUIRED: must match the secret name created in your AWS Secrets Manager
-    SECRET_NAME: str = "aava/aava-atlassian-sa-dev-secret-asm"
+    SECRET_NAME: str = "<name-of-secret-in-aws-secrets-manager>"
 
 
     def _run(self) -> Dict[str, Any]:
@@ -57,14 +57,14 @@ reader = AWSSecretReaderPodIdentity()
 secrets = reader._run()
 
 # ============================================================================
-# CONFIGURATION  --  edit these values for your Jira space (same as the creator)
+# CONFIGURATION  --  Jira connection values are read from AWS Secrets Manager
 # ============================================================================
 JIRA_BASE_URL     = secrets.get("base_url")                     # from AWS Secrets Manager
 JIRA_USER_EMAIL   = secrets.get("id")                   #from AWS Secrets Manager
 JIRA_API_TOKEN    = secrets.get("api_key")                    #from AWS Secrets Manager
 
 
-DEFAULT_ISSUE_TYPE = "Epic"                                     # FIX #2: was missing
+DEFAULT_ISSUE_TYPE = "Epic"                                     # used when no issueType is supplied
 # ============================================================================
 
 
@@ -79,7 +79,7 @@ class JiraIssueCreator(BaseTool):
     description: str = "Creates Jira issues with formatted descriptions and Jira links"
     args_schema: Type[BaseModel] = JiraIssueCreatorSchema
 
-    base_url: str = JIRA_BASE_URL   # FIX #3: declare attribute so self.base_url exists
+    base_url: str = JIRA_BASE_URL
     post_url: str = ""
 
     def _format_heading(self, key: str) -> str:

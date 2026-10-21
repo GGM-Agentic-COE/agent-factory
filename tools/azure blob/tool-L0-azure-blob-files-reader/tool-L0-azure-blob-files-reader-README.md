@@ -1,107 +1,160 @@
-# tool-L1-azure-blob-specific-files-reader
+# tool-L0-azure-blob-files-reader
 
-## What does it do?
+## 1. Executive summary
 
-Reads and returns the decoded text contents of **only the named files** inside a specified folder (virtual prefix) in Azure Blob Storage. The tool takes a folder name plus an explicit list of file names, resolves each one to a full blob path under that prefix, downloads it individually, and returns a formatted string that includes the file name and its content. The folder is never listed, so files that were not requested are never touched. Binary or non-UTF-8 files are noted with their byte size instead of content. Requested files that do not exist are reported per-file and summarised at the end of the output rather than aborting the run.
+You give the tool a folder name (a blob prefix) and a list of file names inside it. It downloads only those files from the configured Azure Blob Storage container and returns their contents in one formatted text block, with the blob path shown above each file and a footer listing any files that were missing or failed.
 
-## Secrets & Configuration
+**Key points** (details in [Section 6](#6-nuances)):
 
-| Value | Where it lives | Notes |
-|-------|-----------------|-------|
-| `connection_string` | **AWS Secrets Manager** — secret `aava-secret-manager-azure-blob-credentials`, key `connection_string` | Azure Storage account connection string. Never appears in the code. |
-| `container_name` | Set directly in code | Fixed per deployment — see "SETUP-REQUIRED" comment at the top of the tool file. |
+- `file_names` accepts a list, a JSON array string or a comma-separated string ([6.1](#61-file_names-accepts-several-formats)).
+- A file name that already starts with the folder prefix is not prefixed again ([6.2](#62-how-each-file-path-is-built)).
+- A missing or unreadable file does not stop the read; it is marked in place and listed in a footer ([6.3](#63-missing-and-failed-files-are-reported-not-fatal)).
 
-> Every value that must be reviewed before deploying this tool to a new environment or client — including `SECRET_NAME` and `region_name` on the `AWSSecretReaderPodIdentity` class — is tagged `SETUP-REQUIRED:` directly in `tool-L1-azure-blob-specific-files-reader-secrets-manager.py`. Search the file for that tag to find them all in one pass.
+---
 
-The production tool (`tool-L1-azure-blob-specific-files-reader-secrets-manager.py`) retrieves its credentials at import time:
+## 2. How to use
 
-```python
-reader = AWSSecretReaderPodIdentity()   # SECRET_NAME = "aava-secret-manager-azure-blob-credentials"
-secrets = reader._run()
-connection_string = secrets.get("connection_string")
+### 2.1 Calling the tool in aava
+
+Enter these values and click **Execute**.
+
+**`folder_name`**
+```
+project-alpha/docs
 ```
 
-`AWSSecretReaderPodIdentity` calls `boto3.client("secretsmanager", region_name="us-east-1").get_secret_value(...)` — no AWS access key or secret is stored in this file; access is granted via the runtime's pod identity.
-
-> `tool-L1-azure-blob-specific-files-reader.py` (without the `-secrets-manager` suffix) is kept in this folder only for local debugging. It is not used in production and still has the connection string as a placeholder value in code.
-
-## Parameters
-
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| folder_name | string | ✓ | Name of the folder (blob prefix) in Azure Blob Storage that contains the files |
-| file_names | list[string] | ✓ | The specific file names inside that folder to read, e.g. `["file-1.md", "file-2.md"]`. Only these files are read. Accepts bare names (`file-1.md`) or prefix-qualified paths (`my_folder/file-1.md`); the folder prefix is not doubled. A JSON-string or comma-separated string is coerced to a list. Duplicates are read once. |
-
-## Returns
-
-| Field | Type | Description |
-|-------|------|-------------|
-| (return value) | string | `"Read N of M requested file(s) from folder '<name>':\n\n===== FILE: <path> =====\n<content>\n..."` on success |
-| (return value) | string | `"No file names were provided. Provide at least one file name to read."` when `file_names` is empty |
-| (return value) | string | `"None of the requested files were readable in folder '<name>'. Requested: <names>."` when every requested file is missing or failed |
-| (return value) | string | `"Container '<name>' does not exist."` when the container is missing |
-| (return value) | string | `"An error occurred while reading the folder"` on unhandled SDK/network error |
-
-Each `===== FILE: <blob-path> =====` section contains either the decoded UTF-8 text or a note: `[Binary content, N bytes — not displayed as text]`, `[File not found in folder]`, or `[Error reading this file]`.
-
-On a partial success the returned string ends with a footer listing the unreadable files:
-
+**`file_names`**
 ```
-Files not found: my_folder/file-3.md
-Files that failed to download: my_folder/file-4.md
+["summary.md", "findings.md"]
 ```
 
-## Standalone tool calling
+### 2.2 Calling the tool in an agent
 
-Call the tool directly from Python (e.g. from a CrewAI orchestrator script, outside of an agent):
-
-```python
-from tool_L1_azure_blob_specific_files_reader_secrets_manager import AzureBlobReaderTool
-
-tool = AzureBlobReaderTool()
-result = tool._run(folder_name="my-project/docs", file_names=["file-1.md", "file-2.md"])
-```
-
-## Calling tool in agent
-
-Tell the agent which folder to read and which files inside it. Both inputs are required:
+Both parameters change per call. `folder_name` is often a workflow identifier from an earlier step, and `file_names` lists the files that step produced. The container is fixed in code.
 
 ```
 folder_name = {{folder_name}}
 file_names = {{file_names}}
 ```
 
-For example, if a prior step in the workflow wrote its output to a folder named after the run itself and only certain artefacts of that run are needed, the agent would be told to reuse that identifier rather than ask the user for one:
+---
 
+## 3. Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `folder_name` | str | ✓ | Folder (blob prefix) in the configured container that holds the files, e.g. `project-alpha/docs`. Trailing `/` are stripped and a single `/` is added. An empty value means the container root. |
+| `file_names` | List[str] | ✓ | File names inside the folder to read, e.g. `["summary.md", "findings.md"]`. Also accepts a JSON array string or a comma-separated string (`summary.md, findings.md`). Surrounding quotes and spaces are removed, empty entries are dropped, a leading `/` is stripped, and duplicates are read once. Names may include a sub-path (`sub/notes.md`) or the full folder path. |
+
+---
+
+## 4. Secrets & configuration
+
+| Value | Source | Notes |
+|-------|--------|-------|
+| `azure_connection_string` | AWS Secrets Manager — the secret named in `SECRET_NAME`, key `azure_connection_string` | Azure Storage account connection string. Read once, when the module is imported, using the pod's IAM role (Pod Identity). The role needs `secretsmanager:GetSecretValue` on the secret. |
+| `SECRET_NAME` | Code — `AWSSecretReaderPodIdentity` | `SETUP-REQUIRED:` placeholder `<name-of-secret-in-aws-secrets-manager>`. Replace it with the name of your secret. |
+| `region_name` | Code — `AWSSecretReaderPodIdentity._run` | `SETUP-REQUIRED:` defaults to `us-east-1`. Set it to the region the secret lives in. |
+| `container_name` | Code — module level | `SETUP-REQUIRED:` placeholder `<your-azure-container-name>`. Replace it with the container to read from. |
+
+Before deploying to a new environment, review every value tagged `SETUP-REQUIRED:` in `tool-L0-azure-blob-files-reader.py`.
+
+---
+
+## 5. Import modules required
+
+| Module | Package | Used for |
+|--------|---------|----------|
+| `json` | stdlib | Parses the secret string and JSON-string `file_names` |
+| `boto3` | `boto3` | Secrets Manager client |
+| `logging` | stdlib | Writes operations and errors to `azure_blob_operations.log` |
+| `typing` | stdlib | Type hints |
+| `pydantic` | `pydantic` | Input schema (`BaseModel`, `Field`, `field_validator`) |
+| `crewai.tools` | `crewai` | `BaseTool` base class |
+| `azure.storage.blob` | `azure-storage-blob` | `BlobServiceClient` to check and download blobs (`BlobClient` and `ContainerClient` are imported but not used directly) |
+| `botocore.exceptions` | `botocore` | `ClientError` when reading the secret |
+
+---
+
+## 6. Nuances
+
+### 6.1 `file_names` accepts several formats
+A real list is used as-is. A string is first parsed as JSON (`["a.md","b.md"]`); if that fails it is split on commas (`a.md, b.md`). A single value becomes a one-item list. Each entry is trimmed of spaces and quotes, and empty entries are removed. If nothing is left, the tool returns `No file names were provided. Provide at least one file name to read.` **Do:** pass a JSON list of names; avoid commas inside file names, because comma-separated input will split them.
+
+### 6.2 How each file path is built
+Each name has a leading `/` removed. If it already starts with `<folder_name>/`, it is used as the full blob path; otherwise `<folder_name>/` is put in front. So `summary.md` and `project-alpha/docs/summary.md` both read the same blob, and that blob is read once. Only exact names are matched: there are no wildcards and no case-insensitive matching. **Do:** pass names exactly as stored, either relative to the folder or as the full path.
+
+### 6.3 Missing and failed files are reported, not fatal
+A file that does not exist shows `[File not found in folder]`; a file whose check or download fails shows `[Error reading this file]`. The other files are still returned, and a footer lists `Files not found:` and `Files that failed to download:`. Only if no requested file can be read does the tool return `None of the requested files were readable in folder '<folder_name>'. Requested: <names>.` **Do:** compare `Read <n> of <m>` in the header, and check the footer before relying on the output.
+
+### 6.4 No size limit, and binary files are not returned
+Each requested file is downloaded in full with no size cap. Files that are not valid UTF-8 (PDF, images, archives) show `[Binary content, <n> bytes — not displayed as text]` and still count as read. **Do:** request text files only, and check for the marker before passing the content on.
+
+---
+
+## 7. Appendix
+
+### 7.1 API workflow
+
+| Step | API call | Purpose |
+|------|----------|---------|
+| 1 | `secretsmanager:GetSecretValue` (at module import) | Read `azure_connection_string` from the secret named in `SECRET_NAME` |
+| 2 | `ContainerClient.exists()` (`GET` container properties) | Confirm the container exists |
+| 3 | `BlobClient.exists()` (`HEAD` blob, per requested file) | Check whether the file exists |
+| 4 | `BlobClient.download_blob().readall()` (Get Blob, per existing file) | Download the file's content |
+
+### 7.2 Returns
+
+**Success**
 ```
-folder_name = <<workflow-execution-id>>
-file_names = ["summary.md", "findings.md"]
+Read <n> of <m> requested file(s) from folder '<folder_name>':
+
+===== FILE: <blob path> =====
+<file content | [Binary content, <n> bytes — not displayed as text] | [File not found in folder] | [Error reading this file]>
+
+===== FILE: <blob path> =====
+...
+
+Files not found: <blob path>, <blob path>
+Files that failed to download: <blob path>
+```
+The footer lines appear only when there are missing or failed files. Files appear in the order requested.
+
+**Error**
+```
+<message>
 ```
 
-## Error Handling
+| Error | Cause | Fix |
+|-------|-------|-----|
+| `No file names were provided. Provide at least one file name to read.` | `file_names` was empty after clean-up | Pass at least one file name |
+| `Container '<container_name>' does not exist.` | The configured container is not in the storage account | Check `container_name` and the storage account in the connection string |
+| `None of the requested files were readable in folder '<folder_name>'. Requested: <names>.` | Every requested file was missing or failed to download | Check the folder and file names, their case, and the log |
+| `An error occurred while reading the folder` | Any other failure, e.g. invalid input, missing or invalid connection string, authentication or network error | Check `azure_blob_operations.log` for the logged exception |
+| `RuntimeError: Error retrieving secret: <detail>` / `RuntimeError: Unexpected error: <detail>` | Raised at import when the secret cannot be read or is not a JSON object | Check `SECRET_NAME`, `region_name`, the Pod Identity association and `secretsmanager:GetSecretValue` on the role |
 
-| Error | Cause | Behaviour |
-|-------|-------|-----------|
-| Container not found | The configured container does not exist | Returns `"Container '<name>' does not exist."` |
-| Empty file list | `file_names` resolved to an empty list | Returns `"No file names were provided. Provide at least one file name to read."` |
-| Requested file not found | Named file does not exist under the folder prefix | Logs at INFO level; marks file section with `[File not found in folder]`, lists it under "Files not found", and continues |
-| No requested file readable | Every named file is missing or failed | Returns `"None of the requested files were readable in folder '<name>'. Requested: <names>."` |
-| Individual blob download failure | Transient SDK error on a single blob | Logs error at ERROR level; marks file section with `[Error reading this file]`, lists it under "Files that failed to download", and continues |
-| Binary / non-UTF-8 content | File cannot be decoded as UTF-8 | Marks section with `[Binary content, N bytes — not displayed as text]` |
-| Unhandled exception | SDK initialisation failure or network error | Logs full traceback; returns `"An error occurred while reading the folder"` |
+### 7.3 Known limitations
 
-## Security Notes
+- Read-only. It cannot write, overwrite or delete blobs.
+- Reads one container, set in code. There is no parameter to choose the container or storage account.
+- Reads only the named files. It cannot list a folder or match wildcards; use `tool-L0-azure-blob-reader` to read a whole folder.
+- Text only. Binary formats are not parsed or extracted.
+- Output does not include blob size or last-modified time.
 
-- `connection_string` is retrieved from AWS Secrets Manager at import time — never hardcoded, never logged.
-- `container_name` is fixed per deployment in code (see Secrets & Configuration above).
-- Requested file names are resolved strictly under the given folder prefix, and only the named blobs are downloaded — the folder is never enumerated.
-- All operations are logged to `azure_blob_operations.log`. Credentials are **never** written to logs.
+### 7.4 Security & resilience
 
-## Resilience
+**Security**
+- No credentials are stored in code. The connection string is read from AWS Secrets Manager using the pod's IAM role and is never logged.
+- Exceptions are logged with stack traces to `azure_blob_operations.log` in the working directory; the caller only receives a generic message.
+- File contents are also printed to stdout, so they can appear in container logs.
+- Only the named blobs are accessed; the folder is never listed.
+- The connection string usually grants account-wide access. Use a SAS-based connection string scoped to read on the container where possible.
 
-| Concern | Configuration |
-|---------|--------------|
-| Timeout | 30 s default (Azure SDK default) |
-| Retry | Max 2 retries with exponential backoff on transient errors (429, 502, 503, timeout) |
-| Circuit breaker | 5 consecutive failures → open for 60 s |
-| Partial failure | Per-file errors are isolated; a missing or failed file is reported in place and the remaining requested files continue to be read |
+**Resilience**
+
+| Concern | Current state | Recommendation |
+|---------|---------------|----------------|
+| Timeout | No explicit timeout; Azure SDK defaults apply | Pass `connection_timeout` and `read_timeout` to `BlobServiceClient.from_connection_string` |
+| Retry | Azure SDK default retry policy only; no tool-level retry. The secret is read once at import with no retry | Configure an explicit `retry_total` on the client; handle secret-read failure without failing import |
+| Concurrency | Files are checked and downloaded one at a time (two calls per file) | Use a bounded thread pool, and drop the separate `exists()` call by catching `ResourceNotFoundError` on download |
+| Input validation | `file_names` coerced and de-duplicated; `folder_name` only has trailing `/` normalised; no size cap on downloads | Reject empty folder names and add a per-file size limit |

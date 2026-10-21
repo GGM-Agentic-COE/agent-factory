@@ -28,12 +28,12 @@ class AWSSecretReaderPodIdentity(BaseTool):
 
     # Review every line tagged "SETUP-REQUIRED:" below before deploying this tool to a new environment or client.
     # SETUP-REQUIRED: must match the secret name created in your AWS Secrets Manager
-    SECRET_NAME: str = "aava/temp/varun-temp-key-values"
+    SECRET_NAME: str = "<name-of-secret-in-aws-secrets-manager>"
 
     def _run(self) -> Dict[str, Any]:
         try:
 
-            # SETUP-REQUIRED: AWS region where that secret lives (us-east-1 or us-east-2 depending on deployment)
+            # SETUP-REQUIRED: AWS region where that secret lives
 
             client = boto3.client('secretsmanager', region_name='us-east-1')
             get_secret_value_response = client.get_secret_value(SecretId=self.SECRET_NAME)
@@ -58,7 +58,7 @@ secrets = reader._run()
 connection_string = secrets.get("azure_connection_string")
 
 # SETUP-REQUIRED: set to your organization's Azure Blob Storage container name
-container_name = "aava-ggm"
+container_name = "<your-azure-container-name>"
 
 
 # Define the args schema for your tool

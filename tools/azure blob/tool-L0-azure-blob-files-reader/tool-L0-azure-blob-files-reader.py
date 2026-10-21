@@ -21,10 +21,13 @@ class AWSSecretReaderPodIdentity(BaseTool):
     name: str = "AWS Secret Reader with Pod Identity"
     description: str = "Reads a fixed AWS Secret (set in code) using Pod Identity, and returns all key-value pairs as a dict."
     args_schema: Type[BaseModel] = AWSSecretReaderPodIdentitySchema
-    SECRET_NAME: str = "aava/temp/varun-temp-key-values"
+    # Review every line tagged "SETUP-REQUIRED:" below before deploying this tool to a new environment or client.
+    # SETUP-REQUIRED: must match the secret name created in your AWS Secrets Manager
+    SECRET_NAME: str = "<name-of-secret-in-aws-secrets-manager>"
 
     def _run(self) -> Dict[str, Any]:
         try:
+            # SETUP-REQUIRED: AWS region where that secret lives
             client = boto3.client('secretsmanager', region_name='us-east-1')
             get_secret_value_response = client.get_secret_value(SecretId=self.SECRET_NAME)
             secret_string = get_secret_value_response.get('SecretString', '{}')
@@ -43,8 +46,10 @@ class AWSSecretReaderPodIdentity(BaseTool):
 
 reader = AWSSecretReaderPodIdentity()
 secrets = reader._run()
+# Secret retrieved from AWS Secrets Manager
 connection_string = secrets.get("azure_connection_string")
-container_name = "aava-ggm"
+# SETUP-REQUIRED: set to your organization's Azure Blob Storage container name
+container_name = "<your-azure-container-name>"
 
 
 class AzureBlobReaderSchema(BaseModel):

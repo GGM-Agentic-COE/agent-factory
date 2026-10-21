@@ -32,8 +32,7 @@ class AWSSecretReaderPodIdentity(BaseTool):
 
     # Review every line tagged "SETUP-REQUIRED:" below before deploying this tool to a new environment or client.
     # SETUP-REQUIRED: must match the secret name created in your AWS Secrets Manager
-    # SECRET_NAME: str = "aava/aava-github-app-dev-secret-asm"
-    SECRET_NAME: str = "aava/aava-github-app-dev-secret-asm"
+    SECRET_NAME: str = "<name-of-secret-in-aws-secrets-manager>"
 
     def _run(self) -> Dict[str, Any]:
         try:
@@ -121,7 +120,7 @@ def _load_private_key() -> str:
     """
     Return the App's RSA private key as a PEM string.
 
-    Resolution order: PRIVATE_KEY constant/env, then PRIVATE_KEY_PATH.
+    The key is read from the `private_key` field of the secret.
     Both PKCS#1 ("BEGIN RSA PRIVATE KEY", what GitHub's download gives you)
     and PKCS#8 ("BEGIN PRIVATE KEY", what `openssl pkcs8 -topk8` produces)
     are accepted -- PyJWT handles either.
@@ -130,7 +129,7 @@ def _load_private_key() -> str:
         str: PEM-encoded private key.
 
     Raises:
-        RuntimeError: If no key is configured or the file is unreadable.
+        RuntimeError: If no key is configured.
     """
     if PRIVATE_KEY:
         key = PRIVATE_KEY
@@ -217,7 +216,7 @@ def _jwt_headers() -> Dict[str, str]:
 
 
 def _token_headers(token: str) -> Dict[str, str]:
-    """Headers for repo-level endpoints. Identical in shape to the PAT version."""
+    """Headers for repo-level (installation token) endpoints."""
     return {
         "Authorization": f"Bearer {token}",
         "Accept": "application/vnd.github+json",
@@ -300,10 +299,8 @@ def _resolve_owner_and_token(repo: str) -> Tuple[str, str, str]:
     """
     Determine the owner of `repo` and return (owner, repo_name, token).
 
-    This is the App-native replacement for the PAT tool's
-    `_fetch_github_repo_owner()`, which called GET /user. That endpoint has no
-    meaning for an App installation -- there is no authenticated human -- so
-    the owner comes from the installation instead.
+    An App installation has no authenticated human user, so the owner
+    comes from the installation instead of a GET /user call.
 
     The key property that makes this work without a caller-supplied owner:
     an installation is scoped to exactly ONE account, and every repository it
@@ -319,8 +316,8 @@ def _resolve_owner_and_token(repo: str) -> Tuple[str, str, str]:
         silently guessed.
 
     Args:
-        repo (str): Repository name, either bare ("scib_demo") or fully
-                    qualified ("my-org/scib_demo").
+        repo (str): Repository name, either bare ("<your-repo-name>") or fully
+                    qualified ("<your-github-org>/<your-repo-name>").
 
     Returns:
         tuple[str, str, str]: (owner_login, repo_name, installation_token)
@@ -442,14 +439,14 @@ def _resolve_owner_and_token(repo: str) -> Tuple[str, str, str]:
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# TOOL SCHEMA — identical to the PAT version
+# TOOL SCHEMA
 # ─────────────────────────────────────────────────────────────────────────────
 
 
 class GithubAppReaderSchema(BaseModel):
     """
-    Input schema -- identical to the PAT tool's GithubReaderSchema. Three
-    fields, no owner: the owner is derived from the App installation.
+    Input schema. Three fields, no owner: the owner is derived from the
+    App installation.
     """
 
     folder_location: str = Field(
@@ -466,7 +463,7 @@ class GithubAppReaderSchema(BaseModel):
         description=(
             "Repository name without owner prefix. This should be the exact "
             "name of the GitHub repository you want to access. Example: "
-            "'scib_demo' or 'my-project-repo'. A fully qualified "
+            "'my-project-repo'. A fully qualified "
             "'owner/repo' is also accepted but is not required."
         ),
     )
@@ -475,7 +472,7 @@ class GithubAppReaderSchema(BaseModel):
         description=(
             "Branch name to read files from. Specify the exact branch name "
             "where the files are located. Example: 'main', 'develop', or "
-            "'feature/SCRUM-11691'."
+            "'feature/my-feature'."
         ),
     )
 
@@ -484,10 +481,6 @@ class GithubAppReader(BaseTool):
     """
     CrewAI tool for recursively reading all files from a GitHub repository
     folder, authenticating as a **GitHub App installation**.
-
-    Behaviourally equivalent to `GithubReader`. Return shapes, status strings,
-    and error message wording are preserved so existing agents and downstream
-    parsers need no changes.
 
     API endpoints used:
         App-level (JWT) -- owner/token resolution, cached after first run:
@@ -502,9 +495,8 @@ class GithubAppReader(BaseTool):
             GET  /repos/{owner}/{repo}/git/trees/{sha}?recursive=1
             GET  /repos/{owner}/{repo}/contents/{file}?ref={branch}  (per file)
 
-        Note there is no GET /user call. An installation token has no
-        associated human, so the PAT tool's owner lookup does not apply; the
-        owner comes from the installation's own account instead.
+        There is no GET /user call. An installation token has no associated
+        human, so the owner comes from the installation's own account.
 
     Rate limits:
         5,000 requests/hour per installation, scaling to 15,000 for larger
@@ -541,7 +533,6 @@ class GithubAppReader(BaseTool):
 
             # ═══════════════════════════════════════════════════════════════
             # PHASE 2: APP AUTHENTICATION + OWNER RESOLUTION
-            #          (this is the only phase that differs from the PAT tool)
             # ═══════════════════════════════════════════════════════════════
             try:
                 repo_owner, repo, token = _resolve_owner_and_token(repo)
@@ -720,10 +711,10 @@ class GithubAppReader(BaseTool):
 
 
 if __name__ == "__main__":
-    # Smoke test:
-    #   GITHUB_APP_ID=... GITHUB_APP_PRIVATE_KEY_PATH=... python tool-L1-github-app-reader.py
+    # Smoke test (credentials come from the secret named in SECRET_NAME):
+    #   python tool-L0-github-reader-using-app.py
     tool = GithubAppReader()
-    out = tool._run(folder_location="src", repo="scib_demo", branch="main")
+    out = tool._run(folder_location="src", repo="<your-repo-name>", branch="main")
     if isinstance(out, str):
         print(out)
     else:

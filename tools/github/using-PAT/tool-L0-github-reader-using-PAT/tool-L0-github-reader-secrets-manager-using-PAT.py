@@ -57,7 +57,7 @@ class AWSSecretReaderPodIdentity(BaseTool):
 
     # Review every line tagged "SETUP-REQUIRED:" below before deploying this tool to a new environment or client.
     # SETUP-REQUIRED: must match the secret name created in your AWS Secrets Manager
-    SECRET_NAME: str = "aava-secret-manager-github-credentials"
+    SECRET_NAME: str = "<name-of-secret-in-aws-secrets-manager>"
 
 
     def _run(self) -> Dict[str, Any]:
@@ -104,7 +104,7 @@ def _fetch_github_repo_owner(token: str) -> str:
 
     Returns:
         str: The GitHub username (login) associated with the token.
-            Example: "varun-ascendion" or "octocat"
+            Example: "<your-github-username>" or "octocat"
 
     Raises:
         requests.exceptions.HTTPError: If the API request fails (e.g., invalid token,
@@ -116,10 +116,10 @@ def _fetch_github_repo_owner(token: str) -> str:
         https://docs.github.com/en/rest/users/users#get-the-authenticated-user
 
     Example:
-        >>> token = "ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+        >>> token = "<your-github-personal-access-token>"
         >>> owner = _fetch_github_repo_owner(token)
         >>> print(owner)
-        'varun-ascendion'
+        '<your-github-username>'
     """
     # Construct headers for GitHub API v3 authentication
     # Authorization: Bearer format is preferred over the older "token" format
@@ -166,13 +166,13 @@ class GithubReaderSchema(BaseModel):
         repo (str): Repository name WITHOUT the owner prefix. The owner is automatically
                    determined by querying the authenticated user endpoint using the token.
                    Examples:
-                     - "scib_demo" (not "varun-ascendion/scib_demo")
+                     - "my-repo" (not "<your-github-username>/my-repo")
                      - "my-project-repo"
                      - "CrewAI-Tools"
 
         branch (str): Git branch name to read files from. Can be:
                      - Standard branch names: "main", "master", "develop"
-                     - Feature branches: "feature/SCRUM-11691", "bugfix/issue-123"
+                     - Feature branches: "feature/new-login", "bugfix/issue-123"
                      - Tag names: "v1.0.0", "release-2.3"
                      Note: Must match exact branch name (case-sensitive)
 
@@ -188,15 +188,15 @@ class GithubReaderSchema(BaseModel):
 
     folder_location: str = Field(
         ...,  # Required field (ellipsis means no default value)
-        description="Repository folder path to read recursively. Specify the exact folder path within the repository that you want to read all files from. Example: 'lld' for root level folder or 'project_k/lld' for nested folder structure.",
+        description="Repository folder path to read recursively. Specify the exact folder path within the repository that you want to read all files from. Example: 'docs' for root level folder or 'project/docs' for nested folder structure.",
     )
     repo: str = Field(
         ...,  # Required field
-        description="Repository name without owner prefix. This should be the exact name of the GitHub repository you want to access. Example: 'scib_demo' or 'my-project-repo'.",
+        description="Repository name without owner prefix. This should be the exact name of the GitHub repository you want to access. Example: 'my-repo' or 'my-project-repo'.",
     )
     branch: str = Field(
         ...,  # Required field
-        description="Branch name to read files from. Specify the exact branch name where the files are located. Example: 'main', 'develop', or 'feature/SCRUM-11691'.",
+        description="Branch name to read files from. Specify the exact branch name where the files are located. Example: 'main', 'develop', or 'feature/new-login'.",
     )
 
 
@@ -244,7 +244,7 @@ class GithubReader(BaseTool):
 
     Example Output Structure:
         {
-            "repository": "varun-ascendion/scib_demo",
+            "repository": "<your-github-username>/my-repo",
             "branch": "main",
             "folder_location": "src/components",
             "files": {
@@ -294,7 +294,7 @@ class GithubReader(BaseTool):
         Args:
             folder_location (str): Repository folder path (e.g., "src/components", "docs")
                                   Leading/trailing slashes are automatically stripped
-            repo (str): Repository name without owner (e.g., "scib_demo")
+            repo (str): Repository name without owner (e.g., "my-repo")
             branch (str): Branch name (e.g., "main", "feature/xyz")
 
         Returns:

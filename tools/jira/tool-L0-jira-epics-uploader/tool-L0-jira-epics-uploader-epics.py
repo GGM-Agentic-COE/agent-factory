@@ -44,7 +44,7 @@ class AWSSecretReaderPodIdentity(BaseTool):
 
     # Review every line tagged "SETUP-REQUIRED:" below before deploying this tool to a new environment or client.
     # SETUP-REQUIRED: must match the secret name created in your AWS Secrets Manager
-    SECRET_NAME: str = "aava/temp/varun-temp-key-values"
+    SECRET_NAME: str = "<name-of-secret-in-aws-secrets-manager>"
 
 
     def _run(self) -> Dict[str, Any]:
@@ -72,7 +72,7 @@ reader = AWSSecretReaderPodIdentity()
 secrets = reader._run()
 
 # ============================================================================
-# CONFIGURATION  --  edit these values for your Jira space (same as the creator)
+# CONFIGURATION  --  edit these values for your Jira space
 # ============================================================================
 JIRA_BASE_URL     = secrets.get("base_url")                     # from AWS Secrets Manager
 JIRA_USER_EMAIL   = secrets.get("id")                   #from AWS Secrets Manager
@@ -81,9 +81,10 @@ DEFAULT_ISSUE_TYPE = "Epic"
 
 # If your project's issue-type scheme doesn't include "Epic"/"Story", Jira returns a
 # MISLEADING "target project doesn't exist or you don't have permission" 400. Map the
-# payload's types to whatever the project actually offers (see `python jira_preflight.py`).
+# payload's types to whatever the project actually offers.
 # Example for a project that only has Task:  {"Epic": "Task", "Story": "Task"}
 # Leave empty {} to send types through unchanged.
+# SETUP-REQUIRED: map payload issue types to the issue types your Jira project offers
 ISSUE_TYPE_MAP = {}                                              # e.g. {"Epic": "Task", "Story": "Task"}
 # ============================================================================
 
@@ -98,7 +99,7 @@ class JiraIssueCreatorSchema(BaseModel):
         ...,
         description=(
             "A dictionary containing Jira issue creation parameters. May include "
-            "'projectKey' (defaults to the hard-coded JIRA_PROJECT_KEY), 'issueType' "
+            "'projectKey' (required Jira project key), 'issueType' "
             "(default issue type), and 'issues' (list of issue dicts with 'summary', "
             "'description', optional 'issueType', optional 'label', and optional "
             "'parentKey'). parentKey may be a logical id (e.g. 'EP-01') that is "
@@ -353,27 +354,27 @@ def create_issues(payload: Dict[str, Any], dry_run: bool = False) -> str:
 if __name__ == "__main__":
     # Quick self-test: build ADF for a tiny payload without hitting Jira.
     demo = {
-        "projectKey": "GGMDEMOS",
+        "projectKey": "<your-jira-project-key>",
         "issueType": "Epic",
         "issues": [
             {
-                "summary": "EP-01: Platform Foundation & Design System",
+                "summary": "EP-01: Platform Foundation",
                 "issueType": "Epic",
                 "label": ["EP-01", "S1"],
                 "parentKey": None,
                 "description": {
-                    "description": "Technical foundation for the Credit Coach agent.",
-                    "scope_in": ["Envoy agent registration", "Consent capture flow"],
+                    "description": "Technical foundation for the sample agent.",
+                    "scope_in": ["Agent registration", "Consent capture flow"],
                     "scope_out": ["Score retrieval logic (see EP-02)"],
                 },
             },
             {
-                "summary": "F-01.1: Envoy Agent Registration & Orchestrator Integration",
+                "summary": "F-01.1: Agent Registration & Orchestrator Integration",
                 "issueType": "Story",
                 "label": ["F-01.1"],
                 "parentKey": "EP-01",
                 "description": {
-                    "description": "Register Credit Coach as a specialist agent. Relates to EP-01.",
+                    "description": "Register the sample agent as a specialist agent. Relates to EP-01.",
                     "requirements_covered": ["FR-39", "FR-26"],
                     "data_sensitivity": "Internal",
                 },

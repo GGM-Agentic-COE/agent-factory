@@ -1,13 +1,13 @@
 spec_version: "1.0"
 artifact_type: tool
 metadata:
-  name: tool-L1-github-reader-using-app
-  version: "1.0.0"
-  layer: L1
+  name: tool-L0-github-reader-using-app
+  version: "2.0.0"
+  layer: L0
   owner: agentic-ai-coe
 
 purpose:
-  description: "Recursively reads and returns the decoded text contents of all files under a specified folder in a GitHub repository branch, authenticating as a GitHub App installation."
+  description: "Recursively reads and returns the decoded text contents of every file under a folder of a GitHub repository branch, authenticating as a GitHub App installation."
   platform: github
   operation: read
 
@@ -16,41 +16,49 @@ interface:
     folder_location:
       type: string
       required: true
-      description: "Repository folder path to read recursively (e.g. 'src' or 'project_k/lld'); leading/trailing slashes are stripped"
+      description: "Folder path inside the repository to read recursively (e.g. 'lld' or 'project_k/lld'). Must be non-empty; surrounding whitespace and leading/trailing slashes are stripped"
     repo:
       type: string
       required: true
-      description: "Repository name, either bare ('scib_demo') or fully qualified ('owner/scib_demo'); bare names are resolved via the App's installations"
+      description: "Repository name, either bare ('my-project-repo') or fully qualified ('<owner>/<repo>'). A bare name is resolved to its owner through the App's installations"
     branch:
       type: string
       required: true
-      description: "Exact branch name to read from (e.g. 'main', 'feature/SCRUM-11691')"
+      description: "Exact branch name to read from (e.g. 'main', 'develop', 'feature/my-feature')"
 
   returns:
     type: object
-    fields:
-      repository: {type: string, description: "owner/repo identifier"}
-      branch: {type: string, description: "Branch that was read"}
-      folder_location: {type: string, description: "Normalised folder path"}
-      files:
-        type: object
-        description: >
-          Per-file result keyed by file path. Each value has:
-          status (success|binary_or_non_utf8|not_found|error),
-          content (string, present on success),
-          size (integer, bytes),
-          sha (string, git blob SHA),
-          message (string, present on non-success statuses).
-      message: {type: string, nullable: true, description: "Present when no files are found, or the tree was truncated"}
-    on_error: string
+    description: >
+      On success: a dict {repository: "<owner>/<repo>", branch, folder_location (normalised), files}.
+      files is keyed by file path; each value has status success (content, size, sha),
+      binary_or_non_utf8 (message "File is not UTF-8 text; content not decoded.", size, sha),
+      not_found (message "File '<path>' not found in branch '<branch>'."), or
+      error (message "Failed to decode file content: <error>" or "Unsupported type: <type>").
+      An optional message key carries "No files found under folder '<folder>'." (files is then {})
+      or "Warning: GitHub truncated the repository tree; the file list may be incomplete."
+      On failure: a string — "Error reading scripts: <detail>" (empty folder_location, App/owner
+      resolution failures, folder not found in branch, tree SHA not resolved, HTTP/network errors
+      with " | GitHub response: <status> <body>" appended) or "Error: Repository '<owner>/<repo>' not found."
 
 credentials:
-  source: secrets-sdk
-  path: "github-app"
+  source: aws-secrets-manager
+  secret_name: "<name-of-secret-in-aws-secrets-manager>"
+  access_method: pod-identity
   fields_used: [app_id, client_id, private_key]
 
+configuration:
+  setup_required: [SECRET_NAME, secrets_manager_region]
+  defaults:
+    SECRET_NAME: "<name-of-secret-in-aws-secrets-manager>"
+    secrets_manager_region: "us-east-1"
+    GITHUB_API: "https://api.github.com"
+    JWT_TTL_SECONDS: 480
+    JWT_REFRESH_MARGIN: 60
+    TOKEN_REFRESH_MARGIN: 300
+    REQUEST_TIMEOUT: 30
+
 identity:
-  tool_id: "tool-L1-github-reader-using-app-001"
+  tool_id: "tool-L0-github-reader-using-app-001"
   role: tool-executor
 
   invocable_by:
@@ -72,6 +80,7 @@ resilience:
   circuit_breaker: {failure_threshold: 5, reset_seconds: 60}
 
 security:
-  input_validation: "folder_location validated as non-empty string, stripped of surrounding whitespace/slashes"
-  output_sanitization: "requests exceptions caught; HTTP status and error text surfaced in error string; raw stack traces never returned"
-  logging: "Input parameters logged (JWT/installation token never logged); GitHub API rate-limit: 5 000-15 000 req/hr per installation"
+  input_validation: "folder_location must be a non-empty string and is stripped of whitespace and slashes; repo is stripped of whitespace and slashes; branch is passed as-is (URL-encoded in the branch lookup)"
+  output_sanitization: "requests exceptions and other errors caught and returned as an 'Error reading scripts: ...' string; HTTP errors include GitHub's status code and raw response body; no stack traces returned"
+  logging: "No logging; errors are returned directly to the caller. JWT and installation tokens are never returned or printed"
+  credential_handling: "GitHub App ID / Client ID and private key read once at import from AWS Secrets Manager via Pod Identity; a JWT (RS256, 480 s) is cached in memory and exchanged for an installation token cached per installation for up to ~55 minutes"

@@ -37,7 +37,7 @@ class AWSSecretReaderPodIdentity(BaseTool):
 
     # Review every line tagged "SETUP-REQUIRED:" below before deploying this tool to a new environment or client.
     # SETUP-REQUIRED: must match the secret name created in your AWS Secrets Manager
-    SECRET_NAME: str = "aava-secret-manager-github-credentials"
+    SECRET_NAME: str = "<name-of-secret-in-aws-secrets-manager>"
 
 
     def _run(self) -> Dict[str, Any]:
@@ -68,7 +68,7 @@ secrets = reader._run()
 github_token = secrets.get("github_token")
 
 # SETUP-REQUIRED: set to your GitHub organization or username
-repo_owner = "varun-ascendion"
+repo_owner = "<your-github-org>"
 
 
 class GithubCommitSchema(BaseModel):
@@ -77,7 +77,7 @@ class GithubCommitSchema(BaseModel):
         ...,
         description="List of dicts with 'filename' (path) and 'code' keys. Example: [{'filename': 'docs/api.txt', 'code': '...'}]"
     )
-    repo_name: str = Field(..., description="The name of the repository. Example: 'SCIB-Inception'.")
+    repo_name: str = Field(..., description="The name of the repository. Example: 'my-repo'.")
     new_branch: str = Field(..., description="The new branch to create and commit to. Example: 'feature/auto-update'.")
     source_branch: str = Field(default="main", description="The branch to copy from. Defaults to 'main'.")
 
