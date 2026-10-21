@@ -1,67 +1,12 @@
-"""
-Jira Issue Creator (CrewAI tool)
-================================
-
-Creates Jira issues (Epics + child Stories) from a flat payload produced by the
-`L1-inception-jira-payload-converter-agent`.
-
-It accepts the schema below and turns each issue's description into Atlassian
-Document Format (ADF), resolves parent links by logical id, and hyperlinks any
-cross-references (EP-01, F-01.2, ...) that have already been created.
-
-Expected payload ("inputJSON"):
-
-{
-  "projectKey": "GGMDEMOS",          # optional - falls back to JIRA_PROJECT_KEY
-  "issueType": "Epic",               # optional default - per-issue "issueType" wins
-  "issues": [
-    {
-      "summary": "EP-01: Platform Foundation & Design System",
-      "issueType": "Epic",           # optional per-issue override
-      "label": ["EP-01", "S1"],      # label[0] is the LOGICAL ID used for linking
-      "parentKey": null,             # logical id (e.g. "EP-01") or a real Jira key
-      "description": { ... }         # str OR dict of str / list[str]
-    },
-    {
-      "summary": "F-01.1: Envoy Agent Registration & Orchestrator Integration",
-      "issueType": "Story",
-      "label": ["F-01.1"],
-      "parentKey": "EP-01",          # resolved to the real key after EP-01 is made
-      "description": { ... }
-    }
-  ]
-}
-
-IMPORTANT: list epics BEFORE their features so parentKey can be resolved in a
-single pass (the converter agent guarantees this ordering).
-"""
-
-# ============================================================================
-# CONFIGURATION  --  edit these four (five) values for your Jira space
-# ============================================================================
-JIRA_BASE_URL     = "https://aavademo.atlassian.net"            # no trailing slash
-JIRA_USER_EMAIL   = "aava.demouser@ascendion.com"               # Atlassian account email
-JIRA_API_TOKEN    = "REDACTED-SECRET-KEY"
-DEFAULT_ISSUE_TYPE = "Epic"                                      # used if none given
-
-# If your project's issue-type scheme doesn't include "Epic"/"Story", Jira returns a
-# MISLEADING "target project doesn't exist or you don't have permission" 400. Map the
-# payload's types to whatever the project actually offers (see `python jira_preflight.py`).
-# Example for a project that only has Task:  {"Epic": "Task", "Story": "Task"}
-# Leave empty {} to send types through unchanged.
-ISSUE_TYPE_MAP = {}                                              # e.g. {"Epic": "Task", "Story": "Task"}
-# NOTE: a hard-coded token is convenient for a demo, but anyone with this file
-# can act as you in Jira. Rotate it after the demo and prefer an env var in prod:
-#   import os; JIRA_API_TOKEN = os.environ.get("JIRA_API_TOKEN", "")
-# ============================================================================
-
-import os
 import re
 import json
 import requests
 from typing import Any, Type, Dict, List, Optional
 from pydantic import BaseModel, Field
+from crewai.tools import BaseTool
 from requests.auth import HTTPBasicAuth
+
+
 
 try:
     from crewai.tools import BaseTool  # type: ignore
@@ -78,8 +23,75 @@ except Exception:  # allow standalone use without crewai installed
             return self._run(*args, **kwargs)
 
 
+import boto3
+from botocore.exceptions import ClientError
+
+
+class AWSSecretReaderPodIdentitySchema(BaseModel):
+    """Input schema for AWSSecretReaderPodIdentity. """
+    pass
+
+
+class AWSSecretReaderPodIdentity(BaseTool):
+    """
+    AWSSecretReaderPodIdentity - Reads a AWS Secret using Pod Identity
+    and returns the full key-value dict.
+    """
+    name: str = "AWS Secret Reader with Pod Identity"
+    description: str = "Reads a fixed AWS Secret (set in code) using Pod Identity, and returns all key-value pairs as a dict."
+    args_schema: Type[BaseModel] = AWSSecretReaderPodIdentitySchema
+
+    # Review every line tagged "SETUP-REQUIRED:" below before deploying this tool to a new environment or client.
+    # SETUP-REQUIRED: must match the secret name created in your AWS Secrets Manager
+    SECRET_NAME: str = "aava/aava-atlassian-sa-dev-secret-asm"
+
+
+    def _run(self) -> Dict[str, Any]:
+        try:
+
+            # SETUP-REQUIRED: AWS region where that secret lives (us-east-1 or us-east-2 depending on deployment)
+
+            client = boto3.client('secretsmanager', region_name='us-east-1')
+            get_secret_value_response = client.get_secret_value(SecretId=self.SECRET_NAME)
+            secret_string = get_secret_value_response.get('SecretString', '{}')
+            secret_dict = json.loads(secret_string)
+
+            if not isinstance(secret_dict, dict):
+                raise ValueError(f"Secret value is not a JSON object: {secret_dict}")
+
+            return secret_dict
+
+        except ClientError as e:
+            raise RuntimeError(f"Error retrieving secret: {str(e)}")
+        except Exception as ex:
+            raise RuntimeError(f"Unexpected error: {str(ex)}")
+
+
+reader = AWSSecretReaderPodIdentity()
+secrets = reader._run()
+
+# ============================================================================
+# CONFIGURATION  --  edit these values for your Jira space (same as the creator)
+# ============================================================================
+JIRA_BASE_URL     = secrets.get("base_url")                     # from AWS Secrets Manager
+JIRA_USER_EMAIL   = secrets.get("id")                   #from AWS Secrets Manager
+JIRA_API_TOKEN    = secrets.get("api_key")                    #from AWS Secrets Manager
+DEFAULT_ISSUE_TYPE = "Epic"
+
+# If your project's issue-type scheme doesn't include "Epic"/"Story", Jira returns a
+# MISLEADING "target project doesn't exist or you don't have permission" 400. Map the
+# payload's types to whatever the project actually offers (see `python jira_preflight.py`).
+# Example for a project that only has Task:  {"Epic": "Task", "Story": "Task"}
+# Leave empty {} to send types through unchanged.
+ISSUE_TYPE_MAP = {}                                              # e.g. {"Epic": "Task", "Story": "Task"}
+# ============================================================================
+
+
 # Matches the logical ids we use as labels: EP-01, F-01.2, FR-12, NFR-03, S1, etc.
 _TOKEN_RE = re.compile(r'(?:EP|F|FR|NFR)-\d+(?:\.\d+)*')
+
+# Matches Jira custom field keys supplied per issue, e.g. customfield_10244
+_CUSTOMFIELD_RE = re.compile(r'^customfield_\d+$')
 
 
 class JiraIssueCreatorSchema(BaseModel):
@@ -87,12 +99,11 @@ class JiraIssueCreatorSchema(BaseModel):
     inputJSON: Dict[str, Any] = Field(
         ...,
         description=(
-            "A dictionary containing Jira issue creation parameters. May include "
-            "'projectKey' (defaults to the hard-coded JIRA_PROJECT_KEY), 'issueType' "
-            "(default issue type), and 'issues' (list of issue dicts with 'summary', "
-            "'description', optional 'issueType', optional 'label', and optional "
-            "'parentKey'). parentKey may be a logical id (e.g. 'EP-01') that is "
-            "resolved to the real Jira key once the parent has been created."
+            "A dictionary containing Jira issue creation parameters. "
+            "Each issue may include Jira custom fields as top-level keys named "
+            "'customfield_<id>' (e.g. \"customfield_10244\": {\"value\": \"Functional\"}). "
+            "These are passed to Jira exactly as given. "
+            "New customfields for SFI must include Classification, and Development Track."
         ),
     )
 
@@ -252,6 +263,17 @@ class JiraIssueCreator(BaseTool):
             return None
         return id_map.get(parent, parent)
 
+    @staticmethod
+    def _extract_custom_fields(issue: Dict[str, Any]) -> Dict[str, Any]:
+        """Collect 'customfield_<id>' keys from an issue and pass them through as-is.
+
+        Null values are skipped so an issue can omit a field by setting it to null.
+        """
+        return {
+            k: v for k, v in issue.items()
+            if isinstance(k, str) and _CUSTOMFIELD_RE.match(k) and v is not None
+        }
+
     def _run(self, inputJSON: Dict[str, Any]) -> str:
         results: List[str] = []
         id_map: Dict[str, str] = {}
@@ -260,8 +282,8 @@ class JiraIssueCreator(BaseTool):
             self.base_url = base_url
             self.post_url = base_url + "/rest/api/3/issue"
 
-            jira_user = inputJSON.get("userEmail") or JIRA_USER_EMAIL
-            jira_token = inputJSON.get("apiToken") or JIRA_API_TOKEN or os.environ.get("JIRA_API_TOKEN", "")
+            jira_user = JIRA_USER_EMAIL
+            jira_token = JIRA_API_TOKEN 
             headers = {"Content-Type": "application/json", "Accept": "application/json"}
             auth = HTTPBasicAuth(jira_user, jira_token)
 
@@ -301,13 +323,17 @@ class JiraIssueCreator(BaseTool):
                     if parent_key:
                         fields["parent"] = {"key": parent_key}
 
+                    # User-supplied Jira custom fields (e.g. customfield_10244)
+                    custom_fields = self._extract_custom_fields(issue)
+                    fields.update(custom_fields)
+
                     if self.dry_run:
                         # simulate a created key so links/parents can be exercised offline
                         fake_key = f"{project_key}-{len(id_map) + 1}"
                         if logical_id:
                             id_map[logical_id] = fake_key
                         results.append(f"[DRY RUN] {issue_type} '{summary}' -> {fake_key} "
-                                       f"(parent={parent_key})")
+                                       f"(parent={parent_key}, customFields={custom_fields})")
                         continue
 
                     response = requests.post(self.post_url, json={"fields": fields},
@@ -321,6 +347,7 @@ class JiraIssueCreator(BaseTool):
                     if logical_id and issue_key:
                         id_map[logical_id] = issue_key
                     results.append(f"{issue_type} created: {issue_key}  ({summary})")
+                    
 
                 except requests.RequestException as e:
                     detail = response.text if response is not None else "No response received"
@@ -337,36 +364,3 @@ def create_issues(payload: Dict[str, Any], dry_run: bool = False) -> str:
     tool = JiraIssueCreator()
     tool.dry_run = dry_run
     return tool._run(payload)
-
-
-if __name__ == "__main__":
-    # Quick self-test: build ADF for a tiny payload without hitting Jira.
-    demo = {
-        "projectKey": "GGMDEMOS",
-        "issueType": "Epic",
-        "issues": [
-            {
-                "summary": "EP-01: Platform Foundation & Design System",
-                "issueType": "Epic",
-                "label": ["EP-01", "S1"],
-                "parentKey": None,
-                "description": {
-                    "description": "Technical foundation for the Credit Coach agent.",
-                    "scope_in": ["Envoy agent registration", "Consent capture flow"],
-                    "scope_out": ["Score retrieval logic (see EP-02)"],
-                },
-            },
-            {
-                "summary": "F-01.1: Envoy Agent Registration & Orchestrator Integration",
-                "issueType": "Story",
-                "label": ["F-01.1"],
-                "parentKey": "EP-01",
-                "description": {
-                    "description": "Register Credit Coach as a specialist agent. Relates to EP-01.",
-                    "requirements_covered": ["FR-39", "FR-26"],
-                    "data_sensitivity": "Internal",
-                },
-            },
-        ],
-    }
-    print(create_issues(demo, dry_run=True))

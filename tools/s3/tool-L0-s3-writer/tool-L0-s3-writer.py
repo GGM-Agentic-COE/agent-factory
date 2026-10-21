@@ -3,16 +3,17 @@ from datetime import datetime, timezone
 from typing import Type
 from pydantic import BaseModel, Field
 from crewai.tools import BaseTool
+from botocore.exceptions import ClientError
 
 
 class S3UploadSchema(BaseModel):
     """Input schema for S3UploadTool."""
     folder_name: str = Field(
         ...,
-        description="Name of the folder (prefix) in the S3 bucket to upload into, e.g. 'incoming'.",
+        description="Name of the folder (prefix) in the S3 bucket to upload into, e.g. the workflow execution id.",
     )
     file_name: str = Field(
-        ..., description="Name of the file to create, e.g. 'report.txt'."
+        ..., description="Exact name of the file to create, e.g. 'summary.md'."
     )
     contents: str = Field(
         ..., description="Text content to write into the file."
@@ -22,29 +23,28 @@ class S3UploadSchema(BaseModel):
 class S3UploadTool(BaseTool):
     """
     S3UploadTool - Uploads text content to a fixed S3 bucket under a
-    caller-specified folder, with a UTC timestamp prefixed to the filename.
+    caller-specified folder, using the exact file name provided.
+    Authentication is via Pod Identity; no credentials are passed in code.
     """
     name: str = "S3 Upload Tool"
     description: str = (
         "Uploads text content to the configured S3 bucket. Inputs are the "
-        "folder name, the file name, and the contents to write."
+        "folder name, the file name, and the contents to write. The file is "
+        "stored under the exact name given. "
+        "The pod is configured with pod identity for authentication."
     )
     args_schema: Type[BaseModel] = S3UploadSchema
 
-    # --- hardcoded config (must match S3DocumentRetriever) ---
-    BUCKET_NAME: str = "aava-ggm"
+    # SETUP-REQUIRED: set to your organization's S3 bucket name
+    BUCKET_NAME: str = "aava-dev-agent-artifacts"
+    # SETUP-REQUIRED: set to the AWS region that bucket lives in
     AWS_REGION: str = "us-east-1"
-    AWS_ACCESS_KEY_ID: str = "ENTER ACCESS KEY HERE"
-    AWS_SECRET_ACCESS_KEY: str = "ENTER SECRET HERE"
+
+    MAX_FILE_BYTES: int = 1_000_000  # reject anything larger
 
     def _run(self, folder_name: str, file_name: str, contents: str) -> dict:
         try:
-            s3 = boto3.client(
-                "s3",
-                aws_access_key_id=self.AWS_ACCESS_KEY_ID,
-                aws_secret_access_key=self.AWS_SECRET_ACCESS_KEY,
-                region_name=self.AWS_REGION,
-            )
+            s3 = boto3.client("s3", region_name=self.AWS_REGION)
         except Exception as e:
             return {"status": "FAILED", "reason": f"S3_CLIENT_INIT_FAILED: {e}"}
 
@@ -53,16 +53,26 @@ class S3UploadTool(BaseTool):
         if not safe_name:
             return {"status": "FAILED", "reason": "INVALID_FILE_NAME"}
 
-        timestamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
-        object_key = f"{prefix}{timestamp}_{safe_name}"
+        body = contents.encode("utf-8")
+        if len(body) > self.MAX_FILE_BYTES:
+            return {
+                "status": "FAILED",
+                "reason": f"FILE_TOO_LARGE: {len(body)} bytes exceeds limit of {self.MAX_FILE_BYTES}",
+            }
+
+        object_key = f"{prefix}{safe_name}"
 
         try:
             s3.put_object(
                 Bucket=self.BUCKET_NAME,
                 Key=object_key,
-                Body=contents.encode("utf-8"),
+                Body=body,
                 ContentType="text/plain; charset=utf-8",
             )
+        except ClientError as e:
+            code = e.response["Error"]["Code"]
+            message = e.response["Error"]["Message"]
+            return {"status": "FAILED", "reason": f"S3_UPLOAD_FAILED ({code}): {message}"}
         except Exception as e:
             return {"status": "FAILED", "reason": f"S3_UPLOAD_FAILED: {e}"}
 
@@ -70,7 +80,8 @@ class S3UploadTool(BaseTool):
             "status": "SUCCESS",
             "bucket": self.BUCKET_NAME,
             "key": object_key,
+            "file_name": safe_name,
             "folder": prefix,
-            "size_bytes": len(contents.encode("utf-8")),
-            "uploaded_at": timestamp,
+            "size_bytes": len(body),
+            "uploaded_at": datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S"),
         }

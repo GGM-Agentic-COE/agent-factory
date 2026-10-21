@@ -16,30 +16,26 @@ class S3DocumentRetriever(BaseTool):
     """
     S3DocumentRetriever - Reads and returns the contents of every file
     inside a given folder (prefix) of a fixed S3 bucket.
+    Authentication is via Pod Identity; no credentials are passed in code.
     """
     name: str = "S3 Document Retriever"
     description: str = (
         "Reads all files inside a given folder of the configured S3 bucket "
-        "and returns their contents. Input is the folder name only."
+        "and returns their contents. Input is the folder name only. "
+        "The pod is configured with pod identity for authentication."
     )
     args_schema: Type[BaseModel] = S3DocumentRetrieverSchema
 
-    # --- hardcoded config ---
-    BUCKET_NAME: str = "aava-ggm"
+    # SETUP-REQUIRED: set to your organization's S3 bucket name
+    BUCKET_NAME: str = "aava-dev-agent-artifacts"
+    # SETUP-REQUIRED: set to the AWS region that bucket lives in
     AWS_REGION: str = "us-east-1"
-    AWS_ACCESS_KEY_ID: str = "ENTER ACCESS KEY HERE"
-    AWS_SECRET_ACCESS_KEY: str = "ENTER SECRET HERE"
 
     MAX_FILE_BYTES: int = 1_000_000  # skip anything larger
 
     def _run(self, folder_name: str) -> str:
         try:
-            s3 = boto3.client(
-                "s3",
-                aws_access_key_id=self.AWS_ACCESS_KEY_ID,
-                aws_secret_access_key=self.AWS_SECRET_ACCESS_KEY,
-                region_name=self.AWS_REGION,
-            )
+            s3 = boto3.client("s3", region_name=self.AWS_REGION)
         except Exception as e:
             return f"S3_CLIENT_INIT_FAILED: {e}"
 

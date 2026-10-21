@@ -1,14 +1,64 @@
-import base64
+import datetime
 import os
 import threading
 import time
-from typing import Any, Dict, Optional, Tuple, Type
-from urllib.parse import quote
+from typing import Any, Dict, List, Tuple, Type
 
 import jwt  # PyJWT -- install with the [crypto] extra for RS256 support
 import requests
 from crewai.tools import BaseTool
 from pydantic import BaseModel, Field
+
+import base64
+
+
+import json
+import boto3
+from botocore.exceptions import ClientError
+
+
+class AWSSecretReaderPodIdentitySchema(BaseModel):
+    """Input schema for AWSSecretReaderPodIdentity. """
+    pass
+
+
+class AWSSecretReaderPodIdentity(BaseTool):
+    """
+    AWSSecretReaderPodIdentity - Reads a AWS Secret using Pod Identity
+    and returns the full key-value dict.
+    """
+    name: str = "AWS Secret Reader with Pod Identity"
+    description: str = "Reads a fixed AWS Secret (set in code) using Pod Identity, and returns all key-value pairs as a dict."
+    args_schema: Type[BaseModel] = AWSSecretReaderPodIdentitySchema
+
+    # Review every line tagged "SETUP-REQUIRED:" below before deploying this tool to a new environment or client.
+    # SETUP-REQUIRED: must match the secret name created in your AWS Secrets Manager
+    SECRET_NAME: str = "aava/aava-github-app-dev-secret-asm"
+
+
+    def _run(self) -> Dict[str, Any]:
+        try:
+
+            # SETUP-REQUIRED: AWS region where that secret lives (us-east-1 or us-east-2 depending on deployment)
+
+            client = boto3.client('secretsmanager', region_name='us-east-1')
+            get_secret_value_response = client.get_secret_value(SecretId=self.SECRET_NAME)
+            secret_string = get_secret_value_response.get('SecretString', '{}')
+            secret_dict = json.loads(secret_string)
+
+            if not isinstance(secret_dict, dict):
+                raise ValueError(f"Secret value is not a JSON object: {secret_dict}")
+
+            return secret_dict
+
+        except ClientError as e:
+            raise RuntimeError(f"Error retrieving secret: {str(e)}")
+        except Exception as ex:
+            raise RuntimeError(f"Unexpected error: {str(ex)}")
+
+
+reader = AWSSecretReaderPodIdentity()
+secrets = reader._run()
 
 # ─────────────────────────────────────────────────────────────────────────────
 # CONFIGURATION
@@ -17,10 +67,9 @@ from pydantic import BaseModel, Field
 GITHUB_API = "https://api.github.com"
 
 # ═════════════════════════════════════════════════════════════════════════════
-#  SET YOUR GITHUB APP CREDENTIALS HERE
+#  GITHUB APP CREDENTIALS (from AWS Secrets Manager)
 # ═════════════════════════════════════════════════════════════════════════════
 #
-# Fill these in directly, or leave them blank to read from the environment.
 # Only ONE of APP_ID / CLIENT_ID is needed -- both work as the JWT issuer, and
 # CLIENT_ID takes precedence when both are set.
 #
@@ -28,34 +77,17 @@ GITHUB_API = "https://api.github.com"
 # user-authorization, which this tool does not do.
 
 # App ID -- the numeric id from Settings -> Developer settings -> GitHub Apps
-APP_ID = ""                       # e.g. "123456"
+APP_ID = secrets.get("app_id")                       # from AWS Secrets Manager
 
 # Client ID -- the "Iv23li..." string on the same page. GitHub's currently
 # recommended issuer value.
-CLIENT_ID = ""                    # e.g. "Iv23liABCDEFGH123456"
+CLIENT_ID = secrets.get("client_id")                 # from AWS Secrets Manager
 
-# Private key (PEM). Leave as "" and use PRIVATE_KEY_PATH / the environment,
-# or paste the key inline using the triple-quoted form shown below. Include
-# the BEGIN/END lines and keep the real newlines -- a PEM collapsed onto one
-# line will not parse.
-#
-#   PRIVATE_KEY = """-----BEGIN RSA PRIVATE KEY-----
-#   MIIEowIBAAKCAQEA...
-#   ...
-#   -----END RSA PRIVATE KEY-----"""
-#
-PRIVATE_KEY = """-----BEGIN RSA PRIVATE KEY-----
-
-   -----END RSA PRIVATE KEY-----"""
+# Private key (PEM), either PKCS#1 ("BEGIN RSA PRIVATE KEY") or PKCS#8
+# ("BEGIN PRIVATE KEY") -- both are accepted.
+PRIVATE_KEY = secrets.get("private_key")             # from AWS Secrets Manager
 
 
-# Alternatively, point at the .pem on disk and leave PRIVATE_KEY blank.
-# PRIVATE_KEY_PATH = ""             # e.g. "/secrets/my-app.private-key.pem"
-
-# ⚠️  A leaked App private key is strictly worse than a leaked PAT: it cannot
-#     be scoped down after the fact, and it grants access to every account
-#     that installed the App. Prefer PRIVATE_KEY_PATH or the environment
-#     variables below over committing the key into this file.
 
 
 # ═════════════════════════════════════════════════════════════════════════════
@@ -412,287 +444,155 @@ def _resolve_owner_and_token(repo: str) -> Tuple[str, str, str]:
 # ─────────────────────────────────────────────────────────────────────────────
 
 
-class GithubAppReaderSchema(BaseModel):
-    """
-    Input schema -- identical to the PAT tool's GithubReaderSchema. Three
-    fields, no owner: the owner is derived from the App installation.
-    """
+class GithubCommitSchema(BaseModel):
+    """Input schema for GithubCommitterTool."""
 
-    folder_location: str = Field(
+    files: List[dict] = Field(
         ...,
-        description=(
-            "Repository folder path to read recursively. Specify the exact "
-            "folder path within the repository that you want to read all files "
-            "from. Example: 'lld' for root level folder or 'project_k/lld' for "
-            "nested folder structure."
-        ),
+        description="List of dicts with 'filename' (path) and 'code' keys. Example: [{'filename': 'docs/api.txt', 'code': '...'}]"
     )
-    repo: str = Field(
-        ...,
-        description=(
-            "Repository name without owner prefix. This should be the exact "
-            "name of the GitHub repository you want to access. Example: "
-            "'scib_demo' or 'my-project-repo'. A fully qualified "
-            "'owner/repo' is also accepted but is not required."
-        ),
-    )
-    branch: str = Field(
-        ...,
-        description=(
-            "Branch name to read files from. Specify the exact branch name "
-            "where the files are located. Example: 'main', 'develop', or "
-            "'feature/SCRUM-11691'."
-        ),
-    )
+    repo_name: str = Field(..., description="The name of the repository. Example: 'SCIB-Inception'.")
+    new_branch: str = Field(..., description="The new branch to create and commit to. Example: 'feature/auto-update'.")
+    source_branch: str = Field(default="main", description="The branch to copy from. Defaults to 'main'.")
 
 
-class GithubAppReader(BaseTool):
+class GithubCommitterTool(BaseTool):
     """
-    CrewAI tool for recursively reading all files from a GitHub repository
-    folder, authenticating as a **GitHub App installation**.
+    Creates a new branch from a source branch and commits files to it,
+    authenticating as a GitHub App installation.
 
-    Behaviourally equivalent to `GithubReader`. Return shapes, status strings,
-    and error message wording are preserved so existing agents and downstream
-    parsers need no changes.
+    The repository owner is no longer a module-level constant -- it is derived
+    from the App installation, exactly as in the reader tool. Everything else
+    about the commit flow is unchanged.
 
     API endpoints used:
         App-level (JWT) -- owner/token resolution, cached after first run:
-            GET  /app/installations                    (always)
-            POST /app/installations/{id}/access_tokens  (once per ~55 min)
-            GET  /repos/{owner}/{repo}/installation    (only if "owner/repo" given)
-        Installation-level (ghs_ token):
-            GET  /installation/repositories            (only if >1 installation)
-            GET  /repos/{owner}/{repo}
-            GET  /repos/{owner}/{repo}/contents/{folder}?ref={branch}
-            GET  /repos/{owner}/{repo}/branches/{branch}
-            GET  /repos/{owner}/{repo}/git/trees/{sha}?recursive=1
-            GET  /repos/{owner}/{repo}/contents/{file}?ref={branch}  (per file)
-
-        Note there is no GET /user call. An installation token has no
-        associated human, so the PAT tool's owner lookup does not apply; the
-        owner comes from the installation's own account instead.
-
-    Rate limits:
-        5,000 requests/hour per installation, scaling to 15,000 for larger
-        organisations — generally more headroom than a PAT, and it does not
-        consume any human's personal quota.
+            GET  /app/installations
+            POST /app/installations/{id}/access_tokens
+        Installation-level (ghs_ token) -- the write flow, unchanged:
+            GET   /repos/{owner}/{repo}/git/ref/heads/{source_branch}
+            POST  /repos/{owner}/{repo}/git/refs
+            GET   /repos/{owner}/{repo}/git/ref/heads/{new_branch}   (if 422)
+            POST  /repos/{owner}/{repo}/git/trees
+            POST  /repos/{owner}/{repo}/git/commits
+            PATCH /repos/{owner}/{repo}/git/refs/heads/{new_branch}
     """
 
-    name: str = "GitHub App Reader"
-    description: str = (
-        "Tool to read all files from a folder in a GitHub repository using "
-        "GitHub App installation credentials. Accepts folder location, repo, "
-        "and branch, and returns file contents recursively."
-    )
-    args_schema: Type[BaseModel] = GithubAppReaderSchema
+    name: str = "Github Branch Committer"
+    description: str = "Creates a new branch from a source branch and commits files to it."
+    args_schema: Type[BaseModel] = GithubCommitSchema
 
-    def _run(self, folder_location: str, repo: str, branch: str) -> Any:
-        """
-        Execute the read. See module docstring for the auth flow.
-
-        Returns:
-            dict | str: On success, {repository, branch, folder_location, files}
-                        where each `files` entry carries status "success",
-                        "binary_or_non_utf8", "not_found", or "error".
-                        On failure, a descriptive error string.
-        """
+    def _run(self, files: List[dict], repo_name: str, new_branch: str, source_branch: str = "main") -> Any:
         try:
             # ═══════════════════════════════════════════════════════════════
-            # PHASE 1: INPUT VALIDATION
-            # ═══════════════════════════════════════════════════════════════
-            if not isinstance(folder_location, str) or not folder_location.strip():
-                return "Error reading scripts: 'folder_location' must be a non-empty string."
-
-            folder_location = folder_location.strip().strip("/")
-
-            # ═══════════════════════════════════════════════════════════════
-            # PHASE 2: APP AUTHENTICATION + OWNER RESOLUTION
-            #          (this is the only phase that differs from the PAT tool)
+            # 0. APP AUTHENTICATION + OWNER RESOLUTION
+            #    (the only part that differs from the PAT version)
             # ═══════════════════════════════════════════════════════════════
             try:
-                repo_owner, repo, token = _resolve_owner_and_token(repo)
+                repo_owner, repo_name, token = _resolve_owner_and_token(repo_name)
             except RuntimeError as exc:
-                return f"Error reading scripts: {exc}"
+                return {"status": "failure", "message": str(exc)}
 
             headers = _token_headers(token)
-            base_url = f"{GITHUB_API}/repos/{repo_owner}/{repo}"
+            base_api = f"https://api.github.com/repos/{repo_owner}/{repo_name}"
 
-            # ═══════════════════════════════════════════════════════════════
-            # PHASE 3: REPOSITORY EXISTENCE VERIFICATION
-            # ═══════════════════════════════════════════════════════════════
-            repo_check = requests.get(base_url, headers=headers, timeout=REQUEST_TIMEOUT)
-            if repo_check.status_code == 404:
-                return f"Error: Repository '{repo_owner}/{repo}' not found."
-            repo_check.raise_for_status()
+            # 1. Get current SHA of the SOURCE branch (e.g. main)
+            resp = requests.get(f"{base_api}/git/ref/heads/{source_branch}", headers=headers)
+            resp.raise_for_status()
+            source_sha = resp.json()["object"]["sha"]
 
-            file_contents: Dict[str, Any] = {}
-
-            # ═══════════════════════════════════════════════════════════════
-            # PHASE 4: FOLDER EXISTENCE VERIFICATION
-            # ═══════════════════════════════════════════════════════════════
-            encoded_folder = quote(folder_location, safe="/")
-            folder_api_url = f"{base_url}/contents/{encoded_folder}"
-
-            folder_response = requests.get(
-                folder_api_url,
+            # 2. Create the new branch ref pointing at the source SHA (the "copy")
+            #    If it already exists, GitHub returns 422 — handle that gracefully.
+            create_ref_resp = requests.post(
+                f"{base_api}/git/refs",
                 headers=headers,
-                params={"ref": branch},
-                timeout=REQUEST_TIMEOUT,
+                json={"ref": f"refs/heads/{new_branch}", "sha": source_sha},
             )
-            if folder_response.status_code == 404:
-                return (
-                    f"Error reading scripts: Folder '{folder_location}' not found "
-                    f"in branch '{branch}'."
-                )
-            folder_response.raise_for_status()
+            if create_ref_resp.status_code == 422:
+                # Branch already exists — fetch its current SHA and commit on top of it.
+                existing = requests.get(f"{base_api}/git/ref/heads/{new_branch}", headers=headers)
+                existing.raise_for_status()
+                current_sha = existing.json()["object"]["sha"]
+            else:
+                create_ref_resp.raise_for_status()
+                current_sha = source_sha
 
-            # ═══════════════════════════════════════════════════════════════
-            # PHASE 5: BRANCH AND TREE SHA RESOLUTION
-            # ═══════════════════════════════════════════════════════════════
-            branch_api_url = f"{base_url}/branches/{quote(branch, safe='')}"
-            branch_response = requests.get(
-                branch_api_url, headers=headers, timeout=REQUEST_TIMEOUT
-            )
-            branch_response.raise_for_status()
-            branch_data = branch_response.json()
+            # 3. Normalize file descriptors (accept BOTH flat and nested formats)
+            tree_items = []
+            resolved_paths = []
+            for file_info in files:
+                folder = None
+                data = file_info
 
-            tree_sha = (
-                branch_data.get("commit", {})
-                .get("commit", {})
-                .get("tree", {})
-                .get("sha")
-            )
-            if not tree_sha:
-                return "Error reading scripts: Unable to resolve tree SHA for branch."
+                # Nested: {"<folder>": {"filename": ..., "code": ...}}
+                if "filename" not in file_info and len(file_info) == 1:
+                    key, value = next(iter(file_info.items()))
+                    if isinstance(value, dict) and "filename" in value:
+                        folder, data = key, value
 
-            # ═══════════════════════════════════════════════════════════════
-            # PHASE 6: RECURSIVE TREE RETRIEVAL
-            # ═══════════════════════════════════════════════════════════════
-            tree_url = f"{base_url}/git/trees/{tree_sha}"
-            tree_response = requests.get(
-                tree_url,
-                headers=headers,
-                params={"recursive": "1"},
-                timeout=REQUEST_TIMEOUT,
-            )
-            tree_response.raise_for_status()
-            tree_data = tree_response.json()
+                filename = (data.get("filename") or "script.py").lstrip("/")
+                content = data.get("code", "")
 
-            # GitHub silently truncates trees above ~100k entries or 7 MB.
-            # Worth surfacing rather than returning a quietly partial result.
-            truncated = bool(tree_data.get("truncated"))
+                filepath = f"{folder.strip('/')}/{filename}" if folder else filename
+                resolved_paths.append(filepath)
 
-            # ═══════════════════════════════════════════════════════════════
-            # PHASE 7: FILE FILTERING
-            # ═══════════════════════════════════════════════════════════════
-            prefix = f"{folder_location}/"
-            target_files = [
-                item
-                for item in tree_data.get("tree", [])
-                if item.get("type") == "blob"
-                and item.get("path", "").startswith(prefix)
-            ]
+                tree_items.append({
+                    "path": filepath,
+                    "mode": "100644",
+                    "type": "blob",
+                    "content": content,
+                })
 
-            if not target_files:
-                return {
-                    "repository": f"{repo_owner}/{repo}",
-                    "branch": branch,
-                    "folder_location": folder_location,
-                    "files": {},
-                    "message": f"No files found under folder '{folder_location}'.",
-                }
+            # 4. Create the Tree object (based on the new branch's current tree)
+            tree_payload = {"base_tree": current_sha, "tree": tree_items}
+            tree_resp = requests.post(f"{base_api}/git/trees", headers=headers, json=tree_payload)
+            tree_resp.raise_for_status()
+            new_tree_sha = tree_resp.json()["sha"]
 
-            # ═══════════════════════════════════════════════════════════════
-            # PHASE 8: FILE CONTENT RETRIEVAL AND DECODING
-            # ═══════════════════════════════════════════════════════════════
-            for item in target_files:
-                file_path = item.get("path")
-                if not file_path:
-                    continue
-
-                encoded_path = quote(file_path, safe="/")
-                api_url = f"{base_url}/contents/{encoded_path}"
-
-                response = requests.get(
-                    api_url,
-                    headers=headers,
-                    params={"ref": branch},
-                    timeout=REQUEST_TIMEOUT,
-                )
-
-                if response.status_code == 404:
-                    file_contents[file_path] = {
-                        "status": "not_found",
-                        "message": f"File '{file_path}' not found in branch '{branch}'.",
-                    }
-                    continue
-
-                response.raise_for_status()
-                data = response.json()
-
-                if data.get("type") == "file" and "content" in data:
-                    try:
-                        decoded_content = base64.b64decode(data["content"]).decode("utf-8")
-                        file_contents[file_path] = {
-                            "status": "success",
-                            "content": decoded_content,
-                            "size": data.get("size"),
-                            "sha": data.get("sha"),
-                        }
-                    except UnicodeDecodeError:
-                        file_contents[file_path] = {
-                            "status": "binary_or_non_utf8",
-                            "message": "File is not UTF-8 text; content not decoded.",
-                            "size": data.get("size"),
-                            "sha": data.get("sha"),
-                        }
-                    except Exception as e:
-                        file_contents[file_path] = {
-                            "status": "error",
-                            "message": f"Failed to decode file content: {str(e)}",
-                        }
-                else:
-                    file_contents[file_path] = {
-                        "status": "error",
-                        "message": f"Unsupported type: {data.get('type')}",
-                    }
-
-            # ═══════════════════════════════════════════════════════════════
-            # PHASE 9: RESULT AGGREGATION AND RETURN
-            # ═══════════════════════════════════════════════════════════════
-            result: Dict[str, Any] = {
-                "repository": f"{repo_owner}/{repo}",
-                "branch": branch,
-                "folder_location": folder_location,
-                "files": file_contents,
+            # 5. Create the Commit
+            commit_payload = {
+                "message": f"Automation Update: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}",
+                "tree": new_tree_sha,
+                "parents": [current_sha],
             }
-            if truncated:
-                result["message"] = (
-                    "Warning: GitHub truncated the repository tree; the file "
-                    "list may be incomplete."
-                )
-            return result
+            commit_resp = requests.post(f"{base_api}/git/commits", headers=headers, json=commit_payload)
+            commit_resp.raise_for_status()
+            new_commit_sha = commit_resp.json()["sha"]
 
-        except requests.exceptions.RequestException as e:
-            response_text = ""
+            # 6. Update the NEW branch reference
+            ref_resp = requests.patch(
+                f"{base_api}/git/refs/heads/{new_branch}",
+                headers=headers,
+                json={"sha": new_commit_sha},
+            )
+            ref_resp.raise_for_status()
+
+            return {
+                "status": "success",
+                "branch": new_branch,
+                "source_branch": source_branch,
+                "updated_files": resolved_paths,
+                "message": f"Created '{new_branch}' from '{source_branch}' and committed {len(files)} file(s).",
+                "url": f"https://github.com/{repo_owner}/{repo_name}/tree/{new_branch}",
+            }
+
+        except requests.exceptions.HTTPError as e:
+            # App-specific diagnostics. A bare str(e) gives only
+            # "403 Client Error: Forbidden for url: ...", which hides the
+            # single most common App failure: Contents permission still set to
+            # read-only. GitHub puts the real reason in the response body, so
+            # surface it.
+            detail = ""
             if getattr(e, "response", None) is not None:
-                response_text = (
-                    f" | GitHub response: {e.response.status_code} {e.response.text}"
-                )
-            return f"Error reading scripts: {str(e)}{response_text}"
+                detail = f" | GitHub response: {e.response.status_code} {e.response.text}"
+                if e.response.status_code == 403:
+                    detail += (
+                        " | HINT: this is almost always the App's Repository "
+                        "permission 'Contents' being Read-only instead of "
+                        "Read and write. Note that after changing it, each "
+                        "installation must accept the new permission."
+                    )
+            return {"status": "failure", "message": f"{str(e)}{detail}"}
 
         except Exception as e:
-            return f"Error reading scripts: {str(e)}"
-
-
-if __name__ == "__main__":
-    # Smoke test:
-    #   GITHUB_APP_ID=... GITHUB_APP_PRIVATE_KEY_PATH=... python tool-L1-github-app-reader.py
-    tool = GithubAppReader()
-    out = tool._run(folder_location="src", repo="scib_demo", branch="main")
-    if isinstance(out, str):
-        print(out)
-    else:
-        print(out["repository"], out["branch"], f"{len(out['files'])} files")
-        for path, meta in out["files"].items():
-            print(f"  [{meta['status']}] {path}")
+            return {"status": "failure", "message": str(e)}

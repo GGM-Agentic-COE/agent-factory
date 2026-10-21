@@ -1,39 +1,62 @@
-# RUN THE SECRETS MANAGER CODE HERE FROM OTHER TOOLS, IF NEEDS TO CONNECT WITH SECRETS MANAGER
-
-## ADJUST THESE CREDENTIALS WHEN NEEDED ______________________________________________________________________
-# Create the BlobServiceClient
-connection_string = "REDACTED-SECRET-KEY"
-
-# Use only the predefined container name
-container_name = "aava-ggm"
-
+import json
+import boto3
+import logging
+from typing import Type, Dict, Any, List
+from pydantic import BaseModel, Field, field_validator
 from crewai.tools import BaseTool
 from azure.storage.blob import BlobServiceClient, BlobClient, ContainerClient
-from pydantic import BaseModel, Field, field_validator
-from typing import List
-import logging
-import json
-import re
-import os
+from botocore.exceptions import ClientError
 
 
-# Define the args schema for your tool
+class AWSSecretReaderPodIdentitySchema(BaseModel):
+    """Input schema for AWSSecretReaderPodIdentity."""
+    pass
+
+
+class AWSSecretReaderPodIdentity(BaseTool):
+    """
+    AWSSecretReaderPodIdentity - Reads a AWS Secret using Pod Identity
+    and returns the full key-value dict.
+    """
+    name: str = "AWS Secret Reader with Pod Identity"
+    description: str = "Reads a fixed AWS Secret (set in code) using Pod Identity, and returns all key-value pairs as a dict."
+    args_schema: Type[BaseModel] = AWSSecretReaderPodIdentitySchema
+    SECRET_NAME: str = "aava/temp/varun-temp-key-values"
+
+    def _run(self) -> Dict[str, Any]:
+        try:
+            client = boto3.client('secretsmanager', region_name='us-east-1')
+            get_secret_value_response = client.get_secret_value(SecretId=self.SECRET_NAME)
+            secret_string = get_secret_value_response.get('SecretString', '{}')
+            secret_dict = json.loads(secret_string)
+
+            if not isinstance(secret_dict, dict):
+                raise ValueError(f"Secret value is not a JSON object: {secret_dict}")
+
+            return secret_dict
+
+        except ClientError as e:
+            raise RuntimeError(f"Error retrieving secret: {str(e)}")
+        except Exception as ex:
+            raise RuntimeError(f"Unexpected error: {str(ex)}")
+
+
+reader = AWSSecretReaderPodIdentity()
+secrets = reader._run()
+connection_string = secrets.get("azure_connection_string")
+container_name = "aava-ggm"
+
+
 class AzureBlobReaderSchema(BaseModel):
-    folder_name: str = Field(..., description="Name of the folder in Azure Blob Storage that contains the files")
-    file_names: List[str] = Field(
-        ...,
-        description=(
-            "List of file names inside the folder to read, e.g. [\"file-1.md\", \"file-2.md\"]. "
-            "Only these files are read; all other files in the folder are ignored."
-        ),
-    )
+    """Input schema for AzureBlobReaderTool."""
+    folder_name: str = Field(..., description="Name of the folder in Azure Blob Storage that contains the files to be read")
+    file_names: List[str] = Field(..., description="List of specific file names inside the folder to read, e.g. ['file-1.md', 'file-2.md']. Only these files will be read and all other files in the folder will be ignored")
 
     @field_validator("file_names", mode="before")
     @classmethod
     def coerce_file_names(cls, value):
         """
-        Agents often hand over the list as a JSON string or a comma-separated
-        string instead of a real list. Normalize all of those into List[str].
+        Normalize file_names input to handle JSON strings or comma-separated strings.
         """
         if isinstance(value, str):
             stripped = value.strip()
@@ -50,7 +73,6 @@ class AzureBlobReaderSchema(BaseModel):
         return [item for item in cleaned if item]
 
 
-# Set up secure logging
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -60,55 +82,28 @@ logger = logging.getLogger('AzureBlobReaderTool')
 
 
 class AzureBlobReaderTool(BaseTool):
+    """
+    AzureBlobReaderTool - A tool to read specific files from Azure Blob Storage folder.
+    """
     name: str = "Azure Blob Reader Tool"
-    description: str = (
-        "Reads and prints the contents of specific named files inside a folder in Azure Blob Storage. "
-        "Requires a folder name and the list of file names to read."
-    )
-    args_schema: type[BaseModel] = AzureBlobReaderSchema
-
-    def __init__(self):
-        super().__init__(
-            name="Azure Blob Reader Tool",
-            description=(
-                "Reads and prints the contents of specific named files inside a folder in Azure Blob Storage. "
-                "Requires a folder name and the list of file names to read."
-            )
-        )
+    description: str = "Reads and prints the contents of specific named files inside a folder in Azure Blob Storage. Requires a folder name and the list of file names to read."
+    args_schema: Type[BaseModel] = AzureBlobReaderSchema
 
     @staticmethod
     def _resolve_blob_path(prefix, file_name):
         """
         Build the full blob path for a requested file name.
-
-        Tolerates the caller passing either a bare file name ("file-1.md") or a
-        path that already includes the folder ("my_folder/file-1.md").
-
-        :param prefix: string, normalized folder prefix ending in "/" (or "").
-        :param file_name: string, the requested file name.
-        Returns:
-            str: the full blob path inside the container.
         """
         cleaned = file_name.strip().lstrip("/")
-
         if prefix and cleaned.startswith(prefix):
             return cleaned
-
         return f"{prefix}{cleaned}"
 
     def read_files_in_folder(self, folder_name, file_names):
         """
-        Downloads only the named files under the given folder prefix and
-        returns (and prints) their contents.
-
-        :param folder_name: string, name of the folder to read from.
-        :param file_names: list of strings, the file names to read.
-        Returns:
-            str: A formatted dump of each requested file's name and content,
-                 or an error message.
+        Downloads only the named files under the given folder prefix and returns their contents.
         """
         try:
-            # Normalize the arguments coming in from an agent or a direct call.
             validated = AzureBlobReaderSchema(folder_name=folder_name, file_names=file_names)
             folder_name = validated.folder_name
             file_names = validated.file_names
@@ -119,9 +114,7 @@ class AzureBlobReaderTool(BaseTool):
                 print(msg)
                 return msg
 
-            # Normalize the prefix so it always ends in exactly one slash.
             prefix = folder_name.rstrip("/") + "/" if folder_name else ""
-
             blob_service_client = BlobServiceClient.from_connection_string(connection_string)
             container_client = blob_service_client.get_container_client(container_name)
 
@@ -139,14 +132,12 @@ class AzureBlobReaderTool(BaseTool):
             for file_name in file_names:
                 blob_path = self._resolve_blob_path(prefix, file_name)
 
-                # Skip duplicates so the same file is never downloaded twice.
                 if blob_path in seen:
                     continue
                 seen.add(blob_path)
 
                 blob_client = container_client.get_blob_client(blob_path)
 
-                # Fetch only this file — no listing of the whole folder.
                 try:
                     if not blob_client.exists():
                         logger.info(f"Requested file not found: '{blob_path}'")
@@ -165,7 +156,6 @@ class AzureBlobReaderTool(BaseTool):
                     print(section)
                     continue
 
-                # Try to decode as UTF-8 text; fall back to a note for binary content.
                 try:
                     text = downloaded.decode("utf-8")
                 except UnicodeDecodeError:
@@ -177,16 +167,12 @@ class AzureBlobReaderTool(BaseTool):
                 print(section)
 
             if file_count == 0:
-                msg = (
-                    f"None of the requested files were readable in folder '{folder_name}'. "
-                    f"Requested: {', '.join(file_names)}."
-                )
+                msg = f"None of the requested files were readable in folder '{folder_name}'. Requested: {', '.join(file_names)}."
                 logger.info(msg)
                 print(msg)
                 return msg
 
             header = f"Read {file_count} of {len(seen)} requested file(s) from folder '{folder_name}':\n\n"
-
             footer = ""
             if missing_files:
                 footer += f"\nFiles not found: {', '.join(missing_files)}"
@@ -196,19 +182,11 @@ class AzureBlobReaderTool(BaseTool):
             return header + "\n".join(output_sections) + footer
 
         except Exception as e:
-            # Log the full error details but return a generic message.
             logger.error(f"An error occurred: {str(e)}", exc_info=True)
             return "An error occurred while reading the folder"
 
-    def _run(self, folder_name, file_names):
+    def _run(self, folder_name: str, file_names: List[str]) -> str:
         """
         Run method required by CrewAI BaseTool.
-
-        Args:
-            folder_name (str): Name of the folder to read from.
-            file_names (list[str]): The specific file names to read from that folder.
-
-        Returns:
-            str: The contents of the requested files.
         """
         return self.read_files_in_folder(folder_name, file_names)

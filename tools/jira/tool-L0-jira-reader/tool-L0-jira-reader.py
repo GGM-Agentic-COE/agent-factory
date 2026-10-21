@@ -1,38 +1,3 @@
-# ============================================================================
-# HOW TO RUN
-
-#
-# As a CrewAI tool, inputJSON may be any of:
-#   {"key": "GGMDEMOS-101"}
-#   {"keys": ["GGMDEMOS-101", "GGMDEMOS-110"]}
-
-#
-# OUTPUT: clean JSON. Every issue — and every child, using the SAME scheme — has:
-#   {
-#     "issue_id":            "GGMDEMOS-101",
-#     "title":               "...",
-#     "status":              "To Do",
-#     "description":         "...plain text...",
-#     "labels":              ["EP-01", "S1"],
-#     "assignee":            "Jane Doe"  | null,
-#     "due_date":            "2026-02-01" | null,
-#     "reporter":            "John Smith" | null,
-#     "child_work_item_ids": ["GGMDEMOS-102", "GGMDEMOS-103"],
-#     "children":            [ { ...same scheme... }, ... ]
-#   }
-# A single input key returns one object; a list of keys returns a JSON array.
-# ============================================================================
-
-# ============================================================================
-# CONFIGURATION  --  edit these values for your Jira space (same as the creator)
-# ============================================================================
-JIRA_BASE_URL     = "https://aavademo.atlassian.net"            # no trailing slash
-JIRA_USER_EMAIL   = "aava.demouser@ascendion.com"              # Atlassian account email
-JIRA_API_TOKEN    = "REDACTED-SECRET-KEY"
-DEFAULT_MAX_DEPTH = 5            # how many levels of children to walk
-PAGE_SIZE         = 100          # children fetched per page
-# ============================================================================
-
 import os
 import json
 import requests
@@ -40,6 +5,64 @@ from typing import Any, Type, Dict, List, Optional
 from pydantic import BaseModel, Field, field_validator
 from crewai.tools import BaseTool
 from requests.auth import HTTPBasicAuth
+
+
+import boto3
+from botocore.exceptions import ClientError
+
+
+class AWSSecretReaderPodIdentitySchema(BaseModel):
+    """Input schema for AWSSecretReaderPodIdentity. """
+    pass
+
+
+class AWSSecretReaderPodIdentity(BaseTool):
+    """
+    AWSSecretReaderPodIdentity - Reads a AWS Secret using Pod Identity
+    and returns the full key-value dict.
+    """
+    name: str = "AWS Secret Reader with Pod Identity"
+    description: str = "Reads a fixed AWS Secret (set in code) using Pod Identity, and returns all key-value pairs as a dict."
+    args_schema: Type[BaseModel] = AWSSecretReaderPodIdentitySchema
+
+    # Review every line tagged "SETUP-REQUIRED:" below before deploying this tool to a new environment or client.
+    # SETUP-REQUIRED: must match the secret name created in your AWS Secrets Manager
+    SECRET_NAME: str = "aava/aava-atlassian-sa-dev-secret-asm"
+
+
+    def _run(self) -> Dict[str, Any]:
+        try:
+
+            # SETUP-REQUIRED: AWS region where that secret lives (us-east-1 or us-east-2 depending on deployment)
+
+            client = boto3.client('secretsmanager', region_name='us-east-1')
+            get_secret_value_response = client.get_secret_value(SecretId=self.SECRET_NAME)
+            secret_string = get_secret_value_response.get('SecretString', '{}')
+            secret_dict = json.loads(secret_string)
+
+            if not isinstance(secret_dict, dict):
+                raise ValueError(f"Secret value is not a JSON object: {secret_dict}")
+
+            return secret_dict
+
+        except ClientError as e:
+            raise RuntimeError(f"Error retrieving secret: {str(e)}")
+        except Exception as ex:
+            raise RuntimeError(f"Unexpected error: {str(ex)}")
+
+
+reader = AWSSecretReaderPodIdentity()
+secrets = reader._run()
+
+# ============================================================================
+# CONFIGURATION  --  edit these values for your Jira space (same as the creator)
+# ============================================================================
+JIRA_BASE_URL     = secrets.get("base_url")                     # from AWS Secrets Manager
+JIRA_USER_EMAIL   = secrets.get("id")                   #from AWS Secrets Manager
+JIRA_API_TOKEN    = secrets.get("api_key")                    #from AWS Secrets Manager
+DEFAULT_MAX_DEPTH = 5            # how many levels of children to walk
+PAGE_SIZE         = 100          # children fetched per page
+# ============================================================================
 
 
 class JiraIssueTreeFetcherSchema(BaseModel):
