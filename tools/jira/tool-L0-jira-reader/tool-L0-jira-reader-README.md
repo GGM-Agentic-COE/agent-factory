@@ -21,17 +21,15 @@ Enter these values and click **Execute**.
 
 **`inputJSON`**
 ```
-{"key": "PROJ-101", "maxDepth": 2, "includeChildren": true}
+{"key": "PROJ-101"}
 ```
-
-`baseUrl`, `userEmail` and `apiToken` are omitted from the example. Leave them out so the values from AWS Secrets Manager are used.
 
 ### 2.2 Calling the tool in an agent
 
-The issue key or keys change on every call. `maxDepth` and `includeChildren` are usually fixed for the workflow. The Jira site and credentials come from AWS Secrets Manager, so the agent passes none of them.
+The issue key or keys change on every call. The Jira site and credentials come from AWS Secrets Manager, so the agent passes none of them.
 
 ```
-inputJSON = {"keys": {{issue_keys}}, "maxDepth": 3, "includeChildren": true}
+inputJSON = {"keys": {{issue_keys}}}
 ```
 
 ---
