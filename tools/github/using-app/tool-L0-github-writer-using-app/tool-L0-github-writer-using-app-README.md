@@ -20,7 +20,28 @@ You give the tool a list of files (path and text content), a repository, a new b
 Enter these values and click **Execute**.
 
 **`files`**
+
+option 1:
+
 ```
+[
+  {
+    "filename": "folder/subfolder1/markdownfile.md",
+    "code": "# this is a sample markdown file"
+  },
+
+  {
+    "filename" : "folder/subfolder2/samplecode.py",
+    "code": "print('hello')"
+  }
+]
+```
+
+option 2:
+```
+
+```
+
 [
   {"filename": "docs/api.md", "code": "# API\n\nGenerated documentation."},
   {"src": {"filename": "main.py", "code": "print('hello')\n"}}
