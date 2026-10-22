@@ -33,7 +33,7 @@ class AWSSecretReaderPodIdentity(BaseTool):
 
     # Review every line tagged "SETUP-REQUIRED:" below before deploying this tool to a new environment or client.
     # SETUP-REQUIRED: must match the secret name created in your AWS Secrets Manager
-    SECRET_NAME: str = "aava/aava-github-app-dev-secret-asm"
+    SECRET_NAME: str = "<name-of-secret-in-aws-secrets-manager>"
 
 
     def _run(self) -> Dict[str, Any]:
@@ -119,7 +119,7 @@ def _load_private_key() -> str:
     """
     Return the App's RSA private key as a PEM string.
 
-    Resolution order: PRIVATE_KEY constant/env, then PRIVATE_KEY_PATH.
+    The key is read from the `private_key` field of the secret.
     Both PKCS#1 ("BEGIN RSA PRIVATE KEY", what GitHub's download gives you)
     and PKCS#8 ("BEGIN PRIVATE KEY", what `openssl pkcs8 -topk8` produces)
     are accepted -- PyJWT handles either.
@@ -128,7 +128,7 @@ def _load_private_key() -> str:
         str: PEM-encoded private key.
 
     Raises:
-        RuntimeError: If no key is configured or the file is unreadable.
+        RuntimeError: If no key is configured.
     """
     if PRIVATE_KEY:
         key = PRIVATE_KEY
@@ -215,7 +215,7 @@ def _jwt_headers() -> Dict[str, str]:
 
 
 def _token_headers(token: str) -> Dict[str, str]:
-    """Headers for repo-level endpoints. Identical in shape to the PAT version."""
+    """Headers for repo-level (installation token) endpoints."""
     return {
         "Authorization": f"Bearer {token}",
         "Accept": "application/vnd.github+json",
@@ -298,10 +298,8 @@ def _resolve_owner_and_token(repo: str) -> Tuple[str, str, str]:
     """
     Determine the owner of `repo` and return (owner, repo_name, token).
 
-    This is the App-native replacement for the PAT tool's
-    `_fetch_github_repo_owner()`, which called GET /user. That endpoint has no
-    meaning for an App installation -- there is no authenticated human -- so
-    the owner comes from the installation instead.
+    An App installation has no authenticated human user, so the owner
+    comes from the installation instead of a GET /user call.
 
     The key property that makes this work without a caller-supplied owner:
     an installation is scoped to exactly ONE account, and every repository it
@@ -317,8 +315,8 @@ def _resolve_owner_and_token(repo: str) -> Tuple[str, str, str]:
         silently guessed.
 
     Args:
-        repo (str): Repository name, either bare ("scib_demo") or fully
-                    qualified ("my-org/scib_demo").
+        repo (str): Repository name, either bare ("<your-repo-name>") or fully
+                    qualified ("<your-github-org>/<your-repo-name>").
 
     Returns:
         tuple[str, str, str]: (owner_login, repo_name, installation_token)
@@ -440,7 +438,7 @@ def _resolve_owner_and_token(repo: str) -> Tuple[str, str, str]:
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# TOOL SCHEMA — identical to the PAT version
+# TOOL SCHEMA
 # ─────────────────────────────────────────────────────────────────────────────
 
 
@@ -451,7 +449,7 @@ class GithubCommitSchema(BaseModel):
         ...,
         description="List of dicts with 'filename' (path) and 'code' keys. Example: [{'filename': 'docs/api.txt', 'code': '...'}]"
     )
-    repo_name: str = Field(..., description="The name of the repository. Example: 'SCIB-Inception'.")
+    repo_name: str = Field(..., description="The name of the repository. Example: 'my-project-repo'.")
     new_branch: str = Field(..., description="The new branch to create and commit to. Example: 'feature/auto-update'.")
     source_branch: str = Field(default="main", description="The branch to copy from. Defaults to 'main'.")
 
@@ -461,15 +459,14 @@ class GithubCommitterTool(BaseTool):
     Creates a new branch from a source branch and commits files to it,
     authenticating as a GitHub App installation.
 
-    The repository owner is no longer a module-level constant -- it is derived
-    from the App installation, exactly as in the reader tool. Everything else
-    about the commit flow is unchanged.
+    The repository owner is derived from the App installation, exactly as
+    in the reader tool.
 
     API endpoints used:
         App-level (JWT) -- owner/token resolution, cached after first run:
             GET  /app/installations
             POST /app/installations/{id}/access_tokens
-        Installation-level (ghs_ token) -- the write flow, unchanged:
+        Installation-level (ghs_ token) -- the write flow:
             GET   /repos/{owner}/{repo}/git/ref/heads/{source_branch}
             POST  /repos/{owner}/{repo}/git/refs
             GET   /repos/{owner}/{repo}/git/ref/heads/{new_branch}   (if 422)
@@ -486,7 +483,6 @@ class GithubCommitterTool(BaseTool):
         try:
             # ═══════════════════════════════════════════════════════════════
             # 0. APP AUTHENTICATION + OWNER RESOLUTION
-            #    (the only part that differs from the PAT version)
             # ═══════════════════════════════════════════════════════════════
             try:
                 repo_owner, repo_name, token = _resolve_owner_and_token(repo_name)

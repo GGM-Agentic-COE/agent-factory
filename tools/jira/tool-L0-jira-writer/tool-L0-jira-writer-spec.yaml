@@ -1,15 +1,15 @@
 spec_version: "1.0"
 artifact_type: tool
 metadata:
-  name: tool-L1-jira-writer
-  version: "1.0.0"
-  layer: L1
+  name: tool-L0-jira-writer
+  version: "2.0.0"
+  layer: L0
   owner: agentic-ai-coe
 
 purpose:
-  description: "Creates one or more Jira issues with ADF-formatted descriptions using a structured JSON payload."
+  description: "Creates one or more Jira issues in a project, converting markdown-style descriptions to ADF and linking logical IDs (e.g. E1) to the keys of issues created earlier in the same call."
   platform: jira
-  operation: create-issue
+  operation: write
 
 interface:
   parameters:
@@ -18,29 +18,42 @@ interface:
       required: true
       description: >
         Dictionary with the following fields:
-          projectKey  (string, optional) — Jira project key; falls back to JIRA_PROJECT_KEY.
-          issueType   (string, optional) — Default issue type (e.g. 'Epic', 'Task'); per-issue 'issueType' overrides this.
-          userEmail   (string, optional) — Atlassian account email; falls back to JIRA_USER_EMAIL.
-          apiToken    (string, optional) — Jira API token; falls back to JIRA_API_TOKEN env var.
-          baseUrl     (string, optional) — Jira instance base URL; falls back to JIRA_BASE_URL.
-          issues      (array, required)  — List of issue objects, each with:
+          projectKey  (string, required in practice) - Jira project key; no fallback in code.
+          issueType   (string, optional, default 'Epic') - default issue type for all issues.
+          baseUrl     (string, optional) - overrides base_url from the secret.
+          userEmail   (string, optional) - overrides id from the secret.
+          issues      (array, optional, default []) - issues created in order, each with:
             summary     (string, required)
-            description (string|object, required)
-            issueType   (string, optional)
-            label       (array[string], optional) — label[0] used as logical ID for cross-linking
-            parentKey   (string, optional) — real Jira key of the parent issue
+            description (string | object, required) - string with '- ' bullets, **bold**, *italic*; an object is rendered as headed sections.
+            issueType   (string, optional) - overrides the default issue type.
+            label       (array[string], optional) - sent as Jira labels; label[0] is the logical ID used for cross-linking.
+            parentKey   (string, optional) - real Jira key of the parent issue.
+        An apiToken field is not read; the token always comes from the secret (or JIRA_API_TOKEN env var).
 
   returns:
     type: string
-    description: "Newline-joined result strings, one per issue: '<IssueType> created: <KEY>' or 'Failed: <summary> → <detail>'. Fatal errors return a single 'Fatal error: ...' string."
+    description: >
+      Newline-joined lines, one per issue, in input order:
+      "<issueType> created: <KEY>", "Failed: <summary> → HTTP <status> | Detail: <response body>"
+      or "Failed: <summary> → <exception> | Detail: <response body | No response received>".
+      An empty string when 'issues' is empty. Any other exception (e.g. missing summary or description)
+      returns a single "Fatal error: <detail>" and discards the result lines collected so far.
 
 credentials:
-  source: secrets-sdk
-  path: "jira"
-  fields_used: [base_url, user_email, api_token]
+  source: aws-secrets-manager
+  secret_name: "<name-of-secret-in-aws-secrets-manager>"
+  access_method: pod-identity
+  fields_used: [base_url, id, api_key]
+
+configuration:
+  setup_required: [SECRET_NAME, secrets-manager region_name]
+  defaults:
+    SECRET_NAME: "<name-of-secret-in-aws-secrets-manager>"
+    secrets-manager region_name: "us-east-1"
+    DEFAULT_ISSUE_TYPE: "Epic"
 
 identity:
-  tool_id: "tool-L1-jira-writer-001"
+  tool_id: "tool-L0-jira-writer-001"
   role: tool-executor
 
   invocable_by:
@@ -62,6 +75,7 @@ resilience:
   circuit_breaker: {failure_threshold: 5, reset_seconds: 60}
 
 security:
-  input_validation: "All required issue fields validated before API call; description normalised before ADF conversion"
-  output_sanitization: "HTTP response status and Jira error detail surfaced on failure; raw stack traces never returned to caller"
-  logging: "Input summary logged; API token never logged"
+  input_validation: "None beyond Pydantic requiring inputJSON to be a dict; summary/description presence is only enforced by the KeyError that ends the run"
+  output_sanitization: "Jira HTTP status and raw response body returned on per-issue failure; other exceptions returned as a 'Fatal error' string with the exception text"
+  logging: "Prints the HTTP status and full Jira response body to stdout for every create call; credentials are not printed"
+  credential_handling: "Jira base URL, account email and API token read once at module import from AWS Secrets Manager via Pod Identity; caller may override baseUrl and userEmail but not the token"

@@ -43,7 +43,7 @@ class AWSSecretReaderPodIdentity(BaseTool):
 
     # Review every line tagged "SETUP-REQUIRED:" below before deploying this tool to a new environment or client.
     # SETUP-REQUIRED: must match the secret name created in your AWS Secrets Manager
-    SECRET_NAME: str = "aava/aava-atlassian-sa-dev-secret-asm"
+    SECRET_NAME: str = "<name-of-secret-in-aws-secrets-manager>"
 
 
     def _run(self) -> Dict[str, Any]:
@@ -71,7 +71,7 @@ reader = AWSSecretReaderPodIdentity()
 secrets = reader._run()
 
 # ============================================================================
-# CONFIGURATION  --  edit these values for your Jira space (same as the creator)
+# CONFIGURATION  --  edit these values for your Jira space
 # ============================================================================
 JIRA_BASE_URL     = secrets.get("base_url")                     # from AWS Secrets Manager
 JIRA_USER_EMAIL   = secrets.get("id")                   #from AWS Secrets Manager
@@ -80,9 +80,10 @@ DEFAULT_ISSUE_TYPE = "Epic"
 
 # If your project's issue-type scheme doesn't include "Epic"/"Story", Jira returns a
 # MISLEADING "target project doesn't exist or you don't have permission" 400. Map the
-# payload's types to whatever the project actually offers (see `python jira_preflight.py`).
+# payload's types to whatever the project actually offers.
 # Example for a project that only has Task:  {"Epic": "Task", "Story": "Task"}
 # Leave empty {} to send types through unchanged.
+# SETUP-REQUIRED: map payload issue types to the issue types your Jira project offers
 ISSUE_TYPE_MAP = {}                                              # e.g. {"Epic": "Task", "Story": "Task"}
 # ============================================================================
 
@@ -103,7 +104,7 @@ class JiraIssueCreatorSchema(BaseModel):
             "Each issue may include Jira custom fields as top-level keys named "
             "'customfield_<id>' (e.g. \"customfield_10244\": {\"value\": \"Functional\"}). "
             "These are passed to Jira exactly as given. "
-            "New customfields for SFI must include Classification, and Development Track."
+            "Include every custom field your Jira project requires (for example Classification or Development Track)."
         ),
     )
 

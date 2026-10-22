@@ -28,7 +28,7 @@ class AWSSecretReaderPodIdentity(BaseTool):
 
     # Review every line tagged "SETUP-REQUIRED:" below before deploying this tool to a new environment or client.
     # SETUP-REQUIRED: must match the secret name created in your AWS Secrets Manager
-    SECRET_NAME: str = "aava/aava-atlassian-sa-dev-secret-asm"
+    SECRET_NAME: str = "<name-of-secret-in-aws-secrets-manager>"
 
 
     def _run(self) -> Dict[str, Any]:
@@ -54,6 +54,8 @@ class AWSSecretReaderPodIdentity(BaseTool):
 
 secrets = AWSSecretReaderPodIdentity()._run()
 
+# Secrets retrieved from AWS Secrets Manager
+# SETUP-REQUIRED: these three key names must match the keys in the secret JSON
 api_key = secrets.get("api_key")
 user_email = secrets.get("id")
 base_url = secrets.get("confluence_base_url")

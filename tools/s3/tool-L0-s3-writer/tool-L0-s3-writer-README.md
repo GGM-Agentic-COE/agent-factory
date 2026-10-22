@@ -1,113 +1,157 @@
-# tool-L1-s3-writer
+# tool-L0-s3-writer
 
-## What does it do?
+## 1. Executive summary
 
-Uploads text content to a fixed S3 bucket under a caller-specified folder. The object key is built as `<folder>/<UTC-timestamp>_<file_name>` — the timestamp prefix means repeated uploads with the same `file_name` never collide or overwrite each other. `file_name` is sanitised to its basename only (any path components are stripped) before being used in the key.
+You give the tool a folder name (an S3 key prefix), a file name and some text. It writes the text as a UTF-8 object at `<folder_name>/<file_name>` in the configured S3 bucket. It returns a dictionary with the status, the object key, the size written and the upload time.
 
-## Secrets & Configuration
+**Key points** (details in [Section 6](#6-nuances)):
 
-| Value | Where it lives | Notes |
-|-------|-----------------|-------|
-| `AWS_ACCESS_KEY_ID` | **AWS Secrets Manager** — secret `aava-secret-manager-s3-credentials`, key `aws_access_key_id` | Never appears in the code. Shared with `tool-L1-s3-reader`. |
-| `AWS_SECRET_ACCESS_KEY` | **AWS Secrets Manager** — same secret, key `aws_secret_access_key` | Never appears in the code. |
-| `BUCKET_NAME` | Set directly in code | Not a secret — the S3 bucket this tool writes to. Must match `tool-L1-s3-reader`'s `BUCKET_NAME`. See "CHANGE THIS" comment at the top of the tool file. |
-| `AWS_REGION` | Set directly in code | Not a secret — the bucket's AWS region. |
+- The file is stored under the exact name given. An existing object with the same key is overwritten without warning ([6.1](#61-existing-files-are-overwritten)).
+- The bucket is fixed in code, and any path in `file_name` is stripped to its last segment ([6.2](#62-folder-and-file-name-handling)).
+- Content over 1 MB (UTF-8 encoded) is rejected, and every object is stored as `text/plain` ([6.3](#63-size-limit-and-content-type)).
 
-> Every value that must be reviewed before deploying this tool to a new environment or client — including `SECRET_NAME`/`region_name` on the `AWSSecretReaderPodIdentity` class and `BUCKET_NAME`/`AWS_REGION` on `S3UploadTool` — is tagged `SETUP-REQUIRED:` directly in `tool-L1-s3-writer-secrets-manager.py`. Search the file for that tag to find them all in one pass.
+---
 
-The production tool (`tool-L1-s3-writer-secrets-manager.py`) retrieves its credentials at import time:
+## 2. How to use
 
-```python
-reader = AWSSecretReaderPodIdentity()   # SECRET_NAME = "aava-secret-manager-s3-credentials"
-secrets = reader._run()
+### 2.1 Calling the tool in aava
 
-class S3UploadTool(BaseTool):
-    AWS_ACCESS_KEY_ID: str = secrets.get("aws_access_key_id")
-    AWS_SECRET_ACCESS_KEY: str = secrets.get("aws_secret_access_key")
+Enter these values and click **Execute**.
+
+**`folder_name`**
+```
+exec-20261021-0001
 ```
 
-`AWSSecretReaderPodIdentity` calls `boto3.client("secretsmanager", region_name="us-east-1").get_secret_value(...)` — no credential is stored in this file.
+**`file_name`**
+```
+summary.md
+```
 
-> **Note on this tool's history:** unlike the other tools in this repository, `tool-L1-s3-writer.py` (without the `-secrets-manager` suffix) never had real AWS keys hardcoded — it shipped with literal placeholder text (`"ENTER ACCESS KEY HERE"` / `"ENTER SECRET HERE"`) that must be filled in before that debug copy will work. It is kept in this folder only for local debugging and is not used in production.
+**`contents`**
+```
+# Summary
 
-## Parameters
+All checks passed.
+```
+
+### 2.2 Calling the tool in an agent
+
+All three parameters change per call. `folder_name` is usually a workflow identifier; `file_name` and `contents` usually come from what the agent produced earlier. The bucket and region are fixed in code, and access comes from the pod's IAM role, so the agent passes neither.
+
+```
+folder_name = {{workflow_execution_id}}
+file_name = summary.md
+contents = the full content the agent produced, verbatim
+```
+
+---
+
+## 3. Parameters
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| folder_name | string | ✓ | Name of the folder (prefix) in the S3 bucket to upload into, e.g. `"incoming"` |
-| file_name | string | ✓ | Name of the file to create, e.g. `"report.txt"`. Any path components are stripped — only the basename is used. |
-| contents | string | ✓ | Text content to write into the file |
+| `folder_name` | str | ✓ | Folder (key prefix) in the configured S3 bucket to upload into, e.g. a workflow execution id. Leading and trailing `/` are stripped and a single trailing `/` is added. |
+| `file_name` | str | ✓ | Exact name of the file to create, e.g. `summary.md`. Only the part after the last `/` is used. Must not be empty after stripping. |
+| `contents` | str | ✓ | Text to write. Encoded as UTF-8; at most `MAX_FILE_BYTES` (1,000,000) bytes after encoding. |
 
-## Returns
+---
 
-On success:
+## 4. Secrets & configuration
 
-```json
+| Value | Source | Notes |
+|-------|--------|-------|
+| AWS credentials | Pod Identity (IAM role on the pod) | There are no keys in code or in Secrets Manager. boto3 resolves the pod's role. The role needs `s3:PutObject` on the bucket. |
+| `BUCKET_NAME` | Code — `S3UploadTool` | `SETUP-REQUIRED:` placeholder `<your-s3-bucket-name>`. Replace it with the bucket to write to. |
+| `AWS_REGION` | Code — `S3UploadTool` | `SETUP-REQUIRED:` defaults to `us-east-1`. Set it to the bucket's region. |
+| `MAX_FILE_BYTES` | Code — `S3UploadTool` | Defaults to `1_000_000` bytes. Larger content is rejected. |
+
+Before deploying to a new environment, review every value tagged `SETUP-REQUIRED:` in `tool-L0-s3-writer.py`.
+
+---
+
+## 5. Import modules required
+
+| Module | Package | Used for |
+|--------|---------|----------|
+| `boto3` | `boto3` | S3 client |
+| `botocore.exceptions` | `botocore` | `ClientError` handling on upload |
+| `datetime` | stdlib | UTC upload timestamp |
+| `typing` | stdlib | Type hints |
+| `pydantic` | `pydantic` | Input schema (`BaseModel`, `Field`) |
+| `crewai.tools` | `crewai` | `BaseTool` base class |
+
+---
+
+## 6. Nuances
+
+### 6.1 Existing files are overwritten
+The object key is exactly `<folder_name>/<file_name>`; no timestamp or suffix is added. If an object with that key already exists, `put_object` replaces it and the tool still returns `SUCCESS`. **Do:** use a unique `folder_name` (e.g. the workflow execution id) or a unique `file_name` when earlier versions must be kept.
+
+### 6.2 Folder and file name handling
+The tool always writes to `BUCKET_NAME`. `folder_name` is a key prefix, so `s3://` URIs or bucket names in it end up as part of the key. `file_name` is reduced to its last path segment, so `reports/q3/summary.md` is written as `<folder_name>/summary.md`. An empty or slash-only `file_name` returns `INVALID_FILE_NAME`. **Do:** put the full path inside the bucket in `folder_name` (e.g. `exec-123/reports`) and only the bare file name in `file_name`.
+
+### 6.3 Size limit and content type
+`contents` is encoded as UTF-8 and rejected with `FILE_TOO_LARGE` if it exceeds 1,000,000 bytes. Every object is stored with `ContentType` `text/plain; charset=utf-8`, whatever the file extension. **Do:** split large outputs into several files, and do not use this tool for binary data or where a specific content type is needed.
+
+---
+
+## 7. Appendix
+
+### 7.1 API workflow
+
+| Step | API call | Purpose |
+|------|----------|---------|
+| 1 | `s3:PutObject` | Write the UTF-8 content to `<folder_name>/<file_name>` |
+
+### 7.2 Returns
+
+**Success**
+```
 {
   "status": "SUCCESS",
   "bucket": "<bucket-name>",
-  "key": "<folder>/<YYYYMMDD_HHMMSS>_<file_name>",
+  "key": "<folder>/<file_name>",
+  "file_name": "<file_name>",
   "folder": "<folder>/",
-  "size_bytes": 1234,
+  "size_bytes": <n>,
   "uploaded_at": "<YYYYMMDD_HHMMSS>"
 }
 ```
 
-On failure:
-
-```json
-{"status": "FAILED", "reason": "<S3_CLIENT_INIT_FAILED | INVALID_FILE_NAME | S3_UPLOAD_FAILED>: <detail>"}
+**Error**
+```
+{"status": "FAILED", "reason": "<ERROR_CODE>: <detail>"}
 ```
 
-## Standalone tool calling
+| Error | Cause | Fix |
+|-------|-------|-----|
+| `S3_CLIENT_INIT_FAILED: <detail>` | The boto3 S3 client could not be created (e.g. invalid region) | Check `AWS_REGION` |
+| `INVALID_FILE_NAME` | `file_name` was empty or only slashes | Pass a bare file name such as `summary.md` |
+| `FILE_TOO_LARGE: <n> bytes exceeds limit of 1000000` | Encoded `contents` is over `MAX_FILE_BYTES` | Split the content into smaller files |
+| `S3_UPLOAD_FAILED (<code>): <message>` | S3 rejected the write, e.g. `AccessDenied` or `NoSuchBucket` | Check `BUCKET_NAME`, the Pod Identity association, and `s3:PutObject` on the role |
+| `S3_UPLOAD_FAILED: <detail>` | Any other upload error, e.g. no credentials on the pod or a network failure | Check the Pod Identity association and network access to S3 |
 
-```python
-from tool_L1_s3_writer_secrets_manager import S3UploadTool
+### 7.3 Known limitations
 
-tool = S3UploadTool()
-result = tool._run(
-    folder_name="incoming/reports",
-    file_name="summary.md",
-    contents="# Sprint 42 Summary\n\nAll stories completed."
-)
-print(result["key"])  # "incoming/reports/20260804_153000_summary.md"
-```
+- Write-only. It cannot read, list or delete objects.
+- Writes to one bucket, set in code. There is no parameter to choose the bucket or region.
+- No option to skip or fail when the object already exists; it always overwrites.
+- Text only. Content type is always `text/plain; charset=utf-8`, and there is no option to set metadata, tags, storage class or encryption settings.
+- No option to change the 1 MB limit.
 
-## Calling tool in agent
+### 7.4 Security & resilience
 
-`folder_name` is often an internal identifier (e.g. the current workflow's execution ID) rather than something the end user types; `file_name` and `contents` typically come from what the agent itself produced earlier in the workflow:
+**Security**
+- No credentials are stored in code. Access comes from the pod's IAM role through Pod Identity, so permissions are controlled entirely by that role's policy.
+- `file_name` is reduced to its basename, so a caller cannot write outside `folder_name` through the file name. `folder_name` itself is not restricted, so any prefix the role allows can be written to.
+- Error strings include the S3 error code and message or the raw boto3 exception text, which may show bucket or key names.
 
-```
-folder_name = <<workflow-execution-id>>
-file_name = desired-report.md
-contents = the full report content that was produced, VERBATIM
-```
+**Resilience**
 
-If the folder is instead something the end user is naming directly, use:
-
-```
-folder_name = {{folder_name}}
-```
-
-## Error Handling
-
-| Error | Cause | Behaviour |
-|-------|-------|-----------|
-| Invalid credentials | Bad AWS access key/secret | Returns `{"status": "FAILED", "reason": "S3_CLIENT_INIT_FAILED: ..."}` |
-| Empty file name after stripping | `file_name` was empty, `/`, or otherwise resolved to nothing | Returns `{"status": "FAILED", "reason": "INVALID_FILE_NAME"}` |
-| Upload failure | Bucket doesn't exist, access denied, or other `put_object` error | Returns `{"status": "FAILED", "reason": "S3_UPLOAD_FAILED: ..."}` |
-
-## Security Notes
-
-- `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` are retrieved from AWS Secrets Manager at import time — never hardcoded, never logged.
-- `BUCKET_NAME` and `AWS_REGION` are fixed per deployment in code (see Secrets & Configuration above) and must match the reader tool's values.
-- `file_name` is reduced to its basename (`.strip("/").split("/")[-1]`) before use — this prevents a caller from writing outside the intended folder via a path-traversal-style file name, but does not otherwise validate or sanitise the name.
-- Error messages returned to the caller include the raw exception text (`{e}`), which may surface boto3/AWS error details — review before exposing this tool's output to end users if that detail is sensitive in your environment.
-
-## Resilience
-
-| Concern | Configuration |
-|---------|--------------|
-| Collision avoidance | Every object key is prefixed with a UTC timestamp (`YYYYMMDD_HHMMSS`), so repeated uploads of the same `file_name` never overwrite each other |
-| Idempotency | Not idempotent by design — each call creates a new, uniquely-named object rather than overwriting an existing one |
-| Path safety | `file_name` is reduced to its basename before being combined with `folder_name` |
+| Concern | Current state | Recommendation |
+|---------|---------------|----------------|
+| Timeout | No explicit timeout; boto3 defaults apply | Set a `botocore.config.Config` with connect and read timeouts |
+| Retry | boto3 default retry mode only; no tool-level retry | Use `retries={"mode": "standard"}` in the client config |
+| Concurrency | One object per call; concurrent calls with the same key overwrite each other (last write wins) | Use unique folder or file names per workflow run |
+| Input validation | Empty `file_name` and content over 1 MB are rejected; `folder_name` is only stripped of `/`, so an empty value writes to the key `/<file_name>` | Reject empty folder names with a clear message |

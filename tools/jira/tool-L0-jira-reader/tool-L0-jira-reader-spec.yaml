@@ -1,15 +1,15 @@
 spec_version: "1.0"
 artifact_type: tool
 metadata:
-  name: tool-L1-jira-reader
-  version: "1.0.0"
-  layer: L1
+  name: tool-L0-jira-reader
+  version: "2.0.0"
+  layer: L0
   owner: agentic-ai-coe
 
 purpose:
-  description: "Fetches one or more Jira issues with their full nested child hierarchy, returning a clean fixed-schema JSON string."
+  description: "Fetches one or more Jira issues with their nested child hierarchy (up to a configurable depth) and returns a clean, fixed-schema JSON string."
   platform: jira
-  operation: fetch-issue
+  operation: read
 
 interface:
   parameters:
@@ -17,32 +17,43 @@ interface:
       type: object
       required: true
       description: >
-        Accepts several coerced forms:
-          key       (string)       — single Jira issue key (e.g. 'GGMDEMOS-101')
-          keys      (array[string]) — multiple Jira issue keys
-          maxDepth  (integer, optional, default 5) — max levels of children to traverse
-          includeChildren (boolean, optional, default true) — whether to fetch child issues
-          userEmail (string, optional) — falls back to JIRA_USER_EMAIL
-          apiToken  (string, optional) — falls back to JIRA_API_TOKEN env var
-          baseUrl   (string, optional) — falls back to JIRA_BASE_URL
-        The validator also accepts a bare key string, comma-separated key string,
-        or a JSON-encoded string as input.
+        Dictionary with the following fields:
+          key             (string)          - single Jira issue key, e.g. 'PROJ-101'. Required if 'keys' is not given.
+          keys            (array[string])   - several Jira issue keys. Takes precedence over 'key'; a string value is treated as one key.
+          maxDepth        (integer, optional, default 5) - levels of children to walk; 0 or empty falls back to 5.
+          includeChildren (boolean, optional, default true) - set false to return only the requested issues.
+          baseUrl         (string, optional) - overrides base_url from the secret.
+          userEmail       (string, optional) - overrides id from the secret.
+          apiToken        (string, optional) - overrides api_key from the secret (then JIRA_API_TOKEN env var).
+        Input is coerced before validation: a list becomes {"keys": [...]}, a JSON string is parsed,
+        a comma-separated string becomes 'keys', and any other string becomes 'key'.
 
   returns:
     type: string
     description: >
-      JSON-encoded object (single key) or array (multiple keys). Each node has:
-        issue_id, title, status, description (plain text), labels,
-        assignee, due_date, reporter, child_work_item_ids, children (recursive).
-      Fatal errors return a plain 'Fatal error: ...' string.
+      On success: pretty-printed JSON. A single object when one 'key' is requested, otherwise an array.
+      Each node has issue_id, title, status, description (ADF converted to plain text), labels,
+      assignee, due_date, reporter, child_work_item_ids and children (same shape, recursive).
+      An issue that cannot be fetched appears as {"issue_id": <key>, "error": "HTTP <status>", "detail": <response body>}.
+      On failure: "Fatal error: provide 'key' (string) or 'keys' (list).", "Fatal error (network): <detail>"
+      or "Fatal error: <detail>".
 
 credentials:
-  source: secrets-sdk
-  path: "jira"
-  fields_used: [base_url, user_email, api_token]
+  source: aws-secrets-manager
+  secret_name: "<name-of-secret-in-aws-secrets-manager>"
+  access_method: pod-identity
+  fields_used: [base_url, id, api_key]
+
+configuration:
+  setup_required: [SECRET_NAME, secrets-manager region_name]
+  defaults:
+    SECRET_NAME: "<name-of-secret-in-aws-secrets-manager>"
+    secrets-manager region_name: "us-east-1"
+    DEFAULT_MAX_DEPTH: 5
+    PAGE_SIZE: 100
 
 identity:
-  tool_id: "tool-L1-jira-reader-001"
+  tool_id: "tool-L0-jira-reader-001"
   role: tool-executor
 
   invocable_by:
@@ -64,6 +75,7 @@ resilience:
   circuit_breaker: {failure_threshold: 5, reset_seconds: 60}
 
 security:
-  input_validation: "inputJSON coerced and validated by Pydantic field_validator before API calls; key/keys presence checked before traversal"
-  output_sanitization: "HTTP errors surfaced as structured error fields (issue_id + error + detail) in the JSON output; fatal exceptions return plain error string"
-  logging: "Issue keys logged; ADF-to-text conversion applied — raw Jira ADF never passed to caller; API token never logged"
+  input_validation: "inputJSON coerced to a dict by a Pydantic before-validator; presence of key/keys checked before any API call; key values are not format-checked"
+  output_sanitization: "Per-issue HTTP errors returned as issue_id/error/detail objects including the raw Jira response body; exceptions returned as a 'Fatal error' string with the exception text"
+  logging: "Prints 'GET <key> -> <status>' to stdout for each top-level issue; credentials are not printed"
+  credential_handling: "Jira base URL, account email and API token read once at module import from AWS Secrets Manager via Pod Identity; caller may override them through baseUrl/userEmail/apiToken in inputJSON"

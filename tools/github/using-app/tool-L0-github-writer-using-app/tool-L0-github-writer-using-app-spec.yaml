@@ -1,13 +1,13 @@
 spec_version: "1.0"
 artifact_type: tool
 metadata:
-  name: tool-L1-github-writer-using-app
-  version: "1.0.0"
-  layer: L1
+  name: tool-L0-github-writer-using-app
+  version: "2.0.0"
+  layer: L0
   owner: agentic-ai-coe
 
 purpose:
-  description: "Creates a new branch from a source branch and commits one or more files to it in a GitHub repository, authenticating as a GitHub App installation."
+  description: "Creates a branch from a source branch (or reuses it if it already exists) and commits one or more text files to it in a single commit, authenticating as a GitHub App installation."
   platform: github
   operation: write
 
@@ -17,43 +17,58 @@ interface:
       type: array
       required: true
       description: >
-        List of file descriptors. Accepts two formats:
-        flat   — {"filename": "path/to/file.py", "code": "<content>"}
-        nested — {"<folder>": {"filename": "file.py", "code": "<content>"}}
+        List of file objects. Each item is either flat {"filename": "<path>", "code": "<content>"}
+        or nested {"<folder>": {"filename": "<name>", "code": "<content>"}} (exactly one key whose
+        value contains "filename"); the nested form commits to "<folder>/<name>". Both forms can be
+        mixed. A missing filename defaults to "script.py" and missing code to "". Leading "/" is
+        stripped from filename and surrounding "/" from folder. A dict (instead of a list) is not accepted.
       items:
         type: object
     repo_name:
       type: string
       required: true
-      description: "Repository name, either bare ('scib_demo') or fully qualified ('owner/scib_demo')"
+      description: "Repository name, either bare ('my-project-repo') or fully qualified ('<owner>/<repo>'). A bare name is resolved to its owner through the App's installations"
     new_branch:
       type: string
       required: true
-      description: "Name of the branch to create and commit to (e.g. 'feature/auto-update')"
+      description: "Branch to create from source_branch and commit to (e.g. 'feature/auto-update'). If it already exists, the commit is added on top of its current head"
     source_branch:
       type: string
       required: false
       default: "main"
-      description: "Branch to copy as the base for the new branch"
+      description: "Branch to copy when creating new_branch"
 
   returns:
     type: object
-    fields:
-      status: {type: string, description: "'success' or 'failure'"}
-      branch: {type: string, description: "Name of the newly created/updated branch"}
-      source_branch: {type: string, description: "Branch used as the base"}
-      updated_files: {type: array, items: {type: string}, description: "Resolved file paths committed"}
-      message: {type: string, description: "Human-readable summary; includes a permission hint on HTTP 403"}
-      url: {type: string, description: "GitHub URL to the new branch"}
-    on_error: {status: "failure", message: string}
+    description: >
+      On success: {status: "success", branch, source_branch, updated_files (list of committed paths),
+      message: "Created '<new_branch>' from '<source_branch>' and committed <n> file(s).",
+      url: "https://github.com/<owner>/<repo>/tree/<new_branch>"}.
+      On failure: {status: "failure", message}. message is the App/owner resolution error text,
+      "<HTTP error> | GitHub response: <status> <body>" for HTTP errors (403 adds a HINT about the
+      App's Contents permission being Read-only), or the raw exception text otherwise.
 
 credentials:
-  source: secrets-sdk
-  path: "github-app"
+  source: aws-secrets-manager
+  secret_name: "<name-of-secret-in-aws-secrets-manager>"
+  access_method: pod-identity
   fields_used: [app_id, client_id, private_key]
 
+configuration:
+  setup_required: [SECRET_NAME, secrets_manager_region]
+  defaults:
+    SECRET_NAME: "<name-of-secret-in-aws-secrets-manager>"
+    secrets_manager_region: "us-east-1"
+    GITHUB_API: "https://api.github.com"
+    JWT_TTL_SECONDS: 480
+    JWT_REFRESH_MARGIN: 60
+    TOKEN_REFRESH_MARGIN: 300
+    REQUEST_TIMEOUT: 30
+    commit_message: "Automation Update: <YYYY-MM-DD HH:MM:SS local time>"
+    file_mode: "100644"
+
 identity:
-  tool_id: "tool-L1-github-writer-using-app-001"
+  tool_id: "tool-L0-github-writer-using-app-001"
   role: tool-executor
 
   invocable_by:
@@ -75,6 +90,7 @@ resilience:
   circuit_breaker: {failure_threshold: 5, reset_seconds: 60}
 
 security:
-  input_validation: "files list and repo_name validated implicitly by Pydantic schema; idempotent — existing branch detected via 422 and commit is stacked on top"
-  output_sanitization: "All exceptions caught; error detail surfaced only as message string in returned dict; 403 responses get an added permission hint, no raw stack traces"
-  logging: "Commit message includes UTC timestamp; JWT/installation token never logged"
+  input_validation: "Types checked by the Pydantic schema only; file paths and content are not otherwise validated. An HTTP 422 on branch creation is treated as 'branch already exists' and the commit is stacked on that branch's head"
+  output_sanitization: "All exceptions caught and returned as {status: failure, message}; HTTP errors include GitHub's status code and raw response body, 403 adds a permission hint; no stack traces returned"
+  logging: "No logging; results are returned directly to the caller. JWT and installation tokens are never returned or printed"
+  credential_handling: "GitHub App ID / Client ID and private key read once at import from AWS Secrets Manager via Pod Identity; a JWT (RS256, 480 s) is cached in memory and exchanged for an installation token cached per installation for up to ~55 minutes"

@@ -1,160 +1,195 @@
-# tool-L1-confluence-reader
+# tool-L0-confluence-reader
 
-## What does it do?
+## 1. Executive summary
 
-Reads the title and full body of a Confluence page via the Confluence REST API v1. Authentication uses HTTP Basic Auth (email + API token). The body is returned in **Confluence storage format**, which is a proprietary XHTML dialect — not plain text, not Markdown. Agents consuming this output must be prepared to handle or strip XHTML tags.
+You give the tool the numeric ID of a Confluence page. It fetches the page through the Confluence REST API, converts the body from Confluence storage format (XHTML) to Markdown, and returns the page title as a `#` heading followed by the Markdown body.
+
+**Key points** (details in [Section 6](#6-nuances)):
+
+- Output is always Markdown. There is no parameter to choose the format and no way to get the raw XHTML ([6.1](#61-output-is-always-markdown)).
+- Code inside Confluence code macros, images and other macro content is not returned ([6.2](#62-what-the-markdown-conversion-keeps-and-drops)).
+- Long pages are cut at 80,000 characters ([6.3](#63-long-pages-are-truncated)).
+- The Confluence site and credentials come from the secret, so you pass only the page ID ([6.4](#64-pass-the-page-id-only)).
 
 ---
 
-## Secrets & Configuration
+## 2. How to use
 
-| Value | Where it lives | Notes |
-|-------|-----------------|-------|
-| `api_key` | **AWS Secrets Manager** — secret `aava-secret-manager-confluence-credentials`, key `api_key` | Atlassian API token. Never appears in the code. Shared with `tool-L1-confluence-page-writer`. |
-| `user_email` | **AWS Secrets Manager** — same secret, key `user_email` | Atlassian account email used for HTTP Basic Auth. |
-| `page_id`, `base_url` | Supplied by the caller at call time | Not credentials — passed as parameters on every call (see Parameters below). |
+### 2.1 Calling the tool in aava
 
-> Every value that must be reviewed before deploying this tool to a new environment or client — `SECRET_NAME` and `region_name` on the `AWSSecretReaderPodIdentity` class — is tagged `SETUP-REQUIRED:` directly in `tool-L1-confluence-reader-secrets-manager.py`. Search the file for that tag to find them all in one pass.
+Enter these values and click **Execute**.
 
-The production tool (`tool-L1-confluence-reader-secrets-manager.py`) retrieves its credentials at import time:
-
-```python
-reader = AWSSecretReaderPodIdentity()   # SECRET_NAME = "aava-secret-manager-confluence-credentials"
-secrets = reader._run()
-api_key = secrets.get("api_key")
-user_email = secrets.get("user_email")
+**`page_id`**
+```
+425985
 ```
 
-`AWSSecretReaderPodIdentity` calls `boto3.client("secretsmanager", region_name="us-east-1").get_secret_value(...)` — no credential is stored in this file; access is granted via the runtime's pod identity.
+### 2.2 Calling the tool in an agent
 
-> `tool-L1-confluence-reader.py` (without the `-secrets-manager` suffix) is kept in this folder only for local debugging. It is not used in production and still has the API token as a placeholder value in code.
+`page_id` changes on every call. The Confluence site address, account email and API token are read from the secret, so the agent passes none of them.
+
+```
+page_id = {{confluence_page_id}}
+```
 
 ---
 
-## Parameters
+## 3. Parameters
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `page_id` | string | ✓ | Numeric ID of the Confluence page (e.g. `"425985"`). Find it in the page URL: `.../pages/425985/Page+Title` |
-| `base_url` | string | ✓ | Base URL of the Confluence instance **including `/wiki`** (e.g. `"https://your-domain.atlassian.net/wiki"`) |
+| `page_id` | str | ✓ | The numeric ID of the Confluence page, e.g. `425985`. It is the number in the page URL after `/pages/`. Passed as-is into the request path; not validated. |
 
 ---
 
-## Returns
+## 4. Secrets & configuration
 
-On success, a single formatted string:
+| Value | Source | Notes |
+|-------|--------|-------|
+| API token | AWS Secrets Manager — the secret named in `SECRET_NAME`, key `api_key` | Confluence API token. Sent as the HTTP Basic Auth password. |
+| Account email | AWS Secrets Manager — the secret named in `SECRET_NAME`, key `id` | Email of the Atlassian account that owns the token. Sent as the HTTP Basic Auth user name. |
+| Confluence base URL | AWS Secrets Manager — the secret named in `SECRET_NAME`, key `confluence_base_url` | Address the REST path is appended to, e.g. `https://<your-domain>.atlassian.net/wiki`. A trailing `/` is removed. |
+| `SECRET_NAME` | Code — `AWSSecretReaderPodIdentity` | `SETUP-REQUIRED:` placeholder `<name-of-secret-in-aws-secrets-manager>`. Replace it with the name of your secret. The pod's IAM role needs `secretsmanager:GetSecretValue` on it. |
+| Secrets Manager region | Code — `AWSSecretReaderPodIdentity._run` | `SETUP-REQUIRED:` defaults to `us-east-1`. Set it to the region the secret lives in. |
+| Secret key names | Code — module level | `SETUP-REQUIRED:` the keys `api_key`, `id` and `confluence_base_url` must match the keys in the secret JSON. |
+| `max_chars` | Code — `ConfluencePageReader` | Defaults to `80_000`. Markdown longer than this is truncated. |
 
-```
-Title: <page title>
-Content: <body in Confluence storage format (XHTML)>
-```
-
-On error:
-
-```
-Error reading Confluence page: <requests exception message>
-```
-
-### ⚠️ Output Format — Confluence Storage Format (XHTML)
-
-The `Content` field is **raw Confluence storage format**, not plain text or Markdown. This is a proprietary XHTML dialect used internally by Confluence. Examples of what you will see:
-
-```xml
-<p>This is a paragraph.</p>
-<h2>Section Heading</h2>
-<ul><li>Bullet point</li></ul>
-<ac:structured-macro ac:name="info">
-  <ac:rich-text-body><p>This is an info panel.</p></ac:rich-text-body>
-</ac:structured-macro>
-<ri:page ri:content-title="Another Page" />
-```
-
-**Agents and downstream consumers must either:**
-- Parse/strip XHTML tags if they need plain text, or
-- Treat the string as markup to be passed directly to another Confluence write call
+Before deploying to a new environment, review every value tagged `SETUP-REQUIRED:` in `tool-L0-confluence-reader.py`.
 
 ---
 
-## Standalone tool calling
+## 5. Import modules required
 
-```python
-from tool_L1_confluence_reader_secrets_manager import ConfluencePageReader
-
-tool = ConfluencePageReader()
-result = tool._run(
-    page_id="425985",
-    base_url="https://mycompany.atlassian.net/wiki"
-)
-```
-
-## Calling tool in agent
-
-`page_id` is the value that changes per request; `base_url` is specific to your Confluence instance and should usually be told to the agent as a fixed value rather than asked of the end user:
-
-```
-page_id = {{page_id}}
-base_url = https://your-domain.atlassian.net/wiki
-```
+| Module | Package | Used for |
+|--------|---------|----------|
+| `os` | stdlib | Imported; not used |
+| `re` | stdlib | Pattern matching during Markdown conversion |
+| `json` | stdlib | Parsing the secret string |
+| `html.parser` | stdlib | `HTMLParser`, base of the storage-format-to-Markdown converter |
+| `typing` | stdlib | Type hints |
+| `requests` | `requests` | Confluence REST API call |
+| `boto3` | `boto3` | Secrets Manager client |
+| `botocore.exceptions` | `botocore` | `ClientError` handling |
+| `pydantic` | `pydantic` | Input schema (`BaseModel`, `Field`) |
+| `crewai.tools` | `crewai` | `BaseTool` base class |
 
 ---
 
-## Error Handling
+## 6. Nuances
 
-| Error | Cause | Behaviour |
-|-------|-------|-----------|
-| `401 Unauthorized` | Invalid or expired API token | `RequestException` caught; returns `"Error reading Confluence page: 401 Client Error..."` |
-| `403 Forbidden` | Authenticated user lacks page-read permission | Same as above |
-| `404 Not Found` | `page_id` does not exist | Returns `"Error reading Confluence page: 404 Client Error..."` |
-| `429 Rate Limited` | Too many API requests | Returns error string; no automatic retry in current implementation |
-| Network timeout | Confluence instance unreachable | Caught by `RequestException`; returns error string |
-| Connection error | DNS failure, firewall | Caught by `RequestException`; returns error string |
+### 6.1 Output is always Markdown
+The tool requests the page body in storage format (`expand=body.storage`) and always converts it to Markdown before returning it. You do not need to ask for Markdown, and there is no parameter to switch it off. The output starts with `# <page title>`, followed by the converted body. **Do:** treat the result as Markdown; if you need the exact XHTML (for example to edit and write the page back), this tool cannot provide it.
 
----
+### 6.2 What the Markdown conversion keeps and drops
+The converter handles these elements:
 
-## API Endpoint Used
+- Headings `h1`–`h6` become `#`–`######`.
+- Paragraphs, `div` and `blockquote` become blank-line-separated text. Block quotes are not marked with `>`.
+- Line breaks become Markdown hard breaks.
+- Bulleted and numbered lists both become `- ` bullets. Nested lists are indented two spaces per level.
+- Tables become pipe tables. The first row is the header if it contains `th` cells; otherwise an empty header row is added. Whitespace inside cells is collapsed to single spaces.
+- Links (`<a href>`) become `[text](url)`.
+- Bold, italic and inline code become `**`, `*` and backticks.
+- `<pre>` blocks become fenced code blocks. If the block already contains Markdown (a code fence, a pipe-table line or a `#` heading line), it is passed through unchanged instead.
+- A macro's `title` parameter (for example an expand or code macro title) becomes a `### <title>` heading, and the macro's rich-text body is kept.
 
-```
-GET {base_url}/rest/api/content/{page_id}?expand=body.storage
-```
+The converter drops these:
 
-Authentication: HTTP Basic Auth (`user_email:api_key`)
+- Every other macro parameter, such as a code macro's language.
+- Script and style content.
+- CDATA bodies. This includes the code inside Confluence code macros and the text of internal page links.
+- Images and attachments.
 
----
+**Do:** if the page keeps important content in code macros, internal links or images, check the original page as well. Do not rely on the Markdown alone.
 
-## Known Issues & Nuances
+### 6.3 Long pages are truncated
+If the converted Markdown is longer than 80,000 characters, only the first 80,000 are returned, followed by `_[Truncated.]_`. **Do:** check for `_[Truncated.]_` at the end of the output, and split very large pages into child pages if the full text is needed.
 
-### 1. Argument Swap Guard (silent behaviour)
-The tool contains this guard:
-```python
-if base_url.isdigit() or page_id.startswith("http"):
-    page_id, base_url = base_url, page_id
-```
-If the calling agent passes the arguments in the wrong order — `page_id="https://..."` or `base_url="425985"` — the tool **silently swaps them and continues** rather than failing fast. While this improves robustness against agent confusion, it can **mask incorrect invocations** and make bugs harder to diagnose.
+### 6.4 Pass the page ID only
+The Confluence site, email and token are read from the secret when the tool module is loaded. `page_id` is placed straight into the request path, so a page URL, title or space key in its place gives an HTTP error. **Do:** pass only the numeric ID, e.g. `425985`.
 
-### 2. Output is XHTML, not plain text
-The `Content` field contains raw Confluence storage format. Agents expecting natural-language text will receive XML markup. An HTML/XML parser or stripping step is needed if plain text is required.
-
-### 3. No HTTP timeout configured
-There is no `timeout=` argument on the `requests.get()` call. On a slow or unresponsive Confluence instance the request can **hang indefinitely**, blocking the agent's execution thread. A 30 s timeout should be added.
-
-### 4. Only `body.storage` is fetched
-The `expand=body.storage` query parameter means only the page body is returned. **Not included**: labels, attachments, comments, page version, space info, child pages, or ancestors. A separate API call is required for any of these.
-
-### 5. No input validation
-`page_id` is not validated to be numeric before the API call. A non-numeric `page_id` will cause a `404` or malformed URL.
+### 6.5 Empty pages return a short placeholder
+If the page body is empty, the tool returns the title, the word `url` joined directly to the configured base URL, and a note that the page is empty. It does not return an error. **Do:** check for `has an empty body.` before using the result.
 
 ---
 
-## Security Notes
+## 7. Appendix
 
-- `api_key` and `user_email` are retrieved from AWS Secrets Manager at import time — never hardcoded, never logged.
-- Credentials are passed via HTTP Basic Auth over HTTPS — never logged by the tool.
+### 7.1 API workflow
 
-## Resilience
+| Step | API call | Purpose |
+|------|----------|---------|
+| 1 | `secretsmanager:GetSecretValue` (once, when the module is loaded) | Read the API token, email and base URL |
+| 2 | `GET {base_url}/rest/api/content/{page_id}?expand=body.storage` | Fetch the page title and storage-format body |
+| 3 | Local conversion (no API call) | Convert storage-format XHTML to Markdown |
+
+### 7.2 Returns
+
+**Success**
+```
+# <page title>
+ 
+ <page body as Markdown>
+```
+
+When the Markdown is longer than 80,000 characters, it ends with:
+```
+_[Truncated.]_
+```
+
+When the page body is empty:
+```
+# <page title>
+
+url<base_url>
+
+_(Page <page_id> has an empty body.)_
+```
+
+**Error**
+```
+Error reading Confluence page: <requests exception>
+Error converting page to Markdown: <ExceptionType>: <detail>
+```
+
+When the module is loaded, the secret read can raise:
+```
+RuntimeError: Error retrieving secret: <detail>
+RuntimeError: Unexpected error: <detail>
+RuntimeError: Secret '<SECRET_NAME>' is missing keys: [<names>]
+```
+
+| Error | Cause | Fix |
+|-------|-------|-----|
+| `Error reading Confluence page: 401 Client Error` | Token rejected, or the email does not match the token | Check `api_key` and `id` in the secret |
+| `Error reading Confluence page: 403 Client Error` | The account cannot view the page | Grant the account view permission on the space or page |
+| `Error reading Confluence page: 404 Client Error` | Page ID does not exist, is not numeric, or is not visible to the account | Check `page_id` and permissions |
+| `Error reading Confluence page: <connection or timeout error>` | Base URL unreachable or no response within 30 seconds | Check `confluence_base_url` and network access from the pod |
+| `Error converting page to Markdown: …` | The storage-format body could not be parsed | Read the page in Confluence directly |
+| `RuntimeError: Error retrieving secret: …` | Secret missing, wrong region, or the pod role lacks `secretsmanager:GetSecretValue` | Check `SECRET_NAME`, the region and the Pod Identity association |
+| `RuntimeError: Secret '…' is missing keys: […]` | The secret does not contain one of the three keys. The message uses the internal names `api_key`, `user_email` and `base_url`; these correspond to the secret keys `api_key`, `id` and `confluence_base_url` | Add the missing key to the secret |
+
+### 7.3 Known limitations
+
+- Read-only. It cannot create, edit or delete pages.
+- One page per call. It does not read child pages, comments, labels, attachments or version history.
+- Pages are found by ID only. There is no lookup by title, space or URL.
+- Output is Markdown only. There is no option for raw storage XHTML, plain text or HTML.
+- The conversion drops code-macro code, internal link text, images and macro parameters other than `title` (see [6.2](#62-what-the-markdown-conversion-keeps-and-drops)).
+- No parameter to change the 80,000-character limit.
+
+### 7.4 Security & resilience
+
+**Security**
+- The email and API token are read from AWS Secrets Manager through Pod Identity and sent only as HTTP Basic Auth. They are not returned or logged.
+- Error strings include the raw `requests` exception text, which can contain the request URL and page ID.
+- The empty-page message includes the configured Confluence base URL.
+
+**Resilience**
 
 | Concern | Current state | Recommendation |
-|---------|--------------|----------------|
-| Timeout | ❌ None configured | Add `timeout=30` to `requests.get()` |
-| Retry | ❌ No retry logic | Add retry with exponential backoff for 429/5xx |
-| Input validation | ❌ No `page_id` format check | Validate `page_id` is numeric before calling |
-| Error detail | ⚠️ Exception message only | Consider including HTTP status code in error string |
+|---------|---------------|----------------|
+| Timeout | 30 seconds on the page request. No explicit timeout on the Secrets Manager call. | Keep 30 seconds. Add a `botocore` config with timeouts for the secret read. |
+| Retry | None. One attempt, and any failure is returned. The secret is read once when the module loads and is not reloaded. | Retry on timeout, 429 and 5xx with exponential backoff. Reload the secret on a 401 so rotated tokens are picked up. |
+| Concurrency | One request per call; no shared state between calls | No change needed |
+| Input validation | `page_id` is not checked. Secret keys are checked for presence when the module loads. | Reject a non-numeric `page_id` before calling the API |

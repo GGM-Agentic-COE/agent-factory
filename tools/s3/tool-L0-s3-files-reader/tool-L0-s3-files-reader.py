@@ -32,7 +32,7 @@ class S3SpecificFileReader(BaseTool):
     args_schema: Type[BaseModel] = S3SpecificFileReaderSchema
 
     # SETUP-REQUIRED: set to your organization's S3 bucket name
-    BUCKET_NAME: str = "aava-dev-agent-artifacts"
+    BUCKET_NAME: str = "<your-s3-bucket-name>"
     # SETUP-REQUIRED: set to the AWS region that bucket lives in
     AWS_REGION: str = "us-east-1"
 

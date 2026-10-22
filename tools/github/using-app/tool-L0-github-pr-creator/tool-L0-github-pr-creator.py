@@ -13,7 +13,7 @@ from pydantic import BaseModel, Field
 
 
 # ═════════════════════════════════════════════════════════════════════════════
-#  CREDENTIALS -- unchanged from the committer tool
+#  CREDENTIALS
 # ═════════════════════════════════════════════════════════════════════════════
 
 class AWSSecretReaderPodIdentitySchema(BaseModel):
@@ -32,7 +32,7 @@ class AWSSecretReaderPodIdentity(BaseTool):
 
     # Review every line tagged "SETUP-REQUIRED:" below before deploying this tool to a new environment or client.
     # SETUP-REQUIRED: must match the secret name created in your AWS Secrets Manager
-    SECRET_NAME: str = "aava/aava-github-app-dev-secret-asm"
+    SECRET_NAME: str = "<name-of-secret-in-aws-secrets-manager>"
 
     def _run(self) -> Dict[str, Any]:
         try:
@@ -235,7 +235,7 @@ def _resolve_owner_and_token(repo: str) -> Tuple[str, str, str]:
     """
     Determine the owner of `repo` and return (owner, repo_name, token).
 
-    Accepts a bare repo name ("scib_demo") or "owner/repo".
+    Accepts a bare repo name ("my-project-repo") or "owner/repo".
     """
     repo = repo.strip().strip("/")
 
@@ -347,7 +347,7 @@ def _resolve_owner_and_token(repo: str) -> Tuple[str, str, str]:
 
 
 # ═════════════════════════════════════════════════════════════════════════════
-#  PULL REQUEST TOOL -- new
+#  PULL REQUEST TOOL
 # ═════════════════════════════════════════════════════════════════════════════
 
 def _branch_path(branch: str) -> str:
@@ -387,7 +387,7 @@ class GithubPullRequestSchema(BaseModel):
     repo_name: str = Field(
         ...,
         description="The name of the repository, bare or fully qualified. "
-                    "Example: 'SCIB-Inception' or 'my-org/SCIB-Inception'.",
+                    "Example: 'my-project-repo' or '<your-github-org>/my-project-repo'.",
     )
     source_branch: str = Field(
         ...,
@@ -410,8 +410,6 @@ class GithubPullRequestTool(BaseTool):
     """
     Opens a pull request from a source branch into a destination branch,
     authenticating as a GitHub App installation.
-
-    Owner and token resolution are shared with the committer and reader tools.
 
     Behaviour:
       * Both branches are verified to exist before anything is created.
@@ -473,7 +471,7 @@ class GithubPullRequestTool(BaseTool):
                 }
 
             # ═══════════════════════════════════════════════════════════════
-            # 0. APP AUTHENTICATION + OWNER RESOLUTION (shared logic)
+            # 0. APP AUTHENTICATION + OWNER RESOLUTION
             # ═══════════════════════════════════════════════════════════════
             try:
                 repo_owner, repo_name, token = _resolve_owner_and_token(repo_name)

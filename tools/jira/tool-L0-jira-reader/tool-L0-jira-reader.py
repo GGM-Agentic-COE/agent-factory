@@ -27,7 +27,7 @@ class AWSSecretReaderPodIdentity(BaseTool):
 
     # Review every line tagged "SETUP-REQUIRED:" below before deploying this tool to a new environment or client.
     # SETUP-REQUIRED: must match the secret name created in your AWS Secrets Manager
-    SECRET_NAME: str = "aava/aava-atlassian-sa-dev-secret-asm"
+    SECRET_NAME: str = "<name-of-secret-in-aws-secrets-manager>"
 
 
     def _run(self) -> Dict[str, Any]:
@@ -55,7 +55,7 @@ reader = AWSSecretReaderPodIdentity()
 secrets = reader._run()
 
 # ============================================================================
-# CONFIGURATION  --  edit these values for your Jira space (same as the creator)
+# CONFIGURATION  --  Jira connection values are read from AWS Secrets Manager
 # ============================================================================
 JIRA_BASE_URL     = secrets.get("base_url")                     # from AWS Secrets Manager
 JIRA_USER_EMAIL   = secrets.get("id")                   #from AWS Secrets Manager
@@ -71,7 +71,7 @@ class JiraIssueTreeFetcherSchema(BaseModel):
     inputJSON: Dict[str, Any] = Field(
         ...,
         description=(
-            "Dict with 'key' (e.g. 'GGMDEMOS-101') OR 'keys' (list of keys). "
+            "Dict with 'key' (e.g. 'PROJ-101') OR 'keys' (list of keys). "
             "Optional 'maxDepth' (default 5) and 'includeChildren' (default True)."
         ),
     )
@@ -244,4 +244,4 @@ def fetch_issue_tree(keys, max_depth: int = DEFAULT_MAX_DEPTH, include_children:
 
 
 if __name__ == "__main__":
-    print(fetch_issue_tree("GGMDEMOS-101"))
+    print(fetch_issue_tree("<your-issue-key>"))

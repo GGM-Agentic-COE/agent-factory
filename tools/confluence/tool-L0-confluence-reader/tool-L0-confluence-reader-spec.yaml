@@ -1,13 +1,13 @@
 spec_version: "1.0"
 artifact_type: tool
 metadata:
-  name: tool-L1-confluence-reader
-  version: "1.0.0"
-  layer: L1
+  name: tool-L0-confluence-reader
+  version: "2.0.0"
+  layer: L0
   owner: agentic-ai-coe
 
 purpose:
-  description: "Reads the title and body of a Confluence page via the REST API, returning the body as Confluence storage format (XHTML)."
+  description: "Reads one Confluence page by its numeric ID via the REST API v1 and returns the page title and body converted from Confluence storage format (XHTML) to Markdown."
   platform: confluence
   operation: read
 
@@ -16,32 +16,40 @@ interface:
     page_id:
       type: string
       required: true
-      description: "Numeric ID of the Confluence page (e.g. '425985'). Must be a digit-only string."
-    base_url:
-      type: string
-      required: true
-      description: "Base URL of the Confluence instance including '/wiki' path (e.g. 'https://your-domain.atlassian.net/wiki'). Must start with 'https://'."
+      description: "The numeric ID of the Confluence page, e.g. '425985'"
 
   returns:
     type: string
     description: >
-      On success: "Title: <page title>\nContent: <body in Confluence storage format (XHTML)>"
-      The content field is raw Confluence storage format — valid XHTML with
-      Confluence-specific macro tags (e.g. <ac:structured-macro>, <ri:page>).
-      On error: "Error reading Confluence page: <requests exception message>"
-
-  notes:
-    - "The tool contains a silent argument-swap guard: if page_id starts with 'http' OR base_url is all digits, the two arguments are automatically swapped. This compensates for agent argument confusion but can mask incorrect invocations."
-    - "body.storage (XHTML) is the only expand field requested; labels, attachments, page metadata, and child pages are not returned."
-    - "No HTTP timeout is configured — the request can hang indefinitely on slow Confluence instances."
+      On success: "# <page title>\n \n <body as Markdown>". Markdown is always returned; there is no
+      option to get raw storage XHTML. Headings, paragraphs, line breaks, bulleted and numbered lists
+      (both rendered as "- " bullets, nested lists indented), tables (pipe tables), links, bold, italic,
+      inline code and <pre> blocks (fenced, or passed through as-is if they already contain Markdown)
+      are converted. Macro "title" parameters become "### <title>" headings; other macro parameters,
+      CDATA bodies (code-macro code, plain-text link text), images and script/style are dropped.
+      Output longer than 80,000 characters is cut and ends with "_[Truncated.]_".
+      Empty page body: "# <title>\n\nurl<base_url>\n\n_(Page <page_id> has an empty body.)_".
+      On failure: "Error reading Confluence page: <requests exception>" or
+      "Error converting page to Markdown: <ExceptionType>: <detail>".
+      At import time, a RuntimeError is raised if the secret cannot be read or is missing keys
+      ("Secret '<SECRET_NAME>' is missing keys: [...]").
 
 credentials:
-  source: secrets-sdk
-  path: "confluence"
-  fields_used: [api_key, user_email]
+  source: aws-secrets-manager
+  secret_name: "<name-of-secret-in-aws-secrets-manager>"
+  access_method: pod-identity
+  fields_used: [api_key, id, confluence_base_url]
+
+configuration:
+  setup_required: [SECRET_NAME, secrets_manager_region, secret_key_names]
+  defaults:
+    SECRET_NAME: "<name-of-secret-in-aws-secrets-manager>"
+    secrets_manager_region: "us-east-1"
+    max_chars: 80000
+    http_timeout_seconds: 30
 
 identity:
-  tool_id: "tool-L1-confluence-reader-001"
+  tool_id: "tool-L0-confluence-reader-001"
   role: tool-executor
 
   invocable_by:
@@ -63,6 +71,7 @@ resilience:
   circuit_breaker: {failure_threshold: 5, reset_seconds: 60}
 
 security:
-  input_validation: "page_id and base_url accepted as-is; no format validation performed before API call"
-  output_sanitization: "RequestException caught; exception message surfaced in return string — raw HTTP body not included"
-  logging: "Credentials (api_key, user_email) used via HTTP Basic Auth — never logged; page_id logged at invocation"
+  input_validation: "page_id accepted as-is and placed in the request path; no format check. Secret keys checked for presence at import time; base_url trailing slash stripped"
+  output_sanitization: "requests exceptions and conversion errors caught and returned as a labelled string; the exception text may include the request URL. The empty-page message includes the Confluence base URL"
+  logging: "No dedicated log file; errors are returned directly to the caller rather than logged separately"
+  credential_handling: "Email (secret key 'id') and API token (secret key 'api_key') read from AWS Secrets Manager via Pod Identity at import time and sent as HTTP Basic Auth; never returned or logged"
