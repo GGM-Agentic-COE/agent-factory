@@ -1,0 +1,94 @@
+spec_version: "1.0"
+artifact_type: tool
+metadata:
+  name: tool-L0-github-writer-using-PAT
+  version: "2.0.0"
+  layer: L0
+  owner: agentic-ai-coe
+
+purpose:
+  description: "Creates a new branch from a source branch (or reuses it if it already exists) and commits one or more files to it in a single commit, in a repository under a fixed owner, authenticating with a Personal Access Token from AWS Secrets Manager."
+  platform: github
+  operation: write
+
+interface:
+  parameters:
+    files:
+      type: array
+      required: true
+      items:
+        type: object
+      description: >
+        List of file descriptors. Each item is either flat
+        {"filename": "path/to/file.py", "code": "<content>"} or nested
+        {"<folder>": {"filename": "file.py", "code": "<content>"}}.
+        A missing filename defaults to "script.py"; missing code defaults to "".
+        Existing files at the same path are overwritten.
+    repo_name:
+      type: string
+      required: true
+      description: "Repository name without the owner prefix (e.g. 'my-repo'); the owner is the fixed repo_owner value in code."
+    new_branch:
+      type: string
+      required: true
+      description: "Branch to create and commit to (e.g. 'feature/auto-update'). If it already exists, the commit is added on top of its current head."
+    source_branch:
+      type: string
+      required: false
+      default: "main"
+      description: "Branch to copy when creating new_branch. Ignored if new_branch already exists."
+
+  returns:
+    type: object
+    fields:
+      status: {type: string, description: "'success'"}
+      branch: {type: string, description: "new_branch"}
+      source_branch: {type: string, description: "source_branch as passed"}
+      updated_files: {type: array, items: {type: string}, description: "Resolved repository paths committed"}
+      message: {type: string, description: "\"Created '<new_branch>' from '<source_branch>' and committed <n> file(s).\""}
+      url: {type: string, description: "https://github.com/<repo_owner>/<repo_name>/tree/<new_branch>"}
+    on_error: {status: "failure", message: "str(exception), e.g. a requests HTTPError such as '404 Client Error: Not Found for url: ...'"}
+
+credentials:
+  source: aws-secrets-manager
+  secret_name: "<name-of-secret-in-aws-secrets-manager>"
+  access_method: pod-identity
+  fields_used: [github_token]
+
+configuration:
+  setup_required: [SECRET_NAME, secrets_manager_region, repo_owner]
+  defaults:
+    SECRET_NAME: "<name-of-secret-in-aws-secrets-manager>"
+    secrets_manager_region: "us-east-1"
+    repo_owner: "<your-github-org>"
+    github_api_base: "https://api.github.com"
+    file_mode: "100644"
+    commit_message: "Automation Update: <YYYY-MM-DD HH:MM:SS> (pod local time)"
+
+identity:
+  tool_id: "tool-L0-github-writer-using-PAT-001"
+  role: tool-executor
+
+  invocable_by:
+    roles: [orchestrator]
+    agents: [any-agent-with-write-permission]
+
+  permissions:
+    operation: write
+    platform: github
+    scope: "org-level"
+
+  credential_scoping:
+    method: org-from-context
+    vault_path_template: "/secrets/{org_id}/github"
+
+resilience:
+  timeout_seconds: 30
+  retry: {max: 2, backoff: exponential, retry_on: [timeout, 429, 502, 503]}
+  circuit_breaker: {failure_threshold: 5, reset_seconds: 60}
+
+security:
+  input_validation: "Types enforced by the Pydantic schema only; file paths, branch names and content are not otherwise validated. An existing new_branch is detected via HTTP 422 on ref creation and the commit is stacked on top of it."
+  output_sanitization: "All exceptions caught and returned as {status: failure, message: str(e)}; GitHub HTTP error text and request URLs may appear in the message"
+  logging: "No logging; the token is never returned or logged"
+  credential_handling: "GitHub PAT read once at import time from AWS Secrets Manager (key github_token) using the pod's IAM role via Pod Identity; never stored in code. Secret read failures raise RuntimeError at import, so the tool fails to load."

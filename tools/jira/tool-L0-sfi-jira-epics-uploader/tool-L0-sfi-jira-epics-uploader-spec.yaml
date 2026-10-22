@@ -1,0 +1,89 @@
+spec_version: "1.0"
+artifact_type: tool
+metadata:
+  name: tool-L0-sfi-jira-epics-uploader
+  version: "2.0.0"
+  layer: L0
+  owner: agentic-ai-coe
+
+purpose:
+  description: "Creates Jira Epics and child Stories from a structured payload in one call, resolving logical parent IDs and linking cross-references, and passes per-issue Jira custom fields (customfield_<id>) through to Jira. Credentials always come from the secret."
+  platform: jira
+  operation: create-issue
+
+interface:
+  parameters:
+    inputJSON:
+      type: object
+      required: true
+      description: >
+        Dictionary with the following fields:
+          projectKey  (string, required) — Jira project key. Missing or empty returns a fatal error.
+          issueType   (string, optional) — Default issue type for issues that do not set their own. Default: "Epic".
+          issues      (array, required)  — Non-empty, ordered list of issue objects (parents before children):
+            summary     (string, optional) — Issue summary. Default: "<no summary>".
+            description (string|object, optional) — Plain text with "- " bullets, **bold** and *italic*,
+                                                    or a dict whose keys become bold headings. Default: "".
+            issueType   (string, optional) — Overrides the default issue type for this issue.
+            label / labels (string|array[string], optional) — Jira labels (spaces become "_");
+                                                    the first label is the issue's logical ID (EP-01, F-01.1, ...).
+            parentKey   (string, optional) — Logical ID of an issue created earlier in this call, or a real Jira key.
+            customfield_<id> (any, optional) — Any number of Jira custom fields, sent to Jira exactly as given
+                                               (e.g. "customfield_10244": {"value": "Functional"}). Null values are skipped.
+          baseUrl     (string, optional) — Overrides the Jira base URL from the secret.
+
+  returns:
+    type: string
+    description: >
+      Newline-joined result lines, in input order:
+        "<IssueType> created: <KEY>  (<summary>)" on success (no URL line),
+        "Failed: <summary> -> HTTP <code> | Detail: <response text>" when Jira rejects an issue,
+        "Failed: <summary> -> <exception> | Detail: <response text or 'No response received'>" on a network error.
+      Fatal errors return a single string instead of the per-issue lines:
+        "Fatal error: no projectKey provided and JIRA_PROJECT_KEY is empty.",
+        "Fatal error: 'issues' must be a non-empty list.",
+        "Fatal error: <exception>" for any other unexpected error.
+      If the secret cannot be read at import, the module raises RuntimeError
+      ("Error retrieving secret: ..." / "Unexpected error: ...") and the tool does not load.
+
+credentials:
+  source: aws-secrets-manager
+  secret_name: "<name-of-secret-in-aws-secrets-manager>"
+  access_method: pod-identity
+  fields_used: [base_url, id, api_key]
+
+configuration:
+  setup_required: [SECRET_NAME, AWS_REGION, ISSUE_TYPE_MAP]
+  defaults:
+    SECRET_NAME: "<name-of-secret-in-aws-secrets-manager>"
+    AWS_REGION: "us-east-1"
+    DEFAULT_ISSUE_TYPE: "Epic"
+    ISSUE_TYPE_MAP: {}
+
+identity:
+  tool_id: "tool-L0-sfi-jira-epics-uploader-001"
+  role: tool-executor
+
+  invocable_by:
+    roles: [orchestrator]
+    agents: [inception-jira-payload-converter-agent, any-agent-with-write-permission]
+
+  permissions:
+    operation: write
+    platform: jira
+    scope: "project-level"
+
+  credential_scoping:
+    method: org-from-context
+    vault_path_template: "/secrets/{org_id}/jira"
+
+resilience:
+  timeout_seconds: 30
+  retry: {max: 2, backoff: exponential, retry_on: [timeout, 429, 502, 503]}
+  circuit_breaker: {failure_threshold: 5, reset_seconds: 60}
+
+security:
+  input_validation: "projectKey must be present and issues must be a non-empty list; custom field keys must match ^customfield_\\d+$ but their values are not validated. ADF is sanitised to remove empty nodes before POST"
+  output_sanitization: "Jira's raw response body is returned on failure; exception text is returned in fatal errors; credentials are never included in the output"
+  logging: "No logging; results are returned directly to the caller"
+  credential_handling: "Jira email and API token are always read from AWS Secrets Manager via Pod Identity at import; they cannot be overridden from the input. baseUrl in the input overrides the secret's base_url, and the secret's credentials are then sent to that URL"
