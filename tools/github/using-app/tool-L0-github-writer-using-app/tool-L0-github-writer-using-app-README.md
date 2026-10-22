@@ -42,10 +42,32 @@ option 2:
 
 ```
 
+ Example JSON structure to paste in AAVA, under 'files' variable:
+1. method 1:
+
+```json
 [
-  {"filename": "docs/api.md", "code": "# API\n\nGenerated documentation."},
-  {"src": {"filename": "main.py", "code": "print('hello')\n"}}
+  {
+    "filename": "folder/subfoler/file.md",
+    "code": "# example content"
+  },
+
+  {
+    "filename" : "folder/subfolder-2/another-file.py",
+    "code": "print('new file')"
+  }
 ]
+```
+
+2. method 2:
+```json
+{
+    "src": {
+      "filename": "main.py",
+      "code": "print('hello')\n"
+    }
+  }
+
 ```
 
 **`repo_name`**
