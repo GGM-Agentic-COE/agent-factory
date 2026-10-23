@@ -1,38 +1,149 @@
 {
   "agent_id": "L1-vision-regulatory-feasibility-checker-evaluator",
-  "agent_version": "1.0.0",
+  "agent_version": "2.0.0",
   "execution_id": "exec-b5c6d7e8",
   "workflow_execution_id": "wf-e5f6a7b8",
   "status": "success",
   "content": {
-    "type": "evaluation_result",
-    "schema_version": "1.0",
+    "type": "regulatory_feasibility",
+    "schema_version": "2.0",
     "items": {
-      "scores": {
-        "faithfulness": 0.6,
-        "hallucination": 0.1,
-        "consistency": 0.55,
-        "relevance": 0.85,
-        "reasoning_quality": 0.7,
-        "citation_completeness": 1.0
-      },
-      "overall_score": 6.2,
-      "pass": false,
-      "findings": [
-        { "id": "FND-01", "gate": "Severity-mismatch check (this evaluator's own rule)", "status": "fail", "detail": "CON-02's rationale states 'claims function as accounting records and must be retained for the statutory minimum period; a tool that allows early deletion would create a compliance gap' — this describes a real, actionable gap, not a Green (routine, non-blocking) situation. The label was changed to Green with mitigation set to null. This looks like a downgrade to avoid writing a mitigation, whether or not that was the intent." },
-        { "id": "FND-02", "gate": "evaluation.md Quality Gates — citation present for every constraint", "status": "pass", "detail": "Both constraints still carry citations." }
-      ],
-      "fixes_applied": [
+      "constraints": [
         {
-          "id": "FIX-01",
-          "finding_id": "FND-01",
-          "description": "Corrected CON-02's status back to Amber and restored its mitigation, since the rationale text (unchanged) already fully supports Amber with a concrete mitigation — this is restoring, not inventing, content.",
-          "before": "status: \"Green\", mitigation: null",
-          "after": "status: \"Amber\", mitigation: \"Design the tool so claim/approval records cannot be deleted before the statutory retention period elapses, and are exportable for audit.\""
+          "id": "CON-01",
+          "name": "Employee data protection",
+          "status": "Green",
+          "citation": { "source_reference": "kb-L1-regulatory-frameworks-index#cross-domain-index", "regulation": "UK GDPR / Data Protection Act 2018" },
+          "rationale_summary": "Processing employee names and financial claim data is a standard obligation for any UK internal system — not a feasibility blocker.",
+          "mitigation_summary": null,
+          "requires_legal_review": false,
+          "confidence": 0.85,
+          "reasoning": "Green confirmed: a routine, non-novel obligation for any system processing employee personal data."
+        },
+        {
+          "id": "CON-02",
+          "name": "Financial record retention",
+          "status": "Amber",
+          "citation": { "source_reference": "tool-L1-regulatory-db-lookup", "regulation": "Companies Act 2006, s.388 (accounting record retention)" },
+          "rationale_summary": "Claims function as accounting records requiring statutory retention; a tool allowing early deletion would create a compliance gap.",
+          "mitigation_summary": "Design the tool so claim/approval records cannot be deleted before the statutory retention period elapses, and are exportable for audit.",
+          "requires_legal_review": false,
+          "confidence": 0.75,
+          "reasoning": "Restored to Amber: the unchanged rationale describes an actionable gap, which is Amber by definition, not the routine non-blocking obligation Green denotes."
         }
       ],
-      "final_decision": "fixed_and_approved"
+      "overall_status": {
+        "status": "Amber",
+        "rationale_summary": "CON-02 is the worst constraint at Amber, with a concrete, precedented mitigation. No Red item exists."
+      },
+      "categories_not_applicable": [
+        { "category": "Authorisation, licensing, registration", "reason": "Internal tool for one company's own staff; no regulated activity is carried on." },
+        { "category": "Financial crime (AML/KYC) and payments authorisation", "reason": "Reimbursements are paid through existing payroll rails; the tool holds no funds." },
+        { "category": "Consumer protection and unfair trading", "reason": "Users are employees under a contract of employment, not consumers." }
+      ],
+      "viability": {
+        "viability_score": 8.1,
+        "recommendation": "auto_publish_eligible",
+        "score_derivation": { "weighted_score": 8.1, "final_score": 8.1, "capped": false, "threshold": 7 },
+        "components": [
+          {
+            "id": "VC-01",
+            "name": "regulatory_posture",
+            "weight": 0.60,
+            "score": 7.5,
+            "confidence": 0.8,
+            "traced_to": "CON-01, CON-02",
+            "reasoning": "Re-derived after the severity fix: overall_status Amber with the single Amber carrying a concrete mitigation places this in the 7-8 band, not the 9-10 band the mislabelled Green supported."
+          },
+          {
+            "id": "VC-02",
+            "name": "idea_clarity",
+            "weight": 0.40,
+            "score": 9.0,
+            "confidence": 0.9,
+            "traced_to": "idea-brief.json: problem_statement, target_geography, product_category",
+            "reasoning": "Unchanged by the severity fix: concrete present-day pain and a tightly bounded internal scope."
+          }
+        ],
+        "caps_applied": []
+      },
+      "open_items": [],
+      "evaluation": {
+        "scores": {
+          "faithfulness": 0.6,
+          "hallucination": 0.1,
+          "consistency": 0.55,
+          "relevance": 0.85,
+          "reasoning_quality": 0.7,
+          "citation_completeness": 1.0
+        },
+        "overall_score": 6.2,
+        "pass": false,
+        "findings": [
+          { "id": "FND-01", "gate": "Severity-mismatch check", "status": "fail", "detail": "CON-02's rationale describes a real, actionable compliance gap — that is Amber, not Green. The label was changed to Green with mitigation nulled." },
+          { "id": "FND-02", "gate": "Citation present for every constraint", "status": "pass", "detail": "Both constraints still carry specific, plausible citations." },
+          { "id": "FND-03", "gate": "Viability re-derivation", "status": "fail", "detail": "Reported 9.3 rested on the mislabelled Green. Re-derived 8.1 from the corrected constraints; no cap applies either way." }
+        ],
+        "fixes_applied": [
+          {
+            "id": "FIX-01",
+            "finding_id": "FND-01",
+            "description": "Restored CON-02 to Amber with its mitigation",
+            "before": "status: \"Green\", mitigation_summary: null",
+            "after": "status: \"Amber\", mitigation_summary: \"Design the tool so claim/approval records cannot be deleted before the statutory retention period elapses, and are exportable for audit.\""
+          },
+          {
+            "id": "FIX-02",
+            "finding_id": "FND-01",
+            "description": "Corrected overall_status to match the restored constraint",
+            "before": "Green",
+            "after": "Amber"
+          },
+          {
+            "id": "FIX-03",
+            "finding_id": "FND-03",
+            "description": "Replaced viability with the re-derivation",
+            "before": "9.3",
+            "after": "8.1"
+          }
+        ],
+        "groundedness_check": {
+          "idea_brief_target_geography": "United Kingdom",
+          "document_target_geography": "United Kingdom",
+          "idea_brief_product_category": "internal financial process tool",
+          "document_product_category": "internal financial process tool",
+          "consistent": true,
+          "domain_kb_citations_checked": [
+            { "constraint_id": "CON-01", "citation": "UK GDPR / Data Protection Act 2018", "grounded_in_kb": false, "note": "not covered" },
+            { "constraint_id": "CON-02", "citation": "Companies Act 2006, s.388", "grounded_in_kb": false, "note": "not covered" }
+          ],
+          "applicable_categories": ["Data protection", "Competition & consumer protection"],
+          "uncovered_categories": []
+        },
+        "viability_check": {
+          "reported_score": 9.3,
+          "rederived_score": 8.1,
+          "rederived_weighted_score": 8.1,
+          "rederived_component_scores": { "regulatory_posture": 7.5, "idea_clarity": 9.0 },
+          "caps_expected": [],
+          "caps_reported": [],
+          "consistent": false,
+          "clears_threshold": true
+        },
+        "final_decision": "fixed_and_approved"
+      }
     },
-    "execution_summary": "• overall_score: 6.2 (fail as submitted), final_decision: fixed_and_approved after correction.\n• Findings: 2 total, 1 fail (FND-01 — severity mismatch), 1 pass.\n• Fix applied: CON-02's status restored to Amber with its mitigation restored — this was a mechanical correction because the rationale text itself never changed, only the label and mitigation field did, so the fix is recoverable from content already present rather than invented.\n• overall_status was also corrected from 'Green' to 'Amber' to match the corrected constraint.\n• Knowledge bases consulted: L1-vision-regulatory-feasibility-checker/evaluation.md, kb-L1-regulatory-frameworks-index.\n• Guardrails evaluated: gr-L1-output-schema-validator (pass), gr-L1-pii-detection (pass), gr-L1-citation-verifier (pass).\n• Gaps flagged: none after fix — but flagging the pattern (rationale describing a gap while label says Green) for review of the generator's own self-check logic."
+    "artifacts": [
+      {
+        "id": "artifact-7d8e9f0a",
+        "type": "document",
+        "name": "regulatory-feasibility.md",
+        "format": "markdown",
+        "storage": { "provider": "blob storage", "location": "sid-temp/wf-e5f6a7b8/regulatory-feasibility.md" },
+        "description": "Re-saved: CON-02's status and mitigation, the overall status line, the header table score and the Viability Score section were all corrected",
+        "produced_by": "L1-vision-regulatory-feasibility-checker-evaluator"
+      }
+    ],
+    "execution_summary": "• overall_score 6.2 (fail as submitted), final_decision: fixed_and_approved after correction.\n• Findings: 3 total, 2 fail (severity mismatch, viability re-derivation).\n• Fix: CON-02 restored to Amber with its mitigation — mechanical, since the rationale text never changed, only the label and the mitigation field did.\n• overall_status corrected Green to Amber to match the restored constraint.\n• viability_score re-derived 8.1 against 9.3 reported; the inflated score rested entirely on the mislabelled Green. Still clears the gate, no cap applies.\n• Coverage sweep: no applicable category missing.\n• Knowledge bases consulted: the checker's evaluation.md rubric, kb-L1-regulatory-frameworks-index, kb-L2-domain-regulatory (no coverage — non-food example).\n• Tools invoked: blob reader (both files retrieved); blob writer (regulatory-feasibility.md re-saved, both score locations corrected).\n• Guardrails: gr-L1-regulatory-feasibility-quality-gate is configured on this agent; the result gated is the final iteration.\n• Gaps flagged: none after fix — but the pattern (rationale describing a gap while the label says Green, inflating the score) is worth reviewing in the generator's self-check."
   }
 }

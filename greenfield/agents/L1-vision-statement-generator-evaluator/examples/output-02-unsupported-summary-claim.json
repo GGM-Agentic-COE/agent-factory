@@ -1,12 +1,12 @@
 {
   "agent_id": "L1-vision-statement-generator-evaluator",
-  "agent_version": "1.0.0",
+  "agent_version": "2.0.0",
   "execution_id": "exec-a0b1c2d3",
   "workflow_execution_id": "wf-f6a7b8c9",
   "status": "success",
   "content": {
     "type": "evaluation_result",
-    "schema_version": "1.0",
+    "schema_version": "2.0",
     "items": {
       "scores": {
         "faithfulness": 0.7,

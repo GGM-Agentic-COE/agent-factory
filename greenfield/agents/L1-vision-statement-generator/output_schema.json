@@ -2,10 +2,19 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "L1-vision-statement-generator-output-schema-v1.0",
   "title": "VisionStatementItems",
-  "description": "Shape of content.items for L1-vision-statement-generator. items carries META POINTS about vision.md, not the full document — the full narrative (executive summary paragraph, full problem/value-prop text, full roadmap descriptions) lives ONLY in the artifact, saved to s3 (blob storage). '_summary' fields are short distillations; regulatory_posture, north_star_metrics, and open_risks stay structurally full since those are already meta-level facts (statuses, ids, targets, relationships), not prose duplication. This agent RECONCILES three upstream inputs rather than summarizing them: every Amber/Red constraint_summaries entry MUST be covered by at least one open_risks entry's related_ids, with a roadmap dependency. Coverage, not 1:1 cardinality — two thematically related Amber constraints MAY be grouped into one combined open_risks entry rather than forced into separate ones; dropping a constraint entirely is the defect this exists to prevent, not the grouping itself. This cross-reference cannot be expressed as a JSON Schema constraint (it spans this agent's own upstream inputs, not just its own output shape) — it is checked by L1-vision-statement-generator-evaluator, not by schema validation alone.",
+  "description": "Shape of content.items for L1-vision-statement-generator. items carries META POINTS about vision.md, not the full document — the full narrative (executive summary paragraph, full problem/value-prop text, full roadmap descriptions) lives ONLY in the artifact, saved to blob storage as vision.md (published to Confluence later by the evaluator). '_summary' fields are short distillations; regulatory_posture, north_star_metrics, and open_risks stay structurally full since those are already meta-level facts (statuses, ids, targets, relationships), not prose duplication. This agent RECONCILES three upstream inputs rather than summarizing them: every Amber/Red constraint_summaries entry MUST be covered by at least one open_risks entry's related_ids, with a roadmap dependency. Coverage, not 1:1 cardinality — two thematically related Amber constraints MAY be grouped into one combined open_risks entry rather than forced into separate ones; dropping a constraint entirely is the defect this exists to prevent, not the grouping itself. This cross-reference cannot be expressed as a JSON Schema constraint (it spans this agent's own upstream inputs, not just its own output shape) — it is checked by L1-vision-statement-generator-evaluator, not by schema validation alone.",
   "type": "object",
-  "required": ["executive_summary", "problem_statement", "target_users", "value_proposition", "market_context", "regulatory_posture", "north_star_metrics", "roadmap", "open_risks"],
+  "required": ["product_name", "executive_summary", "problem_statement", "target_users", "value_proposition", "market_context", "regulatory_posture", "north_star_metrics", "roadmap", "open_risks"],
   "properties": {
+    "product_name": {
+      "type": "object",
+      "required": ["name", "source"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1, "description": "The name the vision document and its Confluence title ('<name>-vision.md') carry. user_provided → exactly as the user supplied it, never re-cased or edited" },
+        "source": { "type": "string", "enum": ["user_provided", "agent_proposed"], "description": "agent_proposed only when no real product_name was supplied; the document's Product Name row must then label the name as proposed" }
+      },
+      "additionalProperties": false
+    },
     "executive_summary": {
       "type": "object",
       "required": ["summary", "confidence", "reasoning"],
@@ -22,10 +31,10 @@
       "type": "object",
       "required": ["summary", "confidence", "reasoning", "traced_to"],
       "properties": {
-        "summary": { "type": "string", "maxLength": 150, "description": "Short gloss of the single most decision-relevant insight — the full paragraph is in vision.md's Market Context section" },
+        "summary": { "type": "string", "maxLength": 150, "description": "Short gloss of the single most decision-relevant insight — the full paragraph is in vision.md's Market Context section. Market analysis is an OPTIONAL upstream input: when none was available, this is exactly 'Not assessed — no market analysis available' with confidence 0 and traced_to 'none'. The key itself stays required so the absence is stated rather than silently omitted" },
         "confidence": { "type": "number", "minimum": 0.0, "maximum": 1.0 },
         "reasoning": { "type": "string", "minLength": 20 },
-        "traced_to": { "type": "string", "description": "Which competitor_matrix entries or SWOT item ids this condenses" }
+        "traced_to": { "type": "string", "description": "Which competitor_matrix entries or SWOT item ids this condenses, or 'none' when no market analysis was available" }
       }
     },
     "regulatory_posture": {

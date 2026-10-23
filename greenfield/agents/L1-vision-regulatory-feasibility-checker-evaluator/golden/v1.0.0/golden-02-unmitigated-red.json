@@ -1,31 +1,137 @@
 {
   "agent_id": "L1-vision-regulatory-feasibility-checker-evaluator",
-  "agent_version": "1.0.0",
+  "agent_version": "2.0.0",
   "execution_id": "exec-e8f9a0b1",
   "workflow_execution_id": "wf-a17c5e92",
   "status": "success",
   "content": {
-    "type": "evaluation_result",
-    "schema_version": "1.0",
+    "type": "regulatory_feasibility",
+    "schema_version": "2.0",
     "items": {
-      "scores": {
-        "faithfulness": 0.4,
-        "hallucination": 0.4,
-        "consistency": 0.5,
-        "relevance": 0.7,
-        "reasoning_quality": 0.5,
-        "citation_completeness": 0.75
-      },
-      "overall_score": 3.8,
-      "pass": false,
-      "findings": [
-        { "id": "FND-01", "gate": "Citation completeness — BLOCKER", "status": "fail", "detail": "CON-01 cites 'Food Marketplace Facilitation Act 2024' — this regulation does not exist in kb-L1-regulatory-frameworks-index or kb-L2-domain-regulatory, and is not a real, verifiable UK statute. This is a fabricated citation, not a real one." },
-        { "id": "FND-02", "gate": "evaluation.md Quality Gates — Amber/Red has mitigation or legal-review flag", "status": "fail", "detail": "CON-01 is Red with mitigation: null and requires_legal_review: false — this violates the zero-tolerance rule directly; the schema itself should have rejected this, but is being checked here as a defense-in-depth failure." },
-        { "id": "FND-03", "gate": "Discount validation", "status": "fail", "detail": "overall_status claims Red with an honest rationale ('CON-01 is Red with no mitigation') — this part is at least honestly stated, not a false discount, but the underlying constraint itself is unsound." }
+      "constraints": [
+        {
+          "id": "CON-01",
+          "name": "Food Business Operator (FBO) status",
+          "status": "Red",
+          "citation": { "source_reference": "kb-L2-domain-regulatory#nonexistent-section", "regulation": "Food Marketplace Facilitation Act 2024" },
+          "rationale_summary": "Taking possession or repackaging food (vs. facilitation-only) would make HarvestLink an FBO, triggering registration/inspection duties.",
+          "mitigation_summary": null,
+          "requires_legal_review": true,
+          "confidence": 0.3,
+          "reasoning": "Severity confirmed Red, but the citation is fabricated — no such Act exists in either KB. requires_legal_review set to true per Processing Rule 5: no mitigation can be justified from a citation that does not exist."
+        },
+        {
+          "id": "CON-02",
+          "name": "Traceability record integrity",
+          "status": "Amber",
+          "citation": { "source_reference": "kb-L2-domain-regulatory#distribution-cold-chain", "regulation": "Regulation (EC) 178/2002, Article 18 (one step back, one step forward)" },
+          "rationale_summary": "Buyers and enforcement rely on traceability records during a recall — integrity needs deliberate design, not assumption.",
+          "mitigation_summary": "Require producer and distributor dual sign-off on every traceability record, with an immutable, append-only audit log.",
+          "requires_legal_review": false,
+          "confidence": 0.8,
+          "reasoning": "Amber confirmed and grounded in kb-L2-domain-regulatory; unaffected by the CON-01 defect."
+        }
       ],
-      "fixes_applied": [],
-      "final_decision": "escalate_to_hitl"
+      "overall_status": {
+        "status": "Red",
+        "rationale_summary": "CON-01 is Red with no mitigation and now requires legal review; no discount applies."
+      },
+      "categories_not_applicable": [
+        { "category": "Financial crime (AML/KYC) and payments authorisation", "reason": "Contract value settles directly between producer and buyer; the platform never holds funds." },
+        { "category": "Consumer protection and unfair trading", "reason": "Both sides are businesses; no consumer contracts are formed on the platform." },
+        { "category": "Sanctions and export control", "reason": "Domestic UK trade only at this scope." }
+      ],
+      "viability": {
+        "viability_score": 4.8,
+        "recommendation": "human_review_required",
+        "score_derivation": { "weighted_score": 4.8, "final_score": 4.8, "capped": true, "threshold": 7 },
+        "components": [
+          {
+            "id": "VC-01",
+            "name": "regulatory_posture",
+            "weight": 0.60,
+            "score": 2.0,
+            "confidence": 0.4,
+            "traced_to": "CON-01, CON-02",
+            "reasoning": "0-3 band: CON-01 is Red with no mitigation and now requires legal review. Low confidence because its citation is fabricated, so the true position is unknown rather than merely bad."
+          },
+          {
+            "id": "VC-02",
+            "name": "idea_clarity",
+            "weight": 0.40,
+            "score": 9.0,
+            "confidence": 0.9,
+            "traced_to": "idea-brief.json: problem_statement, target_geography, product_category",
+            "reasoning": "The brief itself is sound and unaffected by the regulatory defect: named segment, concrete present-day pain, bounded scope."
+          }
+        ],
+        "caps_applied": [
+          { "rule": "red_constraint", "cap_value": 6.0, "triggered_by": ["CON-01"], "reason": "CON-01 is Red with no mitigation." },
+          { "rule": "regulatory_overall_red", "cap_value": 6.0, "triggered_by": ["CON-01"], "reason": "overall_status is Red, driven by CON-01." },
+          { "rule": "requires_legal_review", "cap_value": 6.5, "triggered_by": ["CON-01"], "reason": "Set by this evaluator: no mitigation is justifiable from a fabricated citation." }
+        ]
+      },
+      "open_items": [
+        { "id": "OI-01", "description_summary": "CON-01's citation is fabricated; the real FBO position must be re-derived before any mitigation is credible.", "related_constraint": "CON-01" }
+      ],
+      "evaluation": {
+        "scores": {
+          "faithfulness": 0.4,
+          "hallucination": 0.4,
+          "consistency": 0.5,
+          "relevance": 0.7,
+          "reasoning_quality": 0.5,
+          "citation_completeness": 0.5
+        },
+        "overall_score": 3.8,
+        "pass": false,
+        "findings": [
+          { "id": "FND-01", "gate": "Citation completeness — BLOCKER", "status": "fail", "detail": "CON-01 cites 'Food Marketplace Facilitation Act 2024' — absent from both KBs and not a real UK statute. A fabricated citation." },
+          { "id": "FND-02", "gate": "Amber/Red has mitigation or legal-review flag", "status": "fail", "detail": "CON-01 was Red with mitigation null and requires_legal_review false — schema-invalid and a direct zero-tolerance violation." },
+          { "id": "FND-03", "gate": "Discount validation", "status": "pass", "detail": "overall_status Red is honestly stated, not a false discount; the constraint beneath it is what is unsound." },
+          { "id": "FND-04", "gate": "Viability re-derivation", "status": "fail", "detail": "Generator reported 6.9 with only red_constraint recorded; requires_legal_review and regulatory_overall_red were both missing from caps_applied." }
+        ],
+        "fixes_applied": [
+          { "id": "FIX-01", "finding_id": "FND-02", "description": "Set requires_legal_review on CON-01", "before": "false", "after": "true" },
+          { "id": "FIX-02", "finding_id": "FND-04", "description": "Replaced viability with the re-derivation", "before": "6.9", "after": "4.8" }
+        ],
+        "groundedness_check": {
+          "idea_brief_target_geography": "United Kingdom",
+          "document_target_geography": "United Kingdom",
+          "idea_brief_product_category": "food producer-to-foodservice marketplace and compliance platform",
+          "document_product_category": "food producer-to-foodservice marketplace and compliance platform",
+          "consistent": true,
+          "domain_kb_citations_checked": [
+            { "constraint_id": "CON-01", "citation": "Food Marketplace Facilitation Act 2024", "grounded_in_kb": false, "note": "contradicted" },
+            { "constraint_id": "CON-02", "citation": "Regulation (EC) 178/2002, Article 18", "grounded_in_kb": true, "note": "confirmed" }
+          ],
+          "applicable_categories": ["Food safety & standards", "Data protection", "Local registration/inspection", "Competition & consumer protection"],
+          "uncovered_categories": ["Data protection", "Local registration/inspection"]
+        },
+        "viability_check": {
+          "reported_score": 6.9,
+          "rederived_score": 4.8,
+          "rederived_weighted_score": 4.8,
+          "rederived_component_scores": { "regulatory_posture": 2.0, "idea_clarity": 9.0 },
+          "caps_expected": ["red_constraint", "regulatory_overall_red", "requires_legal_review"],
+          "caps_reported": ["red_constraint"],
+          "consistent": false,
+          "clears_threshold": false
+        },
+        "final_decision": "escalate_to_hitl"
+      }
     },
-    "execution_summary": "• overall_score: 3.8 (fail), final_decision: escalate_to_hitl.\n• Findings: 3 total, all fail. This is not a mechanically-fixable case: the citation is fabricated (references a non-existent Act), so there's no real regulation to restore a mitigation from — inventing one would compound the hallucination rather than correct it.\n• Fixes applied: none. Restoring the real CON-01 (Food Business Operator status, Reg. (EC) 852/2004, with a real facilitation-only mitigation) is possible in principle, but doing so from this evaluator's side would mean re-deriving the generator's entire analysis, not applying a mechanical fix — that's outside this agent's remit per S6.\n• Knowledge bases consulted: L1-vision-regulatory-feasibility-checker/evaluation.md, kb-L1-regulatory-frameworks-index, kb-L2-domain-regulatory (checked, found no match for the cited Act).\n• Guardrails evaluated: gr-L1-output-schema-validator (fail — the generator's own output_schema.json's Red/Amber conditional structurally rejects mitigation:null combined with requires_legal_review:false; this draft should never have reached this evaluator without already failing that gate), gr-L1-pii-detection (pass), gr-L1-citation-verifier (fail — fabricated citation), gr-L1-hallucination-check (fail).\n• Gaps flagged: escalate immediately — re-run L1-vision-regulatory-feasibility-checker for CON-01. This draft's presence here indicates the workflow orchestration is routing pre-schema-validation drafts to this evaluator (by design, per S6 — the evaluator catches issues before the final schema gate), which is expected; what's not expected is a fabricated citation, which no schema check can catch."
+    "artifacts": [
+      {
+        "id": "artifact-9f0a1b2c",
+        "type": "document",
+        "name": "regulatory-feasibility.md",
+        "format": "markdown",
+        "storage": { "provider": "blob storage", "location": "sid-temp/wf-a17c5e92/regulatory-feasibility.md" },
+        "description": "Re-saved: CON-01's legal-review flag, the header table score and the Viability Score section were all corrected",
+        "produced_by": "L1-vision-regulatory-feasibility-checker-evaluator"
+      }
+    ],
+    "execution_summary": "• overall_score 3.8 (fail), final_decision: escalate_to_hitl.\n• Findings: 4 total, 3 fail. The fabricated citation is not mechanically fixable — inventing a mitigation would compound the hallucination.\n• Fixes applied: requires_legal_review set true on CON-01 (Processing Rule 5); viability replaced with the re-derivation.\n• viability_score re-derived 4.8 against 6.9 reported — the generator recorded only one of three qualifying caps.\n• Coverage sweep: data protection and local registration/inspection appear in neither constraints nor categories_not_applicable.\n• Groundedness: geography and category match idea-brief.json; CON-01's citation is contradicted by kb-L2-domain-regulatory.\n• Knowledge bases consulted: the checker's evaluation.md rubric, kb-L1-regulatory-frameworks-index, kb-L2-domain-regulatory.\n• Tools invoked: blob reader (both files retrieved); blob writer (regulatory-feasibility.md re-saved with the flag and both score locations corrected).\n• Guardrails: gr-L1-regulatory-feasibility-quality-gate is configured on this agent; the result gated is the final iteration.\n• Gaps flagged: OI-01 — re-run the checker for CON-01; escalate immediately."
   }
 }

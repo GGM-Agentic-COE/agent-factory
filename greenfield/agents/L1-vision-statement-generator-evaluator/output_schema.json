@@ -4,7 +4,7 @@
   "title": "EvaluatorItems",
   "description": "Shared shape across all Phase 0 evaluator agents (S6 pattern). Scores are read from the paired generator's evaluation.md at runtime — this schema does not duplicate the rubric, only the result shape.",
   "type": "object",
-  "required": ["scores", "overall_score", "pass", "findings", "fixes_applied", "final_decision"],
+  "required": ["scores", "overall_score", "findings", "fixes_applied", "final_decision"],
   "properties": {
     "scores": {
       "type": "object",
@@ -19,16 +19,15 @@
       }
     },
     "overall_score": { "type": "number", "minimum": 0.0, "maximum": 10.0 },
-    "pass": { "type": "boolean", "description": "overall_score >= the paired generator's spec.yaml quality.min_score" },
     "findings": {
       "type": "array",
+      "description": "Problems found only — a check that found nothing gets no entry",
       "items": {
         "type": "object",
-        "required": ["id", "gate", "status", "detail"],
+        "required": ["id", "check", "detail"],
         "properties": {
           "id": { "type": "string", "pattern": "^FND-[0-9]{2}$" },
-          "gate": { "type": "string", "description": "Which evaluation.md Quality Gate or Reflection Checklist item this finding is about" },
-          "status": { "type": "string", "enum": ["pass", "fail"] },
+          "check": { "type": "string", "description": "Which evaluation.md check or reflection checklist item this finding is about" },
           "detail": { "type": "string", "minLength": 10 }
         }
       }

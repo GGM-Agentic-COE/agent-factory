@@ -170,19 +170,34 @@
         "status": "Amber",
         "rationale_summary": "CON-02 is the worst item, with a concrete mitigation"
       },
+      "categories_not_applicable": [
+        { "category": "Authorisation, licensing, registration", "reason": "Internal tool for one company's own staff; no regulated activity is carried on." },
+        { "category": "Financial crime (AML/KYC) and payments authorisation", "reason": "Reimbursements are paid through existing payroll rails; the tool holds no funds." },
+        { "category": "Consumer protection and unfair trading", "reason": "Users are employees under a contract of employment, not consumers." }
+      ],
+      "viability": {
+        "viability_score": 7.8,
+        "recommendation": "auto_publish_eligible",
+        "score_derivation": { "weighted_score": 7.8, "final_score": 7.8, "capped": false, "threshold": 7 },
+        "components": [
+          { "id": "VC-01", "name": "regulatory_posture", "weight": 0.60, "score": 7.5, "confidence": 0.8, "traced_to": "CON-01, CON-02", "reasoning": "7-8 band: overall_status Amber with the single Amber constraint carrying a concrete mitigation, and no Red or legal-review item." },
+          { "id": "VC-02", "name": "idea_clarity", "weight": 0.40, "score": 8.3, "confidence": 0.85, "traced_to": "idea-brief.json: problem_statement, target_users, value_proposition", "reasoning": "Concrete present-day pain and a reachable internal segment, though one upstream open question (OQ-01) remains unresolved." }
+        ],
+        "caps_applied": []
+      },
       "open_items": []
     },
     "viability_score": 7.8
   },
   "generator_output": {
     "agent_id": "L1-vision-statement-generator",
-    "agent_version": "1.0.0",
+    "agent_version": "2.0.0",
     "execution_id": "exec-c7d8e9f0",
     "workflow_execution_id": "wf-e5f6a7b8",
     "status": "success",
     "content": {
       "type": "vision_statement",
-      "schema_version": "1.0",
+      "schema_version": "2.0",
       "items": {
         "problem_statement": {
           "summary": "Expense claims pass through 2-3 manager approvals with no status visibility, and Finance manually re-keys every claim, consuming hours weekly.",

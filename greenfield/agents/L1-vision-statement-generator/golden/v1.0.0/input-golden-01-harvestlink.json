@@ -240,7 +240,26 @@
       "status": "Amber",
       "rationale_summary": "CON-01 is Red but has a precedented facilitation-only mitigation; both Amber items have mitigations too, so overall discounts to Amber."
     },
+    "categories_not_applicable": [
+      { "category": "Financial crime (AML/KYC) and payments authorisation", "reason": "Contract value settles directly between producer and buyer; the platform never holds funds." },
+      { "category": "International data transfer and residency", "reason": "UK-only producers, buyers and hosting; no transfer arises at this scope." },
+      { "category": "Consumer protection and unfair trading", "reason": "Both sides are businesses; no consumer contracts are formed on the platform." },
+      { "category": "Employment and worker classification", "reason": "The platform coordinates contracts between businesses, not people's work." },
+      { "category": "Sanctions and export control", "reason": "Domestic UK trade only at this scope; reassess if export is added." }
+    ],
+    "viability": {
+      "viability_score": 6.0,
+      "recommendation": "human_review_required",
+      "score_derivation": { "weighted_score": 7.2, "final_score": 6.0, "capped": true, "threshold": 7 },
+      "components": [
+        { "id": "VC-01", "name": "regulatory_posture", "weight": 0.60, "score": 6.0, "confidence": 0.8, "traced_to": "CON-01, CON-02, CON-03, CON-04", "reasoning": "Top of the 4-6 band: CON-01 is Red but carries a precedented, non-legal-review mitigation, and both Ambers have concrete design mitigations." },
+        { "id": "VC-02", "name": "idea_clarity", "weight": 0.40, "score": 9.0, "confidence": 0.9, "traced_to": "idea-brief.json: problem_statement, target_geography, product_category", "reasoning": "Names who suffers the problem, how it is felt today, and a reachable, well-bounded segment." }
+      ],
+      "caps_applied": [
+        { "rule": "red_constraint", "cap_value": 6.0, "triggered_by": ["CON-01"], "reason": "CON-01 is Red; the blocker is unresolved until the facilitation-only boundary is confirmed." }
+      ]
+    },
     "open_items": []
   },
-  "viability_score": 7.4
+  "viability_score": 6.0
 }

@@ -1,12 +1,12 @@
 {
   "agent_id": "L1-vision-statement-generator",
-  "agent_version": "1.0.0",
+  "agent_version": "2.0.0",
   "execution_id": "exec-d8e9f0a1",
   "workflow_execution_id": "wf-f6a7b8c9",
   "status": "failed",
   "content": {
     "type": "vision_statement",
-    "schema_version": "1.0",
+    "schema_version": "2.0",
     "items": {},
     "artifacts": [],
     "execution_summary": "• Produced 0 items — INSUFFICIENT_CONTEXT.\n• market_analysis_items is empty (no competitor_matrix, swot, or data_sufficiency) and viability_score is null. L1-vision-market-analyzer should have produced output before this agent runs; treating this as a defensive check, not the expected path.\n• Reflection: confirmed that synthesizing a vision statement without any market context would mean fabricating a market_context section from nothing — refused rather than guessed.\n• Knowledge bases consulted: none.\n• Guardrails evaluated: gr-L1-hallucination-check (pass — nothing invented), gr-L1-output-schema-validator (n/a — failed status), gr-L1-consistency-check (n/a — no content to check), gr-L1-pii-detection (pass).\n• Tools invoked: none.\n• Gaps flagged: pipeline error upstream — check why L1-vision-market-analyzer's output was empty and why viability_score was not computed before this step ran."

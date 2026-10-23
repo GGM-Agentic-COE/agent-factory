@@ -6,8 +6,11 @@ This covers THIS evaluator's own meta-quality — not the generator's rubric
 ## Quality Gates
 - [ ] Coverage check was done by set membership (constraint_id ∈ union of open_risks.related_ids), not by count comparison
 - [ ] Every executive_summary sentence was checked individually against the sections below it, not judged as a whole
-- [ ] viability_score was checked against what the generator actually received, not assumed correct
+- [ ] The Amber/Red constraint set was rebuilt from `regulatory-feasibility.md` itself, not taken from what the generator carried into `regulatory_posture`
+- [ ] viability_score was checked against `regulatory-feasibility.md` (the authoritative source) and `original_input`, not assumed correct — and never re-derived here
+- [ ] A capped score was matched against the narrative: the constraint that triggered the cap is covered in open_risks and named in the executive summary
 - [ ] Any fix to close a coverage gap was built from the constraint's own mitigation_summary, never invented from nothing
+- [ ] `idea-brief.json` was parsed as JSON and read by key path, never scanned as markdown
 
 ## Scores (≥ threshold to pass)
 | Evaluator | ≥ | Checks |
@@ -20,7 +23,7 @@ This covers THIS evaluator's own meta-quality — not the generator's rubric
 ## Reflection Checklist
 - [ ] Zero regulatory constraint_ids missing from open_risks coverage
 - [ ] No unsupported claim left in executive_summary
-- [ ] viability_score reporting matches what was actually received, not silently changed
+- [ ] viability_score reporting matches what was actually received, not silently changed — and was never recomputed here to reconcile a discrepancy that should have been reported
 
 ## Reflection Process
 1. Generate → 2. Check all items above → 3. Fix silently → 4. Deliver final only

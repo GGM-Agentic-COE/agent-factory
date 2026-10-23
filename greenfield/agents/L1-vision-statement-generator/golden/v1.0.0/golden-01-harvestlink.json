@@ -1,12 +1,12 @@
 {
   "agent_id": "L1-vision-statement-generator",
-  "agent_version": "1.0.0",
+  "agent_version": "2.0.0",
   "execution_id": "exec-2e91c7d8",
   "workflow_execution_id": "wf-a17c5e92",
   "status": "success",
   "content": {
     "type": "vision_statement",
-    "schema_version": "1.0",
+    "schema_version": "2.0",
     "items": {
       "problem_statement": {
         "summary": "Regional UK producers/distributors face wholesaler consolidation and lack compliance infrastructure buyers require, losing contracts despite quality.",
@@ -68,6 +68,6 @@
         "produced_by": "L1-vision-statement-generator"
       }
     ],
-    "execution_summary": "• Produced 2 north-star metrics, 3 roadmap phases, 3 open risks (2 regulatory, 1 market).\n• Key reconciliation: all 3 Amber/Red constraints (CON-01, CON-02, CON-03) are covered by open_risks — CON-01 got its own entry (OR-01) since it's the Red item with the most distinct mitigation path; CON-02 and CON-03 were grouped into one combined entry (OR-02) since both are the same underlying 'compliance workflow design' concern. Coverage confirmed, not forced into a rigid 1:1 count.\n• viability_score: 7.4 — clears qg-L1-viability-score (≥7); no HITL escalation needed.\n• Knowledge bases consulted: none — synthesis-only agent.\n• Guardrails evaluated: gr-L1-output-schema-validator (pass), gr-L1-pii-detection (pass), gr-L1-hallucination-check (pass), gr-L1-consistency-check (pass — every regulatory constraint_id appears in at least one open_risks.related_ids).\n• Tools invoked: none — publishing is L1-confluence-publisher's job, not this agent's.\n• Gaps flagged: none beyond what's already captured in open_risks."
+    "execution_summary": "• Produced 2 north-star metrics, 3 roadmap phases, 3 open risks (2 regulatory, 1 market).\n• Key reconciliation: all 3 Amber/Red constraints (CON-01, CON-02, CON-03) are covered by open_risks — CON-01 got its own entry (OR-01) since it's the Red item with the most distinct mitigation path; CON-02 and CON-03 were grouped into one combined entry (OR-02) since both are the same underlying 'compliance workflow design' concern. Coverage confirmed, not forced into a rigid 1:1 count.\n• viability_score: 6.0 — below qg-L1-viability-score (≥7), capped upstream by the Red constraint CON-01; reported honestly, HITL routing is the workflow's call.\n• Knowledge bases consulted: none — synthesis-only agent.\n• Guardrails evaluated: gr-L1-output-schema-validator (pass), gr-L1-pii-detection (pass), gr-L1-hallucination-check (pass), gr-L1-consistency-check (pass — every regulatory constraint_id appears in at least one open_risks.related_ids).\n• Tools invoked: none — publishing is L1-confluence-publisher's job, not this agent's.\n• Gaps flagged: none beyond what's already captured in open_risks."
   }
 }

@@ -1,32 +1,162 @@
 {
   "agent_id": "L1-vision-regulatory-feasibility-checker-evaluator",
-  "agent_version": "1.0.0",
+  "agent_version": "2.0.0",
   "execution_id": "exec-d7e8f9a0",
   "workflow_execution_id": "wf-a17c5e92",
   "status": "success",
   "content": {
-    "type": "evaluation_result",
-    "schema_version": "1.0",
+    "type": "regulatory_feasibility",
+    "schema_version": "2.0",
     "items": {
-      "scores": {
-        "faithfulness": 0.93,
-        "hallucination": 0.03,
-        "consistency": 0.95,
-        "relevance": 0.9,
-        "reasoning_quality": 0.9,
-        "citation_completeness": 1.0
-      },
-      "overall_score": 9.0,
-      "pass": true,
-      "findings": [
-        { "id": "FND-01", "gate": "Severity-mismatch check", "status": "pass", "detail": "All 4 constraints' labels (Red/Amber/Amber/Green) are supported by their rationale text — no mismatch." },
-        { "id": "FND-02", "gate": "Discount validation", "status": "pass", "detail": "overall_status discounts Red to Amber. Verified precondition: CON-01 (Red) has a genuine, non-legal-review mitigation (facilitation-only design); CON-02 and CON-03 (Amber) also have genuine mitigations. Discount is valid." },
-        { "id": "FND-03", "gate": "Citation completeness (100% check)", "status": "pass", "detail": "All 4 constraints cite a real, specific regulation/section, cross-checked against kb-L1-regulatory-frameworks-index's category list — none are implausible for a food-domain platform." },
-        { "id": "FND-04", "gate": "evaluation.md Quality Gates — no Red silently dropped", "status": "pass", "detail": "CON-01 (the sole Red item) is present, correctly labeled, and its mitigation is concrete." }
+      "constraints": [
+        {
+          "id": "CON-01",
+          "name": "Food Business Operator (FBO) status",
+          "status": "Red",
+          "citation": { "source_reference": "kb-L2-domain-regulatory#registration-licensing", "regulation": "Regulation (EC) 852/2004 (retained UK law), Regulation (EC) 178/2002 (General Food Law)" },
+          "rationale_summary": "If HarvestLink takes possession or relabels food instead of just facilitating data/matching, it becomes an FBO with inspection duties.",
+          "mitigation_summary": "Platform must operate strictly as a data/matching and documentation layer; producers and distributors remain the FBOs, never HarvestLink.",
+          "requires_legal_review": false,
+          "confidence": 0.75,
+          "reasoning": "Red label re-derived and confirmed: the naive design would trigger FBO status. The facilitation-only mitigation is precedented for UK marketplace platforms, so no legal-review flag is needed."
+        },
+        {
+          "id": "CON-02",
+          "name": "Traceability record integrity",
+          "status": "Amber",
+          "citation": { "source_reference": "kb-L2-domain-regulatory#distribution-cold-chain", "regulation": "Regulation (EC) 178/2002, Article 18 (one step back, one step forward)" },
+          "rationale_summary": "Traceability records will be relied on by buyers and enforcement during a recall — integrity needs deliberate design, not assumption.",
+          "mitigation_summary": "Require producer and distributor dual sign-off on every traceability record, with an immutable, append-only audit log.",
+          "requires_legal_review": false,
+          "confidence": 0.8,
+          "reasoning": "Amber confirmed: the requirement is well-defined and the dual-sign-off pattern is a standard technical mitigation, not a novel legal question."
+        },
+        {
+          "id": "CON-03",
+          "name": "Allergen declaration liability",
+          "status": "Amber",
+          "citation": { "source_reference": "kb-L2-domain-regulatory#allergen-labelling", "regulation": "Food Information (Amendment) (England) Regulations 2019 (\"Natasha's Law\"); Food Information Regulations 2014 / EU FIC Regulation 1169/2011" },
+          "rationale_summary": "If HarvestLink auto-generates/edits an allergen declaration without producer attestation, liability could shift onto HarvestLink.",
+          "mitigation_summary": "Allergen declarations must be producer-attested and signed off before finalising; HarvestLink is infrastructure, not the legal declarant.",
+          "requires_legal_review": false,
+          "confidence": 0.8,
+          "reasoning": "Amber confirmed against kb-L2-domain-regulatory: the liability-shifting risk and the producer-attestation mitigation are both grounded in the KB's stated facts."
+        },
+        {
+          "id": "CON-04",
+          "name": "Data protection",
+          "status": "Green",
+          "citation": { "source_reference": "kb-L1-regulatory-frameworks-index#cross-domain-index", "regulation": "UK GDPR / Data Protection Act 2018" },
+          "rationale_summary": "Standard obligation for any platform handling producer and buyer business data; not a feasibility blocker on its own.",
+          "mitigation_summary": null,
+          "requires_legal_review": false,
+          "confidence": 0.85,
+          "reasoning": "Green confirmed: an ongoing design requirement common to any B2B platform, not specific or novel to HarvestLink's model."
+        }
       ],
-      "fixes_applied": [],
-      "final_decision": "approved"
+      "overall_status": {
+        "status": "Amber",
+        "rationale_summary": "CON-01 (FBO status) is Red but has a precedented facilitation-only mitigation, so status is discounted to Amber."
+      },
+      "categories_not_applicable": [
+        { "category": "Financial crime (AML/KYC) and payments authorisation", "reason": "Contract value settles directly between producer and buyer; the platform never holds or moves funds." },
+        { "category": "International data transfer and residency", "reason": "UK-only producers, buyers and hosting; no transfer arises at this scope." },
+        { "category": "Automated decision-making and AI obligations", "reason": "Matching surfaces candidates for human selection; no decision is made about an individual." },
+        { "category": "Consumer protection and unfair trading", "reason": "Both sides are businesses; no consumer contracts are formed on the platform." },
+        { "category": "Sector-specific safety regimes beyond food", "reason": "No workplace, medicines, telecoms, energy or nuclear activity is carried on." },
+        { "category": "Employment and worker classification", "reason": "The platform coordinates contracts between businesses, not people's work." },
+        { "category": "Accessibility", "reason": "Assessed; standard WCAG-aligned design discharges the duty for a B2B interface, no separate constraint." },
+        { "category": "Sanctions and export control", "reason": "Domestic UK trade only at this scope; flagged for reassessment if export is added." },
+        { "category": "Age-restricted or conditional supply", "reason": "No age-restricted category is in scope; would need reassessment if alcohol were added." }
+      ],
+      "viability": {
+        "viability_score": 6.0,
+        "recommendation": "human_review_required",
+        "score_derivation": { "weighted_score": 7.2, "final_score": 6.0, "capped": true, "threshold": 7 },
+        "components": [
+          {
+            "id": "VC-01",
+            "name": "regulatory_posture",
+            "weight": 0.60,
+            "score": 6.0,
+            "confidence": 0.8,
+            "traced_to": "CON-01, CON-02, CON-03, CON-04",
+            "reasoning": "Re-derived independently: top of the 4-6 band, since CON-01 is Red with a precedented non-legal-review mitigation and both Ambers carry concrete design mitigations."
+          },
+          {
+            "id": "VC-02",
+            "name": "idea_clarity",
+            "weight": 0.40,
+            "score": 9.0,
+            "confidence": 0.9,
+            "traced_to": "idea-brief.json: problem_statement, target_geography, product_category",
+            "reasoning": "Re-derived from the brief itself: names who suffers the problem, how it is felt today, and a reachable, well-bounded segment."
+          }
+        ],
+        "caps_applied": [
+          { "rule": "red_constraint", "cap_value": 6.0, "triggered_by": ["CON-01"], "reason": "CON-01 is Red; a mitigation exists but the blocker is unresolved until the facilitation-only boundary is confirmed." }
+        ]
+      },
+      "open_items": [],
+      "evaluation": {
+        "scores": {
+          "faithfulness": 0.93,
+          "hallucination": 0.03,
+          "consistency": 0.95,
+          "relevance": 0.9,
+          "reasoning_quality": 0.9,
+          "citation_completeness": 1.0
+        },
+        "overall_score": 9.0,
+        "pass": true,
+        "findings": [
+          { "id": "FND-01", "gate": "Severity-mismatch check", "status": "pass", "detail": "All 4 labels (Red/Amber/Amber/Green) are supported by their rationale text — no mismatch." },
+          { "id": "FND-02", "gate": "Discount validation", "status": "pass", "detail": "Red-to-Amber discount verified: CON-01, CON-02 and CON-03 each carry a genuine, non-legal-review mitigation." },
+          { "id": "FND-03", "gate": "Citation completeness (100% check)", "status": "pass", "detail": "All 4 cite a specific regulation, cross-checked against both KBs; none contradicted by kb-L2-domain-regulatory." },
+          { "id": "FND-04", "gate": "No Red silently dropped", "status": "pass", "detail": "CON-01, the sole Red item, is present, correctly labeled, and its mitigation is concrete." },
+          { "id": "FND-05", "gate": "Category coverage sweep", "status": "pass", "detail": "Every category the framework index flags for a UK food marketplace appears as a constraint or a not-applicable entry." },
+          { "id": "FND-06", "gate": "Viability re-derivation", "status": "pass", "detail": "Re-derived 6.0 from the final constraints; matches reported. red_constraint cap correctly recorded and applied." }
+        ],
+        "fixes_applied": [],
+        "groundedness_check": {
+          "idea_brief_target_geography": "United Kingdom",
+          "document_target_geography": "United Kingdom",
+          "idea_brief_product_category": "food producer-to-foodservice marketplace and compliance platform",
+          "document_product_category": "food producer-to-foodservice marketplace and compliance platform",
+          "consistent": true,
+          "domain_kb_citations_checked": [
+            { "constraint_id": "CON-01", "citation": "Regulation (EC) 852/2004", "grounded_in_kb": true, "note": "confirmed" },
+            { "constraint_id": "CON-02", "citation": "Regulation (EC) 178/2002, Article 18", "grounded_in_kb": true, "note": "confirmed" },
+            { "constraint_id": "CON-03", "citation": "Food Information (Amendment) (England) Regulations 2019", "grounded_in_kb": true, "note": "confirmed" },
+            { "constraint_id": "CON-04", "citation": "UK GDPR / Data Protection Act 2018", "grounded_in_kb": false, "note": "not covered" }
+          ],
+          "applicable_categories": ["Food safety & standards", "Data protection", "Local registration/inspection", "Competition & consumer protection", "Advertising standards"],
+          "uncovered_categories": []
+        },
+        "viability_check": {
+          "reported_score": 6.0,
+          "rederived_score": 6.0,
+          "rederived_weighted_score": 7.2,
+          "rederived_component_scores": { "regulatory_posture": 6.0, "idea_clarity": 9.0 },
+          "caps_expected": ["red_constraint"],
+          "caps_reported": ["red_constraint"],
+          "consistent": true,
+          "clears_threshold": false
+        },
+        "final_decision": "approved"
+      }
     },
-    "execution_summary": "• overall_score: 9.0 (pass), final_decision: approved — no fixes needed.\n• Severity-mismatch check: all 4 labels supported by their rationale.\n• Discount validation: confirmed valid — every Amber/Red item has a genuine, non-legal-review mitigation.\n• Findings: 4 total, all pass.\n• Fixes applied: none.\n• Knowledge bases consulted: L1-vision-regulatory-feasibility-checker/evaluation.md, kb-L1-regulatory-frameworks-index.\n• Guardrails evaluated: gr-L1-output-schema-validator (pass), gr-L1-pii-detection (pass), gr-L1-citation-verifier (pass — 4/4 cited).\n• Gaps flagged: none — ready to proceed to L1-vision-statement-generator."
+    "artifacts": [
+      {
+        "id": "artifact-9f0a1b2c",
+        "type": "document",
+        "name": "regulatory-feasibility.md",
+        "format": "markdown",
+        "storage": { "provider": "blob storage", "location": "sid-temp/wf-a17c5e92/regulatory-feasibility.md" },
+        "description": "Regulatory feasibility assessment for HarvestLink — referenced unchanged, no fixes required a document edit",
+        "produced_by": "L1-vision-regulatory-feasibility-checker-evaluator"
+      }
+    ],
+    "execution_summary": "• overall_score 9.0 (pass), final_decision: approved — no fixes needed.\n• Severity-mismatch check: all 4 labels supported by their own rationale.\n• Discount validation: valid — every Amber/Red item has a genuine, non-legal-review mitigation.\n• viability_score re-derived 6.0 — does NOT clear qg-L1-viability-score (>=7). Weighted 7.2, red_constraint cap bound.\n• Coverage sweep: no applicable category missing from constraints or categories_not_applicable.\n• Groundedness: geography and category match idea-brief.json; no citation contradicted by kb-L2-domain-regulatory.\n• Knowledge bases consulted: the checker's evaluation.md rubric, kb-L1-regulatory-frameworks-index, kb-L2-domain-regulatory.\n• Tools invoked: blob reader (regulatory-feasibility.md, idea-brief.json — both retrieved). Writer not called; no fix changed document content.\n• Guardrails: gr-L1-regulatory-feasibility-quality-gate is configured on this agent; the result gated is the final iteration, not an interim pass.\n• Gaps flagged: none — the capped score routes to human review, which is the correct outcome for an unresolved Red."
   }
 }

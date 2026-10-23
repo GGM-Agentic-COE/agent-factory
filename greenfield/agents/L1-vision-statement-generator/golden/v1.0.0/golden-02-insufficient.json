@@ -1,12 +1,12 @@
 {
   "agent_id": "L1-vision-statement-generator",
-  "agent_version": "1.0.0",
+  "agent_version": "2.0.0",
   "execution_id": "exec-e9f0a1b2",
   "workflow_execution_id": "wf-d3e4f5a6",
   "status": "failed",
   "content": {
     "type": "vision_statement",
-    "schema_version": "1.0",
+    "schema_version": "2.0",
     "items": {},
     "artifacts": [],
     "execution_summary": "• Produced 0 items — INSUFFICIENT_CONTEXT.\n• regulatory_feasibility_items is completely empty (no constraints, no overall_status) and viability_score is null. Without a regulatory overall_status, this agent cannot populate regulatory_posture without inventing a compliance verdict — exactly the kind of fabrication the reconciliation requirement exists to prevent.\n• Reflection: considered defaulting regulatory_posture.overall_status to 'Green' to allow the rest of the document to proceed, but rejected it — asserting an unassessed regulatory posture as Green would be a hallucination, not a reasonable default.\n• Knowledge bases consulted: none.\n• Guardrails evaluated: gr-L1-hallucination-check (pass — did not default to a fabricated Green status), gr-L1-output-schema-validator (n/a — failed status), gr-L1-consistency-check (n/a — no content to check), gr-L1-pii-detection (pass).\n• Tools invoked: none.\n• Gaps flagged: pipeline error upstream — L1-vision-regulatory-feasibility-checker's output did not reach this agent; check whether that agent failed silently instead of returning a proper failed-status response."

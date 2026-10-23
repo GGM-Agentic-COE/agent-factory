@@ -1,0 +1,54 @@
+spec_version: "1.0"
+artifact_type: knowledge_base
+metadata:
+  name: kb-L2-domain-regulatory-ind
+  version: "2.1.0"
+  layer: L2
+  jurisdiction: IN   # India — re-scoped from GB on 2026-08-21
+  owner: food-domain-champion
+  content_hash: "sha256:pending"
+  last_reviewed: "2026-08-21"
+  review_cadence: quarterly
+
+purpose:
+  description: >
+    A domain-KB slot: L1-vision-regulatory-feasibility-checker's prompt and
+    spec reference this id generically, so a different vertical deployment
+    can populate the same slot with its own regulatory facts without
+    changing the agent. This deployment's slot holds food production &
+    distribution domain facts for INDIA, needed to ground a Green/Amber/Red
+    regulatory feasibility assessment: FSSAI registration/licensing tiers,
+    hygiene (Schedule 4, FoSTaC, HACCP), labelling (allergens, veg/non-veg
+    mark, Legal Metrology declarations), cold-chain and traceability rules,
+    and centre/state split mechanisms.
+    Deliberately excludes production-line/technical detail a later
+    design-phase agent would need; per the token-optimisation "condense
+    domain KB" rule (S3), vision-stage agents get PM/feasibility
+    implications only, not field-level technical schemas.
+
+    JURISDICTION IS PART OF THE SLOT. This KB holds one geography's facts.
+    A deployment targeting two geographies needs two KBs, selected by the
+    idea brief's target_geography — never one file with mixed rows, which
+    would let the agent cite an Indian rule for a UK idea.
+
+content:
+  format: markdown
+  documents:
+    - path: content/food-regulatory-facts.md
+      sections: [jurisdiction, registration-licensing, hygiene-safety, labelling, distribution-cold-chain, cross-cutting]
+  total_tokens_estimate: 900
+  chunking: by-section
+  embedding_model: text-embedding-3-small
+
+grounding_rules:
+  accessed_by: [L1-vision-regulatory-feasibility-checker, L1-vision-regulatory-feasibility-checker-evaluator]
+  visibility: "L2 — visible to L2 and below within this deployment's domain projects/squads (L3/L4); not visible to other L2 domain deployments using the same slot id"
+
+freshness:
+  trigger_for_update: "FSSAI notification or regulation amendment, revised licensing turnover thresholds, Legal Metrology rule change, or a change in the deployment's target geography"
+  note: >
+    Food regulation changes more frequently than most domains, and Indian
+    turnover thresholds are revised periodically. This KB is a starting point
+    for a feasibility assessment, not a substitute for current FSSAI
+    notifications or legal review before a licence application. The INR
+    thresholds in the content are indicative and must be confirmed.

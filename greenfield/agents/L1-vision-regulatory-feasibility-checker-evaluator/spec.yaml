@@ -3,22 +3,23 @@ spec_version: "1.0"
 artifact_type: agent
 metadata:
   name: L1-vision-regulatory-feasibility-checker-evaluator
-  version: "1.0.0"
+  version: "2.0.0"
   layer: L1
   phase: vision
   owner: agentic-ai-coe
   created: "2026-08-02"
+  updated: "2026-08-21"
 
 purpose:
-  description: "Independently scores L1-vision-regulatory-feasibility-checker's output, with zero tolerance for a Red constraint that lacks a mitigation or legal-review flag, or that appears to have been downgraded to avoid writing one."
-  input: "L1-vision-regulatory-feasibility-checker's original input plus its draft output."
-  output: "Scores, findings, any fixes applied, and a final decision."
-  business_value: "This is the highest-stakes evaluator in Phase 0 — a false negative here (a Red constraint that slips through unmitigated, or gets quietly relabeled Amber) is a compliance risk that reaches a human decision-maker as if it were already handled."
+  description: "Independently scores L1-vision-regulatory-feasibility-checker's output, with zero tolerance for a Red constraint that lacks a mitigation or legal-review flag, or that appears to have been downgraded to avoid writing one — and re-derives the viability score from the final constraints rather than accepting the one reported."
+  input: "L1-vision-regulatory-feasibility-checker's original input plus its draft output, including its viability object."
+  output: "The corrected regulatory feasibility result including the re-derived viability score, plus scores, findings, fixes applied, and a final decision."
+  business_value: "This is the highest-stakes evaluator in Phase 0 — a false negative here (a Red constraint that slips through unmitigated, or gets quietly relabeled Amber) is a compliance risk that reaches a human decision-maker as if it were already handled. Since v2.0 it also holds the gate number itself: the viability score it approves is what qg-L1-viability-score thresholds and what L1-vision-statement-generator receives, so a severity fix that fails to move the score would let a blocked idea auto-publish."
 
 prompt:
   ref: "prompts/L1-vision-regulatory-feasibility-checker-evaluator/instructions.md"
-  version: "1.0.0"
-  description: "Scores against L1-vision-regulatory-feasibility-checker/evaluation.md; re-derives severity independently rather than trusting the generator's own classification at face value."
+  version: "2.0.0"
+  description: "Scores against L1-vision-regulatory-feasibility-checker/evaluation.md; re-derives severity, category coverage, and the viability score independently rather than trusting the generator's own classification or arithmetic at face value."
 
 contract:
   input_schema: "$ref: schemas/agent-input-contract-schema.json"
@@ -31,21 +32,38 @@ contract:
       enabled: false
     required_parameters:
       original_input: { type: object, description: "The input L1-vision-regulatory-feasibility-checker received" }
-      generator_output: { type: object, description: "L1-vision-regulatory-feasibility-checker's draft items output" }
+      generator_output: { type: object, description: "L1-vision-regulatory-feasibility-checker's draft items output, including constraints, overall_status, categories_not_applicable, viability and open_items" }
+      # The rubric is NOT a request parameter. It is read from GitHub with fixed values in the prompt:
+      #   repo agentic-sdlc-knowledge-bases, branch main,
+      #   folder planning/vision-regulatory-feasiblity/L1-vision-regulatory-feasibility-checker (file evaluation.md).
+      # The KBs are NOT a request parameter either — they come from Confluence (context.knowledge_base_sources).
 
   output:
     $ref: "output_schema.json"
 
 context:
-  knowledge_bases:
-    - ref: "../L1-vision-regulatory-feasibility-checker/evaluation.md"
-    - kb-L1-regulatory-frameworks-index   # to independently sanity-check that a constraint's citation is a real, applicable regulation
+  # No KB is attached at runtime. Both regulatory KBs are READ FROM CONFLUENCE with
+  # tool-L1-confluence-reader, page ids 518422550 and 519012353 fixed in the prompt — the SAME two pages
+  # L1-vision-regulatory-feasibility-checker reads, so the coverage audit and the generator's
+  # sweep cannot diverge. The rubric (evaluation.md) is READ FROM GITHUB at a fixed location (see contract.input).
+  # Jurisdiction is read from each KB's own #jurisdiction section at runtime, never assumed here.
+  knowledge_bases: []
+  knowledge_base_sources:
+    confluence_page_ids: ["518422550", "519012353"]   # one reader call per page; which page holds which KB is worked out from content
+    content:
+      - kb-L1-regulatory-frameworks-index-ind   # #jurisdiction, #cross-domain-index, #coverage-categories (sweep list)
+      - kb-L2-domain-regulatory-ind             # #jurisdiction + domain regulatory facts
   guardrails:
     - gr-L1-output-schema-validator
     - gr-L1-pii-detection
     - gr-L1-citation-verifier
     - gr-L1-regulatory-feasibility-quality-gate   # fires when THIS evaluator concludes; validates L1-vision-regulatory-feasibility-checker's RESULTANT output against its own schema+evaluation.md, zero-tolerance mitigation rule re-checked directly (guardrails/gr-L1-regulatory-feasibility-quality-gate)
-  tools: []
+  tools:
+    - tool-L1-confluence-reader        # reads BOTH regulatory KBs — page ids 518422550 and 519012353, fixed in the prompt, same as the generator; read-only
+    - tool-L1-github-reader-using-app  # reads the rubric (evaluation.md) ONLY — repo agentic-sdlc-knowledge-bases, branch main, fixed folder; one call
+    - tool-L1-azure-blob-reader      # reads regulatory-feasibility.md and idea-brief.json for full-text and groundedness checks
+    - tool-L1-azure-blob-writer      # re-saves regulatory-feasibility.md when a fix changes its content
+    - tool-L1-confluence-writer      # ONLY for rule 6a: every escalate_to_hitl run → "<idea title> - Regulatory Feasibility - Need Review" page, space_key 514162689
 
 quality:
   evaluation_ref: "evaluation.md"
@@ -53,11 +71,16 @@ quality:
   hallucination_check: true
   consistency_check: true
 
+quality_gates_owned:
+  qg-L1-viability-score:
+    threshold: 7
+    description: "The viability score is re-derived here from the FINAL post-fix constraints and emitted as items.viability. This evaluator's number, not the generator's, is what the gate thresholds and what L1-vision-statement-generator receives."
+
 performance:
-  target_latency_seconds: 20
-  max_token_budget: 6000
+  target_latency_seconds: 30   # raised from 20: the category coverage sweep plus the score re-derivation
+  max_token_budget: 8000
 
 versioning:
-  input_version: "1.0"
-  output_version: "1.0"
+  input_version: "2.0"
+  output_version: "2.0"
   instruction_hash: "sha256:pending"

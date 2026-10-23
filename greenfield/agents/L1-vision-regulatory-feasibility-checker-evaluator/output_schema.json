@@ -1,10 +1,10 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "L1-vision-regulatory-feasibility-checker-evaluator-output-schema-v1.0",
+  "$id": "L1-vision-regulatory-feasibility-checker-evaluator-output-schema-v2.0",
   "title": "EvaluatorItems",
-  "description": "Shared shape across all Phase 0 evaluator agents (S6 pattern). Scores are read from the paired generator's evaluation.md at runtime — this schema does not duplicate the rubric, only the result shape.",
+  "description": "Shape of items.evaluation for L1-vision-regulatory-feasibility-checker-evaluator, extending the shared Phase 0 evaluator shape (S6 pattern). Scores are read from the paired generator's evaluation.md at runtime — this schema does not duplicate the rubric, only the result shape. The evaluator re-emits the generator's full result (constraints, overall_status, categories_not_applicable, viability, open_items — see the generator's output_schema.json) with this object attached under items.evaluation. v2.0 adds viability_check, since the score the generator now owns is re-derived here from the final post-fix constraints rather than accepted as reported.",
   "type": "object",
-  "required": ["scores", "overall_score", "pass", "findings", "fixes_applied", "final_decision"],
+  "required": ["scores", "overall_score", "findings", "fixes_applied", "viability_check", "final_decision"],
   "properties": {
     "scores": {
       "type": "object",
@@ -19,16 +19,15 @@
       }
     },
     "overall_score": { "type": "number", "minimum": 0.0, "maximum": 10.0 },
-    "pass": { "type": "boolean", "description": "overall_score >= the paired generator's spec.yaml quality.min_score" },
     "findings": {
       "type": "array",
+      "description": "Problems found only — a check that found nothing gets no entry",
       "items": {
         "type": "object",
-        "required": ["id", "gate", "status", "detail"],
+        "required": ["id", "check", "detail"],
         "properties": {
           "id": { "type": "string", "pattern": "^FND-[0-9]{2}$" },
-          "gate": { "type": "string", "description": "Which evaluation.md Quality Gate or Reflection Checklist item this finding is about" },
-          "status": { "type": "string", "enum": ["pass", "fail"] },
+          "check": { "type": "string", "description": "Which evaluation.md check or reflection checklist item this finding is about" },
           "detail": { "type": "string", "minLength": 10 }
         }
       }
@@ -47,10 +46,100 @@
         }
       }
     },
+    "groundedness_check": {
+      "type": "object",
+      "description": "Whether the assessment is grounded in the actual idea and in domain facts, and whether every applicable regulator category was swept",
+      "required": ["consistent"],
+      "properties": {
+        "brief_geography": { "type": ["string", "null"], "description": "As parsed from idea-brief.json" },
+        "document_geography": { "type": ["string", "null"], "description": "As stated in regulatory-feasibility.md" },
+        "brief_category": { "type": ["string", "null"] },
+        "document_category": { "type": ["string", "null"] },
+        "consistent": { "type": "boolean", "description": "false is always a fail finding — a mismatch means the assessment may have been run against the wrong idea" },
+        "citations_checked_count": { "type": "integer", "minimum": 0, "description": "How many citations were checked against the domain KB. EXCEPTIONS-ONLY reporting: the ones that passed are carried as this count, never as per-constraint entries — a roll-call grows with the assessment and pushes the response past the output rail's payload ceiling" },
+        "citation_problems": {
+          "type": "array",
+          "description": "Only citations the domain KB contradicted or did not cover. Empty when every citation checked out",
+          "items": {
+            "type": "object",
+            "required": ["constraint_id", "citation", "note"],
+            "properties": {
+              "constraint_id": { "type": "string", "pattern": "^CON-[0-9]{2}$" },
+              "citation": { "type": "string", "description": "Regulation name only — never the rationale text" },
+              "note": { "type": "string", "enum": ["contradicted", "not covered"] }
+            }
+          }
+        },
+        "uncovered_categories": { "type": "array", "items": { "type": "string" }, "description": "Applicable categories present in neither constraints nor categories_not_applicable — non-empty is always a fail finding. Only the gaps are listed; categories that were covered are never enumerated" },
+        "kb_declared_jurisdiction": { "type": ["string", "null"], "description": "ISO 3166-1 alpha-2 the attached KBs declare in their #jurisdiction sections" },
+        "jurisdiction_consistent": { "type": "boolean", "description": "false is always a fail finding — see the jurisdiction audit in the prompt" },
+        "out_of_jurisdiction_citations": {
+          "type": "array",
+          "description": "Citations belonging to a country other than the resolved jurisdiction — always a fail finding, never excused as 'not covered'",
+          "items": {
+            "type": "object",
+            "required": ["constraint_id", "citation", "belongs_to"],
+            "properties": {
+              "constraint_id": { "type": "string", "pattern": "^CON-[0-9]{2}$" },
+              "citation": { "type": "string" },
+              "belongs_to": { "type": "string", "description": "The jurisdiction the cited instrument actually belongs to" }
+            }
+          }
+        },
+        "national_only_constraints": { "type": "array", "items": { "type": "string", "pattern": "^CON-[0-9]{2}$" }, "description": "Constraints answered only at national level where a sub-national layer also binds" }
+      }
+    },
+    "viability_check": {
+      "type": "object",
+      "description": "The score re-derived from the FINAL post-fix constraints, compared against what the generator reported. The derivation runs one way only, from the constraints to the number — never adjusted to move final_score toward a wanted side of the threshold.",
+      "required": ["reported_score", "rederived_score", "caps_expected", "caps_reported", "consistent"],
+      "properties": {
+        "reported_score": { "type": ["number", "null"], "minimum": 0.0, "maximum": 10.0, "description": "viability.viability_score as the generator submitted it; null if it emitted none" },
+        "rederived_score": { "type": "number", "minimum": 0.0, "maximum": 10.0, "description": "The lowest of rederived_weighted_score and every cap in caps_expected. This is the number emitted in items.viability" },
+        "rederived_weighted_score": { "type": "number", "minimum": 0.0, "maximum": 10.0, "description": "(regulatory_posture x 0.60) + (idea_clarity x 0.40), before caps" },
+        "rederived_component_scores": {
+          "type": "object",
+          "required": ["regulatory_posture", "idea_clarity"],
+          "properties": {
+            "regulatory_posture": { "type": "number", "minimum": 0.0, "maximum": 10.0 },
+            "idea_clarity": { "type": "number", "minimum": 0.0, "maximum": 10.0 }
+          }
+        },
+        "caps_expected": {
+          "type": "array",
+          "items": { "type": "string", "enum": ["red_constraint", "requires_legal_review", "regulatory_overall_red"] },
+          "description": "The caps the final constraints actually trigger"
+        },
+        "caps_reported": {
+          "type": "array",
+          "items": { "type": "string", "enum": ["red_constraint", "requires_legal_review", "regulatory_overall_red"] },
+          "description": "The caps the generator recorded. A cap in caps_expected but not here is a fail finding"
+        },
+        "consistent": { "type": "boolean", "description": "true only when reported_score equals rederived_score and caps_reported covers caps_expected" },
+        "clears_threshold": { "type": "boolean", "description": "rederived_score >= 7" }
+      },
+      "allOf": [
+        {
+          "description": "An unresolved regulatory blocker can never clear the gate — if a cap fired, the score is below threshold",
+          "if": { "properties": { "caps_expected": { "minItems": 1 } }, "required": ["caps_expected"] },
+          "then": { "properties": { "clears_threshold": { "const": false } } }
+        }
+      ]
+    },
     "final_decision": {
       "type": "string",
       "enum": ["approved", "fixed_and_approved", "escalate_to_hitl"],
-      "description": "approved = passed with no fixes needed; fixed_and_approved = failed findings were fixed and now pass; escalate_to_hitl = could not fix to a passing score"
+      "description": "approved = passed with no fixes needed; fixed_and_approved = failed findings were fixed and now pass; escalate_to_hitl = could not fix to a passing score. A Red or requires_legal_review constraint surviving into the final constraints array is always escalate_to_hitl, regardless of the evaluation score"
     }
-  }
+  },
+  "allOf": [
+    {
+      "description": "A viability derivation that does not match what was reported cannot be recorded as approved-without-fixes",
+      "if": {
+        "properties": { "viability_check": { "properties": { "consistent": { "const": false } }, "required": ["consistent"] } },
+        "required": ["viability_check"]
+      },
+      "then": { "properties": { "final_decision": { "enum": ["fixed_and_approved", "escalate_to_hitl"] } } }
+    }
+  ]
 }
