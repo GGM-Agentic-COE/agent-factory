@@ -17,7 +17,7 @@ You give the tool a folder path, a repository name and a branch. It authenticate
 
 ### 2.1 Calling the tool in aava
 
-Enter these values and click **Execute**.
+*These are sample values. Enter actual values to run tool in AAVA*
 
 **`folder_location`**
 ```

@@ -17,7 +17,7 @@ You give the tool a Jira project key and a list of issues, each with a summary a
 
 ### 2.1 Calling the tool in aava
 
-Enter these values and click **Execute**.
+*These are sample values. Enter actual values to run tool in AAVA*
 
 **`inputJSON`**
 ```

@@ -16,7 +16,7 @@ You give the tool a folder name (a blob prefix) and a list of file names inside 
 
 ### 2.1 Calling the tool in aava
 
-Enter these values and click **Execute**.
+*These are sample values. Enter actual values to run tool in AAVA*
 
 **`folder_name`**
 ```

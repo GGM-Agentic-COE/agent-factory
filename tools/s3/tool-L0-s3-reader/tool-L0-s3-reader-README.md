@@ -16,7 +16,7 @@ You give the tool a folder name (an S3 key prefix). It lists every object under 
 
 ### 2.1 Calling the tool in aava
 
-Enter these values and click **Execute**.
+*These are sample values. Enter actual values to run tool in AAVA*
 
 **`folder_name`**
 ```

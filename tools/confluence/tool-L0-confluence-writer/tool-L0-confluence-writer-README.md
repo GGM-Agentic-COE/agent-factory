@@ -17,7 +17,7 @@ You give the tool a page title, the body content in Markdown, and where to write
 
 ### 2.1 Calling the tool in aava
 
-Enter these values and click **Execute**.
+*These are sample values. Enter actual values to run tool in AAVA*
 
 **`title`**
 ```

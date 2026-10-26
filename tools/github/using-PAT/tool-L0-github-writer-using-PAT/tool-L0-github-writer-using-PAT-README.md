@@ -17,7 +17,7 @@ You give the tool a list of files (path and content), a repository name, a new b
 
 ### 2.1 Calling the tool in aava
 
-Enter these values and click **Execute**.
+*These are sample values. Enter actual values to run tool in AAVA*
 
 **`files`**
 ```

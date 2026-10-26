@@ -17,7 +17,7 @@ You give the tool a repository, a source branch, a pull request title and option
 
 ### 2.1 Calling the tool in aava
 
-Enter these values and click **Execute**.
+*These are sample values. Enter actual values to run tool in AAVA*
 
 **`repo_name`**
 ```

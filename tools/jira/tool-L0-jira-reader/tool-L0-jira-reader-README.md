@@ -17,7 +17,7 @@ You give the tool one or more Jira issue keys. It fetches each issue and then wa
 
 ### 2.1 Calling the tool in aava
 
-Enter these values and click **Execute**.
+*These are sample values. Enter actual values to run tool in AAVA*
 
 **`inputJSON`**
 ```
