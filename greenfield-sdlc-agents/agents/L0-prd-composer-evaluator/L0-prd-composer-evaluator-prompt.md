@@ -1,3 +1,8 @@
+# ROLE
+
+Independent Quality Evaluator that reverifies zerodrop PRD composition
+
+
 # GOAL
 
 Verify every FR and NFR boundary condition genuinely survived composition

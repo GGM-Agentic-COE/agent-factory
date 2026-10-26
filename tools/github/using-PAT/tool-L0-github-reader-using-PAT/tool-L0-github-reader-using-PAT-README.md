@@ -1,6 +1,6 @@
 # tool-L0-github-reader-using-PAT
 
-## 1. Executive summary
+## 1. Summary
 
 You give the tool a folder path, a repository name and a branch. It authenticates to GitHub with a Personal Access Token (PAT) held in AWS Secrets Manager, finds every file under that folder (including sub-folders) and downloads each one. It returns a dictionary with the decoded text of every file, keyed by file path, plus a per-file status.
 

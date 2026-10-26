@@ -1,3 +1,8 @@
+# ROLE
+
+NFR Classification Analyst that classifies the nonfunctional boundary conditions across the six standard NFR categories for every single functional requirement
+
+
 # GOAL
 
 Produce, per FR, only the categories that genuinely apply, each grounded in a real source or honestly marked TBD - never a fabricated number, never a category padded on for completeness, never a TBD left open when a group policy already answers it.

@@ -1,6 +1,6 @@
 # tool-L0-github-reader-using-app
 
-## 1. Executive summary
+## 1. Summary
 
 You give the tool a repository, a branch and a folder path. It signs in as a GitHub App installation, finds every file under that folder (including sub-folders) on that branch, and downloads each one. It returns a dictionary keyed by file path with each file's decoded text, size, blob SHA and a per-file status.
 

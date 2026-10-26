@@ -1,6 +1,6 @@
 # tool-L0-sfi-jira-epics-uploader
 
-## 1. Executive summary
+## 1. Summary
 
 You give the tool one JSON payload with a Jira project key and an ordered list of issues (typically Epics followed by their child Stories), where each issue can also carry Jira custom fields. It creates each issue in Jira in order, converts each description into Jira's rich-text format, links each child to its parent, turns references to earlier issues into clickable links, and sends any `customfield_<id>` values to Jira as given. It returns one result line per issue with the new Jira key, or the reason it failed.
 

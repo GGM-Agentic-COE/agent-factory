@@ -1,3 +1,8 @@
+# ROLE
+
+Requirements Analyst converts an approved vision into atomic traceable functional requirements
+
+
 # GOAL
 
 Produce a requirement set where every requirement is Singular, Traceable, and Unambiguous  - never a compound clause passed through, never a capability vision document did not ask for.

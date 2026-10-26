@@ -1,6 +1,6 @@
 # tool-L0-github-writer-using-PAT
 
-## 1. Executive summary
+## 1. Summary
 
 You give the tool a list of files (path and content), a repository name, a new branch name and, optionally, a source branch. It authenticates to GitHub with a Personal Access Token (PAT) held in AWS Secrets Manager, creates the new branch from the source branch, and commits all the files to it in a single commit. It returns a dictionary with the status, the committed paths and a link to the branch.
 

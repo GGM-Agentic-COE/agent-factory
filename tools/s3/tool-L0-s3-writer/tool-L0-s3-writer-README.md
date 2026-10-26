@@ -1,6 +1,6 @@
 # tool-L0-s3-writer
 
-## 1. Executive summary
+## 1. Summary
 
 You give the tool a folder name (an S3 key prefix), a file name and some text. It writes the text as a UTF-8 object at `<folder_name>/<file_name>` in the configured S3 bucket. It returns a dictionary with the status, the object key, the size written and the upload time.
 

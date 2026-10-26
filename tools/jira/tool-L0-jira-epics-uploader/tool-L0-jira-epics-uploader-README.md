@@ -1,6 +1,6 @@
 # tool-L0-jira-epics-uploader
 
-## 1. Executive summary
+## 1. Summary
 
 You give the tool one JSON payload with a Jira project key and an ordered list of issues (typically Epics followed by their child Stories). It creates each issue in Jira in order, converts each description into Jira's rich-text format, links each child to its parent, and turns references to earlier issues into clickable links. It returns one result line per issue with the new Jira key and its browse URL, or the reason it failed.
 

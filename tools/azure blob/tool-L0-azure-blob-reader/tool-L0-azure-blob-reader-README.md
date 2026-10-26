@@ -1,6 +1,6 @@
 # tool-L0-azure-blob-reader
 
-## 1. Executive summary
+## 1. Summary
 
 You give the tool a folder name (a blob prefix). It lists every blob under that prefix in the configured Azure Blob Storage container and downloads each one. It returns all of the files' contents in one formatted text block, with the blob name shown above each file.
 

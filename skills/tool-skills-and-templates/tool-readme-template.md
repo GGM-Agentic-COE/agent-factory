@@ -1,6 +1,6 @@
 # {{tool-name}}
 
-## 1. Executive summary
+## 1.  Summary
 
 {{2–3 sentences: what goes in, what the tool does, what comes out.}}
 
@@ -16,7 +16,7 @@
 
 ### 2.1 Calling the tool in aava
 
-Enter these values and click **Execute**.
+*These are sample values. Enter actual values to run tool in AAVA*
 
 **`{{param_1}}`**
 ```

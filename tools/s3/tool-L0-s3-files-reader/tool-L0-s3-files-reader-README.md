@@ -1,6 +1,6 @@
 # tool-L0-s3-files-reader
 
-## 1. Executive summary
+## 1. Summary
 
 You give the tool a folder name (an S3 key prefix) and a list of file names. It looks up each named file in that folder of the configured S3 bucket and downloads it. It returns the contents of all requested files in one formatted text block, with last-modified time and size for each file it found, and a marker for each file it could not read.
 
