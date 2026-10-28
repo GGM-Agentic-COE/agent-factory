@@ -1,0 +1,90 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "agents/L0-planning-impact-assessor-evaluator/output_schema.json",
+  "title": "L0-planning-impact-assessor-evaluator AgentOutput",
+  "description": "Evaluation result for L0-planning-impact-assessor. items hold scores, findings (each citing an id) and fixes; the evaluated document lives ONLY in artifacts[0].content. storage.location must be the literal URL returned by tool-L1-confluence-create-page and is omitted if the write failed.",
+  "type": "object",
+  "required": ["agent_id", "agent_version", "execution_id", "workflow_execution_id", "status", "content"],
+  "additionalProperties": false,
+  "properties": {
+    "agent_id": {"const": "L0-planning-impact-assessor-evaluator", "description": "Agent name"},
+    "agent_version": {"type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$", "description": "Semantic version"},
+    "execution_id": {"type": "string", "pattern": "^exec-[0-9a-f-]{36}$", "description": "New id for this evaluation run"},
+    "workflow_execution_id": {"type": "string", "pattern": "^wf-[0-9a-f-]{36}$", "description": "Inherited from generator_output (new only on INSUFFICIENT_CONTEXT with no upstream id)"},
+    "status": {"enum": ["success", "failed"], "description": "failed only on INSUFFICIENT_CONTEXT"},
+    "content": {
+      "type": "object",
+      "required": ["type", "schema_version", "items", "artifacts", "execution_summary"],
+      "additionalProperties": false,
+      "properties": {
+        "type": {"const": "evaluation_result"},
+        "schema_version": {"const": "1.0"},
+        "items": {
+          "type": "object",
+          "required": ["scores", "overall_score", "pass", "findings", "fixes_applied", "final_decision"],
+          "additionalProperties": false,
+          "properties": {
+            "scores": {"$ref": "#/$defs/Scores"},
+            "overall_score": {"type": ["number", "null"], "minimum": 0, "maximum": 10, "description": "0-10; null on INSUFFICIENT_CONTEXT"},
+            "pass": {"type": "boolean", "description": "true iff thresholds met and no unresolved fail finding"},
+            "findings": {"type": "array", "items": {"$ref": "#/$defs/Finding"}},
+            "fixes_applied": {"type": "array", "items": {"$ref": "#/$defs/Fix"}},
+            "corrected_items": {"type": "object", "description": "Corrected generator items (nodes/edges/cycle_check/critical_path and/or impact_assessment) when a fix changed them (rule 12b)"},
+            "final_decision": {"enum": ["approved", "fixed_and_approved", "escalate_to_hitl"]}
+          }
+        },
+        "artifacts": {"type": "array", "maxItems": 1, "items": {"$ref": "#/$defs/Artifact"}, "description": "Empty only when no generator document exists"},
+        "execution_summary": {"type": "string", "pattern": "^•", "description": "Plain-text bullets; must state the Confluence URL or the write failure reason"}
+      }
+    }
+  },
+  "$defs": {
+    "Score": {"type": ["number", "null"], "minimum": 0, "maximum": 1},
+    "Scores": {
+      "type": "object", "additionalProperties": false,
+      "required": ["faithfulness", "hallucination", "consistency", "relevance", "reasoning_quality", "citation_completeness"],
+      "properties": {
+        "faithfulness": {"$ref": "#/$defs/Score"}, "hallucination": {"$ref": "#/$defs/Score", "description": "Lower is better"},
+        "consistency": {"$ref": "#/$defs/Score"}, "relevance": {"$ref": "#/$defs/Score"},
+        "reasoning_quality": {"$ref": "#/$defs/Score"}, "citation_completeness": {"$ref": "#/$defs/Score"}
+      }
+    },
+    "Finding": {
+      "type": "object", "required": ["id", "gate", "status", "detail"], "additionalProperties": false,
+      "properties": {
+        "id": {"type": "string", "pattern": "^FND-\\d{2}$", "description": "Sequential finding id"},
+        "gate": {"type": "string", "description": "Gate / processing rule checked"},
+        "status": {"enum": ["pass", "fail"]},
+        "detail": {"type": "string", "minLength": 20, "description": "Re-derived result with cited ids"},
+        "resolution": {"enum": ["n/a", "fixed", "escalated", "approved-as-is"], "description": "What happened to a fail finding"}
+      }
+    },
+    "Fix": {
+      "type": "object", "required": ["id", "finding_id", "description", "before", "after"], "additionalProperties": false,
+      "properties": {
+        "id": {"type": "string", "pattern": "^FIX-\\d{2}$"},
+        "finding_id": {"type": "string", "pattern": "^FND-\\d{2}$"},
+        "description": {"type": "string", "description": "What changed and the source-data reasoning"},
+        "before": {"type": "string"}, "after": {"type": "string"}
+      }
+    },
+    "Artifact": {
+      "type": "object", "required": ["id", "name", "format", "content", "storage", "description", "produced_by"], "additionalProperties": false,
+      "properties": {
+        "id": {"const": "artifact-001"},
+        "name": {"type": "string", "pattern": "-impact-assessment\\.md$"},
+        "format": {"const": "md"},
+        "content": {"type": "string", "pattern": "^# Impact Assessment: ", "description": "Full evaluated markdown"},
+        "storage": {
+          "type": "object", "required": ["provider"], "additionalProperties": false,
+          "properties": {
+            "provider": {"const": "confluence"},
+            "location": {"type": "string", "format": "uri", "description": "Literal confluence_page_url from the writer tool; omitted if the write failed"}
+          }
+        },
+        "description": {"type": "string"},
+        "produced_by": {"const": "L0-planning-impact-assessor-evaluator"}
+      }
+    }
+  }
+}

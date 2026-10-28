@@ -1,0 +1,54 @@
+{
+  "expected_output": {
+    "agent_id": "L0-planning-impact-assessor",
+    "agent_version": "1.0.0",
+    "execution_id": "exec-e8a8d83f-7570-50db-a87c-5e63c4e91a39",
+    "workflow_execution_id": "wf-2d83bf55-b63d-5f2f-a027-dcf67cf74fd0",
+    "status": "failed",
+    "content": {
+      "type": "impact_assesment",
+      "schema_version": "1.0",
+      "items": {
+        "impact_assessment": {
+          "product_name": "",
+          "overall_impact_level": null,
+          "executive_summary": "",
+          "components_identified": [],
+          "existing_systems_impacted": 0,
+          "existing_systems_excluded": 0,
+          "external_dependencies_count": 0,
+          "flags": [
+            "INSUFFICIENT_CONTEXT: prd_output.status = failed; no FR-NNN available to assess"
+          ]
+        },
+        "dependency_graph": {
+          "nodes": [],
+          "edges": [],
+          "cycle_check": {
+            "status": "NOT_RUN",
+            "cycles_found": []
+          },
+          "critical_path": {
+            "nodes": [],
+            "rationale": "Not computed \u2014 INSUFFICIENT_CONTEXT (upstream PRD failed)"
+          }
+        }
+      },
+      "artifacts": [],
+      "execution_summary": "\u2022 Produced 0 items \u2014 INSUFFICIENT_CONTEXT.\n\u2022 Reason: prd_output.status = failed (upstream L0-requirements-prd-composer could not extract functional requirements).\n\u2022 service_catalog (1 service) and cmdb_export (1 CI) were present but not assessed \u2014 assessment without FRs would be fabrication.\n\u2022 Graph: not built; cycle_check NOT_RUN; no critical path.\n\u2022 KBs consulted: none \u2014 processing halted at input validation before KB fetch.\n\u2022 Tools invoked: none.\n\u2022 Artifact: none produced.\n\u2022 Suggested: re-run L0-requirements-prd-composer and pass a prd_output with status success."
+    }
+  },
+  "evaluation_criteria": {
+    "expected_status": "failed",
+    "must": [
+      "artifacts empty",
+      "no FR/CI/SVC invented",
+      "execution_summary states INSUFFICIENT_CONTEXT with reason and next step",
+      "workflow_execution_id inherited from prd_output"
+    ],
+    "scores": {
+      "hallucination": "0.00",
+      "faithfulness": "1.00"
+    }
+  }
+}
