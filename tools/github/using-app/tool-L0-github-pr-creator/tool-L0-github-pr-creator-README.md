@@ -1,6 +1,6 @@
 # tool-L0-github-pr-creator
 
-## 1. Executive summary
+## 1. Summary
 
 You give the tool a repository, a source branch, a pull request title and optionally a destination branch. It signs in as a GitHub App installation, checks that both branches exist and that the source branch has commits the destination lacks, and opens a pull request from the source into the destination. It returns a dictionary with the status, the pull request number and its link, or the already-open pull request if one exists for the same branches.
 
@@ -17,7 +17,7 @@ You give the tool a repository, a source branch, a pull request title and option
 
 ### 2.1 Calling the tool in aava
 
-Enter these values and click **Execute**.
+*These are sample values. Enter actual values to run tool in AAVA*
 
 **`repo_name`**
 ```

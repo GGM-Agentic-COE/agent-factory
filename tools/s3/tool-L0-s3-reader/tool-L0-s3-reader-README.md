@@ -1,6 +1,6 @@
 # tool-L0-s3-reader
 
-## 1. Executive summary
+## 1. Summary
 
 You give the tool a folder name (an S3 key prefix). It lists every object under that prefix in the configured S3 bucket and downloads each one. It returns all of the files' contents in one formatted text block, with file name, last-modified time and size shown for each.
 
@@ -16,7 +16,7 @@ You give the tool a folder name (an S3 key prefix). It lists every object under 
 
 ### 2.1 Calling the tool in aava
 
-Enter these values and click **Execute**.
+*These are sample values. Enter actual values to run tool in AAVA*
 
 **`folder_name`**
 ```

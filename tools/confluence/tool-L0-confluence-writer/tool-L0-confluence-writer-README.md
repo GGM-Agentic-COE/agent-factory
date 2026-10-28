@@ -1,6 +1,6 @@
 # tool-L0-confluence-writer
 
-## 1. Executive summary
+## 1. Summary
 
 You give the tool a page title, the body content in Markdown, and where to write it (a space key or a folder). It converts the Markdown to Confluence storage format, then either creates a new page or, if a page with that title already exists in the space, appends the content to the bottom of it. It returns a short confirmation with the page ID, space key, title and new version number.
 
@@ -17,7 +17,7 @@ You give the tool a page title, the body content in Markdown, and where to write
 
 ### 2.1 Calling the tool in aava
 
-Enter these values and click **Execute**.
+*These are sample values. Enter actual values to run tool in AAVA*
 
 **`title`**
 ```

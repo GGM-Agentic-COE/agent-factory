@@ -1,6 +1,6 @@
 # tool-L0-confluence-reader
 
-## 1. Executive summary
+## 1. Summary
 
 You give the tool the numeric ID of a Confluence page. It fetches the page through the Confluence REST API, converts the body from Confluence storage format (XHTML) to Markdown, and returns the page title as a `#` heading followed by the Markdown body.
 
@@ -17,7 +17,7 @@ You give the tool the numeric ID of a Confluence page. It fetches the page throu
 
 ### 2.1 Calling the tool in aava
 
-Enter these values and click **Execute**.
+*These are sample values. Enter actual values to run tool in AAVA*
 
 **`page_id`**
 ```

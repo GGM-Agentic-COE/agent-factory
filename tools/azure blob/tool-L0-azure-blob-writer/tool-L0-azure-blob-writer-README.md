@@ -1,6 +1,6 @@
 # tool-L0-azure-blob-writer
 
-## 1. Executive summary
+## 1. Summary
 
 You give the tool a folder name, a file name and the text content. It writes the content as a blob at `<folder_name>/<file_name>` in the configured Azure Blob Storage container, creating the container and a folder-marker blob if needed. It returns a short status message, one line per step.
 
@@ -16,7 +16,7 @@ You give the tool a folder name, a file name and the text content. It writes the
 
 ### 2.1 Calling the tool in aava
 
-Enter these values and click **Execute**.
+*These are sample values. Enter actual values to run tool in AAVA*
 
 **`folder_name`**
 ```

@@ -1,6 +1,6 @@
 # tool-L0-jira-reader
 
-## 1. Executive summary
+## 1. Summary
 
 You give the tool one or more Jira issue keys. It fetches each issue and then walks down its child work items (children, their children, and so on) up to a set depth. It returns one clean JSON tree per key with title, status, plain-text description, labels, assignee, due date, reporter and the nested children.
 
@@ -17,7 +17,7 @@ You give the tool one or more Jira issue keys. It fetches each issue and then wa
 
 ### 2.1 Calling the tool in aava
 
-Enter these values and click **Execute**.
+*These are sample values. Enter actual values to run tool in AAVA*
 
 **`inputJSON`**
 ```

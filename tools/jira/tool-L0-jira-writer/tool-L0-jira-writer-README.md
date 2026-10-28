@@ -1,6 +1,6 @@
 # tool-L0-jira-writer
 
-## 1. Executive summary
+## 1. Summary
 
 You give the tool a Jira project key and a list of issues, each with a summary and a description. It creates the issues one by one, converting each description into Jira's rich-text format and turning logical IDs such as `E1` into links to issues created earlier in the same call. It returns one line per issue with the new Jira key or the failure reason.
 
@@ -17,7 +17,7 @@ You give the tool a Jira project key and a list of issues, each with a summary a
 
 ### 2.1 Calling the tool in aava
 
-Enter these values and click **Execute**.
+*These are sample values. Enter actual values to run tool in AAVA*
 
 **`inputJSON`**
 ```

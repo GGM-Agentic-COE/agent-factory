@@ -1,0 +1,67 @@
+# Agent Specification Document
+spec_version: "1.0"
+artifact_type: agent
+metadata:
+  name: L0-prd-composer-evaluator
+  version: "1.0.0"
+  layer: L0
+  phase: requirements
+  owner: agentic-ai-coe
+  created: "2026-10-26"
+
+purpose:
+  description: "Independently verifies L0-prd-composer's PRD for zero-drop FR/NFR composition, citable assumptions/constraints/risks, correct table structure and absence of success metrics, fixes grounded gaps in both the JSON and the PRD markdown, and publishes the approved PRD to Confluence."
+  input: "L0-prd-composer's output held in memory (items plus the full PRD markdown in artifacts[0].content) and its original input (evaluated requirements and evaluated NFR set)."
+  output: "The corrected PRD items in the same structure the composer emits, an evaluation block (scores, findings, fixes_applied, final_decision), and an artifact pointing to the published Confluence page (null location when not published)."
+  business_value: "The PRD is the single source of truth for the planning agents, so a dropped or misattached requirement here propagates everywhere. This is the only agent permitted to publish the PRD, and nothing is published until it has been independently verified."
+
+prompt:
+  ref: "agents/L0-prd-composer-evaluator/L0-prd-composer-evaluator-prompt.md"
+  version: "1.0.0"
+  description: "Checks zero-drop FRs and per-FR NFRs by set membership, citation of every assumption/constraint/risk, ID-tagged table structure, success-metrics absence and verbatim compound splits; fixes in JSON and markdown; uploads to Confluence unless escalating."
+
+contract:
+  input_schema: "$ref: schemas/agent-input-contract-schema.json"
+  output_schema: "$ref: schemas/agent-output-schema.json"
+
+  input:
+    accepts_from_agents: [L0-prd-composer]
+    accepts_direct_input: false
+    accepts_file_upload:
+      enabled: false
+    required_parameters:
+      original_input: { type: object, description: "The input L0-prd-composer received — requirements_output and nfr_spec_output, used for zero-drop re-derivation" }
+      generator_output: { type: object, description: "L0-prd-composer's JSON output, including the full PRD markdown in artifacts[0].content" }
+      github-prd-evaluator-folder-location: { type: string, description: "GitHub folder holding the composer's evaluation file" }
+      github-prd-evaluator-repo-name: { type: string, description: "GitHub repository holding the composer's evaluation file" }
+      github-prd-evaluator-branch: { type: string, description: "GitHub branch holding the composer's evaluation file" }
+      prd-upload-confluence-location: { type: string, description: "Confluence space_key (or folder) the approved PRD is published to via tool-L0-confluence-writer" }
+
+  output:
+    $ref: "output_schema.json"   # content.type: "prd" + evaluation block + artifacts[].storage (provider: confluence) — schema file not yet created
+
+context:
+  knowledge_bases:
+    - ref: "../L0-prd-composer/evaluation.md"   # source of truth for scoring, retrieved from GitHub at runtime — never duplicated in this agent's prompt
+  guardrails:
+    - gr-L1-output-schema-validator
+    - gr-L1-pii-detection
+    - gr-L3-hallucination-detector
+    - gr-L3-citation-validator      # re-checked independently, not by trusting the composer's own pass/fail claim
+    - gr-L3-consistency-checker     # corrected JSON and PRD markdown must agree before publishing
+    - gr-L2-tool-permissions        # holds a write tool — publish only on approved / fixed_and_approved
+    - gr-L3-agent-rate-limit
+  tools:
+    - tool-L0-github-reader-using-PAT    # reads the composer's evaluation file; tool-L0-github-reader-using-app takes the same parameters if that variant is deployed instead
+    - tool-L0-confluence-writer          # publishes the final, corrected PRD; never called on escalate_to_hitl or INSUFFICIENT_CONTEXT
+
+quality:
+  evaluation_ref: "evaluation.md"   # THIS evaluator's own meta-quality bar, not the composer's rubric
+  min_score: 8.0   # evaluators are held to a higher bar than generators — a wrong finding is worse than a wrong PRD line
+  hallucination_check: true
+  consistency_check: true
+
+versioning:
+  input_version: "1.0"
+  output_version: "1.0"
+  instruction_hash: "sha256:pending"
