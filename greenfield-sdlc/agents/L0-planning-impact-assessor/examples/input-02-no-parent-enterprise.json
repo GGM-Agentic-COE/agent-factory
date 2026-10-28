@@ -1,0 +1,42 @@
+{
+  "prd_output": {
+    "agent_id": "L0-requirements-prd-composer",
+    "agent_version": "1.0.0",
+    "execution_id": "exec-17bcaee4-5640-5221-9444-b09acf6bd92a",
+    "workflow_execution_id": "wf-9914867a-57a7-5f65-a339-435b610a51f5",
+    "status": "success",
+    "content": {
+      "type": "prd",
+      "schema_version": "1.0",
+      "items": {
+        "product_name": "Volunteer Connect",
+        "functional_requirements": [
+          {
+            "id": "FR-001",
+            "title": "Volunteers register for events"
+          },
+          {
+            "id": "FR-002",
+            "title": "Organisers publish events"
+          },
+          {
+            "id": "FR-003",
+            "title": "Store volunteer contact details"
+          }
+        ],
+        "constraints": []
+      }
+    }
+  },
+  "service_catalog": {
+    "services": []
+  },
+  "cmdb_export": {
+    "export_metadata": {
+      "exported_at": "2026-10-27T00:00:00Z"
+    },
+    "configuration_items": [],
+    "relationships": []
+  },
+  "run_date": "2026-10-28"
+}
