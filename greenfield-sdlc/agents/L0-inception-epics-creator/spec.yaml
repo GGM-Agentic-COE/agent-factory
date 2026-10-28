@@ -1,0 +1,65 @@
+spec_version: '1.0'
+artifact_type: agent
+metadata:
+  name: L0-inception-epics-creator
+  version: 1.0.0
+  layer: L0
+  phase: inception
+  owner: agentic-ai-coe
+  created: '2026-10-27'
+purpose:
+  description: Convert one approved PRD into grounded business-altitude Jira Epics
+    with exact source traceability.
+  input: One approved PRD from direct input, file upload, or Confluence, plus Project
+    and source_reference_path.
+  output: AgentOutput content.type=epics
+  business_value: Prevents implementation detail and traceability loss when translating
+    approved requirements into Jira Epics.
+prompt:
+  ref: prompts/L0-inception-epics-creator/instructions.md
+  version: 1.0.0
+  description: Convert one approved PRD into grounded business-altitude Jira Epics
+    with exact source traceability.
+contract:
+  input_schema: '$ref: schemas/agent-input-contract-schema.json'
+  output_schema: '$ref: schemas/agent-output-schema.json'
+  input:
+    accepts_from_agents:
+    - any
+    accepts_direct_input: true
+    accepts_file_upload:
+      enabled: true
+      formats:
+      - .md
+      - .txt
+      - .json
+    required_parameters:
+      workflow_context:
+        type: object
+        description: Source content and workflow lineage required by the prompt.
+    optional_parameters: {}
+  output:
+    $ref: output_schema.json
+context:
+  knowledge_bases:
+  - kb-L0-epics-best-practices.md
+  guardrails:
+  - gr-L1-output-schema-validator
+  - gr-L1-pii-detection
+  - gr-L3-hallucination-detector
+  - gr-L3-citation-validator
+  - gr-L3-consistency-checker
+  - gr-L2-tool-permissions
+  - gr-L3-agent-rate-limit
+  tools:
+  - tool-L1-confluence-fetch-page
+  - tool-L1-github-reader
+quality:
+  evaluation_ref: evaluation.md
+  min_score: 7.0
+  hallucination_check: true
+  consistency_check: true
+versioning:
+  input_version: '1.0'
+  output_version: '1.0'
+  instruction_hash: sha256:8e1b47ffcc191d1d01e0b6ad109c694e7360fe954aa318e6a971294dae0ac027

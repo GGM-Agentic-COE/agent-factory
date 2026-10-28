@@ -1,0 +1,171 @@
+# Agent Specification Document
+spec_version: "1.0"
+artifact_type: agent
+
+metadata:
+  name: L0-inception-jira-epic-formatter-and-uploader
+  version: "1.0.0"
+  layer: L0
+  phase: inception
+  agent_class: utility
+  owner: agentic-ai-coe
+  created: "2026-10-28"
+
+purpose:
+  description: "Validates approved Epic and Feature outputs, uploads them to Jira in one call, and returns reconciled upload status."
+  input: "Approved Epic and Feature evaluator AgentOutputs plus optional Jira project and site parameters."
+  output: "A jira_upload_status AgentOutput containing tool outcome, issue counts, created issues, failures, drops, and reconciliation status."
+  business_value: "Provides a controlled, traceable, single-call hand-off from inception planning to Jira without exposing raw payloads or requiring downstream consumers to parse Jira responses."
+
+prompt:
+  ref: "prompts/L0-inception-jira-epic-formatter-and-uploader/instructions.md"
+  version: "1.0.0"
+  description: "Validates evaluator-approved planning content, formats an internal Jira payload, performs one upload, and reports reconciled status."
+
+contract:
+  input_schema: "$ref: schemas/agent-input-contract-schema.json"
+  output_schema: "$ref: schemas/agent-output-schema.json"
+  input:
+    accepts_from_agents:
+      - L0-inception-epics-creator-evaluator
+      - L0-inception-feature-decomposer-evaluator
+    accepts_direct_input: false
+    accepts_file_upload:
+      enabled: false
+      formats: []
+    required_parameters:
+      epic_evaluator_output:
+        type: object
+        description: "Approved AgentOutput from L0-inception-epics-creator-evaluator containing content.items.epics."
+      feature_evaluator_output:
+        type: object
+        description: "Approved AgentOutput from L0-inception-feature-decomposer-evaluator containing content.items.features."
+    optional_parameters:
+      projectKey:
+        type: string
+        default: ""
+        description: "Optional explicit Jira project-key override; otherwise the common retained Epic project is used."
+      site:
+        type: string
+        default: ""
+        description: "Optional Jira site value passed to the upload tool when required."
+      base_url:
+        type: string
+        default: ""
+        description: "Optional Jira base URL used only to construct project_url in the final status."
+    validation:
+      upstream_status: "Both inputs must have status=success."
+      upstream_evaluation: "Both content.evaluation.pass values must be true."
+      upstream_decision: "Both final_decision values must be approved or fixed_and_approved."
+      workflow_execution_id: "Both upstream workflow_execution_id values must match exactly and are inherited verbatim."
+      minimum_content: "At least one valid approved Epic must remain after validation."
+  output:
+    $ref: "output_schema.json"
+    type: jira_upload_status
+    allowed_status:
+      - success
+      - partial_success
+      - failed
+    artifacts_enabled: false
+
+context:
+  knowledge_bases: []
+  guardrails:
+    - gr-L1-output-schema-validator
+    - gr-L1-pii-detection
+    - gr-L2-tool-permissions
+    - gr-L3-agent-rate-limit
+    - gr-L3-hallucination-detector
+    - gr-L3-citation-validator
+    - gr-L3-consistency-checker
+  tools:
+    - tool-L1-sfi-jira-epics-uploader-secrets-manager
+
+processing:
+  input_ingestion:
+    source: agent_output
+    working_sets:
+      epics: "epic_evaluator_output.content.items.epics"
+      features: "feature_evaluator_output.content.items.features"
+    prohibit_creator_merge: true
+    inherit_workflow_execution_id: true
+    generate_execution_id: true
+  validation:
+    approval_required: true
+    matching_workflow_execution_ids_required: true
+    deduplicate_by_logical_id: true
+    validate_epic_feature_relationships: true
+    require_grounded_project_key: true
+    reject_blocking_content_errors: true
+  payload:
+    private: true
+    top_level_keys:
+      - projectKey
+      - issueType
+      - issues
+    top_level_issue_type: Epic
+    ordering:
+      - Epic
+      - Feature
+    description_value_types:
+      - string
+      - array_of_strings
+    emit_adf: false
+    emit_html: false
+    emit_jira_wiki_markup: false
+  tool_invocation:
+    tool: tool-L1-sfi-jira-epics-uploader-secrets-manager
+    input_parameter: inputJSON
+    maximum_invocations: 1
+    retry: false
+    invoke_only_after_validation: true
+  reconciliation:
+    parse_all_response_lines: true
+    map_results_to_submitted_summaries: true
+    report_unreconciled_results: true
+    fabricate_missing_results: false
+  persistence:
+    create_artifacts: false
+    persist_files: false
+    expose_internal_payload: false
+
+quality:
+  evaluation_ref: "evaluation.md"
+  min_score: 7.0
+  hallucination_check: true
+  consistency_check: true
+  required_checks:
+    - "Both upstream evaluator outputs are approved."
+    - "Both upstream workflow_execution_id values match."
+    - "Every submitted issue traces to evaluator-approved content."
+    - "Every Feature parentKey references an earlier submitted Epic."
+    - "All Epics precede all Features."
+    - "Every description value is a string or array of strings."
+    - "The Jira uploader is invoked no more than once."
+    - "Every returned tool line is parsed and counts are reconciled."
+    - "No internal payload, artifact, or persistence metadata appears in output."
+
+status_rules:
+  success:
+    - "The Jira tool was invoked."
+    - "No fatal error occurred."
+    - "total_failed equals 0."
+    - "total_created equals total_expected."
+  partial_success:
+    - "At least one issue was created."
+    - "At least one submitted issue failed or is unreconciled."
+    - "No fatal error invalidated the complete call."
+  failed:
+    - "Upstream approval failed or workflow IDs differed."
+    - "No valid Epic remained or required content was missing."
+    - "Pre-call validation failed or Jira was not invoked."
+    - "A fatal error occurred or zero issues were created."
+
+versioning:
+  input_version: "1.0"
+  output_version: "1.0"
+  instruction_hash: "sha256:pending"
+
+notes:
+  naming_exception: "The supplied agent name and upstream chain use L0. The repository naming standard should explicitly define L0 or this agent should be renamed in a coordinated change."
+  core_utility_boundary: "This is a Utility agent because its primary responsibility includes a Jira write operation."
