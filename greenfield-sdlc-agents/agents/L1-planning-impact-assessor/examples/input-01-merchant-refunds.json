@@ -1,0 +1,76 @@
+{
+  "prd_output": {
+    "agent_id": "L0-requirements-prd-composer",
+    "agent_version": "1.0.0",
+    "execution_id": "exec-1b660067-0007-5abf-82a3-efcb102be4c3",
+    "workflow_execution_id": "wf-275a40ad-9396-5053-b789-77d0a80d9264",
+    "status": "success",
+    "content": {
+      "type": "prd",
+      "schema_version": "1.0",
+      "items": {
+        "product_name": "Merchant Refund Console",
+        "functional_requirements": [
+          {
+            "id": "FR-001",
+            "title": "Merchant initiates full or partial refund from dashboard"
+          },
+          {
+            "id": "FR-002",
+            "title": "Refund is posted to the payments ledger"
+          },
+          {
+            "id": "FR-003",
+            "title": "Customer receives refund confirmation email"
+          }
+        ],
+        "constraints": [
+          {
+            "id": "CON-001",
+            "text": "Ledger posting p99 <= 500 ms"
+          }
+        ]
+      }
+    }
+  },
+  "service_catalog": {
+    "services": [
+      {
+        "id": "SVC-001",
+        "name": "Payments Service"
+      },
+      {
+        "id": "SVC-002",
+        "name": "Notification Service"
+      }
+    ]
+  },
+  "cmdb_export": {
+    "export_metadata": {
+      "exported_at": "2026-10-26T00:00:00Z"
+    },
+    "configuration_items": [
+      {
+        "id": "CI-1001",
+        "name": "Payments Ledger"
+      },
+      {
+        "id": "CI-1002",
+        "name": "Mailer"
+      },
+      {
+        "id": "CI-1003",
+        "name": "Settlement Batch"
+      }
+    ],
+    "relationships": [
+      {
+        "id": "REL-1",
+        "from": "CI-1001",
+        "to": "CI-1003",
+        "type": "feeds"
+      }
+    ]
+  },
+  "run_date": "2026-10-28"
+}

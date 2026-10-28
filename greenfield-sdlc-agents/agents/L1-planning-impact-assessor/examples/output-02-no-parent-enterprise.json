@@ -1,32 +1,199 @@
 {
-  "agent_id": "L1-planning-impact-assessor",
+  "agent_id": "L0-planning-impact-assessor",
   "agent_version": "1.0.0",
-  "execution_id": "exec-3d9a5f28",
-  "workflow_execution_id": "wf-8a2c4d15",
+  "execution_id": "exec-3683abe4-300d-5956-a07a-3fa5164bbf9e",
+  "workflow_execution_id": "wf-9914867a-57a7-5f65-a339-435b610a51f5",
   "status": "success",
   "content": {
-    "type": "impact_assessment",
+    "type": "impact_assesment",
     "schema_version": "1.0",
     "items": {
-      "capability_check": {
-        "summary": "service_catalog.services[] is genuinely empty — confirmed via export_metadata.note and record_count: 0, not an unchecked or skipped catalog. This is a standalone startup with no parent enterprise, not merely a 'greenfield product' inside an existing company.",
-        "matched_service_id": null,
-        "is_duplicate": false,
-        "rationale": "No service catalog exists to check against — there is no existing IT estate of any kind, so no duplicate-build risk can exist by definition. This is a distinct claim from HarvestLink's case, where a real catalog exists and was checked entry-by-entry."
+      "impact_assessment": {
+        "product_name": "Volunteer Connect",
+        "overall_impact_level": "Low",
+        "executive_summary": "Low impact greenfield: three new components, four KB-mandated platform dependencies surfaced, one PII guardrail gap.",
+        "components_identified": [
+          {
+            "requirement": "FR-001",
+            "component": "Volunteer Web App",
+            "component_type": "new",
+            "blast_radius": "Low",
+            "rationale_summary": "New isolated UI"
+          },
+          {
+            "requirement": "FR-002",
+            "component": "Event API",
+            "component_type": "new",
+            "blast_radius": "Low",
+            "rationale_summary": "New service with no existing consumers"
+          },
+          {
+            "requirement": "FR-003",
+            "component": "Volunteer DB",
+            "component_type": "new",
+            "blast_radius": "Medium",
+            "rationale_summary": "Holds PII; breach impact despite isolation"
+          }
+        ],
+        "existing_systems_impacted": 0,
+        "existing_systems_excluded": 0,
+        "external_dependencies_count": 4,
+        "flags": [
+          "No parent enterprise: service_catalog and cmdb_export both empty — KB-authority mode",
+          "KB guardrail gap: Volunteer DB stores PII but PRD states no encryption-at-rest constraint"
+        ]
       },
-      "existing_system_impact": [],
-      "components": [
-        { "requirement_id": "FR-001", "component_name": "claim-submission-service", "is_new": true, "blast_radius": "Low", "rationale": "Isolated intake step; independently deployable, nothing else depends on its internals." },
-        { "requirement_id": "FR-002", "component_name": "approver-dashboard-service", "is_new": true, "blast_radius": "Medium", "rationale": "Other components' reporting depends on its approval decision, but it is not compliance/legal-critical." },
-        { "requirement_id": "FR-003", "component_name": "metrics-reporting-service", "is_new": true, "blast_radius": "Low", "rationale": "Reporting-only; not on the critical path of a claim's approval." }
-      ],
-      "external_dependencies": [
-        { "name": "Payment processor", "description": "No existing payroll or payment system exists to disburse approved reimbursements, unlike a product built inside an established enterprise — a third-party payment processor (e.g. a payroll-as-a-service provider) is a real prerequisite for approver-dashboard-service (FR-002) to result in an actual payment, not just an internal record.", "related_components": ["FR-002"], "newly_surfaced": true }
-      ]
+      "dependency_graph": {
+        "nodes": [
+          {
+            "id": "volunteer-web-app",
+            "type": "component",
+            "component_type": "new",
+            "label": "Volunteer Web App",
+            "source_requirement": [
+              "FR-001"
+            ]
+          },
+          {
+            "id": "event-api",
+            "type": "component",
+            "component_type": "new",
+            "label": "Event API",
+            "source_requirement": [
+              "FR-002"
+            ]
+          },
+          {
+            "id": "volunteer-db",
+            "type": "component",
+            "component_type": "new",
+            "label": "Volunteer DB",
+            "source_requirement": [
+              "FR-003"
+            ]
+          },
+          {
+            "id": "identity-provider",
+            "type": "external-dependency",
+            "component_type": null,
+            "label": "Identity Provider",
+            "source_requirement": []
+          },
+          {
+            "id": "api-gateway",
+            "type": "external-dependency",
+            "component_type": null,
+            "label": "API Gateway",
+            "source_requirement": []
+          },
+          {
+            "id": "observability-stack",
+            "type": "external-dependency",
+            "component_type": null,
+            "label": "Observability Stack",
+            "source_requirement": []
+          },
+          {
+            "id": "secrets-manager",
+            "type": "external-dependency",
+            "component_type": null,
+            "label": "Secrets Manager",
+            "source_requirement": []
+          }
+        ],
+        "edges": [
+          {
+            "from": "identity-provider",
+            "to": "volunteer-web-app",
+            "type": "blocks"
+          },
+          {
+            "from": "identity-provider",
+            "to": "event-api",
+            "type": "blocks"
+          },
+          {
+            "from": "api-gateway",
+            "to": "event-api",
+            "type": "blocks"
+          },
+          {
+            "from": "observability-stack",
+            "to": "volunteer-web-app",
+            "type": "blocks"
+          },
+          {
+            "from": "observability-stack",
+            "to": "event-api",
+            "type": "blocks"
+          },
+          {
+            "from": "observability-stack",
+            "to": "volunteer-db",
+            "type": "blocks"
+          },
+          {
+            "from": "secrets-manager",
+            "to": "event-api",
+            "type": "blocks"
+          },
+          {
+            "from": "secrets-manager",
+            "to": "volunteer-db",
+            "type": "blocks"
+          },
+          {
+            "from": "volunteer-db",
+            "to": "event-api",
+            "type": "depends-on"
+          },
+          {
+            "from": "event-api",
+            "to": "volunteer-web-app",
+            "type": "depends-on"
+          }
+        ],
+        "cycle_check": {
+          "status": "PASS",
+          "cycles_found": []
+        },
+        "critical_path": {
+          "nodes": [
+            "observability-stack",
+            "volunteer-db",
+            "event-api",
+            "volunteer-web-app"
+          ],
+          "tied_chains": [
+            [
+              "observability-stack",
+              "volunteer-db",
+              "event-api",
+              "volunteer-web-app"
+            ],
+            [
+              "secrets-manager",
+              "volunteer-db",
+              "event-api",
+              "volunteer-web-app"
+            ]
+          ],
+          "length": 3,
+          "rationale": "Longest-path over blocks/depends-on edges from every root; max length 3 edge(s); 2 chains tied at max, all reported: observability-stack -> volunteer-db -> event-api -> volunteer-web-app | secrets-manager -> volunteer-db -> event-api -> volunteer-web-app"
+        }
+      }
     },
     "artifacts": [
-      { "id": "artifact-4c8e2a71", "type": "document", "name": "impact-assessment.md", "format": "markdown", "storage": { "provider": "s3", "location": "s3://adlc-artifacts/exec-3d9a5f28/impact-assessment.md" }, "description": "Impact assessment for the internal expense reimbursement tool, standalone startup with no parent enterprise", "produced_by": "L1-planning-impact-assessor" }
+      {
+        "id": "artifact-01",
+        "type": "document",
+        "name": "Volunteer Connect-impact-assessment.md",
+        "format": "md",
+        "content": "# Impact Assessment: Volunteer Connect\n\n## Legend\n| Field | Value |\n|---|---|\n| Source 1 | PRD: `L0-requirements-prd-composer`|\n| Status (*Draft / In-Review / Approved*) | Draft |\n| Approved by (Human Name) | *Human Name* |\n| Date of Approval | *Date* |\n| Human Approval Comments | *Comments* |\n\n> KB: kb-L1-architecture-principles (Confluence page_id 524091393) — mode: KB-authority mode (no parent enterprise)\n\n## Executive Summary & Overview\nVolunteer Connect is a standalone greenfield app matching volunteers to community events.\n\nNo parent enterprise: catalog and CMDB are both empty, so all three components are new. Four KB-mandatory platform services are surfaced as external dependencies. Volunteer DB stores contact PII without a stated encryption constraint, flagged as a KB guardrail gap.\n- **Overall impact level:** Low — all components new and isolated; no existing system touched\n- **Existing systems:** 0 impacted, 0 explicitly excluded by architecture decision; duplicate-build risk: not assessable — no parent enterprise\n- **External dependencies:** 4 total, 4 newly surfaced by this assessment\n- **Flags:** No parent enterprise: service_catalog and cmdb_export both empty — KB-authority mode; KB guardrail gap: Volunteer DB stores PII but PRD states no encryption-at-rest constraint\n\n## Non-Functional & Regulatory Impact\nNo existing SLAs affected. PII (FR-003) triggers KB encryption-at-rest and retention principles not stated in PRD.\n\n## Existing-System Impact\n**Capability check (service catalog, service grain):** No parent enterprise — service_catalog is empty; no closest service exists to compare.\n\n**Technical impact check (CMDB, configuration-item grain):**\n\nNo parent enterprise — cmdb_export is empty; no CI rows. Stated finding, not omission.\n\n## Components Identified\n| Requirement | Component (new/existing) | Blast Radius | Rationale |\n|---|---|---|---|\n| FR-001 | Volunteer Web App (new) | Low | New isolated UI. |\n| FR-002 | Event API (new) | Low | New service; no consumers yet. |\n| FR-003 | Volunteer DB (new) | Medium | Holds PII; breach impact despite isolation. |\n\n## Data Model & Schema Impact\nNew entities: Volunteer, Event, Registration (all new).\n\n## Integration Landscape & External Dependencies\n- **Upstream (KB-mandated platform):** Identity Provider — KB-mandatory infrastructure absent from PRD.\n- **Upstream (KB-mandated platform):** API Gateway — KB-mandatory infrastructure absent from PRD.\n- **Upstream (KB-mandated platform):** Observability Stack — KB-mandatory infrastructure absent from PRD.\n- **Upstream (KB-mandated platform):** Secrets Manager — KB-mandatory infrastructure absent from PRD.\n\n## Assumptions & Out of Scope\nNo integrations with external charities in scope.\n\n## Dependency Graph\n```mermaid\n%%{ init: { 'flowchart': { 'nodeSpacing': 80, 'rankSpacing': 80 } } }%%\nflowchart TD\n    volunteer-web-app[\"Volunteer Web App\"]\n    event-api[\"Event API\"]\n    volunteer-db[\"Volunteer DB\"]\n    identity-provider([\"Identity Provider\"])\n    api-gateway([\"API Gateway\"])\n    observability-stack([\"Observability Stack\"])\n    secrets-manager([\"Secrets Manager\"])\n    identity-provider -->|blocks| volunteer-web-app\n    identity-provider -->|blocks| event-api\n    api-gateway -->|blocks| event-api\n    observability-stack -->|blocks| volunteer-web-app\n    observability-stack -->|blocks| event-api\n    observability-stack -->|blocks| volunteer-db\n    secrets-manager -->|blocks| event-api\n    secrets-manager -->|blocks| volunteer-db\n    volunteer-db -->|depends on| event-api\n    event-api -->|depends on| volunteer-web-app\n    classDef newNode fill:#4a7fc1,stroke:#2d5a8e,color:#fff\n    classDef existingNode fill:#e8a838,stroke:#b07820,color:#fff\n    classDef unaffectedNode fill:#8c8c8c,stroke:#5a5a5a,color:#fff\n    class volunteer-web-app,event-api,volunteer-db newNode\n    %% CRITICAL PATH: observability-stack -> volunteer-db -> event-api -> volunteer-web-app (length 3)\n    %% CRITICAL PATH: secrets-manager -> volunteer-db -> event-api -> volunteer-web-app (length 3)\n```\n",
+        "description": "Generated impact assessment",
+        "produced_by": "L0-planning-impact-assessor"
+      }
     ],
-    "execution_summary": "• service_catalog and cmdb_export are both genuinely empty — stated explicitly as 'no parent enterprise', not silently treated as an unchecked catalog/CMDB.\n• existing_system_impact is an empty array by design, per the template's degrade-gracefully fallback — 'No existing internal systems affected — net-new build, no parent enterprise'.\n• Mapped all 3 FRs to 3 components from the PRD alone; blast radius: 1 Medium, 2 Low.\n• Key decision: the absence of an existing payroll/payment system (unlike the typical example's Payroll System CI) surfaces a new external dependency — a third-party payment processor is required, which a product built inside an established enterprise would not need to source externally.\n• Knowledge bases consulted: kb-L1-enterprise-architecture — attached at runtime but had no applicable entries for this company, consistent with there being no parent enterprise to describe.\n• Guardrails evaluated: gr-L1-output-schema-validator (pass), gr-L1-pii-detection (pass), gr-L1-consistency-check (pass), gr-L2-food-domain-compliance (n/a — non-food domain).\n• Tools invoked: none.\n• Gaps flagged: payment-processor selection is not yet made."
+    "execution_summary": "• Assessment: 0 services and 0 CIs checked; 3 FR rows mapped to 3 components; overall impact Low; no parent enterprise; KB-authority mode\n• Graph: 7 nodes / 10 edges; cycle_check PASS (DFS, 0 cycles); critical path length 3, 2 tied chain(s): observability-stack -> volunteer-db -> event-api -> volunteer-web-app | secrets-manager -> volunteer-db -> event-api -> volunteer-web-app; mermaid 1:1 confirmed (same ids, counts, directions)\n• KBs consulted: kb-L1-architecture-principles via Confluence page 524091393 — KB-authority mode active; asserted IdP, API Gateway, observability, secrets manager; checked PII encryption principle\n• Tools invoked: tool-L1-confluence-fetch-page (page_id 524091393) — success\n• Artifact Volunteer Connect-impact-assessment.md produced and inlined in artifacts[0].content, ready for downstream evaluator\n• Reflection: observability-stack initially edged only to event-api; corrected to gate all components\n• Gaps flagged: No parent enterprise: service_catalog and cmdb_export both empty — KB-authority mode; KB guardrail gap: Volunteer DB stores PII but PRD states no encryption-at-rest constraint"
   }
 }
