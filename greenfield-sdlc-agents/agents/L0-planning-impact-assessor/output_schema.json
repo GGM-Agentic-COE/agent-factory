@@ -1,0 +1,129 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "agents/L0-planning-impact-assessor/output_schema.json",
+  "title": "L0-planning-impact-assessor AgentOutput",
+  "description": "Items + Artifacts (meta-points) pattern. items carry meta-point summaries only (executive_summary <=20 words, rationale_summary <=15 words); the full narrative lives ONLY in artifacts[0].content as the inlined <Product name>-impact-assessment.md. Structural fields (ids, enums, counts, graph) stay complete. No storage block: persistence is owned by the downstream evaluator.",
+  "type": "object",
+  "required": ["agent_id", "agent_version", "execution_id", "workflow_execution_id", "status", "content"],
+  "additionalProperties": false,
+  "properties": {
+    "agent_id": {"const": "L0-planning-impact-assessor", "description": "Agent name"},
+    "agent_version": {"type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$", "description": "Semantic version"},
+    "execution_id": {"type": "string", "pattern": "^exec-[0-9a-f-]{36}$", "description": "This run's id"},
+    "workflow_execution_id": {"type": "string", "pattern": "^wf-[0-9a-f-]{36}$", "description": "Inherited from prd_output.workflow_execution_id"},
+    "status": {"enum": ["success", "failed"], "description": "failed on INSUFFICIENT_CONTEXT or cycle FAIL"},
+    "content": {
+      "type": "object",
+      "required": ["type", "schema_version", "items", "artifacts", "execution_summary"],
+      "additionalProperties": false,
+      "properties": {
+        "type": {"const": "impact_assesment", "description": "Content type (spelling per instructions)"},
+        "schema_version": {"const": "1.0", "description": "Items schema version"},
+        "items": {
+          "type": "object",
+          "required": ["impact_assessment", "dependency_graph"],
+          "additionalProperties": false,
+          "properties": {
+            "impact_assessment": {"$ref": "#/$defs/ImpactAssessment"},
+            "dependency_graph": {"$ref": "#/$defs/DependencyGraph"}
+          }
+        },
+        "artifacts": {"type": "array", "maxItems": 1, "items": {"$ref": "#/$defs/Artifact"}, "description": "Exactly one on success; empty on INSUFFICIENT_CONTEXT"},
+        "execution_summary": {"type": "string", "pattern": "^•", "description": "Plain-text bullets, NOT JSON"}
+      }
+    }
+  },
+  "$defs": {
+    "ImpactAssessment": {
+      "type": "object",
+      "description": "Meta points of the assessment",
+      "required": ["product_name", "overall_impact_level", "executive_summary", "components_identified", "existing_systems_impacted", "existing_systems_excluded", "external_dependencies_count", "flags"],
+      "additionalProperties": false,
+      "properties": {
+        "product_name": {"type": "string", "description": "Product name from PRD; empty on INSUFFICIENT_CONTEXT"},
+        "overall_impact_level": {"enum": ["Low", "Medium", "High", null], "description": "null only on INSUFFICIENT_CONTEXT"},
+        "executive_summary": {"type": "string", "maxLength": 150, "description": "<=20 words distillation"},
+        "components_identified": {"type": "array", "items": {"$ref": "#/$defs/ComponentRow"}, "description": "One row per FR→component mapping"},
+        "existing_systems_impacted": {"type": "integer", "minimum": 0, "description": "CIs marked Yes"},
+        "existing_systems_excluded": {"type": "integer", "minimum": 0, "description": "CIs marked No — by architecture decision"},
+        "external_dependencies_count": {"type": "integer", "minimum": 0, "description": "Integration Landscape entries"},
+        "flags": {"type": "array", "items": {"type": "string", "maxLength": 200}, "description": "Mismatches, stale/contaminated exports, KB violations, INSUFFICIENT_CONTEXT"}
+      }
+    },
+    "ComponentRow": {
+      "type": "object",
+      "required": ["requirement", "component", "component_type", "blast_radius", "rationale_summary"],
+      "additionalProperties": false,
+      "properties": {
+        "requirement": {"type": "string", "pattern": "^FR-\\d{3}$", "description": "FR id from PRD (citation)"},
+        "component": {"type": "string", "description": "Readable component name"},
+        "component_type": {"enum": ["new", "existing"], "description": "Net-new build or existing system"},
+        "blast_radius": {"enum": ["Low", "Medium", "High"], "description": "Change blast radius"},
+        "rationale_summary": {"type": "string", "maxLength": 110, "description": "<=15 words"}
+      }
+    },
+    "Node": {
+      "type": "object",
+      "required": ["id", "type", "component_type", "label", "source_requirement"],
+      "additionalProperties": false,
+      "properties": {
+        "id": {"type": "string", "pattern": "^[a-z0-9-]+$", "description": "kebab-case unique id"},
+        "type": {"enum": ["component", "external-dependency", "existing-ci"], "description": "Node type"},
+        "component_type": {"enum": ["new", "existing", null], "description": "Set only for component nodes"},
+        "label": {"type": "string", "description": "Readable name"},
+        "source_requirement": {"type": "array", "items": {"type": "string", "pattern": "^FR-\\d{3}$"}, "description": "FRs for component nodes; [] otherwise"}
+      }
+    },
+    "Edge": {
+      "type": "object",
+      "required": ["from", "to", "type"],
+      "additionalProperties": false,
+      "properties": {
+        "from": {"type": "string", "pattern": "^[a-z0-9-]+$", "description": "dependency / prerequisite / producer"},
+        "to": {"type": "string", "pattern": "^[a-z0-9-]+$", "description": "component / dependent / consumer"},
+        "type": {"enum": ["depends-on", "blocks", "integrates-with"], "description": "Edge type"}
+      }
+    },
+    "DependencyGraph": {
+      "type": "object",
+      "required": ["nodes", "edges", "cycle_check", "critical_path"],
+      "additionalProperties": false,
+      "properties": {
+        "nodes": {"type": "array", "items": {"$ref": "#/$defs/Node"}},
+        "edges": {"type": "array", "items": {"$ref": "#/$defs/Edge"}},
+        "cycle_check": {
+          "type": "object", "required": ["status", "cycles_found"], "additionalProperties": false,
+          "properties": {
+            "status": {"enum": ["PASS", "FAIL", "NOT_RUN"], "description": "DFS result; NOT_RUN only on INSUFFICIENT_CONTEXT"},
+            "cycles_found": {"type": "array", "items": {"type": "array", "items": {"type": "string"}}, "description": "Each cycle as ordered id list"}
+          }
+        },
+        "critical_path": {
+          "type": "object", "required": ["nodes", "rationale"], "additionalProperties": false,
+          "properties": {
+            "nodes": {"type": "array", "items": {"type": "string"}, "description": "Longest chain; first tied chain when ties (all listed in rationale)"},
+            "tied_chains": {"type": "array", "items": {"type": "array", "items": {"type": "string"}}, "description": "All chains tied at max length"},
+            "length": {"type": "integer", "minimum": 0, "description": "Edge count of the longest chain"},
+            "rationale": {"type": "string", "description": "How derived, ties, or blocked reason"}
+          }
+        }
+      }
+    },
+    "Artifact": {
+      "type": "object",
+      "required": ["id", "type", "name", "format", "content", "description", "produced_by"],
+      "additionalProperties": false,
+      "properties": {
+        "id": {"const": "artifact-01", "description": "Stable artifact id"},
+        "type": {"const": "document"},
+        "name": {"type": "string", "pattern": "-impact-assessment\\.md$"},
+        "format": {"const": "md"},
+        "content": {"type": "string", "minLength": 200, "pattern": "^# Impact Assessment: ", "description": "Full inlined markdown"},
+        "description": {"type": "string"},
+        "produced_by": {"const": "L0-planning-impact-assessor"}
+      }
+    }
+  },
+  "if": {"properties": {"status": {"const": "success"}}},
+  "then": {"properties": {"content": {"properties": {"artifacts": {"minItems": 1}}}}}
+}

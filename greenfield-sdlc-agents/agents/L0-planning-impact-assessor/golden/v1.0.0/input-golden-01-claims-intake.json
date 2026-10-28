@@ -1,0 +1,148 @@
+{
+  "prd_output": {
+    "agent_id": "L0-requirements-prd-composer",
+    "agent_version": "1.0.0",
+    "execution_id": "exec-50fdf279-cb42-53e7-9e4e-c9cae89c0425",
+    "workflow_execution_id": "wf-220d8f42-2dfa-5586-8609-c31d910aca82",
+    "status": "success",
+    "content": {
+      "type": "prd",
+      "schema_version": "1.0",
+      "items": {
+        "product_name": "ClaimsIntake Hub",
+        "functional_requirements": [
+          {
+            "id": "FR-001",
+            "title": "Policyholder submits first notice of loss (FNOL) via web and mobile"
+          },
+          {
+            "id": "FR-002",
+            "title": "Validate claim against active policy coverage in real time"
+          },
+          {
+            "id": "FR-003",
+            "title": "Retrieve policy, insured-object and deductible details"
+          },
+          {
+            "id": "FR-004",
+            "title": "Upload and attach supporting documents and photos"
+          },
+          {
+            "id": "FR-005",
+            "title": "Pre-screen every new claim for fraud indicators before assignment"
+          },
+          {
+            "id": "FR-006",
+            "title": "Notify policyholder by SMS and email at each status change"
+          },
+          {
+            "id": "FR-007",
+            "title": "Track claim status end-to-end with full audit history"
+          }
+        ],
+        "constraints": [
+          {
+            "id": "CON-001",
+            "text": "Claim acknowledgement p95 latency <= 2 s"
+          },
+          {
+            "id": "CON-002",
+            "text": "Claim records retained 10 years (IRDAI)"
+          },
+          {
+            "id": "CON-003",
+            "text": "PII encrypted at rest and in transit"
+          },
+          {
+            "id": "CON-004",
+            "text": "Mainframe claims system is being retired and must not receive new integrations"
+          }
+        ]
+      }
+    }
+  },
+  "service_catalog": {
+    "services": [
+      {
+        "id": "SVC-101",
+        "name": "Policy Admin Service",
+        "capabilities": [
+          "policy lookup",
+          "coverage check"
+        ]
+      },
+      {
+        "id": "SVC-102",
+        "name": "Document Management Service",
+        "capabilities": [
+          "document store",
+          "retention"
+        ]
+      },
+      {
+        "id": "SVC-103",
+        "name": "Notification Service",
+        "capabilities": [
+          "sms",
+          "email"
+        ]
+      },
+      {
+        "id": "SVC-104",
+        "name": "Fraud Scoring Service",
+        "capabilities": [
+          "fraud score api"
+        ]
+      }
+    ]
+  },
+  "cmdb_export": {
+    "export_metadata": {
+      "exported_at": "2026-10-25T06:00:00Z",
+      "source": "ServiceNow CMDB"
+    },
+    "configuration_items": [
+      {
+        "id": "CI-2001",
+        "name": "PolicyAdmin-Core",
+        "status": "operational"
+      },
+      {
+        "id": "CI-2002",
+        "name": "DocVault",
+        "status": "operational"
+      },
+      {
+        "id": "CI-2003",
+        "name": "Notify-Hub",
+        "status": "operational"
+      },
+      {
+        "id": "CI-2004",
+        "name": "Legacy-Claims-Mainframe",
+        "status": "retiring"
+      },
+      {
+        "id": "CI-2005",
+        "name": "Enterprise-Data-Warehouse",
+        "status": "operational"
+      }
+    ],
+    "relationships": [
+      {
+        "id": "REL-3001",
+        "from": "CI-2001",
+        "to": "CI-2005",
+        "type": "feeds"
+      },
+      {
+        "id": "REL-3002",
+        "from": "CI-2004",
+        "to": "CI-2001",
+        "type": "feeds",
+        "status": "active"
+      }
+    ]
+  },
+  "run_date": "2026-10-28"
+}
