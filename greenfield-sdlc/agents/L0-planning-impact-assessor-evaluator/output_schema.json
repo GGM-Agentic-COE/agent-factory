@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "agents/L0-impact-assessor-evaluator/output_schema.json",
   "title": "L0-impact-assessor-evaluator AgentOutput",
-  "description": "Evaluation result for L0-impact-assessor. items hold scores, findings (each citing an id) and fixes; the evaluated document lives ONLY in artifacts[0].content. storage.location must be the literal URL returned by tool-L1-confluence-create-page and is omitted if the write failed.",
+  "description": "Evaluation result for L0-impact-assessor. items hold scores, findings (each citing an id) and fixes; the evaluated document lives ONLY in artifacts[0].content. storage.location must be the literal URL returned by tool-L0-confluence-create-page and is omitted if the write failed.",
   "type": "object",
   "required": ["agent_id", "agent_version", "execution_id", "workflow_execution_id", "status", "content"],
   "additionalProperties": false,

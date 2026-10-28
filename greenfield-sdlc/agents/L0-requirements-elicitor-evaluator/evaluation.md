@@ -1,8 +1,8 @@
-# Evaluation — L1-requirements-elicitor-evaluator
+# Evaluation — L0-requirements-elicitor-evaluator
 
-This covers THIS evaluator's own meta-quality — not L1-requirements-elicitor's
-rubric (that lives in `../L1-requirements-elicitor/evaluation.md` and
-`kb-L1-requirements-quality-standard`, loaded at runtime, not duplicated here).
+This covers THIS evaluator's own meta-quality — not L0-requirements-elicitor's
+rubric (that lives in `../L0-requirements-elicitor/evaluation.md` and
+`kb-L0-requirements-quality-standard`, loaded at runtime, not duplicated here).
 
 ## Quality Gates
 

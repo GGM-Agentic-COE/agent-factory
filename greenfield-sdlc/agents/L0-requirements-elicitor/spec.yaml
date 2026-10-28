@@ -42,12 +42,12 @@ context:
   knowledge_bases:
     - kb-L0-requirements-quality-standard   # ISO/IEC/IEEE 29148 + RFC 2119; used for mechanical checks only (vague-term and compound-clause scans), retrieved from GitHub at runtime
   guardrails:
-    - gr-L1-output-schema-validator
-    - gr-L1-pii-detection
+    - gr-L0-output-schema-validator
+    - gr-L0-pii-detection
     - gr-L3-hallucination-detector
     - gr-L3-citation-validator
     - gr-L3-consistency-checker
-    - gr-L2-tool-permissions
+    - gr-L1-tool-permissions
     - gr-L3-agent-rate-limit
   tools:
     - tool-L0-confluence-reader          # reads the approved vision document

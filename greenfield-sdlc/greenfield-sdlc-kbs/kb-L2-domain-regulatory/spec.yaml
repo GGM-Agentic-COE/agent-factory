@@ -1,9 +1,9 @@
 spec_version: "1.0"
 artifact_type: knowledge_base
 metadata:
-  name: kb-L2-domain-regulatory
+  name: kb-L1-domain-regulatory
   version: "1.0.0"
-  layer: L2
+  layer: L1
   owner: food-domain-champion
   content_hash: "sha256:841c92c9d94a9434d3934835e0d93fe64b401f727b770c3b6bd92b989199308c"
   last_reviewed: "2026-08-02"
@@ -11,7 +11,7 @@ metadata:
 
 purpose:
   description: >
-    A domain-KB slot: L1-regulatory-feasibility-checker's prompt and
+    A domain-KB slot: L0-regulatory-feasibility-checker's prompt and
     spec reference this id generically, so a different vertical deployment
     can populate the same slot with its own regulatory facts without
     changing the agent. This deployment's slot holds food production &
@@ -34,8 +34,8 @@ content:
   embedding_model: text-embedding-3-small
 
 grounding_rules:
-  accessed_by: [L1-regulatory-feasibility-checker]
-  visibility: "L2 — visible to L2 and below within this deployment's domain projects/squads (L3/L4); not visible to other L2 domain deployments using the same slot id"
+  accessed_by: [L0-regulatory-feasibility-checker]
+  visibility: "L1 — visible to L1 and below within this deployment's domain projects/squads (L3/L4); not visible to other L1 domain deployments using the same slot id"
 
 freshness:
   trigger_for_update: "FSA/FSS guidance change, new allergen-labelling law, Brexit-related retained-law amendment"

@@ -1,14 +1,14 @@
 prompts:
   - task: self_check_output
     content: |
-      L1-requirements-prd-composer's original output (items): {{ generator_output }}
-      L1-requirements-prd-composer-evaluator's verdict (fixes_applied, final_decision): {{ bot_response }}
-      Original input received by L1-requirements-prd-composer (includes requirements_output and nfr_spec_output): {{ original_input }}
+      L0-requirements-prd-composer's original output (items): {{ generator_output }}
+      L0-requirements-prd-composer-evaluator's verdict (fixes_applied, final_decision): {{ bot_response }}
+      Original input received by L0-requirements-prd-composer (includes requirements_output and nfr_spec_output): {{ original_input }}
 
-      Reconstruct the RESULTANT output: L1-requirements-prd-composer's items
+      Reconstruct the RESULTANT output: L0-requirements-prd-composer's items
       with every fixes_applied[].before → after substitution resolved in.
       Check that resultant content — not the evaluator's own scoring
-      bookkeeping — against L1-requirements-prd-composer/output_schema.json
+      bookkeeping — against L0-requirements-prd-composer/output_schema.json
       and its evaluation.md rubric:
 
       1. Schema compliance: does executive_summary have summary (<=150
@@ -52,4 +52,4 @@ prompts:
 
       Answer "yes" if ALL checks pass on the RESULTANT content. Answer "no"
       if ANY check fails — this gates what actually flows to
-      L1-impact-assessor and L1-dependency-mapper.
+      L0-impact-assessor and L0-dependency-mapper.

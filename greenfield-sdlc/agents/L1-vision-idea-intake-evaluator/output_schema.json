@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "L1-vision-idea-intake-evaluator-output-schema-v1.0",
+  "$id": "L0-vision-idea-intake-evaluator-output-schema-v1.0",
   "title": "EvaluatorItems",
   "description": "Shared shape across all Phase 0 evaluator agents (S6 pattern). Scores are read from the paired generator's evaluation.md at runtime — this schema does not duplicate the rubric, only the result shape.",
   "type": "object",

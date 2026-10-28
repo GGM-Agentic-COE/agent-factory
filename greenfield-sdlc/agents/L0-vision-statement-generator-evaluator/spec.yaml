@@ -11,7 +11,7 @@ metadata:
   updated: "2026-10-05"
 
 purpose:
-  description: "Independently verifies that L0-vision-statement-generator's reconciliation is real — every Amber/Red regulatory constraint is covered by open_risks, executive_summary introduces no new claims, and the viability_score it received (owned by L0-regulatory-feasibility-checker and re-derived at qg-L1-viability-score during that agent's evaluator run) is reported honestly, not silently overridden."
+  description: "Independently verifies that L0-vision-statement-generator's reconciliation is real — every Amber/Red regulatory constraint is covered by open_risks, executive_summary introduces no new claims, and the viability_score it received (owned by L0-regulatory-feasibility-checker and re-derived at qg-L0-viability-score during that agent's evaluator run) is reported honestly, not silently overridden."
   input: "L0-vision-statement-generator's original input (the upstream item sets and the viability_score) plus its draft output."
   output: "Scores, findings, any fixes applied, and a final decision."
   business_value: "This is the last automated checkpoint before a human (the Product Lead) reads the vision document. If a serious regulatory finding was dropped anywhere in the pipeline, this is the last place it can still be caught before it reaches a person who will reasonably assume nothing was silently lost."
@@ -43,17 +43,17 @@ contract:
 
 context:
   # No KB is attached at runtime. The rubric (L0-vision-statement-generator/evaluation.md)
-  # is READ FROM GITHUB with tool-L1-github-reader-using-app at the fixed location above.
+  # is READ FROM GITHUB with tool-L0-github-reader-using-app at the fixed location above.
   knowledge_bases: []
   guardrails:
-    - gr-L1-output-schema-validator
-    - gr-L1-pii-detection
-    - gr-L1-consistency-check   # re-checked independently — the reconciliation coverage check
-    - gr-L1-vision-statement-quality-gate   # fires when THIS evaluator concludes; validates L0-vision-statement-generator's RESULTANT output against its own schema+evaluation.md, above all the reconciliation-coverage BLOCKER (guardrails/gr-L1-vision-statement-quality-gate)
+    - gr-L0-output-schema-validator
+    - gr-L0-pii-detection
+    - gr-L0-consistency-check   # re-checked independently — the reconciliation coverage check
+    - gr-L0-vision-statement-quality-gate   # fires when THIS evaluator concludes; validates L0-vision-statement-generator's RESULTANT output against its own schema+evaluation.md, above all the reconciliation-coverage BLOCKER (guardrails/gr-L0-vision-statement-quality-gate)
   tools:
-    - tool-L1-github-reader-using-app  # reads the rubric (evaluation.md) ONLY — repo agentic-sdlc-knowledge-bases, branch main, fixed folder; one call
-    - tool-L1-azure-blob-reader      # reads regulatory-feasibility.md, idea-brief.json and market-analysis.md in one call (vision.md comes from the generator's output)
-    - tool-L1-confluence-writer      # publishes the evaluated (corrected) vision document — title "<product_name>-vision.md", XHTML content, space_key 514162689. Always, including escalate_to_hitl — the human reviews it in Confluence. The ONLY write: nothing goes back to blob
+    - tool-L0-github-reader-using-app  # reads the rubric (evaluation.md) ONLY — repo agentic-sdlc-knowledge-bases, branch main, fixed folder; one call
+    - tool-L0-azure-blob-reader      # reads regulatory-feasibility.md, idea-brief.json and market-analysis.md in one call (vision.md comes from the generator's output)
+    - tool-L0-confluence-writer      # publishes the evaluated (corrected) vision document — title "<product_name>-vision.md", XHTML content, space_key 514162689. Always, including escalate_to_hitl — the human reviews it in Confluence. The ONLY write: nothing goes back to blob
 
 quality:
   evaluation_ref: "evaluation.md"

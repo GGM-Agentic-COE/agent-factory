@@ -47,12 +47,12 @@ context:
     - kb-L0-enterprise-architecture
     - kb-L0-enterprise-security           # group policy (ES3/ES4) checked before any Security/Compliance/Availability TBD is written
   guardrails:
-    - gr-L1-output-schema-validator
-    - gr-L1-pii-detection
+    - gr-L0-output-schema-validator
+    - gr-L0-pii-detection
     - gr-L3-hallucination-detector
     - gr-L3-citation-validator
     - gr-L3-consistency-checker
-    - gr-L2-tool-permissions
+    - gr-L1-tool-permissions
     - gr-L3-agent-rate-limit
   tools:
     - tool-L0-confluence-reader          # reads the vision document's regulatory feasibility analysis

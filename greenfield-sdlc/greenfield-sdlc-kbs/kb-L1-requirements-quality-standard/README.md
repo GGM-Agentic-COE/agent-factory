@@ -1,15 +1,15 @@
-# kb-L1-requirements-quality-standard
+# kb-L0-requirements-quality-standard
 
 **Domain covered:** None specific — a cross-domain method for judging
 whether a functional requirement is Unambiguous, Complete, Singular,
 Feasible, Verifiable, Correct, and Traceable (ISO/IEC/IEEE 29148).
 
-**Why it exists:** `L1-requirements-elicitor` is a generic L1 agent, reused
+**Why it exists:** `L0-requirements-elicitor` is a generic L0 agent, reused
 across every domain. Two of the seven characteristics it must satisfy —
 Singular (no compound "and") and Traceable (every FR cites a vision.md
 clause) — were already enforced directly in `requirements.template.md`
 before this KB existed. The other five had no systematic method behind
-them. Same role as `kb-L1-nfr-classification-taxonomy`: a small, reusable,
+them. Same role as `kb-L0-nfr-classification-taxonomy`: a small, reusable,
 cross-domain method, not a domain fact set.
 
 **What it deliberately does NOT do:** supply a feasibility or correctness
@@ -18,10 +18,10 @@ judgment calls that need domain/architecture knowledge this KB doesn't
 have — it states the question to ask, never asserts the answer.
 
 **Who uses it?**
-- `L1-requirements-elicitor` — mechanical self-check only: vague-term scan
+- `L0-requirements-elicitor` — mechanical self-check only: vague-term scan
   (Unambiguous), compound-clause scan (Singular). Cheap, deterministic,
   no judgment required.
-- `L1-requirements-elicitor-evaluator` — the full rubric as source of
+- `L0-requirements-elicitor-evaluator` — the full rubric as source of
   truth: Complete's coverage check, Verifiable's testability check,
   Consistent's contradiction check, and the Feasible/Correct *questions*
   (never verdicts this KB itself supplies).
@@ -39,4 +39,4 @@ would.
 
 **Owner:** Agentic-AI CoE
 
-**Consumers:** `L1-requirements-elicitor`, `L1-requirements-elicitor-evaluator`
+**Consumers:** `L0-requirements-elicitor`, `L0-requirements-elicitor-evaluator`

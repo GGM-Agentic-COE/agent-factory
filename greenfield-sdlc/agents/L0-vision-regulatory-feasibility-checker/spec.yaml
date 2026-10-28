@@ -11,8 +11,8 @@ metadata:
   updated: "2026-10-05"
 
 purpose:
-  description: "Classifies regulatory feasibility (licensing, data protection, consumer, sector and cross-cutting regimes) for a proposed idea as Green/Amber/Red per constraint, with citation and mitigation — and derives the viability_score that gates the pipeline at qg-L1-viability-score."
-  input: "idea-brief.json (problem statement, target geography/product category, target users, value proposition) from L1-vision-idea-intake."
+  description: "Classifies regulatory feasibility (licensing, data protection, consumer, sector and cross-cutting regimes) for a proposed idea as Green/Amber/Red per constraint, with citation and mitigation — and derives the viability_score that gates the pipeline at qg-L0-viability-score."
+  input: "idea-brief.json (problem statement, target geography/product category, target users, value proposition) from L0-vision-idea-intake."
   output: "regulatory-feasibility.md artifact plus structured constraint items and the viability score with its component breakdown and caps."
   business_value: "A viable-looking idea can be dead on arrival for regulatory reasons — this must surface before roadmap commitment, not after. Zero tolerance for omitting a Red-classified constraint: a false negative here is a compliance risk, not a quality nuance. Owning the viability score here keeps the gate with the agent that holds the blocking evidence, and out of the agent whose auto-publish depends on it."
 
@@ -26,19 +26,19 @@ contract:
   output_schema: "$ref: schemas/agent-output-schema.json"
 
   input:
-    accepts_from_agents: [L1-vision-idea-intake]
+    accepts_from_agents: [L0-vision-idea-intake]
     accepts_direct_input: false
     accepts_file_upload:
       enabled: true
       formats: [".json"]   # idea-brief.json — parsed as JSON by key path, never scanned as markdown
     required_parameters:
-      problem_statement: { type: string, description: "From L1-vision-idea-intake's idea-brief.json" }
+      problem_statement: { type: string, description: "From L0-vision-idea-intake's idea-brief.json" }
       target_geography: { type: string, description: "Target geography for the idea — a country, or a country plus sub-national regions. Resolved at runtime against the jurisdiction the attached KBs declare; a country they do not cover fails with JURISDICTION_MISMATCH rather than being translated" }
     optional_parameters:
-      # No date parameter is required. The run date comes from tool-L1-system-current-date,
+      # No date parameter is required. The run date comes from tool-L0-system-current-date,
       # because the agent has no clock and an unaided model fills a date slot with a
       # confident guess. generated_date below is only the fallback for a tool failure.
-      generated_date: { type: string, default: null, description: "Fallback date, read from idea-brief.json (any common format, e.g. dd-mm-yyyy — normalized to yyyy-mm-dd). Used only when tool-L1-system-current-date is unavailable or fails. Records when the brief was authored, which may pre-date this run. With neither available the agent writes \"not available\" in the header and completes the assessment — a missing date never halts the run, and is never filled from an example, a fixture, or training data." }
+      generated_date: { type: string, default: null, description: "Fallback date, read from idea-brief.json (any common format, e.g. dd-mm-yyyy — normalized to yyyy-mm-dd). Used only when tool-L0-system-current-date is unavailable or fails. Records when the brief was authored, which may pre-date this run. With neither available the agent writes \"not available\" in the header and completes the assessment — a missing date never halts the run, and is never filled from an example, a fixture, or training data." }
       product_category: { type: string, default: null, description: "Product/activity category, if known, to narrow the regulator lookup" }
       target_users: { type: string, default: null, description: "Target user segment from idea-brief.json — feeds both the segment-specific constraint sweep and the idea_clarity viability component" }
       value_proposition: { type: string, default: null, description: "Value proposition from idea-brief.json — feeds claim-substantiation constraints and the idea_clarity viability component" }
@@ -53,7 +53,7 @@ context:
   # JURISDICTION_MISMATCH when they disagree. Re-targeting the deployment to
   # another country means pointing at that country's two KB pages instead — the prompt
   # is unchanged.
-  # Both knowledge bases are READ FROM CONFLUENCE with tool-L1-confluence-reader,
+  # Both knowledge bases are READ FROM CONFLUENCE with tool-L0-confluence-reader,
   # two calls, page_id 518422550 and 519012353, fixed in the prompt (never from the request).
   # They are NOT attached at runtime and NOT read from GitHub. The Confluence pages hold
   # the same content as the two KB folders below, which stay in the repo as the source
@@ -67,19 +67,19 @@ context:
   knowledge_base_sources:
     confluence_page_ids: ["518422550", "519012353"]   # one reader call per page; which page holds which KB is worked out from content
     content:
-      - kb-L1-regulatory-frameworks-index-ind   # #jurisdiction, #cross-domain-index, #coverage-categories (sweep list)
-      - kb-L2-domain-regulatory-ind             # #jurisdiction + food production & distribution regulatory facts
+      - kb-L0-regulatory-frameworks-index-ind   # #jurisdiction, #cross-domain-index, #coverage-categories (sweep list)
+      - kb-L1-domain-regulatory-ind             # #jurisdiction + food production & distribution regulatory facts
   guardrails:
-    - gr-L1-output-schema-validator
-    - gr-L1-pii-detection
-    - gr-L1-hallucination-check
-    - gr-L1-citation-verifier   # BLOCKER — every constraint must cite a specific regulation/section
+    - gr-L0-output-schema-validator
+    - gr-L0-pii-detection
+    - gr-L0-hallucination-check
+    - gr-L0-citation-verifier   # BLOCKER — every constraint must cite a specific regulation/section
   tools:
-    - tool-L1-confluence-reader        # reads BOTH regulatory KBs — page ids 518422550 and 519012353, fixed in the prompt; read-only
-    - tool-L1-regulatory-db-lookup   # read-only; invoked directly, per the Core/Utility split
-    - tool-L1-system-current-date    # reads the host clock — the only way this agent can date the artifact without guessing
-    - tool-L1-azure-blob-reader      # reads idea-brief.json from blob storage
-    - tool-L1-azure-blob-writer      # writes regulatory-feasibility.md to blob storage
+    - tool-L0-confluence-reader        # reads BOTH regulatory KBs — page ids 518422550 and 519012353, fixed in the prompt; read-only
+    - tool-L0-regulatory-db-lookup   # read-only; invoked directly, per the Core/Utility split
+    - tool-L0-system-current-date    # reads the host clock — the only way this agent can date the artifact without guessing
+    - tool-L0-azure-blob-reader      # reads idea-brief.json from blob storage
+    - tool-L0-azure-blob-writer      # writes regulatory-feasibility.md to blob storage
 
 quality:
   evaluation_ref: "evaluation.md"
@@ -88,7 +88,7 @@ quality:
   consistency_check: true
 
 quality_gates_owned:
-  qg-L1-viability-score:
+  qg-L0-viability-score:
     threshold: 7
     description: "viability.viability_score is derived here from regulatory posture (0.60) and idea clarity (0.40), with unresolved regulatory blockers applied as hard caps. L0-vision-statement-generator receives the number as an input parameter and may not compute or adjust it."
 

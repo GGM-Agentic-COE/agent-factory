@@ -1,14 +1,14 @@
-# kb-L1-regulatory-frameworks-index
+# kb-L0-regulatory-frameworks-index
 
 **Domain covered:** None specific — a cross-domain index of which UK
 regulatory body governs which category of regulated activity.
 
-**Why it exists:** `L1-regulatory-feasibility-checker` is a generic L1
+**Why it exists:** `L0-regulatory-feasibility-checker` is a generic L0
 agent, reused across every domain the CoE builds for. Before it can reason
 about food, payments, healthcare, or anything else, it needs to know which
 body's rules even apply. This KB is that first lookup — genuinely
-domain-agnostic, so it stays at L1 rather than being duplicated into every
-L2 domain KB.
+domain-agnostic, so it stays at L0 rather than being duplicated into every
+L1 domain KB.
 
 **Sources:** Public regulator remit statements (FCA, FSA, HSE, ICO, MHRA,
 Ofcom, Ofgem, ONR, ASA, CMA, OPSS, Primary Authority Scheme).
@@ -22,4 +22,4 @@ say so rather than guess.
 
 **Owner:** Agentic-AI CoE
 
-**Consumers:** `L1-regulatory-feasibility-checker` (all domains)
+**Consumers:** `L0-regulatory-feasibility-checker` (all domains)

@@ -1,15 +1,15 @@
-"""gr-L1-requirements-quality-gate: validates the RESULTANT
-L1-requirements-elicitor output (its own items, with the evaluator's
-fixes_applied resolved in) against L1-requirements-elicitor/output_schema.json
-and kb-L1-requirements-quality-standard's ISO/IEC/IEEE 29148 rubric. Fires
-at L1-requirements-elicitor-evaluator's post_execution.
+"""gr-L0-requirements-quality-gate: validates the RESULTANT
+L0-requirements-elicitor output (its own items, with the evaluator's
+fixes_applied resolved in) against L0-requirements-elicitor/output_schema.json
+and kb-L0-requirements-quality-standard's ISO/IEC/IEEE 29148 rubric. Fires
+at L0-requirements-elicitor-evaluator's post_execution.
 """
 import json
 import logging
 import re
 from nemoguardrails.actions import action
 
-logger = logging.getLogger("gr-L1-requirements-quality-gate")
+logger = logging.getLogger("gr-L0-requirements-quality-gate")
 
 VAGUE_TERMS = ["fast", "user-friendly", "appropriate", "secure", "robust", "intuitive"]
 

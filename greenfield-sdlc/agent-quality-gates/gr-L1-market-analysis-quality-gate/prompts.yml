@@ -1,15 +1,15 @@
 prompts:
   - task: self_check_output
     content: |
-      L1-vision-market-analyzer's original output (items): {{ generator_output }}
-      L1-vision-market-analyzer-evaluator's verdict (fixes_applied, final_decision): {{ bot_response }}
+      L0-vision-market-analyzer's original output (items): {{ generator_output }}
+      L0-vision-market-analyzer-evaluator's verdict (fixes_applied, final_decision): {{ bot_response }}
 
-      Reconstruct the RESULTANT output: L1-vision-market-analyzer's items
+      Reconstruct the RESULTANT output: L0-vision-market-analyzer's items
       with every fixes_applied[].before → after substitution resolved in.
       This guardrail checks that resultant content — not the evaluator's
       own scoring bookkeeping — against
-      L1-vision-market-analyzer/output_schema.json and
-      L1-vision-market-analyzer/evaluation.md:
+      L0-vision-market-analyzer/output_schema.json and
+      L0-vision-market-analyzer/evaluation.md:
 
       1. Schema compliance: does every competitor_matrix[] entry have id,
          name, positioning/strengths/weaknesses (full text, no length cap),
@@ -49,4 +49,4 @@ prompts:
 
       Answer "yes" if ALL checks pass on the RESULTANT content. Answer "no"
       if ANY check fails — this gates what actually flows to
-      L1-vision-statement-generator.
+      L0-vision-statement-generator.

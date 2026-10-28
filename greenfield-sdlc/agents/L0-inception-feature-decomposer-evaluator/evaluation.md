@@ -1,6 +1,6 @@
-# Evaluation — L1-feature-decomposer-evaluator
+# Evaluation — L0-feature-decomposer-evaluator
 
-This covers THIS evaluator's own meta-quality — not the L1-feature-
+This covers THIS evaluator's own meta-quality — not the L0-feature-
 decomposer's generation rubric. The decomposer's rubric and the applicable
 Feature-decomposition knowledge base are loaded at runtime and are not duplicated
 here.

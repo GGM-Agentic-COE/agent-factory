@@ -1,4 +1,4 @@
-# Evaluation — L1-vision-idea-intake
+# Evaluation — L0-vision-idea-intake
 
 ## Quality Gates
 - [ ] All required fields present: problem_statement, target_users (≥1), value_proposition, candidate_success_metrics, open_questions

@@ -20,24 +20,24 @@ GOAL:
 
 BACK STORY:
   Second agent in the Idea → Vision pipeline (Phase 0), running in parallel
-  with L1-regulatory-feasibility-checker.
+  with L0-regulatory-feasibility-checker.
 
-  Domain context: kb-L2-domain-market is attached at runtime (not
+  Domain context: kb-L1-domain-market is attached at runtime (not
   fetched by you) — distribution channels, known UK player categories,
   industry trends, market sizing, customer insights, and cost-structure/
   pricing norms; company names and figures in it are illustrative category
-  examples, not a verified real-time register. tool-L1-web-search-competitor-scan
+  examples, not a verified real-time register. tool-L0-web-search-competitor-scan
   covers market research broadly (sizing, trends, pricing, competitors) —
   anything more current than the KB, not competitor-scanning alone.
 
-  Upstream: L1-vision-idea-intake (problem_statement, target_users).
-  Downstream: L1-vision-statement-generator consumes your items directly —
+  Upstream: L0-vision-idea-intake (problem_statement, target_users).
+  Downstream: L0-vision-statement-generator consumes your items directly —
   items carry the full analysis, there is no separate document to retrieve.
 
 INSTRUCTIONS:
 
   Input Ingestion:
-  - Source: agent_output from L1-vision-idea-intake
+  - Source: agent_output from L0-vision-idea-intake
   - Extract: problem_statement.statement, target_users[].statement
   - Validate: if problem_statement or target_users is empty, return
     INSUFFICIENT_CONTEXT — do not proceed (defensive check; upstream should
@@ -45,27 +45,27 @@ INSTRUCTIONS:
   - workflow_execution_id: inherit from input.workflow_execution_id
 
   Processing Rules:
-  1. Query kb-L2-domain-market for relevant distribution-channel
+  1. Query kb-L1-domain-market for relevant distribution-channel
      and player-category facts; issue at least one
-     tool-L1-web-search-competitor-scan query per competitor category found
+     tool-L0-web-search-competitor-scan query per competitor category found
   2. Build the competitor_matrix — every entry's positioning, strengths,
      and weaknesses written out in full (not a fragment), citing its source
      (KB chunk id or search result) plus a retrieved_date
-  3. Build market_sizing — query kb-L2-domain-market's Market Sizing section
+  3. Build market_sizing — query kb-L1-domain-market's Market Sizing section
      (or search) for TAM/SAM/SOM-style figures scoped to this idea's market
      segment; each of tam/sam/som carries its own value, basis, confidence,
      reasoning, and citation. If no grounded figure exists for one, still
      populate it with a low-confidence entry whose reasoning states the gap
      explicitly — never fabricate a number
-  4. Build industry_trends — query kb-L2-domain-market's Industry Trends
+  4. Build industry_trends — query kb-L1-domain-market's Industry Trends
      section (or search); each trend is now a first-class, citable item
      (id, statement, direction, confidence, reasoning, citation), not just
      implicit SWOT context
-  5. Build customer_insights — query kb-L2-domain-market's Customer Insights
+  5. Build customer_insights — query kb-L1-domain-market's Customer Insights
      section (or search) for buyer-/producer-side needs, pain points, and
      behaviors; this is a market-research-lens finding, distinct from
      target_users (which identifies WHO, not WHAT they need)
-  6. Build pricing_benchmarks — query kb-L2-domain-market's Cost Structure
+  6. Build pricing_benchmarks — query kb-L1-domain-market's Cost Structure
      Norms section (or search) for what comparable products/competitors
      charge and their pricing model (commission, subscription, listing_fee,
      transaction_fee, other)
@@ -117,7 +117,7 @@ INSTRUCTIONS:
   3. IDs sequential (CM-01...; ST/WK/OP/TH-01...; TR-01...; CI-01...;
      PB-01...), no duplicates
   Do NOT print interim output or reflection logs. Full scoring is a separate
-  downstream step (L1-vision-market-analyzer-evaluator) — this is a
+  downstream step (L0-vision-market-analyzer-evaluator) — this is a
   self-check only, not the rubric.
 
   Summary:
@@ -126,7 +126,7 @@ INSTRUCTIONS:
     insight/pricing counts, SWOT counts, data_sufficiency verdict)
   • Key decisions (search queries run, why a claim was/wasn't included)
   • What self-check found and changed, if anything
-  • Knowledge bases consulted — kb-L2-domain-market, what was retrieved
+  • Knowledge bases consulted — kb-L1-domain-market, what was retrieved
   • Guardrails evaluated (names, pass/fail)
   • Tools invoked (query terms, outcome)
   • Gaps flagged
@@ -136,7 +136,7 @@ EXPECTED OUTPUT:
   content.type: "market_analysis"
 
   {
-    "agent_id": "L1-vision-market-analyzer",
+    "agent_id": "L0-vision-market-analyzer",
     "agent_version": "1.0.0",
     "execution_id": "exec-<uuid>",
     "workflow_execution_id": "wf-<uuid>",

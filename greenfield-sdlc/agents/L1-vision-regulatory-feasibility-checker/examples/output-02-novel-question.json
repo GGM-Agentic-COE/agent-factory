@@ -1,5 +1,5 @@
 {
-  "agent_id": "L1-regulatory-feasibility-checker",
+  "agent_id": "L0-regulatory-feasibility-checker",
   "agent_version": "1.0.0",
   "execution_id": "exec-b5c6d7e8",
   "workflow_execution_id": "wf-f6a7b8c9",
@@ -13,7 +13,7 @@
           "id": "CON-01",
           "name": "Automated decision-making on expense claims",
           "status": "Red",
-          "citation": { "source_reference": "kb-L1-regulatory-frameworks-index#cross-domain-index", "regulation": "UK GDPR, Article 22 (automated individual decision-making)" },
+          "citation": { "source_reference": "kb-L0-regulatory-frameworks-index#cross-domain-index", "regulation": "UK GDPR, Article 22 (automated individual decision-making)" },
           "rationale": "Whether auto-approving a sub-£50 claim purely by algorithmic threshold, with no human review at any point, triggers UK GDPR Article 22's protections against automated individual decision-making is genuinely contested — Article 22 turns on whether the decision has a 'legal or similarly significant effect' on the individual, and reasonable readings differ on whether a small reimbursement approval meets that bar.",
           "mitigation": null,
           "requires_legal_review": true,
@@ -24,7 +24,7 @@
           "id": "CON-02",
           "name": "Employee data protection",
           "status": "Green",
-          "citation": { "source_reference": "kb-L1-regulatory-frameworks-index#cross-domain-index", "regulation": "UK GDPR / Data Protection Act 2018" },
+          "citation": { "source_reference": "kb-L0-regulatory-frameworks-index#cross-domain-index", "regulation": "UK GDPR / Data Protection Act 2018" },
           "rationale": "Standard obligation for any system processing employee personal and financial data — collecting, storing, and using employee expense-claim data under UK GDPR and the Data Protection Act 2018 is routine data controller activity, not something novel or blocking on its own.",
           "mitigation": null,
           "requires_legal_review": false,
@@ -44,6 +44,6 @@
         }
       ]
     },
-    "execution_summary": "• Produced 2 constraints (1 Green, 0 Amber, 1 Red), overall_status: Red, 1 open item.\n• Key decision: did not force a mitigation onto CON-01 just to satisfy the schema's Amber/Red rule — used requires_legal_review: true instead, which the schema accepts as the alternative valid path, since the underlying legal question is genuinely unresolved.\n• Reflection: confirmed overall_status is not discounted to Amber, since the no-discount default applies whenever any Red/Amber item lacks a precedented, non-legal-review mitigation.\n• Knowledge bases consulted: kb-L1-regulatory-frameworks-index (used for both constraints' category lookup); kb-L2-domain-regulatory (checked, not applicable).\n• Guardrails evaluated: gr-L1-output-schema-validator (pass), gr-L1-pii-detection (pass), gr-L1-hallucination-check (pass), gr-L1-citation-verifier (pass — 2/2 constraints cited).\n• Tools invoked: tool-L1-regulatory-db-lookup (query: 'automated decision-making expense approval GDPR Article 22', outcome: no conclusive resolution found, hence legal review flag rather than a guessed mitigation).\n• Gaps flagged: OI-01 — Article 22 applicability requires qualified legal review."
+    "execution_summary": "• Produced 2 constraints (1 Green, 0 Amber, 1 Red), overall_status: Red, 1 open item.\n• Key decision: did not force a mitigation onto CON-01 just to satisfy the schema's Amber/Red rule — used requires_legal_review: true instead, which the schema accepts as the alternative valid path, since the underlying legal question is genuinely unresolved.\n• Reflection: confirmed overall_status is not discounted to Amber, since the no-discount default applies whenever any Red/Amber item lacks a precedented, non-legal-review mitigation.\n• Knowledge bases consulted: kb-L0-regulatory-frameworks-index (used for both constraints' category lookup); kb-L1-domain-regulatory (checked, not applicable).\n• Guardrails evaluated: gr-L0-output-schema-validator (pass), gr-L0-pii-detection (pass), gr-L0-hallucination-check (pass), gr-L0-citation-verifier (pass — 2/2 constraints cited).\n• Tools invoked: tool-L0-regulatory-db-lookup (query: 'automated decision-making expense approval GDPR Article 22', outcome: no conclusive resolution found, hence legal review flag rather than a guessed mitigation).\n• Gaps flagged: OI-01 — Article 22 applicability requires qualified legal review."
   }
 }

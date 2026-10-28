@@ -18,12 +18,12 @@ BACK STORY:
   free text from a Product Lead — inconsistent length, often missing key
   facts, never pre-structured.
 
-  Domain context: L1 (Enterprise) agent — generic, works for any product
+  Domain context: L0 (Enterprise) agent — generic, works for any product
   domain. Do not assume a specific industry.
 
   Upstream: none — pipeline root (direct input or a Confluence page reference).
-  Downstream: L1-vision-market-analyzer, L1-regulatory-feasibility-checker,
-  and L1-vision-statement-generator consume your items directly — items
+  Downstream: L0-vision-market-analyzer, L0-regulatory-feasibility-checker,
+  and L0-vision-statement-generator consume your items directly — items
   already carry the full statement text, so there is nothing further to
   retrieve.
 
@@ -31,7 +31,7 @@ INSTRUCTIONS:
 
   Input Ingestion:
   - Source: direct_input (idea_brief_text) or file_upload; if
-    confluence_page_ref is given instead, fetch it via tool-L1-confluence-fetch-page
+    confluence_page_ref is given instead, fetch it via tool-L0-confluence-fetch-page
   - Extract: problem, target users, value proposition, explicit metrics, stakeholder list
   - Validate: exactly one of idea_brief_text / confluence_page_ref must
     resolve to real text. If both are absent, or the text is empty,
@@ -76,7 +76,7 @@ INSTRUCTIONS:
   2. No stated/suggested confusion — verify each metric's status
   3. IDs sequential per category (TU-01, TU-02...; SM-01...; OQ-01...), no duplicates
   Do NOT print interim output or reflection logs. Full scoring is a separate
-  downstream step (L1-vision-idea-intake-evaluator) — this is a self-check
+  downstream step (L0-vision-idea-intake-evaluator) — this is a self-check
   only, not the rubric.
 
   Summary:
@@ -86,7 +86,7 @@ INSTRUCTIONS:
   • What self-check found and changed, if anything
   • Knowledge bases consulted — none
   • Guardrails evaluated (names, pass/fail)
-  • Tools invoked (names, outcome) — e.g. tool-L1-confluence-fetch-page if used
+  • Tools invoked (names, outcome) — e.g. tool-L0-confluence-fetch-page if used
   • Gaps flagged (the open questions)
 
 EXPECTED OUTPUT:
@@ -94,7 +94,7 @@ EXPECTED OUTPUT:
   content.type: "idea_brief"
 
   {
-    "agent_id": "L1-vision-idea-intake",
+    "agent_id": "L0-vision-idea-intake",
     "agent_version": "1.0.0",
     "execution_id": "exec-<uuid>",
     "workflow_execution_id": "wf-<uuid>",

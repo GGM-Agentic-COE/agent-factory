@@ -2,21 +2,21 @@
 spec_version: "1.0"
 artifact_type: agent
 metadata:
-  name: L1-regulatory-feasibility-checker
+  name: L0-regulatory-feasibility-checker
   version: "1.0.0"
-  layer: L1
+  layer: L0
   phase: vision
   owner: agentic-ai-coe
   created: "2026-08-02"
 
 purpose:
   description: "Classifies regulatory feasibility (licensing, compliance regimes) for a proposed idea as Green/Amber/Red per constraint, with citation and mitigation."
-  input: "idea-brief.md items (problem statement, target geography/product category) from L1-vision-idea-intake."
+  input: "idea-brief.md items (problem statement, target geography/product category) from L0-vision-idea-intake."
   output: "Structured constraint items only — no separate document; items carry the full rationale and mitigation directly."
   business_value: "A viable-looking idea can be dead on arrival for regulatory reasons — this must surface before roadmap commitment, not after. Zero tolerance for omitting a Red-classified constraint: a false negative here is a compliance risk, not a quality nuance."
 
 prompt:
-  ref: "prompts/L1-regulatory-feasibility-checker/instructions.md"
+  ref: "prompts/L0-regulatory-feasibility-checker/instructions.md"
   version: "1.0.0"
   description: "Assesses regulatory constraints against a generic cross-domain regulator index and a domain-specific regulatory KB; every constraint is cited, every Amber/Red carries a mitigation or legal-review flag."
 
@@ -25,12 +25,12 @@ contract:
   output_schema: "$ref: schemas/agent-output-schema.json"
 
   input:
-    accepts_from_agents: [L1-vision-idea-intake]
+    accepts_from_agents: [L0-vision-idea-intake]
     accepts_direct_input: false
     accepts_file_upload:
       enabled: false
     required_parameters:
-      problem_statement: { type: string, description: "From L1-vision-idea-intake's idea_brief items" }
+      problem_statement: { type: string, description: "From L0-vision-idea-intake's idea_brief items" }
       target_geography: { type: string, description: "Target geography for the idea, e.g. 'United Kingdom'" }
     optional_parameters:
       product_category: { type: string, default: null, description: "Product/activity category, if known, to narrow the regulator lookup" }
@@ -40,15 +40,15 @@ contract:
 
 context:
   knowledge_bases:
-    - kb-L1-regulatory-frameworks-index
-    - kb-L2-domain-regulatory
+    - kb-L0-regulatory-frameworks-index
+    - kb-L1-domain-regulatory
   guardrails:
-    - gr-L1-output-schema-validator
-    - gr-L1-pii-detection
-    - gr-L1-hallucination-check
-    - gr-L1-citation-verifier   # BLOCKER — every constraint must cite a specific regulation/section
+    - gr-L0-output-schema-validator
+    - gr-L0-pii-detection
+    - gr-L0-hallucination-check
+    - gr-L0-citation-verifier   # BLOCKER — every constraint must cite a specific regulation/section
   tools:
-    - tool-L1-regulatory-db-lookup   # read-only; invoked directly, per the Core/Utility split
+    - tool-L0-regulatory-db-lookup   # read-only; invoked directly, per the Core/Utility split
 
 quality:
   evaluation_ref: "evaluation.md"

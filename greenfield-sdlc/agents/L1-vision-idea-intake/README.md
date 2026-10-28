@@ -1,4 +1,4 @@
-# L1-vision-idea-intake
+# L0-vision-idea-intake
 
 ## Purpose
 
@@ -26,14 +26,14 @@ than filling gaps with plausible-sounding guesses.
 ## How does it work?
 
 1. Ingests the raw idea text (direct input, or fetched from Confluence via
-   `tool-L1-confluence-fetch-page` if only a page reference was given)
+   `tool-L0-confluence-fetch-page` if only a page reference was given)
 2. Validates the input is substantive enough to process; fails fast if not
 3. Extracts problem, users, value proposition — each tagged with the exact
    input excerpt it's grounded in (`traced_to`)
 4. Separates explicitly-stated metrics from inferred ones (`status` field)
 5. Surfaces anything unresolved as an open question rather than guessing
 6. Self-checks completeness and ID sequencing before returning (full scoring
-   is delegated to `L1-vision-idea-intake-evaluator` downstream, per S6)
+   is delegated to `L0-vision-idea-intake-evaluator` downstream, per S6)
 
 ## Input
 
@@ -58,7 +58,7 @@ than filling gaps with plausible-sounding guesses.
 ## Composition
 
 ```
-agents/L1-vision-idea-intake/
+agents/L0-vision-idea-intake/
 ├── spec.yaml
 ├── evaluation.md
 ├── output_schema.json
@@ -74,6 +74,6 @@ agents/L1-vision-idea-intake/
     ├── input-golden-02-insufficient.json
     └── golden-02-insufficient.json
 
-prompts/L1-vision-idea-intake/
+prompts/L0-vision-idea-intake/
 └── instructions.md
 ```

@@ -1,25 +1,25 @@
 spec_version: "1.0"
 artifact_type: guardrail
 metadata:
-  name: gr-L1-impact-assessment-quality-gate
+  name: gr-L0-impact-assessment-quality-gate
   version: "1.0.0"
-  layer: L1
+  layer: L0
   owner: agentic-ai-coe
   implementation: colang
 
 purpose:
-  description: "Fires when L1-impact-assessor-evaluator concludes. Validates the RESULTANT output — L1-impact-assessor's own items, with the evaluator's fixes_applied resolved in — against L1-impact-assessor/output_schema.json and its evaluation.md rubric. Same pattern as the Phase 0/Phase 1 quality gates: fires on the evaluator, validates the core agent's content, never the evaluator's own scoring bookkeeping. Unlike its sibling gates, several rules here also need the ORIGINAL input (prd_output.content.items.requirements[], service_catalog.services[], cmdb_export.configuration_items[]) because full-fr-coverage, capability-check-not-vacuous, and ci-id-validity are coverage/anti-hallucination checks against source data the generator's own items do not themselves carry."
+  description: "Fires when L0-impact-assessor-evaluator concludes. Validates the RESULTANT output — L0-impact-assessor's own items, with the evaluator's fixes_applied resolved in — against L0-impact-assessor/output_schema.json and its evaluation.md rubric. Same pattern as the Phase 0/Phase 1 quality gates: fires on the evaluator, validates the core agent's content, never the evaluator's own scoring bookkeeping. Unlike its sibling gates, several rules here also need the ORIGINAL input (prd_output.content.items.requirements[], service_catalog.services[], cmdb_export.configuration_items[]) because full-fr-coverage, capability-check-not-vacuous, and ci-id-validity are coverage/anti-hallucination checks against source data the generator's own items do not themselves carry."
 
 triggers_on:
   - post_execution   # fires when the evaluator (not the generator) finishes
 
 on_fail: retry_once_then_escalate
-applies_to: configured_agents   # wired into L1-impact-assessor-evaluator/spec.yaml context.guardrails — not global
+applies_to: configured_agents   # wired into L0-impact-assessor-evaluator/spec.yaml context.guardrails — not global
 
 rules:
-  # --- Output schema validation (of L1-impact-assessor's own output_schema.json) ---
+  # --- Output schema validation (of L0-impact-assessor's own output_schema.json) ---
   - name: schema-compliance
-    description: "The resultant items must validate against L1-impact-assessor/output_schema.json: capability_check (summary >=20 chars, matched_service_id pattern ^SVC-[A-Z]+-[0-9]{3}$ or null, is_duplicate bool, rationale >=20 chars), existing_system_impact[] (ci_id pattern ^CI-[A-Z]+-[0-9]{3}$, system_name, touched bool, how_or_why_not >=10 chars, related_components[]), components[] (requirement_id pattern ^FR-[0-9]{3}$, component_name, is_new bool, blast_radius, rationale >=10 chars), external_dependencies[] (name, description >=20 chars, related_components[], newly_surfaced bool)"
+    description: "The resultant items must validate against L0-impact-assessor/output_schema.json: capability_check (summary >=20 chars, matched_service_id pattern ^SVC-[A-Z]+-[0-9]{3}$ or null, is_duplicate bool, rationale >=20 chars), existing_system_impact[] (ci_id pattern ^CI-[A-Z]+-[0-9]{3}$, system_name, touched bool, how_or_why_not >=10 chars, related_components[]), components[] (requirement_id pattern ^FR-[0-9]{3}$, component_name, is_new bool, blast_radius, rationale >=10 chars), external_dependencies[] (name, description >=20 chars, related_components[], newly_surfaced bool)"
     action: block
     severity: critical
 
@@ -28,7 +28,7 @@ rules:
     action: block
     severity: high
 
-  # --- Rubric adherence (L1-impact-assessor/evaluation.md Quality Gates, checked against the RESULTANT content) ---
+  # --- Rubric adherence (L0-impact-assessor/evaluation.md Quality Gates, checked against the RESULTANT content) ---
   - name: capability-check-not-vacuous
     description: "capability_check.matched_service_id is null ONLY IF original_input.service_catalog is genuinely empty (no services[]); if the catalog has entries, matched_service_id must name a real SVC- id actually present in that catalog, or the check is vacuous — evaluation.md Quality Gate #1: 'names the closest candidate service even when it is not a duplicate, never no similar service found with nothing checked against'"
     action: block
@@ -50,7 +50,7 @@ rules:
     severity: critical
 
   - name: cmdb-kb-mismatch-flagged
-    description: "If a plausible mismatch exists between what the CMDB shows and what kb-L1-enterprise-architecture's narrative claims for a given CI, it must appear as a stated finding in that CI's how_or_why_not — never silently reconciled by picking one source (evaluation.md Quality Gate #2 and Reflection Checklist item 3). Semantic judgment call, not a regex match."
+    description: "If a plausible mismatch exists between what the CMDB shows and what kb-L0-enterprise-architecture's narrative claims for a given CI, it must appear as a stated finding in that CI's how_or_why_not — never silently reconciled by picking one source (evaluation.md Quality Gate #2 and Reflection Checklist item 3). Semantic judgment call, not a regex match."
     action: flag
     severity: high
 

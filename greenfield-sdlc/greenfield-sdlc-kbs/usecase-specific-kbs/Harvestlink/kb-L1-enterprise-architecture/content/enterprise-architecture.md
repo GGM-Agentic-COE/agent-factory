@@ -1,12 +1,12 @@
 <!--
-kb-L1-enterprise-architecture · content · enterprise-architecture.md
-Layer: L1 (enterprise-wide, cross-phase — NOT domain-specific). Illustrative
+kb-L0-enterprise-architecture · content · enterprise-architecture.md
+Layer: L0 (enterprise-wide, cross-phase — NOT domain-specific). Illustrative
 content for the reference scenario: Thornbury Foods Group, the fictional
 parent enterprise building HarvestLink as a new digital product. Not a
 real company; not a real product commitment. Grounds impact-assessment.md
 and any later-phase design agent (HLD/LLD) that needs to know what
 HarvestLink might touch, integrate with, or deliberately avoid touching.
-Security & compliance standards live in kb-L1-enterprise-security — not
+Security & compliance standards live in kb-L0-enterprise-security — not
 duplicated here.
 -->
 
@@ -35,7 +35,7 @@ duplicated here.
 | SMDS | Existing wholesale supplier/distributor records | **Check only, read-only** | Onboarding (FR-001) should check for an existing SMDS record to avoid duplicate producer identity — but HarvestLink's own producer records live in its own service, not written back to SMDS |
 | Group ERP (SAP) | Financial ledger, invoicing | **No integration, by design** | HarvestLink must never take title/possession of goods (vision.md § Regulatory Posture); any ERP posting would imply HarvestLink is a transacting party, undermining the facilitation-only structure |
 | Compliance Document Store | Manually-uploaded wholesale supplier certs | **No integration** | No API exists (EA2); HarvestLink's traceability/allergen services (FR-003, FR-004) are built standalone, not as an extension of this legacy store — an explicit decision, not an oversight |
-| Employee Identity (Azure AD) | Employee accounts only | **No integration** | HarvestLink's users (producers, distributors, buyers) are external parties; group SSO has no external-party tier (see kb-L1-enterprise-security) |
+| Employee Identity (Azure AD) | Employee accounts only | **No integration** | HarvestLink's users (producers, distributors, buyers) are external parties; group SSO has no external-party tier (see kb-L0-enterprise-security) |
 | Data Warehouse (Snowflake) | Group-wide aggregate reporting | **Outbound feed only** | HarvestLink's metrics-reporting-pipeline (FR-008/FR-009) feeds aggregate, non-PII metrics to the group DW per group reporting policy — one-way, no read dependency back |
 | API Gateway (Kong) | New digital-product traffic | **Required** | Any HarvestLink service exposed beyond its own boundary must publish through the Gateway, not a direct point-to-point integration |
 

@@ -1,26 +1,26 @@
-# gr-L1-idea-intake-quality-gate
+# gr-L0-idea-intake-quality-gate
 
-**Layer:** L1
-**Triggers on:** post_execution (output rail) — fires when `L1-vision-idea-intake-evaluator` concludes
+**Layer:** L0
+**Triggers on:** post_execution (output rail) — fires when `L0-vision-idea-intake-evaluator` concludes
 **On fail:** Retry once, then escalate to HITL
 **Implementation:** LLM-driven (Colang) — Python actions preserved for hybrid mode
-**Applies to:** `L1-vision-idea-intake-evaluator` only (`configured_agents`)
+**Applies to:** `L0-vision-idea-intake-evaluator` only (`configured_agents`)
 
 ## What does it do?
 
-`L1-vision-idea-intake-evaluator` scores `L1-vision-idea-intake`'s draft
-output against `L1-vision-idea-intake/evaluation.md` and fixes what it can.
+`L0-vision-idea-intake-evaluator` scores `L0-vision-idea-intake`'s draft
+output against `L0-vision-idea-intake/evaluation.md` and fixes what it can.
 This guardrail fires at that point (post-evaluation) but validates a
-different thing entirely: the **resultant** `L1-vision-idea-intake` output
+different thing entirely: the **resultant** `L0-vision-idea-intake` output
 — its own `items`, with the evaluator's `fixes_applied` resolved in — is
-what actually flows to `L1-vision-market-analyzer` and
-`L1-regulatory-feasibility-checker`. This gate checks THAT content:
+what actually flows to `L0-vision-market-analyzer` and
+`L0-regulatory-feasibility-checker`. This gate checks THAT content:
 
 1. **Output schema validation** — does the resultant content conform to
-   `L1-vision-idea-intake/output_schema.json` (not the evaluator's own
+   `L0-vision-idea-intake/output_schema.json` (not the evaluator's own
    output shape)?
 2. **Capability checklist / rubric adherence** — does the resultant
-   content actually satisfy `L1-vision-idea-intake/evaluation.md`'s
+   content actually satisfy `L0-vision-idea-intake/evaluation.md`'s
    Quality Gates and Reflection Checklist (sequential IDs, correctly
    labeled stated/suggested metrics, grounded `traced_to`, no
    placeholder text, honest INSUFFICIENT_CONTEXT handling)?
@@ -49,12 +49,12 @@ actual resultant content.
 ## How It Works
 
 ```
-L1-vision-idea-intake-evaluator concludes (scores, fixes, final_decision)
+L0-vision-idea-intake-evaluator concludes (scores, fixes, final_decision)
         ↓
 ┌────────────────────────────────────────────────────────────────────┐
 │  IDEA-INTAKE QUALITY GATE (post_execution, fires on evaluator)      │
 │                                                                      │
-│  Reconstruct RESULTANT content: L1-vision-idea-intake's items with  │
+│  Reconstruct RESULTANT content: L0-vision-idea-intake's items with  │
 │  fixes_applied[].before→after resolved in                           │
 │                                                                      │
 │  DETERMINISTIC (actions.py):                                        │
@@ -74,17 +74,17 @@ L1-vision-idea-intake-evaluator concludes (scores, fixes, final_decision)
 │  All ✓ → gate passes                                                 │
 └────────────────────────────────────────────────────────────────────┘
         ↓
-Resultant idea-brief content flows to L1-vision-market-analyzer /
-L1-regulatory-feasibility-checker
+Resultant idea-brief content flows to L0-vision-market-analyzer /
+L0-regulatory-feasibility-checker
 ```
 
 ## File Structure
 
 ```
-gr-L1-idea-intake-quality-gate/
+gr-L0-idea-intake-quality-gate/
 ├── config.yml                              # Rail configuration
 ├── prompts.yml                             # LLM evaluation prompt (6 checks)
-├── gr-L1-idea-intake-quality-gate.co       # LLM-only Colang flow (uses self_check_output)
+├── gr-L0-idea-intake-quality-gate.co       # LLM-only Colang flow (uses self_check_output)
 ├── idea_intake_quality_gate.co             # Python-hybrid Colang flow (calls actions.py)
 ├── actions.py                              # Deterministic Python (schema, ID sequencing, INSUFFICIENT_CONTEXT integrity, placeholder scan)
 ├── spec.yaml                               # Guardrail specification
@@ -92,7 +92,7 @@ gr-L1-idea-intake-quality-gate/
 ```
 
 **Two modes:**
-- **LLM-only** (`gr-L1-idea-intake-quality-gate.co`): all 6 checks via `self_check_output`.
+- **LLM-only** (`gr-L0-idea-intake-quality-gate.co`): all 6 checks via `self_check_output`.
 - **Python-hybrid** (`idea_intake_quality_gate.co`): the 4 deterministic checks (1, 2, 3, 6) reconstruct the resultant content and validate it directly in `actions.py`; the LLM handles the 2 genuinely semantic checks (4, 5).
 
 ## Testing
@@ -144,7 +144,7 @@ gr-L1-idea-intake-quality-gate/
 ```python
 from nemoguardrails import LLMRails, RailsConfig
 
-config = RailsConfig.from_path("./gr-L1-idea-intake-quality-gate")
+config = RailsConfig.from_path("./gr-L0-idea-intake-quality-gate")
 rails = LLMRails(config)
 
 response = await rails.generate_async(

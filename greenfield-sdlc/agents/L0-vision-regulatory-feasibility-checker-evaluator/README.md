@@ -12,7 +12,7 @@ classification at face value.
 Since v2.0 it also holds the gate number itself. The viability score is
 derived by the generator and **re-derived here from the final, post-fix
 constraints** — because a severity fix that failed to move the score would
-let a blocked idea clear `qg-L1-viability-score` and auto-publish.
+let a blocked idea clear `qg-L0-viability-score` and auto-publish.
 
 ## What does it do?
 
@@ -31,7 +31,7 @@ Accepts the original input and draft output from
   and it also catches *false equivalence*, where the correct local regime is
   named but reasoned through a foreign analogue's mechanics
 - A category coverage sweep: every applicable category in
-  `kb-L1-regulatory-frameworks-index#coverage-categories` must be either a
+  `kb-L0-regulatory-frameworks-index#coverage-categories` must be either a
   constraint or a declared `categories_not_applicable` entry — absent from
   both is a finding. That list is read from the KB, not authored here, so
   this audit and the generator's sweep are provably the same list
@@ -45,13 +45,13 @@ Accepts the original input and draft output from
 1. Ingests the generator's original input and draft output
 2. Reads `regulatory-feasibility.md` and `idea-brief.json` from blob storage
    — the brief is **JSON**, parsed by key path, not scanned as markdown
-3. Reads both regulatory KBs from **Confluence** with `tool-L1-confluence-reader`
+3. Reads both regulatory KBs from **Confluence** with `tool-L0-confluence-reader`
    — `page_id = 518422550` and `page_id = 519012353`, fixed in the prompt, the same pages the
    generator reads — to sanity-check citations and re-run the category sweep.
    Because both agents read the same location, the audit and the sweep cannot
    diverge. Anchors are matched as headings in the returned XHTML
 4. Reads the scoring rubric (`evaluation.md`) from GitHub with
-   `tool-L1-github-reader-using-app` — one call, fixed in the prompt: repo
+   `tool-L0-github-reader-using-app` — one call, fixed in the prompt: repo
    `agentic-sdlc-knowledge-bases`, branch `main`, folder
    `planning/vision-regulatory-feasiblity/L0-regulatory-feasibility-checker`.
    No examples are read. An unreadable rubric, or no KB carrying `#coverage-categories`, fails with

@@ -16,7 +16,7 @@ BACK STORY:
 
   Domain context:
   - One KB attached at runtime:
-    - **kb-L1-architecture-principles**: Read this using the attached confluence reader tool. Assert
+    - **kb-L0-architecture-principles**: Read this using the attached confluence reader tool. Assert
       KB-mandatory infrastructure absent from PRD as external-dependency nodes. Flag violations.
     Never re-derive component boundaries from the KB.
   - No template KB. Document template embedded below; graph schema IS output_schema.json.
@@ -38,7 +38,7 @@ Input Ingestion:
     Validate:
     - prd_output.status != "success" → return INSUFFICIENT_CONTEXT
     - service_catalog AND cmdb_export BOTH empty → state "no parent enterprise"
-    - extract kb-L1-architecture-principles.md using theconfluence reader tool with { page_id = 
+    - extract kb-L0-architecture-principles.md using theconfluence reader tool with { page_id = 
      }
       in the assessment header; activate KB-authority mode; never silently treat empty as unchecked
     - Check export_metadata.exported_at against run date; stale → data-quality risk in Gaps
@@ -74,7 +74,7 @@ Input Ingestion:
     | Existing System (CI) | impacted? | How / Why Not | Component(s) |
     |---|---|---|---|
     | {CI name} | {Yes \| No — by architecture decision} | {integration, or reason for exclusion —
-    cross-checked against kb-L1-enterprise-architecture; a mismatch is itself a finding} |
+    cross-checked against kb-L0-enterprise-architecture; a mismatch is itself a finding} |
     {FR-NNN, or "—"} |
     ## Components Identified
     | Requirement | Component (new/existing) | Blast Radius | Rationale |
@@ -96,7 +96,7 @@ Input Ingestion:
   Part 1: Impact Assessment Analysis
     1. Run capability check against every service_catalog entry, and technical impact check
        against every relevant cmdb_export CI, cross-checked against
-       kb-L1-enterprise-architecture — flag, don't reconcile, any KB/CMDB disagreement.
+       kb-L0-enterprise-architecture — flag, don't reconcile, any KB/CMDB disagreement.
     2. Map every FR to a component with a stated blast-radius rationale — no FR left unmapped.
     3. List every external dependency in Integration Landscape, categorized by
        upstream/downstream, including any newly surfaced by step 1.

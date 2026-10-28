@@ -11,8 +11,8 @@ it's this agent's reconciliation logic that would have caught it.
 
 ## What does it do?
 
-Accepts the full outputs of `L1-vision-idea-intake` (as `idea-brief.json`)
-and `L0-regulatory-feasibility-checker` — plus `L1-vision-market-analyzer`
+Accepts the full outputs of `L0-vision-idea-intake` (as `idea-brief.json`)
+and `L0-regulatory-feasibility-checker` — plus `L0-vision-market-analyzer`
 where it ran — and the viability score, and produces one reconciled vision
 statement:
 - Problem, target users, and value proposition carried forward without drift
@@ -25,7 +25,7 @@ statement:
 - An executive summary, written last, that introduces no new claims
 
 It saves the vision document to **blob storage** as `vision.md`, with
-`tool-L1-azure-blob-writer`, in the request's `folder_name`. It calls no
+`tool-L0-azure-blob-writer`, in the request's `folder_name`. It calls no
 Confluence tool. The flow is:
 
 ```
@@ -60,9 +60,9 @@ name is supplied, the agent proposes one from the idea brief and labels it
 7. Writes the executive summary last, as a pure condensation
 8. Reports viability_score exactly as received; does not compute, re-derive,
    round, or adjust it, and does not decide what follows (that's the
-   workflow's `qg-L1-viability-score` gate, not this agent)
+   workflow's `qg-L0-viability-score` gate, not this agent)
 9. Saves the filled template to blob storage as `vision.md` with
-   `tool-L1-azure-blob-writer` (one call, one retry on failure)
+   `tool-L0-azure-blob-writer` (one call, one retry on failure)
 
 ## Where the viability score comes from
 
@@ -73,7 +73,7 @@ that must agree exactly: as the `viability_score` input parameter, and in
 disagreement between the two is `INPUT_MALFORMED` — never resolved here by
 picking one or averaging them.
 
-There is no `viability-assessment.md` and no `L1-vision-viability-scorer`.
+There is no `viability-assessment.md` and no `L0-vision-viability-scorer`.
 If either turns up in the folder, it is a stale artifact of an earlier
 pipeline version and is ignored.
 

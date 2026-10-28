@@ -1,7 +1,7 @@
-# kb-L2-domain-regulatory
+# kb-L1-domain-regulatory
 
 *A domain-KB slot, not a food-specific artifact:
-`L1-regulatory-feasibility-checker`'s prompt and spec reference this
+`L0-regulatory-feasibility-checker`'s prompt and spec reference this
 id generically, so a different vertical can populate the same slot with its
 own regulatory facts without touching the agent at all. This reference
 deployment's slot is filled with food-domain content — see below.*
@@ -12,7 +12,7 @@ licensing, hygiene and food safety, allergen labelling, cold chain and
 traceability, and cross-jurisdiction mechanisms relevant to a distributor
 operating across multiple local authority areas.
 
-**Why it exists:** `L1-regulatory-feasibility-checker` needs real
+**Why it exists:** `L0-regulatory-feasibility-checker` needs real
 food-specific facts to classify constraints Green/Amber/Red and to cite a
 specific regulation per constraint — generic knowledge isn't enough, and
 the full technical regulatory corpus is far more than a vision-stage agent
@@ -34,9 +34,9 @@ authorization application.
 
 **Quality bar:** Every constraint bullet must cite a real, named regulation
 or scheme. No constraint may be classified Red without also being checked
-against `gr-L1-hallucination-check` for whether a mitigation genuinely
+against `gr-L0-hallucination-check` for whether a mitigation genuinely
 exists in this KB or elsewhere.
 
 **Owner:** Food Domain Champion
 
-**Consumers:** `L1-regulatory-feasibility-checker`
+**Consumers:** `L0-regulatory-feasibility-checker`

@@ -1,26 +1,26 @@
-# gr-L1-prd-quality-gate
+# gr-L0-prd-quality-gate
 
-**Layer:** L1
-**Triggers on:** post_execution (output rail) — fires when `L1-requirements-prd-composer-evaluator` concludes
+**Layer:** L0
+**Triggers on:** post_execution (output rail) — fires when `L0-requirements-prd-composer-evaluator` concludes
 **On fail:** Retry once, then escalate to HITL
 **Implementation:** LLM-driven (Colang) — Python actions preserved for hybrid mode
-**Applies to:** `L1-requirements-prd-composer-evaluator` only (`configured_agents`)
+**Applies to:** `L0-requirements-prd-composer-evaluator` only (`configured_agents`)
 
 ## What does it do?
 
-`L1-requirements-prd-composer-evaluator` scores `L1-requirements-prd-composer`'s
-draft `prd.md` composition against `L1-requirements-prd-composer/evaluation.md`
+`L0-requirements-prd-composer-evaluator` scores `L0-requirements-prd-composer`'s
+draft `prd.md` composition against `L0-requirements-prd-composer/evaluation.md`
 and fixes what it can. This guardrail fires at that point but validates a
-different thing: the **resultant** `L1-requirements-prd-composer` output — its
+different thing: the **resultant** `L0-requirements-prd-composer` output — its
 own `items`, with the evaluator's `fixes_applied` resolved in — is what
-actually flows to `L1-impact-assessor` and
-`L1-dependency-mapper`. This gate checks THAT content:
+actually flows to `L0-impact-assessor` and
+`L0-dependency-mapper`. This gate checks THAT content:
 
 1. **Output schema validation** — does the resultant content conform to
-   `L1-requirements-prd-composer/output_schema.json` (not the evaluator's
+   `L0-requirements-prd-composer/output_schema.json` (not the evaluator's
    own output shape)?
 2. **Capability checklist / rubric adherence** — does the resultant content
-   actually satisfy `L1-requirements-prd-composer/evaluation.md`'s Quality
+   actually satisfy `L0-requirements-prd-composer/evaluation.md`'s Quality
    Gates: zero-drop composition of every FR from `requirements.md` and every
    NFR boundary condition from `nfr-spec.md`, verbatim `compound_splits`
    carry-forward, every Assumption/Constraint/Risk tagged to an FR or
@@ -32,7 +32,7 @@ it's an independent re-derivation of composition fidelity, run against what
 actually ships downstream.
 
 **Why it matters:** an evaluator reporting `fixed_and_approved` is a claim,
-not a guarantee. `L1-requirements-prd-composer` composes (does not
+not a guarantee. `L0-requirements-prd-composer` composes (does not
 re-derive) two already-approved upstream documents — a "fix" that quietly
 dropped an FR's NFR boundary condition, left a risk untagged, or let a
 success-metrics-looking field slip through despite the template's explicit
@@ -58,7 +58,7 @@ the same upstream content the composer itself received.
 ## How It Works
 
 ```
-L1-requirements-prd-composer-evaluator concludes
+L0-requirements-prd-composer-evaluator concludes
         ↓
 ┌────────────────────────────────────────────────────────────────────┐
 │  PRD QUALITY GATE (post_execution, fires on evaluator)             │
@@ -99,10 +99,10 @@ Resultant PRD content flows to impact-assessor / dependency-mapper
 ## File Structure
 
 ```
-gr-L1-prd-quality-gate/
+gr-L0-prd-quality-gate/
 ├── config.yml                        # Rail configuration
 ├── prompts.yml                       # LLM evaluation prompt (9 checks)
-├── gr-L1-prd-quality-gate.co         # LLM-only Colang flow
+├── gr-L0-prd-quality-gate.co         # LLM-only Colang flow
 ├── prd_quality_gate.co               # Python-hybrid Colang flow (calls actions.py)
 ├── actions.py                        # Deterministic Python (schema, zero-drop FR/NFR, split carry-forward, tagging, metrics scan, TBD rollup)
 ├── spec.yaml                         # Guardrail specification
@@ -110,12 +110,12 @@ gr-L1-prd-quality-gate/
 ```
 
 **Two modes:**
-- **LLM-only** (`gr-L1-prd-quality-gate.co`): all 9 checks via `self_check_output`.
+- **LLM-only** (`gr-L0-prd-quality-gate.co`): all 9 checks via `self_check_output`.
 - **Python-hybrid** (`prd_quality_gate.co`): the 7 deterministic checks (1-7)
   reconstruct the resultant content and validate it directly in
   `actions.py` — checks 2, 3, 4, and 7 additionally need `original_input`
   (which carries `requirements_output` and `nfr_spec_output`, both
-  `L1-requirements-prd-composer-evaluator`'s own required input parameters)
+  `L0-requirements-prd-composer-evaluator`'s own required input parameters)
   to compare against; the LLM handles the 2 genuinely semantic checks
   (8, 9) — whether a claim is actually "absent" elsewhere or a risk is
   genuinely traceable is judgment, not a regex match.
@@ -134,7 +134,7 @@ present verbatim, assumptions are tagged, no metrics field, no TBD dropped:
   "assumptions": [{"short_title": "Single tenant", "summary": "Assumes single-tenant deployment.", "underlies_or_affects": ["FR-001"], "confidence": 0.85, "reasoning": "Carried forward from vision.md's Regulatory Posture."}],
   "constraints": [],
   "risks": [],
-  "requirements": [{"id": "FR-001", "title": "Digital claim submission", "statement": "The system shall allow an employee to submit an expense claim digitally.", "traces_to": "vision.md § Value Proposition", "nfrs": [{"category": "Security", "boundary_condition": "All submissions encrypted in transit (TLS 1.2+)", "source": "kb-L1-enterprise-security § ES3"}], "confidence": 0.93, "reasoning": "Composed verbatim from requirements.md and nfr-spec.md."}],
+  "requirements": [{"id": "FR-001", "title": "Digital claim submission", "statement": "The system shall allow an employee to submit an expense claim digitally.", "traces_to": "vision.md § Value Proposition", "nfrs": [{"category": "Security", "boundary_condition": "All submissions encrypted in transit (TLS 1.2+)", "source": "kb-L0-enterprise-security § ES3"}], "confidence": 0.93, "reasoning": "Composed verbatim from requirements.md and nfr-spec.md."}],
   "open_questions": []
 }
 ```
@@ -173,7 +173,7 @@ condition was dropped and a stray metrics field was smuggled in:
 ```python
 from nemoguardrails import LLMRails, RailsConfig
 
-config = RailsConfig.from_path("./gr-L1-prd-quality-gate")
+config = RailsConfig.from_path("./gr-L0-prd-quality-gate")
 rails = LLMRails(config)
 
 response = await rails.generate_async(
@@ -200,7 +200,7 @@ original_input = json.dumps({
         "compound_splits": [],
     }}},
     "nfr_spec_output": {"status": "success", "content": {"items": {
-        "nfr_classifications": [{"id": "FR-001", "title": "t", "boundary_conditions": [{"category": "Security", "boundary_condition": "All submissions encrypted in transit (TLS 1.2+)", "source": "kb-L1-enterprise-security § ES3"}], "confidence": 0.9, "reasoning": "r" * 25}],
+        "nfr_classifications": [{"id": "FR-001", "title": "t", "boundary_conditions": [{"category": "Security", "boundary_condition": "All submissions encrypted in transit (TLS 1.2+)", "source": "kb-L0-enterprise-security § ES3"}], "confidence": 0.9, "reasoning": "r" * 25}],
     }}},
 })
 

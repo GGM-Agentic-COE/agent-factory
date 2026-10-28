@@ -44,12 +44,12 @@ context:
   knowledge_bases:
     - ref: "../L0-prd-composer/evaluation.md"   # source of truth for scoring, retrieved from GitHub at runtime — never duplicated in this agent's prompt
   guardrails:
-    - gr-L1-output-schema-validator
-    - gr-L1-pii-detection
+    - gr-L0-output-schema-validator
+    - gr-L0-pii-detection
     - gr-L3-hallucination-detector
     - gr-L3-citation-validator      # re-checked independently, not by trusting the composer's own pass/fail claim
     - gr-L3-consistency-checker     # corrected JSON and PRD markdown must agree before publishing
-    - gr-L2-tool-permissions        # holds a write tool — publish only on approved / fixed_and_approved
+    - gr-L1-tool-permissions        # holds a write tool — publish only on approved / fixed_and_approved
     - gr-L3-agent-rate-limit
   tools:
     - tool-L0-github-reader-using-PAT    # reads the composer's evaluation file; tool-L0-github-reader-using-app takes the same parameters if that variant is deployed instead

@@ -2,9 +2,9 @@
 spec_version: "1.0"
 artifact_type: agent
 metadata:
-  name: L1-vision-idea-intake
+  name: L0-vision-idea-intake
   version: "1.0.0"
-  layer: L1
+  layer: L0
   phase: vision
   owner: agentic-ai-coe
   created: "2026-08-02"
@@ -16,7 +16,7 @@ purpose:
   business_value: "Every downstream Phase 0 agent (market analysis, regulatory feasibility, vision synthesis) needs the same structured starting facts. Without this agent, each would re-interpret the raw idea text independently and drift."
 
 prompt:
-  ref: "prompts/L1-vision-idea-intake/instructions.md"
+  ref: "prompts/L0-vision-idea-intake/instructions.md"
   version: "1.0.0"
   description: "Extracts problem statement, target users, value proposition, and candidate metrics from a raw idea; flags anything missing rather than inventing it."
 
@@ -42,12 +42,12 @@ contract:
 context:
   knowledge_bases: []   # idea-brief structure is embedded in instructions.md per S4 — no KB needed
   guardrails:
-    - gr-L1-output-schema-validator
-    - gr-L1-pii-detection
-    - gr-L1-hallucination-check
-    - gr-L1-consistency-check
+    - gr-L0-output-schema-validator
+    - gr-L0-pii-detection
+    - gr-L0-hallucination-check
+    - gr-L0-consistency-check
   tools:
-    - tool-L1-confluence-fetch-page   # read-only; invoked directly, per the Core/Utility split (writes are Utility-only)
+    - tool-L0-confluence-fetch-page   # read-only; invoked directly, per the Core/Utility split (writes are Utility-only)
 
 quality:
   evaluation_ref: "evaluation.md"

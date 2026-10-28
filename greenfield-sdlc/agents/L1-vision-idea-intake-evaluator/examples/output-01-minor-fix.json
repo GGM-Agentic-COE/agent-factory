@@ -1,5 +1,5 @@
 {
-  "agent_id": "L1-vision-idea-intake-evaluator",
+  "agent_id": "L0-vision-idea-intake-evaluator",
   "agent_version": "1.0.0",
   "execution_id": "exec-f1a2b3c4",
   "workflow_execution_id": "wf-e5f6a7b8",
@@ -35,6 +35,6 @@
       ],
       "final_decision": "fixed_and_approved"
     },
-    "execution_summary": "• overall_score: 7.5 (pass), final_decision: fixed_and_approved.\n• Findings: 4 total, 1 fail (FND-01), 3 pass.\n• Fix applied: SM-01's status corrected from 'stated' to 'suggested' (FIX-01) — the rest of the output was left untouched since it was already correct.\n• Knowledge bases consulted: L1-vision-idea-intake/evaluation.md (Quality Gates and Scores table).\n• Guardrails evaluated: gr-L1-output-schema-validator (pass), gr-L1-pii-detection (pass).\n• Gaps flagged: none — a single mechanical mislabeling, fully correctable without escalation."
+    "execution_summary": "• overall_score: 7.5 (pass), final_decision: fixed_and_approved.\n• Findings: 4 total, 1 fail (FND-01), 3 pass.\n• Fix applied: SM-01's status corrected from 'stated' to 'suggested' (FIX-01) — the rest of the output was left untouched since it was already correct.\n• Knowledge bases consulted: L0-vision-idea-intake/evaluation.md (Quality Gates and Scores table).\n• Guardrails evaluated: gr-L0-output-schema-validator (pass), gr-L0-pii-detection (pass).\n• Gaps flagged: none — a single mechanical mislabeling, fully correctable without escalation."
   }
 }

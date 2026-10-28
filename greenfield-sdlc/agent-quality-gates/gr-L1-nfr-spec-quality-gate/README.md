@@ -1,28 +1,28 @@
-# gr-L1-nfr-spec-quality-gate
+# gr-L0-nfr-spec-quality-gate
 
-**Layer:** L1
-**Triggers on:** post_execution (output rail) — fires when `L1-requirements-nfr-classifier-evaluator` concludes
+**Layer:** L0
+**Triggers on:** post_execution (output rail) — fires when `L0-requirements-nfr-classifier-evaluator` concludes
 **On fail:** Retry once, then escalate to HITL
 **Implementation:** LLM-driven (Colang) — Python actions preserved for hybrid mode
-**Applies to:** `L1-requirements-nfr-classifier-evaluator` only (`configured_agents`)
+**Applies to:** `L0-requirements-nfr-classifier-evaluator` only (`configured_agents`)
 
 ## What does it do?
 
-`L1-requirements-nfr-classifier-evaluator` independently re-checks
-`L1-requirements-nfr-classifier`'s draft NFR classifications against
-`kb-L1-nfr-classification-taxonomy` and the real grounding sources
+`L0-requirements-nfr-classifier-evaluator` independently re-checks
+`L0-requirements-nfr-classifier`'s draft NFR classifications against
+`kb-L0-nfr-classification-taxonomy` and the real grounding sources
 (`requirements.md`, `vision.md` — including its Regulatory Posture section,
-`kb-L1-enterprise-security`), and fixes what it can. This guardrail fires
+`kb-L0-enterprise-security`), and fixes what it can. This guardrail fires
 at that point but validates a different thing: the **resultant**
-`L1-requirements-nfr-classifier` output — its own `items`, with the
+`L0-requirements-nfr-classifier` output — its own `items`, with the
 evaluator's `fixes_applied` resolved in — is what actually flows to
-`L1-requirements-prd-composer`. This gate checks THAT content:
+`L0-requirements-prd-composer`. This gate checks THAT content:
 
 1. **Output schema validation** — does the resultant content conform to
-   `L1-requirements-nfr-classifier/output_schema.json` (not the
+   `L0-requirements-nfr-classifier/output_schema.json` (not the
    evaluator's own output shape)?
 2. **Capability checklist / rubric adherence** — does the resultant
-   content actually satisfy `L1-requirements-nfr-classifier/evaluation.md`'s
+   content actually satisfy `L0-requirements-nfr-classifier/evaluation.md`'s
    Quality Gates: exactly one entry per FR with matching ids/order, at
    least one genuinely-applicable category per FR (or an explicit "No NFR
    categories apply"), every non-TBD boundary condition citing a real
@@ -56,7 +56,7 @@ evaluator's own bookkeeping says.
 ## How It Works
 
 ```
-L1-requirements-nfr-classifier-evaluator concludes
+L0-requirements-nfr-classifier-evaluator concludes
         ↓
 ┌────────────────────────────────────────────────────────────────────┐
 │  NFR-SPEC QUALITY GATE (post_execution, fires on evaluator)        │
@@ -84,16 +84,16 @@ L1-requirements-nfr-classifier-evaluator concludes
 │  All ✓ → gate passes                                                 │
 └────────────────────────────────────────────────────────────────────┘
         ↓
-Resultant nfr-spec content flows to L1-requirements-prd-composer
+Resultant nfr-spec content flows to L0-requirements-prd-composer
 ```
 
 ## File Structure
 
 ```
-gr-L1-nfr-spec-quality-gate/
+gr-L0-nfr-spec-quality-gate/
 ├── config.yml                              # Rail configuration
 ├── prompts.yml                             # LLM evaluation prompt (7 checks)
-├── gr-L1-nfr-spec-quality-gate.co          # LLM-only Colang flow
+├── gr-L0-nfr-spec-quality-gate.co          # LLM-only Colang flow
 ├── nfr_spec_quality_gate.co                # Python-hybrid Colang flow (calls actions.py)
 ├── actions.py                              # Deterministic Python (schema, ID sequencing, TBD/source consistency, citation-form validity)
 ├── spec.yaml                               # Guardrail specification
@@ -101,7 +101,7 @@ gr-L1-nfr-spec-quality-gate/
 ```
 
 **Two modes:**
-- **LLM-only** (`gr-L1-nfr-spec-quality-gate.co`): all 7 checks via `self_check_output`.
+- **LLM-only** (`gr-L0-nfr-spec-quality-gate.co`): all 7 checks via `self_check_output`.
 - **Python-hybrid** (`nfr_spec_quality_gate.co`): the 4 deterministic checks (1-4) reconstruct the resultant content and validate it directly in `actions.py`; the LLM handles the 3 genuinely semantic checks (5, 6, 7) — whether a category was genuinely applicable, whether a cited figure is plausible, and whether a TBD was actually resolvable are judgment calls, not regex matches.
 
 ## Testing
@@ -150,14 +150,14 @@ gr-L1-nfr-spec-quality-gate/
 | Empty boundary_conditions, no explicit reasoning | boundary_conditions: [], reasoning doesn't say "No NFR categories apply" | "no" |
 | Silently-skipped category | FR statement clearly implies Security but no Security category appears | "no" |
 | Fabricated-looking figure | A cited requirements.md § FR-NNN source that plainly doesn't state the figure claimed | "no" |
-| Premature TBD | TBD used even though the same FR's own statement (or a sibling entry's kb-L1-enterprise-security citation) already grounds it | "no" |
+| Premature TBD | TBD used even though the same FR's own statement (or a sibling entry's kb-L0-enterprise-security citation) already grounds it | "no" |
 
 ### Option 2: End-to-End Flow Testing (NeMo Guardrails SDK)
 
 ```python
 from nemoguardrails import LLMRails, RailsConfig
 
-config = RailsConfig.from_path("./gr-L1-nfr-spec-quality-gate")
+config = RailsConfig.from_path("./gr-L0-nfr-spec-quality-gate")
 rails = LLMRails(config)
 
 response = await rails.generate_async(

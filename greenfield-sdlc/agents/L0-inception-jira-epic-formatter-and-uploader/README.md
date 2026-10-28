@@ -16,7 +16,7 @@ The agent:
 - Drops only records covered by explicit drop rules and reports those drops separately.
 - Builds all Epic issues first and all Feature issues second so logical parent IDs can be resolved in one upload pass.
 - Produces string or string-array description values and leaves Jira/ADF formatting to the upload tool.
-- Invokes `tool-L1-sfi-jira-epics-uploader-secrets-manager` once with the complete validated payload.
+- Invokes `tool-L0-sfi-jira-epics-uploader-secrets-manager` once with the complete validated payload.
 - Parses every success, failure, and fatal response line.
 - Reconciles expected, created, failed, dropped, and unreconciled issue counts.
 - Returns `success`, `partial_success`, or `failed` in a standard `jira_upload_status` response.

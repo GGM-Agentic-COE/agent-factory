@@ -40,7 +40,7 @@ generator ──► blob: <folder_name>/vision.md ──► this evaluator (eval
    output is passed in; everything checked is built from `vision.md`. The
    brief is **JSON**, parsed by key path
 2. Reads the scoring rubric (`evaluation.md`) from GitHub with
-   `tool-L1-github-reader-using-app` — one call, fixed in the prompt: repo
+   `tool-L0-github-reader-using-app` — one call, fixed in the prompt: repo
    `agentic-sdlc-knowledge-bases`, branch `main`, folder
    `planning/vision-statement-generator/L0-vision-statement-generator`. No
    examples are read. An unreadable rubric fails with `REFERENCE_UNAVAILABLE`
@@ -60,7 +60,7 @@ generator ──► blob: <folder_name>/vision.md ──► this evaluator (eval
    inventing content. Nothing is written back to blob storage — the blob
    `vision.md` stays as the generator's draft
 8. **Publishes** the corrected document to Confluence with
-   `tool-L1-confluence-writer` — `title = <Product Name>-vision.md`, content
+   `tool-L0-confluence-writer` — `title = <Product Name>-vision.md`, content
    converted to XHTML, `space_key = 514162689` — for **every** decision,
    including `escalate_to_hitl`. The human reviews it in Confluence; issues
    that couldn't be fixed are listed in the findings

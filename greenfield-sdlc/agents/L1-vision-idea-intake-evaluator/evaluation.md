@@ -1,7 +1,7 @@
-# Evaluation — L1-vision-idea-intake-evaluator
+# Evaluation — L0-vision-idea-intake-evaluator
 
-This covers THIS evaluator's own meta-quality — not L1-vision-idea-intake's
-rubric (that lives in `../L1-vision-idea-intake/evaluation.md` and is loaded
+This covers THIS evaluator's own meta-quality — not L0-vision-idea-intake's
+rubric (that lives in `../L0-vision-idea-intake/evaluation.md` and is loaded
 at runtime, not duplicated here).
 
 ## Quality Gates

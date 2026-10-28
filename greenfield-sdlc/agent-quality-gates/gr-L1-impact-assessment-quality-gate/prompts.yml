@@ -1,15 +1,15 @@
 prompts:
   - task: self_check_output
     content: |
-      L1-impact-assessor's original input (prd_output, service_catalog,
+      L0-impact-assessor's original input (prd_output, service_catalog,
       cmdb_export): {{ original_input }}
-      L1-impact-assessor's original output (items): {{ generator_output }}
-      L1-impact-assessor-evaluator's verdict (fixes_applied, final_decision): {{ bot_response }}
+      L0-impact-assessor's original output (items): {{ generator_output }}
+      L0-impact-assessor-evaluator's verdict (fixes_applied, final_decision): {{ bot_response }}
 
-      Reconstruct the RESULTANT output: L1-impact-assessor's items
+      Reconstruct the RESULTANT output: L0-impact-assessor's items
       with every fixes_applied[].before → after substitution resolved in.
       Check that resultant content — not the evaluator's own scoring
-      bookkeeping — against L1-impact-assessor/output_schema.json
+      bookkeeping — against L0-impact-assessor/output_schema.json
       and its evaluation.md rubric:
 
       1. Schema compliance: does capability_check have summary (>=20 chars),
@@ -38,7 +38,7 @@ prompts:
          prd_output.content.items.requirements[].id — no FR unmapped, no
          invented FR id?
       7. CMDB/KB mismatch flagged: where a plausible mismatch exists
-         between what the CMDB shows and what kb-L1-enterprise-architecture
+         between what the CMDB shows and what kb-L0-enterprise-architecture
          would claim for a CI, is it stated as a finding in that
          how_or_why_not, not silently reconciled?
       8. Reasoning quality: does every how_or_why_not/rationale field
@@ -54,4 +54,4 @@ prompts:
 
       Answer "yes" if ALL checks pass on the RESULTANT content. Answer "no"
       if ANY check fails — this gates what actually flows to
-      L1-dependency-mapper and L1-backlog-prioritizer.
+      L0-dependency-mapper and L0-backlog-prioritizer.

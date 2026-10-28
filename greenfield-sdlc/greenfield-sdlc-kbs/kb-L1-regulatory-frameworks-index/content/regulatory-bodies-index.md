@@ -1,13 +1,13 @@
 <!--
-kb-L1-regulatory-frameworks-index · content · regulatory-bodies-index.md
-Layer: L1 (enterprise, domain-agnostic). Micro-KB content rules apply:
+kb-L0-regulatory-frameworks-index · content · regulatory-bodies-index.md
+Layer: L0 (enterprise, domain-agnostic). Micro-KB content rules apply:
 max 1 line/bullet, max 15 words, no explanations, numbers not words.
 -->
 
 # UK Regulatory Bodies Index (Cross-Domain)
 
 Use to identify the correct regulator category before loading a
-domain-specific L2 regulatory KB for detailed rules.
+domain-specific L1 regulatory KB for detailed rules.
 
 - Financial services, payments → FCA, PRA (Bank of England) (→ CON-Regulatory)
 - Food safety & standards → FSA (England/Wales/NI), FSS (Scotland) (→ CON-Regulatory)

@@ -71,15 +71,15 @@ contract:
 context:
   knowledge_bases: []
   guardrails:
-    - gr-L1-output-schema-validator
-    - gr-L1-pii-detection
-    - gr-L2-tool-permissions
+    - gr-L0-output-schema-validator
+    - gr-L0-pii-detection
+    - gr-L1-tool-permissions
     - gr-L3-agent-rate-limit
     - gr-L3-hallucination-detector
     - gr-L3-citation-validator
     - gr-L3-consistency-checker
   tools:
-    - tool-L1-sfi-jira-epics-uploader-secrets-manager
+    - tool-L0-sfi-jira-epics-uploader-secrets-manager
 
 processing:
   input_ingestion:
@@ -114,7 +114,7 @@ processing:
     emit_html: false
     emit_jira_wiki_markup: false
   tool_invocation:
-    tool: tool-L1-sfi-jira-epics-uploader-secrets-manager
+    tool: tool-L0-sfi-jira-epics-uploader-secrets-manager
     input_parameter: inputJSON
     maximum_invocations: 1
     retry: false

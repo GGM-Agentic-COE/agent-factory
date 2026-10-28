@@ -1,15 +1,15 @@
-"""gr-L1-market-analysis-quality-gate: validates the RESULTANT
-L1-vision-market-analyzer output (its own items, with the evaluator's
-fixes_applied resolved in) against L1-vision-market-analyzer/output_schema.json
-and L1-vision-market-analyzer/evaluation.md. Fires at
-L1-vision-market-analyzer-evaluator's post_execution.
+"""gr-L0-market-analysis-quality-gate: validates the RESULTANT
+L0-vision-market-analyzer output (its own items, with the evaluator's
+fixes_applied resolved in) against L0-vision-market-analyzer/output_schema.json
+and L0-vision-market-analyzer/evaluation.md. Fires at
+L0-vision-market-analyzer-evaluator's post_execution.
 """
 import json
 import logging
 import re
 from nemoguardrails.actions import action
 
-logger = logging.getLogger("gr-L1-market-analysis-quality-gate")
+logger = logging.getLogger("gr-L0-market-analysis-quality-gate")
 
 SWOT_QUADRANTS = {"strengths": "ST", "weaknesses": "WK", "opportunities": "OP", "threats": "TH"}
 DIRECTION_ENUM = {"growing", "declining", "stable", "emerging"}

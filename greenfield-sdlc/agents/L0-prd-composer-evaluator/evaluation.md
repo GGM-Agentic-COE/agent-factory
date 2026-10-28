@@ -1,7 +1,7 @@
-# Evaluation — L1-requirements-prd-composer-evaluator
+# Evaluation — L0-requirements-prd-composer-evaluator
 
-This covers THIS evaluator's own meta-quality — not L1-requirements-prd-composer's
-rubric (that lives in `../L1-requirements-prd-composer/evaluation.md`, loaded
+This covers THIS evaluator's own meta-quality — not L0-requirements-prd-composer's
+rubric (that lives in `../L0-requirements-prd-composer/evaluation.md`, loaded
 at runtime, not duplicated here).
 
 ## Quality Gates

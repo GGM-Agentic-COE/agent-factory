@@ -141,7 +141,7 @@ Knowledge-Base Retrieval:
 
   branch = 
 
-- Use the attached github-reader tool to retrieve kb-L1-epics-best-practices.md:
+- Use the attached github-reader tool to retrieve kb-L0-epics-best-practices.md:
   folder_location =
 
   repo = 
@@ -157,7 +157,7 @@ Knowledge-Base Responsibilities:
   - overall-score calculation;
   - pass criteria;
   - final-decision criteria.
-- kb-L1-epics-best-practices.md is the source of truth for:
+- kb-L0-epics-best-practices.md is the source of truth for:
   - Epic authoring;
   - business-capability altitude;
   - PRD-to-Epic traceability;
@@ -185,7 +185,7 @@ Mandatory Input Validation:
   - set top-level status to "failed";
   - set pass to false;
   - set final_decision to "escalate_to_hitl".
-- If kb-L1-epics-best-practices.md cannot be retrieved:
+- If kb-L0-epics-best-practices.md cannot be retrieved:
   - record the limitation as a finding;
   - evaluate only criteria fully supported by the available evaluation standard
     and grounded input;
@@ -210,7 +210,7 @@ Valid Refusal Handling:
 - Preserve the refusal and its grounded gaps when valid.
 Evaluation Process:
 1. Load the Epic Creator evaluation knowledge base and
-   kb-L1-epics-best-practices.md.
+   kb-L0-epics-best-practices.md.
 2. Validate the upstream AgentOutput structure.
 3. Inherit workflow_execution_id verbatim and generate a fresh execution_id.
 4. Resolve the PRD using the PRD Retrieval precedence:
@@ -240,7 +240,7 @@ Evaluation Process:
     null when no date is provided.
 18. Record genuine gate failures in content.evaluation.findings.
 19. Apply safe fixes using only the resolved PRD, existing grounded Epic
-    content, and kb-L1-epics-best-practices.md.
+    content, and kb-L0-epics-best-practices.md.
 20. Apply fixes directly to content.items.epics or content.items.gaps.
 21. Record every applied correction in content.evaluation.fixes_applied.
 22. Leave unfixable content unchanged and record an unresolved finding.
@@ -429,6 +429,6 @@ EXPECTED OUTPUT:
     "description": "Evaluated and corrected Epics output.",
     "produced_by": "L0-epics-creator-evaluator",
 
-    "execution_summary": "• Overall result: overall_score=<score>, pass=<true|false>, final_decision=<decision>.\n• Rubric gates: evaluated=<count>, passed=<count>, corrected=<count>, failed=<count>, not_applicable=<count>.\n• Findings and fixes: failed=<count>, corrected=<count>, fixes_applied=<count>, unresolved=<count>.\n• Score thresholds: <concise dimension-level threshold result>.\n• Knowledge bases consulted: Epic Creator evaluation standard; kb-L1-epics-best-practices.md.\n• Downstream handoff: <permitted|blocked>."
+    "execution_summary": "• Overall result: overall_score=<score>, pass=<true|false>, final_decision=<decision>.\n• Rubric gates: evaluated=<count>, passed=<count>, corrected=<count>, failed=<count>, not_applicable=<count>.\n• Findings and fixes: failed=<count>, corrected=<count>, fixes_applied=<count>, unresolved=<count>.\n• Score thresholds: <concise dimension-level threshold result>.\n• Knowledge bases consulted: Epic Creator evaluation standard; kb-L0-epics-best-practices.md.\n• Downstream handoff: <permitted|blocked>."
   }
 }

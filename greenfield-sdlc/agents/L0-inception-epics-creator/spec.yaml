@@ -44,16 +44,16 @@ context:
   knowledge_bases:
   - kb-L0-epics-best-practices.md
   guardrails:
-  - gr-L1-output-schema-validator
-  - gr-L1-pii-detection
+  - gr-L0-output-schema-validator
+  - gr-L0-pii-detection
   - gr-L3-hallucination-detector
   - gr-L3-citation-validator
   - gr-L3-consistency-checker
-  - gr-L2-tool-permissions
+  - gr-L1-tool-permissions
   - gr-L3-agent-rate-limit
   tools:
-  - tool-L1-confluence-fetch-page
-  - tool-L1-github-reader
+  - tool-L0-confluence-fetch-page
+  - tool-L0-github-reader
 quality:
   evaluation_ref: evaluation.md
   min_score: 7.0

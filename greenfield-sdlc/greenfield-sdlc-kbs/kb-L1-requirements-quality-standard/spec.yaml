@@ -1,9 +1,9 @@
 spec_version: "1.0"
 artifact_type: knowledge_base
 metadata:
-  name: kb-L1-requirements-quality-standard
+  name: kb-L0-requirements-quality-standard
   version: "1.0.0"
-  layer: L1
+  layer: L0
   owner: agentic-ai-coe
   content_hash: "sha256:3b14281220fdb28d68ed44c355a6119a0f0239212ccefe32bf86c1397b070ace"
   last_reviewed: "2026-08-08"
@@ -14,13 +14,13 @@ purpose:
     Domain-agnostic requirements-quality method, grounded in ISO/IEC/IEEE
     29148's seven requirement characteristics (Unambiguous, Complete,
     Singular, Feasible, Verifiable, Correct, Traceable) and RFC 2119
-    obligation keywords. Used by L1-requirements-elicitor for a mechanical
+    obligation keywords. Used by L0-requirements-elicitor for a mechanical
     self-check (vague-term scan, compound-clause scan) and by
-    L1-requirements-elicitor-evaluator as the source-of-truth rubric for
+    L0-requirements-elicitor-evaluator as the source-of-truth rubric for
     the characteristics that need judgment (Complete's coverage check,
     Verifiable's testability check, Consistent's contradiction check,
     Feasible/Correct as questions, never verdicts, this KB itself can't
-    supply). Same role as kb-L1-nfr-classification-taxonomy: a small,
+    supply). Same role as kb-L0-nfr-classification-taxonomy: a small,
     reusable, cross-domain method, not a domain fact set.
 
 content:
@@ -33,8 +33,8 @@ content:
   embedding_model: text-embedding-3-small
 
 grounding_rules:
-  accessed_by: [L1-requirements-elicitor, L1-requirements-elicitor-evaluator]
-  visibility: "L1 — visible to all layers (L1/L2/L3/L4) per standard visibility rule"
+  accessed_by: [L0-requirements-elicitor, L0-requirements-elicitor-evaluator]
+  visibility: "L0 — visible to all layers (L0/L1/L3/L4) per standard visibility rule"
 
 freshness:
   trigger_for_update: "the underlying ISO/IEC/IEEE 29148 standard revises, or a new commonly-flagged vague term needs adding"

@@ -1,15 +1,15 @@
-"""gr-L1-prd-quality-gate: validates the RESULTANT L1-requirements-prd-composer
+"""gr-L0-prd-quality-gate: validates the RESULTANT L0-requirements-prd-composer
 output (its own items, with the evaluator's fixes_applied resolved in) against
-L1-requirements-prd-composer/output_schema.json and its evaluation.md rubric.
-Fires at L1-requirements-prd-composer-evaluator's post_execution. Gates what
-actually flows to L1-impact-assessor and L1-dependency-mapper.
+L0-requirements-prd-composer/output_schema.json and its evaluation.md rubric.
+Fires at L0-requirements-prd-composer-evaluator's post_execution. Gates what
+actually flows to L0-impact-assessor and L0-dependency-mapper.
 """
 import json
 import logging
 import re
 from nemoguardrails.actions import action
 
-logger = logging.getLogger("gr-L1-prd-quality-gate")
+logger = logging.getLogger("gr-L0-prd-quality-gate")
 
 NFR_CATEGORIES = {"Performance", "Security", "Scalability", "Availability", "Compliance", "Usability"}
 METRIC_KEY_MARKERS = ["metric", "kpi", "target"]

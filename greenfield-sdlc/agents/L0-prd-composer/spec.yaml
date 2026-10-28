@@ -42,8 +42,8 @@ contract:
 context:
   knowledge_bases: []   # PRD template is embedded in the prompt (S4); both upstream outputs are consumed in full
   guardrails:
-    - gr-L1-output-schema-validator
-    - gr-L1-pii-detection
+    - gr-L0-output-schema-validator
+    - gr-L0-pii-detection
     - gr-L3-hallucination-detector
     - gr-L3-citation-validator
     - gr-L3-consistency-checker   # zero-drop reconciliation of FRs and NFR boundary conditions

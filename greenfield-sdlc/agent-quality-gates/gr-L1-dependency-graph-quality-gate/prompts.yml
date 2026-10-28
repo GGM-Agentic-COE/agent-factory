@@ -1,15 +1,15 @@
 prompts:
   - task: self_check_output
     content: |
-      L1-dependency-mapper's original output (items): {{ generator_output }}
-      L1-dependency-mapper-evaluator's verdict (fixes_applied, final_decision): {{ bot_response }}
+      L0-dependency-mapper's original output (items): {{ generator_output }}
+      L0-dependency-mapper-evaluator's verdict (fixes_applied, final_decision): {{ bot_response }}
 
-      Reconstruct the RESULTANT output: L1-dependency-mapper's items
+      Reconstruct the RESULTANT output: L0-dependency-mapper's items
       with every fixes_applied[].before -> after substitution resolved in
       (edge from/to/type corrections and critical_path.nodes/rationale
       corrections included). Check that resultant content — not the
       evaluator's own scoring bookkeeping — against
-      L1-dependency-mapper/output_schema.json and its evaluation.md
+      L0-dependency-mapper/output_schema.json and its evaluation.md
       rubric. Do NOT trust the resultant cycle_check or critical_path fields
       at face value — actually re-derive them yourself, step by step, exactly
       as instructed below:
@@ -58,5 +58,5 @@ prompts:
       own independently-traced DFS and longest-path results (not the
       resultant fields themselves) as the source of truth for checks 3-5.
       Answer "no" if ANY check fails — this gates what actually flows to
-      L1-backlog-prioritizer (topological-sort input) and Phase 4's
-      L1-design-hld.
+      L0-backlog-prioritizer (topological-sort input) and Phase 4's
+      L0-design-hld.

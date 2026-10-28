@@ -1,16 +1,16 @@
-"""gr-L1-nfr-spec-quality-gate: validates the RESULTANT
-L1-requirements-nfr-classifier output (its own items, with the evaluator's
-fixes_applied resolved in) against L1-requirements-nfr-classifier/output_schema.json
-and its evaluation.md rubric (kb-L1-nfr-classification-taxonomy's six
+"""gr-L0-nfr-spec-quality-gate: validates the RESULTANT
+L0-requirements-nfr-classifier output (its own items, with the evaluator's
+fixes_applied resolved in) against L0-requirements-nfr-classifier/output_schema.json
+and its evaluation.md rubric (kb-L0-nfr-classification-taxonomy's six
 categories, citation form, TBD/source consistency, ID sequencing). Fires at
-L1-requirements-nfr-classifier-evaluator's post_execution.
+L0-requirements-nfr-classifier-evaluator's post_execution.
 """
 import json
 import logging
 import re
 from nemoguardrails.actions import action
 
-logger = logging.getLogger("gr-L1-nfr-spec-quality-gate")
+logger = logging.getLogger("gr-L0-nfr-spec-quality-gate")
 
 VALID_CATEGORIES = {"Performance", "Security", "Scalability", "Availability", "Compliance", "Usability"}
 TBD_PHRASE = "TBD — needs stakeholder input"
@@ -19,7 +19,7 @@ NO_CATEGORIES_PHRASE = "no nfr categories apply"
 CITATION_PATTERNS = [
     re.compile(r"^requirements\.md § FR-\d{3}$"),
     re.compile(r"^vision\.md § .+$"),
-    re.compile(r"^kb-L1-enterprise-security § ES\d+$"),
+    re.compile(r"^kb-L0-enterprise-security § ES\d+$"),
 ]
 
 

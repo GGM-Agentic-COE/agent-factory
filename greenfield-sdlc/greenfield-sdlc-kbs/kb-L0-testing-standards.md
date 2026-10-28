@@ -1,6 +1,6 @@
 # Common Testing Standards — Knowledge Base
  
-## kb-L1-testing-standards v1.0.0
+## kb-L0-testing-standards v1.0.0
  
 Enterprise testing standards and governance rules shared by testing agents and downstream testing components.
  

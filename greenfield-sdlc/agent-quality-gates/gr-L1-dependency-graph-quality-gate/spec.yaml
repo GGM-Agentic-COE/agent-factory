@@ -1,23 +1,23 @@
 spec_version: "1.0"
 artifact_type: guardrail
 metadata:
-  name: gr-L1-dependency-graph-quality-gate
+  name: gr-L0-dependency-graph-quality-gate
   version: "1.0.0"
-  layer: L1
+  layer: L0
   owner: agentic-ai-coe
   implementation: colang
 
 purpose:
-  description: "Fires when L1-dependency-mapper-evaluator concludes. Validates the RESULTANT output — L1-dependency-mapper's own items, with the evaluator's fixes_applied resolved in — against L1-dependency-mapper/output_schema.json and its evaluation.md rubric. Same pattern as the other Phase 0/Phase 1 quality gates: fires on the evaluator, validates the core agent's content, never the evaluator's own scoring bookkeeping. Unlike its sibling gates, most rules here are NOT schema/regex checks — the single most important thing this guardrail does is INDEPENDENTLY RE-COMPUTE the DFS cycle check and the longest-path critical_path from the resultant nodes/edges in Python and compare the recomputed result against what the resultant content claims. Neither the generator's cycle_check/critical_path fields nor the evaluator's own re-derivation (scored, self-reported) are trusted at face value — a reversed edge or an unverified cycle claim is schema-valid and still wrong (see L1-dependency-mapper-evaluator/golden/v1.0.0/golden-02-edge-direction-bug.json, and phase-1/README.md's own worked-example bug of the same class)."
+  description: "Fires when L0-dependency-mapper-evaluator concludes. Validates the RESULTANT output — L0-dependency-mapper's own items, with the evaluator's fixes_applied resolved in — against L0-dependency-mapper/output_schema.json and its evaluation.md rubric. Same pattern as the other Phase 0/Phase 1 quality gates: fires on the evaluator, validates the core agent's content, never the evaluator's own scoring bookkeeping. Unlike its sibling gates, most rules here are NOT schema/regex checks — the single most important thing this guardrail does is INDEPENDENTLY RE-COMPUTE the DFS cycle check and the longest-path critical_path from the resultant nodes/edges in Python and compare the recomputed result against what the resultant content claims. Neither the generator's cycle_check/critical_path fields nor the evaluator's own re-derivation (scored, self-reported) are trusted at face value — a reversed edge or an unverified cycle claim is schema-valid and still wrong (see L0-dependency-mapper-evaluator/golden/v1.0.0/golden-02-edge-direction-bug.json, and phase-1/README.md's own worked-example bug of the same class)."
 
 triggers_on:
   - post_execution   # fires when the evaluator (not the generator) finishes
 
 on_fail: retry_once_then_escalate
-applies_to: configured_agents   # wired into L1-dependency-mapper-evaluator/spec.yaml context.guardrails — not global
+applies_to: configured_agents   # wired into L0-dependency-mapper-evaluator/spec.yaml context.guardrails — not global
 
 rules:
-  # --- Output schema validation (of L1-dependency-mapper's own output_schema.json) ---
+  # --- Output schema validation (of L0-dependency-mapper's own output_schema.json) ---
   - name: schema-compliance
     description: "The resultant items has every required top-level field (product_name, source_artifacts, nodes, edges, cycle_check, critical_path, generated, execution_id, workflow_execution_id); every node has id/type/label (type in component|external-dependency); every edge has from/to/type (type in depends-on|blocks|integrates-with); node ids are kebab-case (^[a-z0-9-]+$) and unique — no duplicates"
     action: block
@@ -28,9 +28,9 @@ rules:
     action: block
     severity: critical
 
-  # --- Rubric adherence (L1-dependency-mapper/evaluation.md Quality Gates, checked against the RESULTANT content via independent re-derivation) ---
+  # --- Rubric adherence (L0-dependency-mapper/evaluation.md Quality Gates, checked against the RESULTANT content via independent re-derivation) ---
   - name: independent-cycle-recheck
-    description: "THE SINGLE MOST IMPORTANT CHECK IN THIS GUARDRAIL. Implements an actual DFS over the resultant nodes/edges (recursion-stack back-edge detection, exactly mirroring L1-dependency-mapper's own prompt Processing Rule 4) and compares the computed status/cycles against the resultant cycle_check.status/cycles_found. Flags a violation if they disagree in either direction — a claimed PASS hiding a real cycle, a claimed FAIL that isn't real, or a claimed cycle whose node set doesn't match what a real traversal finds — never trusts either the generator's or the evaluator's cycle_check claim at face value (evaluation.md Quality Gate #1)"
+    description: "THE SINGLE MOST IMPORTANT CHECK IN THIS GUARDRAIL. Implements an actual DFS over the resultant nodes/edges (recursion-stack back-edge detection, exactly mirroring L0-dependency-mapper's own prompt Processing Rule 4) and compares the computed status/cycles against the resultant cycle_check.status/cycles_found. Flags a violation if they disagree in either direction — a claimed PASS hiding a real cycle, a claimed FAIL that isn't real, or a claimed cycle whose node set doesn't match what a real traversal finds — never trusts either the generator's or the evaluator's cycle_check claim at face value (evaluation.md Quality Gate #1)"
     action: block
     severity: critical
 

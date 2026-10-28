@@ -1,7 +1,7 @@
-"""gr-L1-idea-intake-quality-gate: validates the RESULTANT L1-vision-idea-intake
+"""gr-L0-idea-intake-quality-gate: validates the RESULTANT L0-vision-idea-intake
 output (its own items, with the evaluator's fixes_applied resolved in) against
-L1-vision-idea-intake/output_schema.json and L1-vision-idea-intake/evaluation.md.
-Fires at L1-vision-idea-intake-evaluator's post_execution — evaluation concluded,
+L0-vision-idea-intake/output_schema.json and L0-vision-idea-intake/evaluation.md.
+Fires at L0-vision-idea-intake-evaluator's post_execution — evaluation concluded,
 resultant content is what actually flows downstream.
 """
 import json
@@ -9,7 +9,7 @@ import logging
 import re
 from nemoguardrails.actions import action
 
-logger = logging.getLogger("gr-L1-idea-intake-quality-gate")
+logger = logging.getLogger("gr-L0-idea-intake-quality-gate")
 
 ID_PATTERNS = {"target_users": r"^TU-\d{2}$", "candidate_success_metrics": r"^SM-\d{2}$", "open_questions": r"^OQ-\d{2}$"}
 PLACEHOLDER_MARKERS = ["tbd", "to be determined", "various users", "n/a", "placeholder", "lorem ipsum"]

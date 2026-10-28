@@ -1,7 +1,7 @@
-"""gr-L1-vision-statement-quality-gate: validates the RESULTANT
-L1-vision-statement-generator output (its own items, with the evaluator's
-fixes_applied resolved in) against L1-vision-statement-generator/output_schema.json
-and its evaluation.md. Fires at L1-vision-statement-generator-evaluator's
+"""gr-L0-vision-statement-quality-gate: validates the RESULTANT
+L0-vision-statement-generator output (its own items, with the evaluator's
+fixes_applied resolved in) against L0-vision-statement-generator/output_schema.json
+and its evaluation.md. Fires at L0-vision-statement-generator-evaluator's
 post_execution. Last automated checkpoint before the Product Lead approval gate.
 """
 import json
@@ -9,7 +9,7 @@ import logging
 import re
 from nemoguardrails.actions import action
 
-logger = logging.getLogger("gr-L1-vision-statement-quality-gate")
+logger = logging.getLogger("gr-L0-vision-statement-quality-gate")
 
 
 def _parse(x):

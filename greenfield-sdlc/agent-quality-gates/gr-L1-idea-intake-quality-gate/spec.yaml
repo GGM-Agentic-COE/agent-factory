@@ -1,25 +1,25 @@
 spec_version: "1.0"
 artifact_type: guardrail
 metadata:
-  name: gr-L1-idea-intake-quality-gate
+  name: gr-L0-idea-intake-quality-gate
   version: "1.0.0"
-  layer: L1
+  layer: L0
   owner: agentic-ai-coe
   implementation: colang
 
 purpose:
-  description: "Fires when L1-vision-idea-intake-evaluator concludes. Validates the RESULTANT output — L1-vision-idea-intake's own items, with the evaluator's fixes_applied resolved in — against L1-vision-idea-intake/output_schema.json and L1-vision-idea-intake/evaluation.md's rubric. This is a gate on the content that actually flows to L1-vision-market-analyzer / L1-regulatory-feasibility-checker, not on the evaluator's own scoring bookkeeping."
+  description: "Fires when L0-vision-idea-intake-evaluator concludes. Validates the RESULTANT output — L0-vision-idea-intake's own items, with the evaluator's fixes_applied resolved in — against L0-vision-idea-intake/output_schema.json and L0-vision-idea-intake/evaluation.md's rubric. This is a gate on the content that actually flows to L0-vision-market-analyzer / L0-regulatory-feasibility-checker, not on the evaluator's own scoring bookkeeping."
 
 triggers_on:
   - post_execution   # fires when the evaluator (not the generator) finishes — evaluation is concluded, resultant content is final
 
 on_fail: retry_once_then_escalate
-applies_to: configured_agents   # wired into L1-vision-idea-intake-evaluator/spec.yaml context.guardrails — not global
+applies_to: configured_agents   # wired into L0-vision-idea-intake-evaluator/spec.yaml context.guardrails — not global
 
 rules:
-  # --- Output schema validation (of L1-vision-idea-intake's own output_schema.json) ---
+  # --- Output schema validation (of L0-vision-idea-intake's own output_schema.json) ---
   - name: schema-compliance
-    description: "The resultant items (generator_output.content.items, with fixes_applied resolved in) must validate against L1-vision-idea-intake/output_schema.json: problem_statement/value_proposition (statement, confidence, reasoning, traced_to), target_users[] (id TU-NN, statement, confidence, reasoning, traced_to), candidate_success_metrics[] (id SM-NN, metric, status stated|suggested, confidence, reasoning), open_questions[] (id OQ-NN, question, reasoning)"
+    description: "The resultant items (generator_output.content.items, with fixes_applied resolved in) must validate against L0-vision-idea-intake/output_schema.json: problem_statement/value_proposition (statement, confidence, reasoning, traced_to), target_users[] (id TU-NN, statement, confidence, reasoning, traced_to), candidate_success_metrics[] (id SM-NN, metric, status stated|suggested, confidence, reasoning), open_questions[] (id OQ-NN, question, reasoning)"
     action: block
     severity: critical
 
@@ -29,7 +29,7 @@ rules:
     severity: high
 
   - name: insufficient-context-integrity
-    description: "If L1-vision-idea-intake's own status was 'failed' (INSUFFICIENT_CONTEXT), items must be empty and execution_summary must state INSUFFICIENT_CONTEXT — never a hallucinated partial brief (evaluation.md Quality Gate #5)"
+    description: "If L0-vision-idea-intake's own status was 'failed' (INSUFFICIENT_CONTEXT), items must be empty and execution_summary must state INSUFFICIENT_CONTEXT — never a hallucinated partial brief (evaluation.md Quality Gate #5)"
     action: block
     severity: critical
 

@@ -1,5 +1,5 @@
 {
-  "agent_id": "L1-vision-idea-intake-evaluator",
+  "agent_id": "L0-vision-idea-intake-evaluator",
   "agent_version": "1.0.0",
   "execution_id": "exec-b4c5d6e7",
   "workflow_execution_id": "wf-a17c5e92",
@@ -27,6 +27,6 @@
       "fixes_applied": [],
       "final_decision": "approved"
     },
-    "execution_summary": "• overall_score: 8.9 (pass), final_decision: approved — no fixes needed.\n• Findings: 4 total, all pass. This is a clean, well-grounded idea-brief extraction with correct stated/suggested labeling throughout.\n• Fixes applied: none.\n• Knowledge bases consulted: L1-vision-idea-intake/evaluation.md.\n• Guardrails evaluated: gr-L1-output-schema-validator (pass), gr-L1-pii-detection (pass).\n• Gaps flagged: none — this output is ready to proceed to L1-vision-market-analyzer and L1-regulatory-feasibility-checker."
+    "execution_summary": "• overall_score: 8.9 (pass), final_decision: approved — no fixes needed.\n• Findings: 4 total, all pass. This is a clean, well-grounded idea-brief extraction with correct stated/suggested labeling throughout.\n• Fixes applied: none.\n• Knowledge bases consulted: L0-vision-idea-intake/evaluation.md.\n• Guardrails evaluated: gr-L0-output-schema-validator (pass), gr-L0-pii-detection (pass).\n• Gaps flagged: none — this output is ready to proceed to L0-vision-market-analyzer and L0-regulatory-feasibility-checker."
   }
 }

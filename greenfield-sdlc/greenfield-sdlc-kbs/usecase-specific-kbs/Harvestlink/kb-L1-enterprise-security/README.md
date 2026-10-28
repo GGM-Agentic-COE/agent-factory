@@ -1,10 +1,10 @@
-# kb-L1-enterprise-security
+# kb-L0-enterprise-security
 
 **Domain covered:** Thornbury Foods Group's established security
 standards — identity, data classification, retention, audit-log tiering,
 secure SDLC, incident response, third-party/external-user risk.
 
-**Why it exists:** same reasoning as `kb-L1-enterprise-architecture`'s
+**Why it exists:** same reasoning as `kb-L0-enterprise-architecture`'s
 README — HarvestLink is a new *product*, not a new *enterprise*, and an
 already-established company has already-established security standards a
 new digital product must satisfy. Assessed against a real (if illustrative)
@@ -12,7 +12,7 @@ policy set, several of `nfr-spec.md`'s open "TBD — needs stakeholder
 input" boundary conditions turn out to already have an answer here — see
 "What this resolves" below.
 
-**Who uses it?** `L1-requirements-nfr-classifier` (primary), `L1-impact-assessor`.
+**Who uses it?** `L0-requirements-nfr-classifier` (primary), `L0-impact-assessor`.
 
 **What does it cover?**
 - Identity/access boundary: employee SSO vs. external-party identity
@@ -56,4 +56,4 @@ this bar.
 
 **Owner:** Agentic-AI CoE
 
-**Consumers:** `L1-requirements-nfr-classifier`, `L1-impact-assessor`
+**Consumers:** `L0-requirements-nfr-classifier`, `L0-impact-assessor`

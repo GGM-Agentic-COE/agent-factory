@@ -1,6 +1,6 @@
-# kb-L2-domain-market
+# kb-L1-domain-market
 
-*A domain-KB slot, not a food-specific artifact: `L1-vision-market-analyzer`'s
+*A domain-KB slot, not a food-specific artifact: `L0-vision-market-analyzer`'s
 prompt and spec reference this id generically, so a different vertical can
 populate the same slot with its own market facts without touching the
 agent at all. This reference deployment's slot is filled with food-domain
@@ -11,9 +11,9 @@ market structure —
 distribution channel types, market player categories, industry trends, and
 cost-structure norms.
 
-**Why it exists:** `L1-vision-market-analyzer` needs a domain-grounded
+**Why it exists:** `L0-vision-market-analyzer` needs a domain-grounded
 starting scaffold before it issues live searches via
-`tool-L1-web-search-competitor-scan`. This KB supplies the categories and
+`tool-L0-web-search-competitor-scan`. This KB supplies the categories and
 structural facts that don't change month to month (channel types, cost
 drivers); the live search tool supplies whatever is current at execution
 time. Neither replaces the other.
@@ -35,4 +35,4 @@ its own citation, not in this static KB.
 
 **Owner:** Food Domain Champion
 
-**Consumers:** `L1-vision-market-analyzer`
+**Consumers:** `L0-vision-market-analyzer`

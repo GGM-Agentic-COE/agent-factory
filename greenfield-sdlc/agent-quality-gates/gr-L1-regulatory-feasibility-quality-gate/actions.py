@@ -1,8 +1,8 @@
-"""gr-L1-regulatory-feasibility-quality-gate: validates the RESULTANT
-L1-regulatory-feasibility-checker output (its own items, with the
+"""gr-L0-regulatory-feasibility-quality-gate: validates the RESULTANT
+L0-regulatory-feasibility-checker output (its own items, with the
 evaluator's fixes_applied resolved in) against
-L1-regulatory-feasibility-checker/output_schema.json and its
-evaluation.md. Fires at L1-regulatory-feasibility-checker-evaluator's
+L0-regulatory-feasibility-checker/output_schema.json and its
+evaluation.md. Fires at L0-regulatory-feasibility-checker-evaluator's
 post_execution. Highest-stakes gate in Phase 0 — zero tolerance.
 """
 import json
@@ -10,7 +10,7 @@ import logging
 import re
 from nemoguardrails.actions import action
 
-logger = logging.getLogger("gr-L1-regulatory-feasibility-quality-gate")
+logger = logging.getLogger("gr-L0-regulatory-feasibility-quality-gate")
 
 GENERIC_REGULATION_PHRASES = ["applicable regulations", "relevant law", "relevant regulations", "comply with regulations"]
 

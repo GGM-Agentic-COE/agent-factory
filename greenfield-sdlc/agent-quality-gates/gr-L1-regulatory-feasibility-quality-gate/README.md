@@ -1,27 +1,27 @@
-# gr-L1-regulatory-feasibility-quality-gate
+# gr-L0-regulatory-feasibility-quality-gate
 
-**Layer:** L1
-**Triggers on:** post_execution (output rail) — fires when `L1-regulatory-feasibility-checker-evaluator` concludes
+**Layer:** L0
+**Triggers on:** post_execution (output rail) — fires when `L0-regulatory-feasibility-checker-evaluator` concludes
 **On fail:** Retry once, then escalate to HITL
 **Implementation:** LLM-driven (Colang) — Python actions preserved for hybrid mode
-**Applies to:** `L1-regulatory-feasibility-checker-evaluator` only (`configured_agents`)
+**Applies to:** `L0-regulatory-feasibility-checker-evaluator` only (`configured_agents`)
 
 ## What does it do?
 
-`L1-regulatory-feasibility-checker-evaluator` re-derives constraint
+`L0-regulatory-feasibility-checker-evaluator` re-derives constraint
 severity independently and fixes what it can — a false negative here (an
 unmitigated Red constraint slipping through) is a compliance risk, not a
 quality nuance. This guardrail fires at that point but validates a
-different thing: the **resultant** `L1-regulatory-feasibility-checker`
+different thing: the **resultant** `L0-regulatory-feasibility-checker`
 output — its own `items`, with the evaluator's `fixes_applied` resolved in
-— is what actually flows to `L1-vision-statement-generator`. This gate
+— is what actually flows to `L0-vision-statement-generator`. This gate
 checks THAT content:
 
 1. **Output schema validation** — does the resultant content conform to
-   `L1-regulatory-feasibility-checker/output_schema.json` (not the
+   `L0-regulatory-feasibility-checker/output_schema.json` (not the
    evaluator's own output shape)?
 2. **Capability checklist / rubric adherence** — does the resultant
-   content actually satisfy `L1-regulatory-feasibility-checker/evaluation.md`'s
+   content actually satisfy `L0-regulatory-feasibility-checker/evaluation.md`'s
    rubric — above all, the zero-tolerance rule that every Amber/Red
    constraint carries a real mitigation or an explicit legal-review flag,
    re-checked directly on the resultant content, independent of whatever
@@ -36,7 +36,7 @@ not a guarantee. If a "fix" left `mitigation` null on a Red
 constraint with `requires_legal_review: false`, or a citation still reads
 "applicable regulations" instead of a named section, that is exactly the
 false negative this evaluator exists to prevent — reaching
-`L1-vision-statement-generator` regardless of what the evaluator's own
+`L0-vision-statement-generator` regardless of what the evaluator's own
 bookkeeping says.
 
 ### Rules
@@ -54,7 +54,7 @@ bookkeeping says.
 ## How It Works
 
 ```
-L1-regulatory-feasibility-checker-evaluator concludes
+L0-regulatory-feasibility-checker-evaluator concludes
         ↓
 ┌────────────────────────────────────────────────────────────────────┐
 │  REGULATORY-FEASIBILITY QUALITY GATE (post_execution, fires on eval)│
@@ -81,16 +81,16 @@ L1-regulatory-feasibility-checker-evaluator concludes
 │  All ✓ → gate passes                                                 │
 └────────────────────────────────────────────────────────────────────┘
         ↓
-Resultant regulatory-feasibility content flows to L1-vision-statement-generator
+Resultant regulatory-feasibility content flows to L0-vision-statement-generator
 ```
 
 ## File Structure
 
 ```
-gr-L1-regulatory-feasibility-quality-gate/
+gr-L0-regulatory-feasibility-quality-gate/
 ├── config.yml                                     # Rail configuration
 ├── prompts.yml                                    # LLM evaluation prompt (7 checks)
-├── gr-L1-regulatory-feasibility-quality-gate.co    # LLM-only Colang flow
+├── gr-L0-regulatory-feasibility-quality-gate.co    # LLM-only Colang flow
 ├── regulatory_feasibility_quality_gate.co          # Python-hybrid Colang flow (calls actions.py)
 ├── actions.py                                      # Deterministic Python (schema, zero-tolerance mitigation rule, citation specificity)
 ├── spec.yaml                                       # Guardrail specification
@@ -98,7 +98,7 @@ gr-L1-regulatory-feasibility-quality-gate/
 ```
 
 **Two modes:**
-- **LLM-only** (`gr-L1-regulatory-feasibility-quality-gate.co`): all 7 checks via `self_check_output`.
+- **LLM-only** (`gr-L0-regulatory-feasibility-quality-gate.co`): all 7 checks via `self_check_output`.
 - **Python-hybrid** (`regulatory_feasibility_quality_gate.co`): the 4 deterministic checks (1-4) — including the zero-tolerance mitigation rule — reconstruct the resultant content and validate it directly in `actions.py`; the LLM handles the 3 genuinely semantic checks (5, 6, 7).
 
 ## Testing
@@ -110,7 +110,7 @@ gr-L1-regulatory-feasibility-quality-gate/
 ```json
 {
   "constraints": [
-    {"id": "CON-01", "name": "Food business registration", "status": "Red", "citation": {"source_reference": "kb-L2-domain-regulatory", "regulation": "Food Safety Act 1990, s.19"}, "rationale": "Registration required before trading; not yet structured for it", "mitigation": "Register with local authority 28 days before trading start", "requires_legal_review": false, "confidence": 0.9, "reasoning": "Directly required for any food business"}
+    {"id": "CON-01", "name": "Food business registration", "status": "Red", "citation": {"source_reference": "kb-L1-domain-regulatory", "regulation": "Food Safety Act 1990, s.19"}, "rationale": "Registration required before trading; not yet structured for it", "mitigation": "Register with local authority 28 days before trading start", "requires_legal_review": false, "confidence": 0.9, "reasoning": "Directly required for any food business"}
   ],
   "overall_status": {"status": "Amber", "rationale": "CON-01 (Red) has a precedented mitigation, discounted one level per the stated rule"},
   "open_items": []
@@ -122,7 +122,7 @@ gr-L1-regulatory-feasibility-quality-gate/
 ```json
 {
   "constraints": [
-    {"id": "CON-01", "name": "Food business registration", "status": "Red", "citation": {"source_reference": "kb-L2-domain-regulatory", "regulation": "Food Safety Act 1990, s.19"}, "rationale": "Registration required before trading; not yet structured for it", "mitigation": null, "requires_legal_review": false, "confidence": 0.9, "reasoning": "..."}
+    {"id": "CON-01", "name": "Food business registration", "status": "Red", "citation": {"source_reference": "kb-L1-domain-regulatory", "regulation": "Food Safety Act 1990, s.19"}, "rationale": "Registration required before trading; not yet structured for it", "mitigation": null, "requires_legal_review": false, "confidence": 0.9, "reasoning": "..."}
   ],
   "overall_status": {"status": "Red", "rationale": "..."},
   "open_items": []
@@ -147,7 +147,7 @@ gr-L1-regulatory-feasibility-quality-gate/
 ```python
 from nemoguardrails import LLMRails, RailsConfig
 
-config = RailsConfig.from_path("./gr-L1-regulatory-feasibility-quality-gate")
+config = RailsConfig.from_path("./gr-L0-regulatory-feasibility-quality-gate")
 rails = LLMRails(config)
 
 response = await rails.generate_async(
@@ -171,7 +171,7 @@ from actions import check_regulatory_feasibility_quality_gate
 generator_output = json.dumps({"status": "success", "content": {"items": {
     "constraints": [{
         "id": "CON-01", "name": "Food business registration", "status": "Red",
-        "citation": {"source_reference": "kb-L2-domain-regulatory", "regulation": "Food Safety Act 1990, s.19"},
+        "citation": {"source_reference": "kb-L1-domain-regulatory", "regulation": "Food Safety Act 1990, s.19"},
         "rationale": "r" * 30, "mitigation": None, "requires_legal_review": False,
         "confidence": 0.9, "reasoning": "s" * 25,
     }],

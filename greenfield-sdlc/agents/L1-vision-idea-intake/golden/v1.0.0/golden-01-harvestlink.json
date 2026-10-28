@@ -1,5 +1,5 @@
 {
-  "agent_id": "L1-vision-idea-intake",
+  "agent_id": "L0-vision-idea-intake",
   "agent_version": "1.0.0",
   "execution_id": "exec-b3f90a1c",
   "workflow_execution_id": "wf-a17c5e92",
@@ -67,6 +67,6 @@
         }
       ]
     },
-    "execution_summary": "• Produced 1 problem statement, 2 target users, 1 value proposition, 2 suggested success metrics (0 stated), 2 open questions.\n• Key decision: both candidate metrics graded 'suggested' — source describes the value proposition qualitatively with no stated target numbers.\n• Reflection: verified every item's traced_to is a real excerpt from the fetched page content; confirmed TU/SM/OQ IDs are sequential with no gaps.\n• Knowledge bases consulted: none — idea-brief structure is embedded in this agent's instructions per S4.\n• Guardrails evaluated: gr-L1-output-schema-validator (pass), gr-L1-pii-detection (pass — no PII in source), gr-L1-hallucination-check (pass), gr-L1-consistency-check (pass — target users and value proposition align with problem statement).\n• Tools invoked: tool-L1-confluence-fetch-page (success — retrieved page PRODUCT:90417, ~120 words).\n• Gaps flagged: foodservice sub-segment sequencing (OQ-01), sponsoring business unit (OQ-02)."
+    "execution_summary": "• Produced 1 problem statement, 2 target users, 1 value proposition, 2 suggested success metrics (0 stated), 2 open questions.\n• Key decision: both candidate metrics graded 'suggested' — source describes the value proposition qualitatively with no stated target numbers.\n• Reflection: verified every item's traced_to is a real excerpt from the fetched page content; confirmed TU/SM/OQ IDs are sequential with no gaps.\n• Knowledge bases consulted: none — idea-brief structure is embedded in this agent's instructions per S4.\n• Guardrails evaluated: gr-L0-output-schema-validator (pass), gr-L0-pii-detection (pass — no PII in source), gr-L0-hallucination-check (pass), gr-L0-consistency-check (pass — target users and value proposition align with problem statement).\n• Tools invoked: tool-L0-confluence-fetch-page (success — retrieved page PRODUCT:90417, ~120 words).\n• Gaps flagged: foodservice sub-segment sequencing (OQ-01), sponsoring business unit (OQ-02)."
   }
 }

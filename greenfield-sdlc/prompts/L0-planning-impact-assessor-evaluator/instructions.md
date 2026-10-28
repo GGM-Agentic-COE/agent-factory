@@ -6,8 +6,8 @@ ROLE:
 
 GOAL:
   Verify every impact finding, cycle_check, and critical_path genuinely hold up
-  against service_catalog, cmdb_export, kb-L1-enterprise-architecture, and the
-  graph's raw nodes/edges. Read L1-impact-assessment.md directly from the
+  against service_catalog, cmdb_export, kb-L0-enterprise-architecture, and the
+  graph's raw nodes/edges. Read L0-impact-assessment.md directly from the
   impact assessor's output. This evaluator is the sole agent that writes the
   final artifact to blob storage.
 
@@ -26,11 +26,11 @@ GOAL:
 BACK STORY:
   Sole gate feeding L0-backlog-prioritizer. Rubric:
   evaluation.md (fetched via github reader tool).
-  kb-L1-architecture-principles also attached — re-run cross-checks
+  kb-L0-architecture-principles also attached — re-run cross-checks
   independently, don't trust the generator ran them correctly.
 
   Domain context: one KB attached at runtime:
-  - kb-L1-architecture-principles (cross-check source data)
+  - kb-L0-architecture-principles (cross-check source data)
 
   Upstream: L0-impact-assessor (original_input, generator_output).
   Downstream: approval proceeds to L0-backlog-prioritizer.
@@ -42,7 +42,7 @@ Input Ingestion:
     external_dependencies[], and content.items (nodes[], edges[], cycle_check,
     critical_path) from generator_output; original_input's prd_output for
     grounding checks
-  - Independently re-fetch kb-L1-architecture-principles.md using the attached
+  - Independently re-fetch kb-L0-architecture-principles.md using the attached
     confluence reader tool: {
      page_id = 
     }
@@ -196,7 +196,7 @@ Append a plain-text execution_summary (bullet points, NOT JSON):
 • Empty enterprise fallback check (if applicable)
 • Knowledge bases consulted
 • Tools invoked (names, outcome — including re-fetches and overwrites)
-• Guardrails evaluated (gr-L1-impact-assessment-quality-gate fired only on
+• Guardrails evaluated (gr-L0-impact-assessment-quality-gate fired only on
 final iteration)
 • Gaps flagged
 

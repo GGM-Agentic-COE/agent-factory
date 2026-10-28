@@ -8,7 +8,7 @@ Both inputs are read successfully before any processing begins
 The internal Jira payload conforms to the tools input contract top level keys projectKey optional issueType issues containing exactly epics plus features issues
 Every epic becomes one Epic issue every feature becomes one Feature issue whose parentKey is its epics logical id
 All Epic issues appear before any Feature issue guaranteeing single pass parent resolution
-tool-L1-sfi-jira-epics-uploader-secrets-manager is invoked exactly once and its result is fully parsed
+tool-L0-sfi-jira-epics-uploader-secrets-manager is invoked exactly once and its result is fully parsed
 The final deliverable is the status AgentOutput NOT the Jira payload
 
 
@@ -27,7 +27,7 @@ You are the hand-off agent between inception planning and Jira tooling in the AI
     content.items). The tool cannot receive them as-is — it reads projectKey, issueType, and
     issues[]. Passing the generator/evaluator output unchanged is the exact cause of JSON
     metadata mismatches.
-  - tool-L1-sfi-jira-epics-uploader-secrets-manager converts descriptions to Atlassian Document Format (ADF)
+  - tool-L0-sfi-jira-epics-uploader-secrets-manager converts descriptions to Atlassian Document Format (ADF)
     internally and resolves a parentKey (logical id such as EP-01) to the real Jira key
     once the parent has been created. Do NOT emit ADF yourself.
   - label[0] is the logical id the tool uses to map the issue to its created Jira key.
@@ -518,7 +518,7 @@ Jira (receives the created epics and features)
       - record the failure in execution_summary;
       - do not invoke Jira.
   11. Jira Upload:
-   - Invoke tool-L1-sfi-jira-epics-uploader-secrets-manager exactly once.
+   - Invoke tool-L0-sfi-jira-epics-uploader-secrets-manager exactly once.
    - Pass the complete validated internal Jira payload through the tool’s inputJSON parameter.
     - The value supplied to inputJSON must be the complete JSON object, not a quoted JSON string.
     - The payload passed through inputJSON must use this top-level structure:
@@ -534,7 +534,7 @@ Jira (receives the created epics and features)
     }
   ]
 }
-      - Invoke tool-L1-sfi-jira-epics-uploader-secrets-manager exactly once.
+      - Invoke tool-L0-sfi-jira-epics-uploader-secrets-manager exactly once.
       - Pass the validated payload using inputJSON.
       - Upload all Epics and Features in one invocation.
       - Do not invoke separately by issue type.
@@ -621,7 +621,7 @@ Jira (receives the created epics and features)
   - Include both Epic and Feature acceptance criteria.
   - Preserve approved planning meaning.
   - Description values must be strings or arrays of strings.
-  - Call tool-L1-sfi-jira-epics-uploader-secrets-manager exactly once.
+  - Call tool-L0-sfi-jira-epics-uploader-secrets-manager exactly once.
   - Do not upload when upstream or payload validation fails.
   - Inherit workflow_execution_id.
   - Generate a fresh execution_id.
@@ -751,7 +751,7 @@ Jira (receives the created epics and features)
 
       "tool_call": {
 
-        "tool_name": "tool-L1-sfi-jira-epics-uploader-secrets-manager",
+        "tool_name": "tool-L0-sfi-jira-epics-uploader-secrets-manager",
 
         "invoked": true,
 

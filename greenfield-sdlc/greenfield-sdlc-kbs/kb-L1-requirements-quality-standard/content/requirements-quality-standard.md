@@ -1,7 +1,7 @@
 <!--
-kb-L1-requirements-quality-standard · content · requirements-quality-standard.md
-Layer: L1 (enterprise, domain-agnostic). Consumed by: L1-requirements-elicitor
-(mechanical checks only, self-check) and L1-requirements-elicitor-evaluator
+kb-L0-requirements-quality-standard · content · requirements-quality-standard.md
+Layer: L0 (enterprise, domain-agnostic). Consumed by: L0-requirements-elicitor
+(mechanical checks only, self-check) and L0-requirements-elicitor-evaluator
 (full rubric, source of truth). Micro-KB content rules apply: max 1
 line/bullet, max 15 words, no explanations, numbers not words. This KB
 describes HOW to judge requirement quality, not WHAT a specific

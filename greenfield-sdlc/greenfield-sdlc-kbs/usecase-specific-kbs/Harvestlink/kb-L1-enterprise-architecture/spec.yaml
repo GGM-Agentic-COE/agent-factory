@@ -1,9 +1,9 @@
 spec_version: "1.0"
 artifact_type: knowledge_base
 metadata:
-  name: kb-L1-enterprise-architecture
+  name: kb-L0-enterprise-architecture
   version: "1.0.0"
-  layer: L1
+  layer: L0
   owner: agentic-ai-coe
   content_hash: "sha256:f2b43fb7a6b175e670c53cdd060167c0cbb0b282ca5f603773e88578d092fabb"
   last_reviewed: "2026-08-07"
@@ -14,13 +14,13 @@ purpose:
     Thornbury Foods Group's technology landscape, existing systems, and
     integration boundaries — for the reference scenario where HarvestLink
     is built as a new digital product WITHIN an already-established
-    enterprise, not from a blank slate. Grounds L1-impact-assessor
-    and L1-dependency-mapper's existing-system impact checks, and
+    enterprise, not from a blank slate. Grounds L0-impact-assessor
+    and L0-dependency-mapper's existing-system impact checks, and
     any later-phase design agent (HLD/LLD) that needs to know what a new
     HarvestLink component might touch, integrate with, or must deliberately
     avoid touching. Enterprise-wide and cross-phase by nature — not scoped
     to Phase 1, unlike the domain-specific KBs under phase-0/phase-1. Cross
-    references kb-L1-enterprise-security for security/compliance standards
+    references kb-L0-enterprise-security for security/compliance standards
     rather than duplicating them.
 
 content:
@@ -34,9 +34,9 @@ content:
 
 consumers:
   agents:
-    - L1-impact-assessor
-    - L1-dependency-mapper
-    - L1-requirements-nfr-classifier
+    - L0-impact-assessor
+    - L0-dependency-mapper
+    - L0-requirements-nfr-classifier
   usage: >
     impact-assessor checks each proposed component against EA3's
     integration-relevance table before declaring existing-system impact;
@@ -48,8 +48,8 @@ consumers:
     note: "new digital products define their own SLA tier").
 
 grounding_rules:
-  accessed_by: [L1-impact-assessor, L1-dependency-mapper, L1-requirements-nfr-classifier]
-  visibility: "L1 — visible to all layers (L1/L2/L3/L4); enterprise-wide and cross-phase, not owned by any single phase directory"
+  accessed_by: [L0-impact-assessor, L0-dependency-mapper, L0-requirements-nfr-classifier]
+  visibility: "L0 — visible to all layers (L0/L1/L3/L4); enterprise-wide and cross-phase, not owned by any single phase directory"
 
 freshness:
   trigger_for_update: "a system is decommissioned/replaced, an integration boundary changes, or a new Tier-1 system is added"

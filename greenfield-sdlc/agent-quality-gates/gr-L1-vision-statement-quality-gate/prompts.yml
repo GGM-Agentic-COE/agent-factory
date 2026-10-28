@@ -1,16 +1,16 @@
 prompts:
   - task: self_check_output
     content: |
-      L1-vision-statement-generator's original output (items): {{ generator_output }}
-      L1-vision-statement-generator-evaluator's verdict (fixes_applied, final_decision): {{ bot_response }}
-      Original input received by L1-vision-statement-generator (includes viability_score): {{ original_input }}
+      L0-vision-statement-generator's original output (items): {{ generator_output }}
+      L0-vision-statement-generator-evaluator's verdict (fixes_applied, final_decision): {{ bot_response }}
+      Original input received by L0-vision-statement-generator (includes viability_score): {{ original_input }}
 
-      Reconstruct the RESULTANT output: L1-vision-statement-generator's
+      Reconstruct the RESULTANT output: L0-vision-statement-generator's
       items with every fixes_applied[].before → after substitution
       resolved in. This is the LAST automated checkpoint before a human
       reads vision.md. Check that resultant content — not the evaluator's
       own scoring bookkeeping — against
-      L1-vision-statement-generator/output_schema.json and its
+      L0-vision-statement-generator/output_schema.json and its
       evaluation.md:
 
       1. Schema compliance: does executive_summary/problem_statement/

@@ -5,7 +5,7 @@ bases, and deliberately kept separate from `knowledge-bases/`.
 
 ## Why this is a separate category from `knowledge-bases/`
 
-`knowledge-bases/kb-L1-enterprise-architecture` is curated *knowledge*: WHY
+`knowledge-bases/kb-L0-enterprise-architecture` is curated *knowledge*: WHY
 things are the way they are, architecture principles, integration
 reasoning, governance rules. It's written prose+tables, reviewed quarterly,
 attached to an agent's `context.knowledge_bases`, and chunked/embedded for
@@ -14,7 +14,7 @@ retrieval — the standard KB pattern in this framework
 
 The files here are *data*: a raw, timestamped export from Thornbury's own
 systems (illustrative ServiceNow-style Service Catalog and CMDB), exactly
-as `L1-impact-assessor`'s BOM row has always described its input:
+as `L0-impact-assessor`'s BOM row has always described its input:
 `"External: service catalog / CMDB export (e.g. Backstage, ServiceNow)"`
 — an external system export, not an agent-factory-governed artifact. It
 has no `spec.yaml` (no chunking/embedding model applies to it), no review
@@ -28,7 +28,7 @@ narrative view, for a third angle):
 |---|---|---|
 | `thornbury-service-catalog.json` | Service (business/technical capability) | "Does something like this already exist? Who owns it?" — avoid duplicate build, find the right escalation path |
 | `thornbury-cmdb-export.json` | Configuration Item (individual technical asset) + relationships | "What specific technical touchpoint exists, and what does it currently integrate with?" |
-| `knowledge-bases/kb-L1-enterprise-architecture` | Narrative | "Why does HarvestLink touch or not touch this, and what's the governance rule?" |
+| `knowledge-bases/kb-L0-enterprise-architecture` | Narrative | "Why does HarvestLink touch or not touch this, and what's the governance rule?" |
 
 ## Provenance
 
@@ -40,7 +40,7 @@ tier/owner, CIs with type/criticality/relationships) is the reusable part.
 
 ## Consumers
 
-`L1-impact-assessor` (primary — both files); `L1-dependency-mapper`
+`L0-impact-assessor` (primary — both files); `L0-dependency-mapper`
 (CMDB relationships, as a cross-check against its own computed graph).
 
 ## Refresh cadence

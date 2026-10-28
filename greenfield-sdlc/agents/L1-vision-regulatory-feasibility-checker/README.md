@@ -1,4 +1,4 @@
-# L1-regulatory-feasibility-checker
+# L0-regulatory-feasibility-checker
 
 ## Purpose
 
@@ -11,7 +11,7 @@ mandatory, structured, and impossible to silently drop a serious finding.
 
 ## What does it do?
 
-Accepts the problem statement and target geography from `L1-vision-idea-intake`
+Accepts the problem statement and target geography from `L0-vision-idea-intake`
 and produces:
 - A list of applicable regulatory constraints, each classified Green/Amber/Red
 - A citation to a specific regulation/section for every constraint — no
@@ -28,9 +28,9 @@ mitigation nor a legal-review flag.
 ## How does it work?
 
 1. Ingests `problem_statement` and target geography/category from the upstream agent
-2. Queries `kb-L1-regulatory-frameworks-index` to identify which regulator
+2. Queries `kb-L0-regulatory-frameworks-index` to identify which regulator
    categories apply at all
-3. Queries `kb-L2-domain-regulatory` (and `tool-L1-regulatory-db-lookup`
+3. Queries `kb-L1-domain-regulatory` (and `tool-L0-regulatory-db-lookup`
    for anything beyond the KBs) for the specific applicable rules
 4. Classifies each constraint Green/Amber/Red with a citation
 5. Provides a mitigation for every Amber/Red item — `requires_legal_review`
@@ -39,11 +39,11 @@ mitigation nor a legal-review flag.
    item has a precedented mitigation — in which case it explicitly justifies
    why the verdict is one level better than the worst individual item
 7. Self-checks that no Red item was silently dropped before returning (full
-   scoring delegated to `L1-regulatory-feasibility-checker-evaluator`, per S6)
+   scoring delegated to `L0-regulatory-feasibility-checker-evaluator`, per S6)
 
 ## Input
 
-- **Source:** agent_output from `L1-vision-idea-intake`
+- **Source:** agent_output from `L0-vision-idea-intake`
 - **Required:** `problem_statement`, `target_geography`
 - **Optional:** `product_category` — narrows the regulator lookup if known
 
@@ -55,14 +55,14 @@ mitigation nor a legal-review flag.
   items carry the full rationale and mitigation directly, there is no separate
   document produced
 - **Metadata:** every constraint carries `citation` (BLOCKER guardrail
-  `gr-L1-citation-verifier`, 100% required, not just scored) and `reasoning`
+  `gr-L0-citation-verifier`, 100% required, not just scored) and `reasoning`
 - **Summary:** constraint counts by status, overall verdict rationale, KB
   content used, guardrail results, open items flagged
 
 ## Composition
 
 ```
-agents/L1-regulatory-feasibility-checker/
+agents/L0-regulatory-feasibility-checker/
 ├── spec.yaml
 ├── evaluation.md
 ├── output_schema.json
@@ -78,6 +78,6 @@ agents/L1-regulatory-feasibility-checker/
     ├── input-golden-02-insufficient.json
     └── golden-02-insufficient.json
 
-prompts/L1-regulatory-feasibility-checker/
+prompts/L0-regulatory-feasibility-checker/
 └── instructions.md
 ```

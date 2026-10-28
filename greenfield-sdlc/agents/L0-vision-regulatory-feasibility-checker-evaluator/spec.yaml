@@ -14,7 +14,7 @@ purpose:
   description: "Independently scores L0-regulatory-feasibility-checker's output, with zero tolerance for a Red constraint that lacks a mitigation or legal-review flag, or that appears to have been downgraded to avoid writing one — and re-derives the viability score from the final constraints rather than accepting the one reported."
   input: "L0-regulatory-feasibility-checker's original input plus its draft output, including its viability object."
   output: "The corrected regulatory feasibility result including the re-derived viability score, plus scores, findings, fixes applied, and a final decision."
-  business_value: "This is the highest-stakes evaluator in Phase 0 — a false negative here (a Red constraint that slips through unmitigated, or gets quietly relabeled Amber) is a compliance risk that reaches a human decision-maker as if it were already handled. Since v2.0 it also holds the gate number itself: the viability score it approves is what qg-L1-viability-score thresholds and what L0-vision-statement-generator receives, so a severity fix that fails to move the score would let a blocked idea auto-publish."
+  business_value: "This is the highest-stakes evaluator in Phase 0 — a false negative here (a Red constraint that slips through unmitigated, or gets quietly relabeled Amber) is a compliance risk that reaches a human decision-maker as if it were already handled. Since v2.0 it also holds the gate number itself: the viability score it approves is what qg-L0-viability-score thresholds and what L0-vision-statement-generator receives, so a severity fix that fails to move the score would let a blocked idea auto-publish."
 
 prompt:
   ref: "prompts/L0-regulatory-feasibility-checker-evaluator/instructions.md"
@@ -43,7 +43,7 @@ contract:
 
 context:
   # No KB is attached at runtime. Both regulatory KBs are READ FROM CONFLUENCE with
-  # tool-L1-confluence-reader, page ids 518422550 and 519012353 fixed in the prompt — the SAME two pages
+  # tool-L0-confluence-reader, page ids 518422550 and 519012353 fixed in the prompt — the SAME two pages
   # L0-regulatory-feasibility-checker reads, so the coverage audit and the generator's
   # sweep cannot diverge. The rubric (evaluation.md) is READ FROM GITHUB at a fixed location (see contract.input).
   # Jurisdiction is read from each KB's own #jurisdiction section at runtime, never assumed here.
@@ -51,19 +51,19 @@ context:
   knowledge_base_sources:
     confluence_page_ids: ["518422550", "519012353"]   # one reader call per page; which page holds which KB is worked out from content
     content:
-      - kb-L1-regulatory-frameworks-index-ind   # #jurisdiction, #cross-domain-index, #coverage-categories (sweep list)
-      - kb-L2-domain-regulatory-ind             # #jurisdiction + domain regulatory facts
+      - kb-L0-regulatory-frameworks-index-ind   # #jurisdiction, #cross-domain-index, #coverage-categories (sweep list)
+      - kb-L1-domain-regulatory-ind             # #jurisdiction + domain regulatory facts
   guardrails:
-    - gr-L1-output-schema-validator
-    - gr-L1-pii-detection
-    - gr-L1-citation-verifier
-    - gr-L1-regulatory-feasibility-quality-gate   # fires when THIS evaluator concludes; validates L0-regulatory-feasibility-checker's RESULTANT output against its own schema+evaluation.md, zero-tolerance mitigation rule re-checked directly (guardrails/gr-L1-regulatory-feasibility-quality-gate)
+    - gr-L0-output-schema-validator
+    - gr-L0-pii-detection
+    - gr-L0-citation-verifier
+    - gr-L0-regulatory-feasibility-quality-gate   # fires when THIS evaluator concludes; validates L0-regulatory-feasibility-checker's RESULTANT output against its own schema+evaluation.md, zero-tolerance mitigation rule re-checked directly (guardrails/gr-L0-regulatory-feasibility-quality-gate)
   tools:
-    - tool-L1-confluence-reader        # reads BOTH regulatory KBs — page ids 518422550 and 519012353, fixed in the prompt, same as the generator; read-only
-    - tool-L1-github-reader-using-app  # reads the rubric (evaluation.md) ONLY — repo agentic-sdlc-knowledge-bases, branch main, fixed folder; one call
-    - tool-L1-azure-blob-reader      # reads regulatory-feasibility.md and idea-brief.json for full-text and groundedness checks
-    - tool-L1-azure-blob-writer      # re-saves regulatory-feasibility.md when a fix changes its content
-    - tool-L1-confluence-writer      # ONLY for rule 6a: every escalate_to_hitl run → "<idea title> - Regulatory Feasibility - Need Review" page, space_key 514162689
+    - tool-L0-confluence-reader        # reads BOTH regulatory KBs — page ids 518422550 and 519012353, fixed in the prompt, same as the generator; read-only
+    - tool-L0-github-reader-using-app  # reads the rubric (evaluation.md) ONLY — repo agentic-sdlc-knowledge-bases, branch main, fixed folder; one call
+    - tool-L0-azure-blob-reader      # reads regulatory-feasibility.md and idea-brief.json for full-text and groundedness checks
+    - tool-L0-azure-blob-writer      # re-saves regulatory-feasibility.md when a fix changes its content
+    - tool-L0-confluence-writer      # ONLY for rule 6a: every escalate_to_hitl run → "<idea title> - Regulatory Feasibility - Need Review" page, space_key 514162689
 
 quality:
   evaluation_ref: "evaluation.md"
@@ -72,7 +72,7 @@ quality:
   consistency_check: true
 
 quality_gates_owned:
-  qg-L1-viability-score:
+  qg-L0-viability-score:
     threshold: 7
     description: "The viability score is re-derived here from the FINAL post-fix constraints and emitted as items.viability. This evaluator's number, not the generator's, is what the gate thresholds and what L0-vision-statement-generator receives."
 

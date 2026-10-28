@@ -1,7 +1,7 @@
 <!--
-kb-L1-nfr-classification-taxonomy · content · nfr-classification-taxonomy.md
-Layer: L1 (enterprise, domain-agnostic). Consumed by:
-L1-requirements-nfr-classifier. Micro-KB content rules apply: max 1
+kb-L0-nfr-classification-taxonomy · content · nfr-classification-taxonomy.md
+Layer: L0 (enterprise, domain-agnostic). Consumed by:
+L0-requirements-nfr-classifier. Micro-KB content rules apply: max 1
 line/bullet, max 15 words, no explanations, numbers not words, annotated
 with target category. This KB describes HOW to classify, not WHAT the
 numbers are — it never asserts a default threshold. A boundary condition

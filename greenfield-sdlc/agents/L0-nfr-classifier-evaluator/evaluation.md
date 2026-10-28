@@ -1,8 +1,8 @@
-# Evaluation — L1-requirements-nfr-classifier-evaluator
+# Evaluation — L0-requirements-nfr-classifier-evaluator
 
-This covers THIS evaluator's own meta-quality — not L1-requirements-nfr-
-classifier's rubric (that lives in `../L1-requirements-nfr-classifier/
-evaluation.md` and `kb-L1-nfr-classification-taxonomy`, loaded at runtime,
+This covers THIS evaluator's own meta-quality — not L0-requirements-nfr-
+classifier's rubric (that lives in `../L0-requirements-nfr-classifier/
+evaluation.md` and `kb-L0-nfr-classification-taxonomy`, loaded at runtime,
 not duplicated here).
 
 ## Quality Gates
@@ -28,12 +28,12 @@ not duplicated here).
       the number/rule is confirmed to appear in that source verbatim (or as
       a direct logical consequence of it) — not merely "plausible."
 - [ ] Every Compliance-category boundary condition traces only to
-      regulatory-feasibility.md or kb-L1-enterprise-security, never to an
+      regulatory-feasibility.md or kb-L0-enterprise-security, never to an
       unsupported inference from the FR statement alone.
 
 ### TBD Verification (→ Faithfulness, Consistency)
 - [ ] Every TBD was independently re-checked against regulatory-feasibility.md
-      and kb-L1-enterprise-security before being accepted as genuinely open.
+      and kb-L0-enterprise-security before being accepted as genuinely open.
 - [ ] The Coverage Summary's TBD count (if present) matches an actual count
       of "TBD — needs stakeholder input" rows, not an estimate.
 

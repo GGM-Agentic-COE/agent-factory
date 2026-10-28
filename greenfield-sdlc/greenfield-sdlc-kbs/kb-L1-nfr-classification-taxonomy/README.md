@@ -1,17 +1,17 @@
-# kb-L1-nfr-classification-taxonomy
+# kb-L0-nfr-classification-taxonomy
 
 **Domain covered:** None specific — a cross-domain method for classifying
 a functional requirement's non-functional boundary conditions into the six
 standard categories (performance, security, scalability, availability,
 compliance, usability).
 
-**Why it exists:** `L1-requirements-nfr-classifier` is a generic L1 agent,
+**Why it exists:** `L0-requirements-nfr-classifier` is a generic L0 agent,
 reused across every domain the CoE builds for. Before it can classify a
 specific FR's boundary conditions, it needs a consistent method for what
 question to ask per category and what form the answer should take. This KB
-is that method — genuinely domain-agnostic, so it stays at L1 rather than
-being duplicated into every L2 domain KB. Same role as
-`kb-L1-regulatory-frameworks-index` in Phase 0: a small, reusable,
+is that method — genuinely domain-agnostic, so it stays at L0 rather than
+being duplicated into every L1 domain KB. Same role as
+`kb-L0-regulatory-frameworks-index` in Phase 0: a small, reusable,
 cross-domain index, not a domain fact set.
 
 **What it deliberately does NOT do:** supply a number, threshold, or
@@ -37,4 +37,4 @@ not an enhancement — re-read the header comment before merging.
 
 **Owner:** Agentic-AI CoE
 
-**Consumers:** `L1-requirements-nfr-classifier` (all domains)
+**Consumers:** `L0-requirements-nfr-classifier` (all domains)

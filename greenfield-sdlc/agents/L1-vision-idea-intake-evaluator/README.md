@@ -1,17 +1,17 @@
-# L1-vision-idea-intake-evaluator
+# L0-vision-idea-intake-evaluator
 
 ## Purpose
 
 Letting a generator grade its own homework defeats the point of a quality
 gate. This agent is the independent, different-prompt check the
 Generator→Evaluator pattern (S6) requires — it scores
-`L1-vision-idea-intake`'s output against a fixed rubric, fixes what's
+`L0-vision-idea-intake`'s output against a fixed rubric, fixes what's
 genuinely fixable, and escalates what isn't, rather than trusting the
 generator's own self-assessment.
 
 ## What does it do?
 
-Accepts the original input and draft output from `L1-vision-idea-intake` and
+Accepts the original input and draft output from `L0-vision-idea-intake` and
 produces:
 - Independent scores across 5 dimensions (faithfulness, hallucination,
   consistency, relevance, reasoning quality)
@@ -24,7 +24,7 @@ produces:
 ## How does it work?
 
 1. Ingests the generator's original input and draft output
-2. Loads `L1-vision-idea-intake/evaluation.md` as the scoring source of
+2. Loads `L0-vision-idea-intake/evaluation.md` as the scoring source of
    truth — does not duplicate its rubric in this agent's own prompt
 3. Scores each dimension and records a finding per quality gate/checklist item
 4. Applies fixes for anything mechanically correctable, recording before/after
@@ -35,7 +35,7 @@ produces:
 
 ## Input
 
-- **Source:** agent_output from `L1-vision-idea-intake`
+- **Source:** agent_output from `L0-vision-idea-intake`
 - **Required:** `original_input`, `generator_output`
 
 ## Output
@@ -49,7 +49,7 @@ produces:
 ## Composition
 
 ```
-agents/L1-vision-idea-intake-evaluator/
+agents/L0-vision-idea-intake-evaluator/
 ├── spec.yaml
 ├── evaluation.md
 ├── output_schema.json
@@ -65,6 +65,6 @@ agents/L1-vision-idea-intake-evaluator/
     ├── input-golden-02-unfixable.json
     └── golden-02-unfixable.json
 
-prompts/L1-vision-idea-intake-evaluator/
+prompts/L0-vision-idea-intake-evaluator/
 └── instructions.md
 ```

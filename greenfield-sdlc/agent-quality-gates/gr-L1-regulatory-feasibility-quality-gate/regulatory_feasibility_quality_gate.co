@@ -1,6 +1,6 @@
-# gr-L1-regulatory-feasibility-quality-gate — Python-Hybrid Colang Implementation
-# Layer: L1 — fires at L1-regulatory-feasibility-checker-evaluator's post_execution
-# Validates L1-regulatory-feasibility-checker's RESULTANT output (not the evaluator's own bookkeeping)
+# gr-L0-regulatory-feasibility-quality-gate — Python-Hybrid Colang Implementation
+# Layer: L0 — fires at L0-regulatory-feasibility-checker-evaluator's post_execution
+# Validates L0-regulatory-feasibility-checker's RESULTANT output (not the evaluator's own bookkeeping)
 # Deterministic checks via actions.py + LLM for semantic checks
 # Zero-tolerance gate: a false negative here is a compliance risk, not a quality nuance.
 
@@ -19,4 +19,4 @@ define flow check output regulatory feasibility quality gate
     stop
 
 define bot block regulatory feasibility quality gate violation
-  "L1-regulatory-feasibility-checker's resultant output (post-evaluation) failed its quality gate: schema violation, a generic citation, or an Amber/Red constraint still lacking a mitigation or requires_legal_review flag. This is a zero-tolerance gate — the workflow cannot proceed to L1-vision-statement-generator with a non-conformant regulatory verdict. Retrying."
+  "L0-regulatory-feasibility-checker's resultant output (post-evaluation) failed its quality gate: schema violation, a generic citation, or an Amber/Red constraint still lacking a mitigation or requires_legal_review flag. This is a zero-tolerance gate — the workflow cannot proceed to L0-vision-statement-generator with a non-conformant regulatory verdict. Retrying."

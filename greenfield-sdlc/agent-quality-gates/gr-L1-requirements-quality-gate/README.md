@@ -1,25 +1,25 @@
-# gr-L1-requirements-quality-gate
+# gr-L0-requirements-quality-gate
 
-**Layer:** L1
-**Triggers on:** post_execution (output rail) — fires when `L1-requirements-elicitor-evaluator` concludes
+**Layer:** L0
+**Triggers on:** post_execution (output rail) — fires when `L0-requirements-elicitor-evaluator` concludes
 **On fail:** Retry once, then escalate to HITL
 **Implementation:** LLM-driven (Colang) — Python actions preserved for hybrid mode
-**Applies to:** `L1-requirements-elicitor-evaluator` only (`configured_agents`)
+**Applies to:** `L0-requirements-elicitor-evaluator` only (`configured_agents`)
 
 ## What does it do?
 
-`L1-requirements-elicitor-evaluator` scores `L1-requirements-elicitor`'s
+`L0-requirements-elicitor-evaluator` scores `L0-requirements-elicitor`'s
 draft requirements against ISO/IEC/IEEE 29148 (via
-`L1-requirements-elicitor/evaluation.md` and
-`kb-L1-requirements-quality-standard`) and fixes what it can. This
+`L0-requirements-elicitor/evaluation.md` and
+`kb-L0-requirements-quality-standard`) and fixes what it can. This
 guardrail fires at that point but validates a different thing: the
-**resultant** `L1-requirements-elicitor` output — its own `items`, with the
+**resultant** `L0-requirements-elicitor` output — its own `items`, with the
 evaluator's `fixes_applied` resolved in — is what actually flows to
-`L1-requirements-nfr-classifier` and `L1-requirements-prd-composer`. This
+`L0-requirements-nfr-classifier` and `L0-requirements-prd-composer`. This
 gate checks THAT content:
 
 1. **Output schema validation** — does the resultant content conform to
-   `L1-requirements-elicitor/output_schema.json` (not the evaluator's own
+   `L0-requirements-elicitor/output_schema.json` (not the evaluator's own
    output shape)?
 2. **Capability checklist / rubric adherence** — does the resultant
    content actually satisfy ISO/IEC/IEEE 29148's characteristics:
@@ -52,7 +52,7 @@ independent of what the evaluator's own bookkeeping says.
 ## How It Works
 
 ```
-L1-requirements-elicitor-evaluator concludes
+L0-requirements-elicitor-evaluator concludes
         ↓
 ┌────────────────────────────────────────────────────────────────────┐
 │  REQUIREMENTS QUALITY GATE (post_execution, fires on evaluator)    │
@@ -84,10 +84,10 @@ Resultant requirements content flows to nfr-classifier / prd-composer
 ## File Structure
 
 ```
-gr-L1-requirements-quality-gate/
+gr-L0-requirements-quality-gate/
 ├── config.yml                              # Rail configuration
 ├── prompts.yml                             # LLM evaluation prompt (7 checks)
-├── gr-L1-requirements-quality-gate.co      # LLM-only Colang flow
+├── gr-L0-requirements-quality-gate.co      # LLM-only Colang flow
 ├── requirements_quality_gate.co            # Python-hybrid Colang flow (calls actions.py)
 ├── actions.py                              # Deterministic Python (schema, ID sequencing, split integrity, vague-term scan)
 ├── spec.yaml                               # Guardrail specification
@@ -95,7 +95,7 @@ gr-L1-requirements-quality-gate/
 ```
 
 **Two modes:**
-- **LLM-only** (`gr-L1-requirements-quality-gate.co`): all 7 checks via `self_check_output`.
+- **LLM-only** (`gr-L0-requirements-quality-gate.co`): all 7 checks via `self_check_output`.
 - **Python-hybrid** (`requirements_quality_gate.co`): the 4 deterministic checks (1-4) reconstruct the resultant content and validate it directly in `actions.py`; the LLM handles the 3 genuinely semantic checks (5, 6, 7) — "and" appearing in a statement is not by itself proof of a compound clause (a compound subject like "producer and distributor sign-off" on one testable outcome is not the same defect as two independently testable behaviours joined together), so Singular is judgment, not a regex match.
 
 ## Testing
@@ -142,7 +142,7 @@ gr-L1-requirements-quality-gate/
 ```python
 from nemoguardrails import LLMRails, RailsConfig
 
-config = RailsConfig.from_path("./gr-L1-requirements-quality-gate")
+config = RailsConfig.from_path("./gr-L0-requirements-quality-gate")
 rails = LLMRails(config)
 
 response = await rails.generate_async(

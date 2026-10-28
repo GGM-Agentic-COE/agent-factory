@@ -1,25 +1,25 @@
 spec_version: "1.0"
 artifact_type: guardrail
 metadata:
-  name: gr-L1-regulatory-feasibility-quality-gate
+  name: gr-L0-regulatory-feasibility-quality-gate
   version: "1.0.0"
-  layer: L1
+  layer: L0
   owner: agentic-ai-coe
   implementation: colang
 
 purpose:
-  description: "Fires when L1-regulatory-feasibility-checker-evaluator concludes. Validates the RESULTANT output — L1-regulatory-feasibility-checker's own items, with the evaluator's fixes_applied resolved in — against L1-regulatory-feasibility-checker/output_schema.json and its evaluation.md rubric. Highest-stakes gate in the Phase 0 pipeline: a false negative here (an unmitigated Red constraint reaching L1-vision-statement-generator) is a compliance risk, not a quality nuance."
+  description: "Fires when L0-regulatory-feasibility-checker-evaluator concludes. Validates the RESULTANT output — L0-regulatory-feasibility-checker's own items, with the evaluator's fixes_applied resolved in — against L0-regulatory-feasibility-checker/output_schema.json and its evaluation.md rubric. Highest-stakes gate in the Phase 0 pipeline: a false negative here (an unmitigated Red constraint reaching L0-vision-statement-generator) is a compliance risk, not a quality nuance."
 
 triggers_on:
   - post_execution   # fires when the evaluator (not the generator) finishes
 
 on_fail: retry_once_then_escalate
-applies_to: configured_agents   # wired into L1-regulatory-feasibility-checker-evaluator/spec.yaml context.guardrails — not global
+applies_to: configured_agents   # wired into L0-regulatory-feasibility-checker-evaluator/spec.yaml context.guardrails — not global
 
 rules:
-  # --- Output schema validation (of L1-regulatory-feasibility-checker's own output_schema.json) ---
+  # --- Output schema validation (of L0-regulatory-feasibility-checker's own output_schema.json) ---
   - name: schema-compliance
-    description: "The resultant items must validate against L1-regulatory-feasibility-checker/output_schema.json: constraints[] (id CON-NN, name, status Green|Amber|Red, citation{source_reference, regulation}, rationale — full text, no length cap, mitigation nullable — full text, no length cap, requires_legal_review bool, confidence, reasoning), overall_status (status, rationale — full text, no length cap), open_items[] (id OI-NN, description — full text, no length cap)"
+    description: "The resultant items must validate against L0-regulatory-feasibility-checker/output_schema.json: constraints[] (id CON-NN, name, status Green|Amber|Red, citation{source_reference, regulation}, rationale — full text, no length cap, mitigation nullable — full text, no length cap, requires_legal_review bool, confidence, reasoning), overall_status (status, rationale — full text, no length cap), open_items[] (id OI-NN, description — full text, no length cap)"
     action: block
     severity: critical
 

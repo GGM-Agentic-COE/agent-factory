@@ -1,14 +1,14 @@
 prompts:
   - task: self_check_output
     content: |
-      L1-requirements-elicitor's original output (items): {{ generator_output }}
-      L1-requirements-elicitor-evaluator's verdict (fixes_applied, final_decision): {{ bot_response }}
+      L0-requirements-elicitor's original output (items): {{ generator_output }}
+      L0-requirements-elicitor-evaluator's verdict (fixes_applied, final_decision): {{ bot_response }}
 
-      Reconstruct the RESULTANT output: L1-requirements-elicitor's items
+      Reconstruct the RESULTANT output: L0-requirements-elicitor's items
       with every fixes_applied[].before → after substitution resolved in.
       Check that resultant content — not the evaluator's own scoring
-      bookkeeping — against L1-requirements-elicitor/output_schema.json and
-      kb-L1-requirements-quality-standard's ISO/IEC/IEEE 29148 rubric:
+      bookkeeping — against L0-requirements-elicitor/output_schema.json and
+      kb-L0-requirements-quality-standard's ISO/IEC/IEEE 29148 rubric:
 
       1. Schema compliance: does every functional_requirements[] entry have
          id, title, statement, traces_to, confidence, reasoning? Does every
@@ -30,4 +30,4 @@ prompts:
 
       Answer "yes" if ALL checks pass on the RESULTANT content. Answer "no"
       if ANY check fails — this gates what actually flows to
-      L1-requirements-nfr-classifier and L1-requirements-prd-composer.
+      L0-requirements-nfr-classifier and L0-requirements-prd-composer.

@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "L1-vision-idea-intake-output-schema-v1.0",
+  "$id": "L0-vision-idea-intake-output-schema-v1.0",
   "title": "IdeaIntakeItems",
-  "description": "Shape of content.items for L1-vision-idea-intake, nested inside the standard AgentOutput envelope (schemas/agent-output-schema.json). There is no separate idea-brief.md document — this agent produces no artifact. 'statement' fields here ARE the full, authoritative content (the complete problem statement, the complete value proposition, each target user's complete description), grounded via traced_to — not a distillation of something fuller stored elsewhere. Structured/classificatory fields (ids, status, confidence) are likewise kept in full. No citation objects — this agent grounds against the raw input text, not a knowledge base, so each item carries traced_to (the input excerpt supporting it) instead of a KB citation.",
+  "description": "Shape of content.items for L0-vision-idea-intake, nested inside the standard AgentOutput envelope (schemas/agent-output-schema.json). There is no separate idea-brief.md document — this agent produces no artifact. 'statement' fields here ARE the full, authoritative content (the complete problem statement, the complete value proposition, each target user's complete description), grounded via traced_to — not a distillation of something fuller stored elsewhere. Structured/classificatory fields (ids, status, confidence) are likewise kept in full. No citation objects — this agent grounds against the raw input text, not a knowledge base, so each item carries traced_to (the input excerpt supporting it) instead of a KB citation.",
   "type": "object",
   "required": ["problem_statement", "target_users", "value_proposition", "candidate_success_metrics", "open_questions"],
   "properties": {

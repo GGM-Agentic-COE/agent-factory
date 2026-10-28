@@ -1,5 +1,5 @@
 # =============================================================================
-# L1-WF-greenfield-idea-to-pr
+# L0-WF-greenfield-idea-to-pr
 # Executable workflow spec — resolves Agent_Factory_E2E_SDLC_Diagram_Greenfield.html
 # (topology), Agent_Factory_Greenfield_BOM.html (inputs/outputs/tools/KBs/guardrails),
 # and Agent_Factory_Greenfield_Requirements.html (FR/NFR, quality thresholds) into
@@ -7,7 +7,7 @@
 #
 # NAMING NOTE: agent/tool/kb/guardrail IDs below follow the no-suffix convention
 # from 01-agent-development-naming-standard.html's canonical table (e.g.
-# `L1-story-generator`), matching the original Agent_Factory_E2E_SDLC_
+# `L0-story-generator`), matching the original Agent_Factory_E2E_SDLC_
 # Diagram.html and all three companion docs already produced. This does NOT match
 # the regex in schemas/agent-output-schema.json and schemas/agent-input-contract-
 # schema.json, which require agent_id to match `^L[0-4]-.+-agent$` (i.e. an
@@ -24,7 +24,7 @@
 # Mirrors NFR-G1..G12 in Agent_Factory_Greenfield_Requirements.html.
 # -----------------------------------------------------------------------------
 defaults:
-  guardrail_chain_always: [gr-L1-output-schema-validator, gr-L1-hallucination-check, gr-L1-consistency-check]
+  guardrail_chain_always: [gr-L0-output-schema-validator, gr-L0-hallucination-check, gr-L0-consistency-check]
   on_failure:
     retry: { max_attempts: 2, backoff: exponential, base_delay_s: 5 }
     fallback: escalate_to_hitl   # after retries exhausted, create Jira subtask + halt step
@@ -33,30 +33,30 @@ defaults:
     correlation_id: "{{workflow_execution_id}}"
     events: [step.started, step.completed, step.quality_gate.pass, step.quality_gate.fail, step.error]
     log_fields: [input_hash, output_hash, model_version, kb_version, token_usage, guardrail_results]
-  scored_by: L1-quality-verifier
+  scored_by: L0-quality-verifier
 
 # -----------------------------------------------------------------------------
 # QUALITY GATE REGISTRY — 18 gates, referenced by id from steps below.
 # -----------------------------------------------------------------------------
 quality_gates:
-  qg-L1-viability-score:            { min_score: 7,  blocking: true }
-  qg-L1-requirements-completeness:  { min_score: 7,  blocking: true }
-  qg-L1-dependency-graph-integrity: { min_score: 7,  blocking: true, hard_fail_on: cyclic_graph }
-  qg-L1-backlog-sequencing-validity: { min_score: 7,  blocking: true }
-  qg-L1-epic-quality:               { min_score: 7,  blocking: true }
-  qg-L1-feature-completeness:       { min_score: 7,  blocking: true }
-  qg-L1-story-quality:              { min_score: 7,  blocking: true }
-  qg-L1-task-completeness:          { min_score: 6,  blocking: true }
-  qg-L1-journey-coverage:           { min_score: 7,  blocking: false }
-  qg-L1-ux-completeness:            { min_score: 7,  blocking: false }
-  qg-L1-hld-quality:                { min_score: 7,  blocking: true,  verify: true }
-  qg-L1-lld-quality:                { min_score: 7,  blocking: true }
-  qg-L1-data-model-integrity:       { min_score: 7,  blocking: true }
-  qg-L1-test-coverage:              { min_score: 7,  blocking: false }
-  qg-L1-script-executability:       { min_score: 7,  blocking: true, hard_fail_on: lint_error }
-  qg-L1-api-code-quality:           { min_score: 7,  blocking: true,  verify: true }
-  qg-L1-ui-code-quality:            { min_score: 7,  blocking: true,  verify: true }
-  qg-L1-unit-test-coverage:         { min_score: 7,  blocking: true, hard_fail_on: coverage_below_80pct }
+  qg-L0-viability-score:            { min_score: 7,  blocking: true }
+  qg-L0-requirements-completeness:  { min_score: 7,  blocking: true }
+  qg-L0-dependency-graph-integrity: { min_score: 7,  blocking: true, hard_fail_on: cyclic_graph }
+  qg-L0-backlog-sequencing-validity: { min_score: 7,  blocking: true }
+  qg-L0-epic-quality:               { min_score: 7,  blocking: true }
+  qg-L0-feature-completeness:       { min_score: 7,  blocking: true }
+  qg-L0-story-quality:              { min_score: 7,  blocking: true }
+  qg-L0-task-completeness:          { min_score: 6,  blocking: true }
+  qg-L0-journey-coverage:           { min_score: 7,  blocking: false }
+  qg-L0-ux-completeness:            { min_score: 7,  blocking: false }
+  qg-L0-hld-quality:                { min_score: 7,  blocking: true,  verify: true }
+  qg-L0-lld-quality:                { min_score: 7,  blocking: true }
+  qg-L0-data-model-integrity:       { min_score: 7,  blocking: true }
+  qg-L0-test-coverage:              { min_score: 7,  blocking: false }
+  qg-L0-script-executability:       { min_score: 7,  blocking: true, hard_fail_on: lint_error }
+  qg-L0-api-code-quality:           { min_score: 7,  blocking: true,  verify: true }
+  qg-L0-ui-code-quality:            { min_score: 7,  blocking: true,  verify: true }
+  qg-L0-unit-test-coverage:         { min_score: 7,  blocking: true, hard_fail_on: coverage_below_80pct }
 
 # -----------------------------------------------------------------------------
 # HUMAN-IN-THE-LOOP GATES — refines the "4 gates" summary in the diagram/BOM
@@ -65,33 +65,33 @@ quality_gates:
 # -----------------------------------------------------------------------------
 hitl_gates:
   - id: gate-vision-approval
-    after_workflow: L1-WF-vision-idea-to-statement
+    after_workflow: L0-WF-vision-idea-to-statement
     role: Product Lead
     approves: vision.md
     blocking: true
-    on_reject: { action: return_to_step, workflow: L1-WF-vision-idea-to-statement, step: 4 }
+    on_reject: { action: return_to_step, workflow: L0-WF-vision-idea-to-statement, step: 4 }
   - id: gate-requirements-validation
-    after_workflow: L1-WF-requirements-vision-to-dependency-graph
+    after_workflow: L0-WF-requirements-vision-to-dependency-graph
     role: Product Lead
     approves: [prd.md, impact-assessment.md, dependency-graph.json]
     blocking: true
   - id: gate-backlog-approval
-    after_workflow: L1-WF-backlog-to-roadmap
+    after_workflow: L0-WF-backlog-to-roadmap
     role: Product Lead
     approves: roadmap.md
     blocking: true
   - id: gate-architecture-review
-    after_workflow: L1-WF-design-stories-to-lld
+    after_workflow: L0-WF-design-stories-to-lld
     role: Feature Owner
     approves: [hld.md, lld.md, openapi.yaml, db-schema.sql]
     blocking: true
   - id: gate-test-strategy-signoff
-    after_workflow: L1-WF-testing-stories-to-xray
+    after_workflow: L0-WF-testing-stories-to-xray
     role: QA Expert
     approves: [test-scenarios.md, test-cases.feature, xray_test_keys]
     blocking: false   # runs in parallel with Construction per the 5-day Feature Cycle model
   - id: gate-code-review-merge
-    after_workflow: L1-WF-release-code-to-pr
+    after_workflow: L0-WF-release-code-to-pr
     role: Feature Owner + peers
     approves: pull_request
     blocking: true    # blocks merge, not PR creation itself
@@ -99,139 +99,139 @@ hitl_gates:
 # =============================================================================
 # PHASE 0 — IDEA → VISION
 # =============================================================================
-L1-WF-vision-idea-to-statement:
+L0-WF-vision-idea-to-statement:
   description: Turns a raw idea into a human-approved vision statement.
   steps:
     - step_id: 1
-      agent: L1-vision-idea-intake
+      agent: L0-vision-idea-intake
       input: { source: direct_input, parameters: { idea_brief_text: "{{trigger.idea_text}}", confluence_page_ref: "{{trigger.confluence_page_ref | optional}}" } }
-      tool: tool-L1-confluence-fetch-page
+      tool: tool-L0-confluence-fetch-page
       # no knowledge_bases: idea-brief structure is folded into instructions.md per
       # the S4 "Template as Instruction" rule (see BOM reconciliation, 2026-08-02)
       output: { type: json }   # items-only, no document — idea-brief.md dropped as an artifact 2026-08-07 (see BOM Phase 0 callout)
       quality_gate: null
     - step_id: 2
-      agent: L1-vision-market-analyzer
-      input: { source: agent_output, source_agent: L1-vision-idea-intake }   # items-only upstream, no artifact to name
-      tool: tool-L1-web-search-competitor-scan
-      knowledge_bases: [kb-L2-domain-market]
-      guardrails_additional: [gr-L1-citation-verifier]
+      agent: L0-vision-market-analyzer
+      input: { source: agent_output, source_agent: L0-vision-idea-intake }   # items-only upstream, no artifact to name
+      tool: tool-L0-web-search-competitor-scan
+      knowledge_bases: [kb-L1-domain-market]
+      guardrails_additional: [gr-L0-citation-verifier]
       output: { type: json }   # items-only, no document — market-analysis.md dropped as an artifact 2026-08-07
       quality_gate: null
     - step_id: 3
-      agent: L1-regulatory-feasibility-checker
-      input: { source: agent_output, source_agent: L1-vision-idea-intake }   # items-only upstream, no artifact to name
-      tool: tool-L1-regulatory-db-lookup
-      knowledge_bases: [kb-L1-regulatory-frameworks-index, kb-L2-domain-regulatory]
-      guardrails_additional: [gr-L1-citation-verifier]
+      agent: L0-regulatory-feasibility-checker
+      input: { source: agent_output, source_agent: L0-vision-idea-intake }   # items-only upstream, no artifact to name
+      tool: tool-L0-regulatory-db-lookup
+      knowledge_bases: [kb-L0-regulatory-frameworks-index, kb-L1-domain-regulatory]
+      guardrails_additional: [gr-L0-citation-verifier]
       output: { type: json }   # items-only, no document — regulatory-feasibility.md dropped as an artifact 2026-08-07 (its sole cross-phase reuse redirected to vision.md § Regulatory Posture)
-      quality_gate: qg-L1-viability-score
+      quality_gate: qg-L0-viability-score
       parallel_with: step_2   # 2 and 3 both depend only on step 1; run concurrently
     - step_id: 4
-      agent: L1-vision-statement-generator
+      agent: L0-vision-statement-generator
       input:
         source: agent_output
-        source_agents: [L1-vision-idea-intake, L1-vision-market-analyzer, L1-regulatory-feasibility-checker]   # all three items-only now; no artifacts to name
+        source_agents: [L0-vision-idea-intake, L0-vision-market-analyzer, L0-regulatory-feasibility-checker]   # all three items-only now; no artifacts to name
         parameters: { viability_score: "{{step_3.quality_gate.score}}" }
-      tool: tool-L1-confluence-create-page
+      tool: tool-L0-confluence-create-page
       # no knowledge_bases: vision structure is folded into instructions.md per S4;
       # this agent synthesizes purely from upstream artifacts, no additional facts needed
       output: { artifact: vision.md, type: document, format: markdown, storage: { provider: confluence } }
-      quality_gate: qg-L1-viability-score
+      quality_gate: qg-L0-viability-score
       on_gate_fail: escalate_to_hitl   # do not auto-publish below threshold (NFR delta, vision-statement-generator)
   hitl: gate-vision-approval
 
 # =============================================================================
 # PHASE 1 — REQUIREMENTS → IMPACT ASSESSMENT → DEPENDENCY GRAPH
 # =============================================================================
-L1-WF-requirements-vision-to-dependency-graph:
+L0-WF-requirements-vision-to-dependency-graph:
   description: Structures the approved vision into requirements and models sequencing risk.
   preconditions: [gate-vision-approval == approved]
   steps:
     - step_id: 1
-      agent: L1-requirements-elicitor
-      input: { source: agent_output, source_agent: L1-vision-statement-generator, artifact: vision.md, parameters: { approval_comment: "{{gate-vision-approval.comment}}" } }
-      tool: tool-L1-confluence-fetch-page
+      agent: L0-requirements-elicitor
+      input: { source: agent_output, source_agent: L0-vision-statement-generator, artifact: vision.md, parameters: { approval_comment: "{{gate-vision-approval.comment}}" } }
+      tool: tool-L0-confluence-fetch-page
       # no knowledge_bases: requirements.template.md is embedded in the prompt per S4 (≤3K tokens, purely structural);
       # every requirement traces to vision.md directly, never a separate regulatory KB (see BOM Phase 1 callout, 2026-08-07)
-      evaluator: L1-requirements-elicitor-evaluator
-      guardrails_additional: [gr-L1-requirements-quality-gate]   # fires on the evaluator's post_execution; validates the RESULTANT (post-fix) requirements content
+      evaluator: L0-requirements-elicitor-evaluator
+      guardrails_additional: [gr-L0-requirements-quality-gate]   # fires on the evaluator's post_execution; validates the RESULTANT (post-fix) requirements content
       output: { type: json }   # items-only, no document — requirements.md dropped as an artifact 2026-08-07, same treatment as idea-brief.md/market-analysis.md/regulatory-feasibility.md above
-      quality_gate: qg-L1-requirements-completeness
+      quality_gate: qg-L0-requirements-completeness
       precheck: fail_if_missing(approval_comment)   # NFR delta: agent refuses to run without recorded approval
     - step_id: 2
-      agent: L1-requirements-nfr-classifier
+      agent: L0-requirements-nfr-classifier
       input:
         source: agent_output
-        source_agents: [L1-requirements-elicitor, L1-vision-statement-generator]   # Compliance-category grounding redirected from regulatory-feasibility.md (dropped) to vision.md § Regulatory Posture, 2026-08-07
+        source_agents: [L0-requirements-elicitor, L0-vision-statement-generator]   # Compliance-category grounding redirected from regulatory-feasibility.md (dropped) to vision.md § Regulatory Posture, 2026-08-07
         artifacts: [vision.md]   # requirements.md is items-only now — read via agent_output, not a fetched document
-      knowledge_bases: [kb-L1-nfr-classification-taxonomy, kb-L1-enterprise-architecture, kb-L1-enterprise-security]
-      evaluator: L1-requirements-nfr-classifier-evaluator
-      guardrails_additional: [gr-L1-nfr-spec-quality-gate]   # fires on the evaluator's post_execution; validates the RESULTANT (post-fix) NFR classification content
+      knowledge_bases: [kb-L0-nfr-classification-taxonomy, kb-L0-enterprise-architecture, kb-L0-enterprise-security]
+      evaluator: L0-requirements-nfr-classifier-evaluator
+      guardrails_additional: [gr-L0-nfr-spec-quality-gate]   # fires on the evaluator's post_execution; validates the RESULTANT (post-fix) NFR classification content
       output: { type: json }   # items-only, no document — nfr-spec.md dropped as an artifact 2026-08-07, same treatment as requirements.md above
       quality_gate: null
     - step_id: 3
-      agent: L1-requirements-prd-composer
+      agent: L0-requirements-prd-composer
       input:
         source: agent_output
-        source_agents: [L1-requirements-elicitor, L1-requirements-nfr-classifier, L1-vision-statement-generator]
+        source_agents: [L0-requirements-elicitor, L0-requirements-nfr-classifier, L0-vision-statement-generator]
         artifacts: [vision.md]   # requirements.md/nfr-spec.md are items-only now — read via agent_output, not fetched documents
         parameters: { approval_comment: "{{gate-vision-approval.comment}}" }   # no requirements document exists to retrieve this from anymore (2026-08-07); passed through directly, same gate elicitor consumed
-      evaluator: L1-requirements-prd-composer-evaluator
-      guardrails_additional: [gr-L1-prd-quality-gate]   # fires on the evaluator's post_execution; validates the RESULTANT (post-fix) PRD content — zero-drop FR/NFR composition, verbatim compound_splits, tagged Assumptions/Constraints/Risks, absent success metrics
+      evaluator: L0-requirements-prd-composer-evaluator
+      guardrails_additional: [gr-L0-prd-quality-gate]   # fires on the evaluator's post_execution; validates the RESULTANT (post-fix) PRD content — zero-drop FR/NFR composition, verbatim compound_splits, tagged Assumptions/Constraints/Risks, absent success metrics
       output: { artifact: prd.md, type: document, format: markdown }
       quality_gate: null
     - step_id: 4
-      agent: L1-impact-assessor
+      agent: L0-impact-assessor
       input:
         source: agent_output
-        source_agent: L1-requirements-prd-composer
+        source_agent: L0-requirements-prd-composer
         artifact: prd.md
         external: { service_catalog: "{{integrations.service_catalog | default: empty}}", cmdb_export: "{{integrations.cmdb_export | default: empty}}" }
-      knowledge_bases: [kb-L1-enterprise-architecture]
-      evaluator: L1-impact-assessor-evaluator
-      guardrails_additional: [gr-L2-food-domain-compliance, gr-L1-impact-assessment-quality-gate]   # 2nd fires on the evaluator's post_execution; validates the RESULTANT (post-fix) impact-assessment content
+      knowledge_bases: [kb-L0-enterprise-architecture]
+      evaluator: L0-impact-assessor-evaluator
+      guardrails_additional: [gr-L1-food-domain-compliance, gr-L0-impact-assessment-quality-gate]   # 2nd fires on the evaluator's post_execution; validates the RESULTANT (post-fix) impact-assessment content
       output: { artifact: impact-assessment.md, type: document, format: markdown }
       quality_gate: null
     - step_id: 5
-      agent: L1-dependency-mapper
-      input: { source: agent_output, source_agents: [L1-impact-assessor, L1-requirements-prd-composer], artifacts: [impact-assessment.md, prd.md] }
-      knowledge_bases: [kb-L1-enterprise-architecture]
-      evaluator: L1-dependency-mapper-evaluator
-      guardrails_additional: [gr-L1-dependency-graph-quality-gate]   # fires on the evaluator's post_execution; independently re-computes cycle_check/critical_path over the RESULTANT (post-fix) graph rather than trusting either agent's claim
+      agent: L0-dependency-mapper
+      input: { source: agent_output, source_agents: [L0-impact-assessor, L0-requirements-prd-composer], artifacts: [impact-assessment.md, prd.md] }
+      knowledge_bases: [kb-L0-enterprise-architecture]
+      evaluator: L0-dependency-mapper-evaluator
+      guardrails_additional: [gr-L0-dependency-graph-quality-gate]   # fires on the evaluator's post_execution; independently re-computes cycle_check/critical_path over the RESULTANT (post-fix) graph rather than trusting either agent's claim
       output: { artifact: dependency-graph.json, type: data, format: json }
-      quality_gate: qg-L1-dependency-graph-integrity
+      quality_gate: qg-L0-dependency-graph-integrity
       on_gate_fail: escalate_to_hitl   # cyclic graph is build-blocking, not auto-resolved
   hitl: gate-requirements-validation
 
 # =============================================================================
 # PHASE 2 — PROJECT / SPRINT PLANNING
 # =============================================================================
-L1-WF-backlog-to-roadmap:
+L0-WF-backlog-to-roadmap:
   description: Sequences and allocates approved requirements into 5-day Feature Cycles.
   preconditions: [gate-requirements-validation == approved]
   steps:
     - step_id: 1
-      agent: L1-backlog-prioritizer
+      agent: L0-backlog-prioritizer
       input:
         source: agent_output
-        source_agents: [L1-dependency-mapper, L1-requirements-elicitor]
+        source_agents: [L0-dependency-mapper, L0-requirements-elicitor]
         artifacts: [dependency-graph.json]   # requirements.md is items-only — read via agent_output, not a fetched document
         parameters: { value_scoring_inputs: "{{trigger.rice_wsjf_fields}}" }
-      tool: tool-L1-jira-fetch-issue
-      knowledge_bases: [kb-L1-sdlc-templates]
+      tool: tool-L0-jira-fetch-issue
+      knowledge_bases: [kb-L0-sdlc-templates]
       output: { artifact: prioritized-backlog.md, type: document, format: markdown }
-      quality_gate: qg-L1-backlog-sequencing-validity
+      quality_gate: qg-L0-backlog-sequencing-validity
       postcheck: assert_topological_sort(dependency-graph.json)   # programmatic, not LLM-judged
     - step_id: 2
-      agent: L1-sprint-planner
+      agent: L0-sprint-planner
       input:
         source: agent_output
-        source_agent: L1-backlog-prioritizer
+        source_agent: L0-backlog-prioritizer
         artifact: prioritized-backlog.md
         external: { team_capacity: "{{integrations.jira_velocity_report}}" }
-      tool: [tool-L1-jira-create-issue, tool-L1-jira-update-issue]
-      knowledge_bases: [kb-L1-sdlc-templates]
+      tool: [tool-L0-jira-create-issue, tool-L0-jira-update-issue]
+      knowledge_bases: [kb-L0-sdlc-templates]
       output: { artifact: roadmap.md, type: document, format: markdown }
       quality_gate: null
   hitl: gate-backlog-approval
@@ -239,107 +239,107 @@ L1-WF-backlog-to-roadmap:
 # =============================================================================
 # PHASE 3 — INCEPTION: EPICS, FEATURES, STORIES, TASKS
 # =============================================================================
-L1-WF-roadmap-to-tasks:
+L0-WF-roadmap-to-tasks:
   description: Breaks the approved roadmap down into Jira-ready epics, features, stories, and tasks.
   preconditions: [gate-backlog-approval == approved]
   steps:
     - step_id: 1
-      agent: L1-epic-creator
-      input: { source: agent_output, source_agents: [L1-sprint-planner, L1-vision-statement-generator], artifacts: [roadmap.md, vision.md] }
-      tool: tool-L1-jira-fetch-issue
-      knowledge_bases: [kb-L1-sdlc-templates, kb-L1-enterprise-security]
-      guardrails_additional: [gr-L1-pii-detection, gr-L2-food-domain-compliance]
+      agent: L0-epic-creator
+      input: { source: agent_output, source_agents: [L0-sprint-planner, L0-vision-statement-generator], artifacts: [roadmap.md, vision.md] }
+      tool: tool-L0-jira-fetch-issue
+      knowledge_bases: [kb-L0-sdlc-templates, kb-L0-enterprise-security]
+      guardrails_additional: [gr-L0-pii-detection, gr-L1-food-domain-compliance]
       output: { artifact: epics.json, type: data, format: json }
-      quality_gate: qg-L1-epic-quality
+      quality_gate: qg-L0-epic-quality
     - step_id: 2
-      agent: L1-feature-decomposer
-      input: { source: agent_output, source_agent: L1-epic-creator, artifact: epics.json }
-      knowledge_bases: [kb-L1-sdlc-templates]
+      agent: L0-feature-decomposer
+      input: { source: agent_output, source_agent: L0-epic-creator, artifact: epics.json }
+      knowledge_bases: [kb-L0-sdlc-templates]
       output: { artifact: features.json, type: data, format: json }
-      quality_gate: qg-L1-feature-completeness
+      quality_gate: qg-L0-feature-completeness
     - step_id: 3
-      agent: L1-story-generator
-      input: { source: agent_output, source_agents: [L1-feature-decomposer, L1-requirements-elicitor], artifacts: [features.json] }   # requirements.md is items-only — read via agent_output, not a fetched document
-      knowledge_bases: [kb-L1-sdlc-templates, kb-L2-food-domain]
-      guardrails_additional: [gr-L1-pii-detection, gr-L1-citation-verifier]
+      agent: L0-story-generator
+      input: { source: agent_output, source_agents: [L0-feature-decomposer, L0-requirements-elicitor], artifacts: [features.json] }   # requirements.md is items-only — read via agent_output, not a fetched document
+      knowledge_bases: [kb-L0-sdlc-templates, kb-L1-food-domain]
+      guardrails_additional: [gr-L0-pii-detection, gr-L0-citation-verifier]
       output: { artifact: stories.json, type: data, format: json }
-      quality_gate: qg-L1-story-quality
-      scored_by: [L1-quality-verifier]
-      verified_by: L1-quality-verifier   # A12 independent review, per diagram
+      quality_gate: qg-L0-story-quality
+      scored_by: [L0-quality-verifier]
+      verified_by: L0-quality-verifier   # A12 independent review, per diagram
     - step_id: 4
-      agent: L1-task-generator
-      input: { source: agent_output, source_agent: L1-story-generator, artifact: stories.json }
-      knowledge_bases: [kb-L1-sdlc-templates]
+      agent: L0-task-generator
+      input: { source: agent_output, source_agent: L0-story-generator, artifact: stories.json }
+      knowledge_bases: [kb-L0-sdlc-templates]
       output: { artifact: tasks.json, type: data, format: json }
-      quality_gate: qg-L1-task-completeness
+      quality_gate: qg-L0-task-completeness
     - step_id: 5
-      agent: L1-jira-orchestrator
-      input: { source: agent_output, source_agents: [L1-epic-creator, L1-feature-decomposer, L1-story-generator, L1-task-generator], artifacts: [epics.json, features.json, stories.json, tasks.json] }
-      tool: [tool-L1-jira-create-issue, tool-L1-jira-fetch-issue, tool-L1-jira-update-issue]
+      agent: L0-jira-orchestrator
+      input: { source: agent_output, source_agents: [L0-epic-creator, L0-feature-decomposer, L0-story-generator, L0-task-generator], artifacts: [epics.json, features.json, stories.json, tasks.json] }
+      tool: [tool-L0-jira-create-issue, tool-L0-jira-fetch-issue, tool-L0-jira-update-issue]
       output: { artifact: jira_issue_keys, type: report }
       quality_gate: null
 
 # =============================================================================
 # PHASE 4 — DESIGN: USER JOURNEYS, WIREFRAMES, HLD, LLD, API SPEC, DATA MODEL
 # =============================================================================
-L1-WF-design-stories-to-lld:
+L0-WF-design-stories-to-lld:
   description: Produces the full design artifact set from approved stories.
   steps:
     - step_id: 1
-      agent: L1-design-user-journey-mapper
-      input: { source: agent_output, source_agents: [L1-story-generator, L1-vision-statement-generator], artifacts: [stories.json, vision.md] }
-      knowledge_bases: [kb-L1-sdlc-templates]
+      agent: L0-design-user-journey-mapper
+      input: { source: agent_output, source_agents: [L0-story-generator, L0-vision-statement-generator], artifacts: [stories.json, vision.md] }
+      knowledge_bases: [kb-L0-sdlc-templates]
       output: { artifact: user-journeys.md, type: document, format: markdown }
-      quality_gate: qg-L1-journey-coverage
+      quality_gate: qg-L0-journey-coverage
     - step_id: 2
-      agent: L1-design-ux-wireframe
-      input: { source: agent_output, source_agents: [L1-story-generator, L1-design-user-journey-mapper], artifacts: [stories.json, user-journeys.md] }
-      tool: tool-L1-figma-create-frame   # optional
-      knowledge_bases: [kb-L1-sdlc-templates]
+      agent: L0-design-ux-wireframe
+      input: { source: agent_output, source_agents: [L0-story-generator, L0-design-user-journey-mapper], artifacts: [stories.json, user-journeys.md] }
+      tool: tool-L0-figma-create-frame   # optional
+      knowledge_bases: [kb-L0-sdlc-templates]
       output: { artifact: wireframes.md, type: document, format: markdown }
-      quality_gate: qg-L1-ux-completeness
+      quality_gate: qg-L0-ux-completeness
     - step_id: 3
-      agent: L1-design-api-spec
-      input: { source: agent_output, source_agents: [L1-story-generator, L1-requirements-nfr-classifier], artifacts: [stories.json] }   # nfr-spec.md is items-only — read via agent_output, not a fetched document
-      knowledge_bases: [kb-L1-enterprise-architecture, kb-L2-food-domain-api-patterns]
+      agent: L0-design-api-spec
+      input: { source: agent_output, source_agents: [L0-story-generator, L0-requirements-nfr-classifier], artifacts: [stories.json] }   # nfr-spec.md is items-only — read via agent_output, not a fetched document
+      knowledge_bases: [kb-L0-enterprise-architecture, kb-L1-food-domain-api-patterns]
       output: { artifact: openapi.yaml, type: api_spec, format: yaml }
       quality_gate: null
-      guardrails_additional: [gr-L1-schema-validator-openapi]
+      guardrails_additional: [gr-L0-schema-validator-openapi]
       hard_fail_on: invalid_openapi_syntax
       parallel_with: step_2
     - step_id: 4
-      agent: L1-design-hld
+      agent: L0-design-hld
       input:
         source: agent_output
-        source_agents: [L1-requirements-elicitor, L1-requirements-nfr-classifier, L1-dependency-mapper, L1-design-api-spec]
+        source_agents: [L0-requirements-elicitor, L0-requirements-nfr-classifier, L0-dependency-mapper, L0-design-api-spec]
         artifacts: [dependency-graph.json, openapi.yaml]   # requirements.md/nfr-spec.md are items-only — read via agent_output, not fetched documents
-      knowledge_bases: [kb-L1-enterprise-architecture]
+      knowledge_bases: [kb-L0-enterprise-architecture]
       output: { artifact: hld.md, type: document, format: markdown }
-      quality_gate: qg-L1-hld-quality
-      verified_by: L1-quality-verifier
+      quality_gate: qg-L0-hld-quality
+      verified_by: L0-quality-verifier
       latency_p95_s: 60
     - step_id: 5
-      agent: L1-design-lld
-      input: { source: agent_output, source_agents: [L1-design-hld, L1-design-api-spec], artifacts: [hld.md, openapi.yaml] }
-      knowledge_bases: [kb-L1-enterprise-architecture]
+      agent: L0-design-lld
+      input: { source: agent_output, source_agents: [L0-design-hld, L0-design-api-spec], artifacts: [hld.md, openapi.yaml] }
+      knowledge_bases: [kb-L0-enterprise-architecture]
       output: { artifact: lld.md, type: document, format: markdown }
-      quality_gate: qg-L1-lld-quality
+      quality_gate: qg-L0-lld-quality
     - step_id: 6
-      agent: L1-design-data-architect
-      input: { source: agent_output, source_agents: [L1-design-lld, L1-requirements-elicitor], artifacts: [lld.md] }   # requirements.md is items-only — read via agent_output, not a fetched document
-      tool: tool-L1-db-schema-diff   # optional
-      knowledge_bases: [kb-L1-enterprise-architecture]
-      guardrails_additional: [gr-L1-pii-detection]
+      agent: L0-design-data-architect
+      input: { source: agent_output, source_agents: [L0-design-lld, L0-requirements-elicitor], artifacts: [lld.md] }   # requirements.md is items-only — read via agent_output, not a fetched document
+      tool: tool-L0-db-schema-diff   # optional
+      knowledge_bases: [kb-L0-enterprise-architecture]
+      guardrails_additional: [gr-L0-pii-detection]
       output: { artifact: db-schema.sql, type: config, format: sql }
-      quality_gate: qg-L1-data-model-integrity
+      quality_gate: qg-L0-data-model-integrity
     - step_id: 7
-      agent: L1-github-orchestrator
+      agent: L0-github-orchestrator
       invocation_context: design-publish
       input:
         source: agent_output
-        source_agents: [L1-design-user-journey-mapper, L1-design-ux-wireframe, L1-design-api-spec, L1-design-hld, L1-design-lld, L1-design-data-architect]
+        source_agents: [L0-design-user-journey-mapper, L0-design-ux-wireframe, L0-design-api-spec, L0-design-hld, L0-design-lld, L0-design-data-architect]
         artifacts: [user-journeys.md, wireframes.md, openapi.yaml, hld.md, lld.md, db-schema.sql]
-      tool: [tool-L1-github-upload-file, tool-L1-confluence-create-page]
+      tool: [tool-L0-github-upload-file, tool-L0-confluence-create-page]
       output: { artifact: design_branch, type: code, storage: { provider: github, location: "aava/design-{{feature_id}}" } }
       idempotency: no_overwrite_without_update_flag
       quality_gate: null
@@ -348,46 +348,46 @@ L1-WF-design-stories-to-lld:
 # =============================================================================
 # PHASE 5 — TEST STRATEGY: SCENARIOS, CASES, SCRIPTS, SYNTHETIC DATA
 # =============================================================================
-L1-WF-testing-stories-to-xray:
+L0-WF-testing-stories-to-xray:
   description: Generates the test strategy artifact set and loads it into XRay.
   preconditions: [gate-architecture-review == approved]
   steps:
     - step_id: 1
-      agent: L1-testing-scenario-writer
-      input: { source: agent_output, source_agent: L1-story-generator, artifact: stories.json }
-      knowledge_bases: [kb-L1-testing-standards, kb-L2-food-domain]
-      guardrails_additional: [gr-L1-citation-verifier]
+      agent: L0-testing-scenario-writer
+      input: { source: agent_output, source_agent: L0-story-generator, artifact: stories.json }
+      knowledge_bases: [kb-L0-testing-standards, kb-L1-food-domain]
+      guardrails_additional: [gr-L0-citation-verifier]
       output: { artifact: test-scenarios.md, type: document, format: markdown }
-      quality_gate: qg-L1-test-coverage
+      quality_gate: qg-L0-test-coverage
     - step_id: 2
-      agent: L1-testing-case-writer
-      input: { source: agent_output, source_agent: L1-testing-scenario-writer, artifact: test-scenarios.md }
-      knowledge_bases: [kb-L1-testing-standards]
+      agent: L0-testing-case-writer
+      input: { source: agent_output, source_agent: L0-testing-scenario-writer, artifact: test-scenarios.md }
+      knowledge_bases: [kb-L0-testing-standards]
       output: { artifact: test-cases.feature, type: test_suite, format: text }
       quality_gate: null
     - step_id: 3
-      agent: L1-testing-script-generator
+      agent: L0-testing-script-generator
       input:
         source: agent_output
-        source_agents: [L1-testing-case-writer, L1-design-api-spec, L1-design-ux-wireframe]
+        source_agents: [L0-testing-case-writer, L0-design-api-spec, L0-design-ux-wireframe]
         artifacts: [test-cases.feature, openapi.yaml, wireframes.md]
-      knowledge_bases: [kb-L1-testing-standards]
+      knowledge_bases: [kb-L0-testing-standards]
       output: { artifact: test-scripts/, type: test_suite, format: typescript }
-      quality_gate: qg-L1-script-executability
+      quality_gate: qg-L0-script-executability
       hard_fail_on: lint_error   # dry-run/lint, stricter than schema-only check
     - step_id: 4
-      agent: L1-testing-synthetic-data-generator
-      input: { source: agent_output, source_agents: [L1-design-data-architect, L1-testing-case-writer], artifacts: [db-schema.sql, test-cases.feature] }
-      knowledge_bases: [kb-L1-testing-standards]
-      guardrails_additional: [gr-L1-pii-detection]
+      agent: L0-testing-synthetic-data-generator
+      input: { source: agent_output, source_agents: [L0-design-data-architect, L0-testing-case-writer], artifacts: [db-schema.sql, test-cases.feature] }
+      knowledge_bases: [kb-L0-testing-standards]
+      guardrails_additional: [gr-L0-pii-detection]
       output: { artifact: synthetic-data.json, type: data, format: json }
       quality_gate: null
       hard_fail_on: real_pii_detected   # zero tolerance, no override
       parallel_with: step_3
     - step_id: 5
-      agent: L1-xray-orchestrator
-      input: { source: agent_output, source_agents: [L1-testing-case-writer, L1-testing-script-generator], artifacts: [test-cases.feature, test-scripts/] }
-      tool: tool-L1-xray-create-test
+      agent: L0-xray-orchestrator
+      input: { source: agent_output, source_agents: [L0-testing-case-writer, L0-testing-script-generator], artifacts: [test-cases.feature, test-scripts/] }
+      tool: tool-L0-xray-create-test
       output: { artifact: xray_test_keys, type: report }
       quality_gate: null
   hitl: gate-test-strategy-signoff   # non-blocking; runs parallel to Construction per 5-day cycle
@@ -395,69 +395,69 @@ L1-WF-testing-stories-to-xray:
 # =============================================================================
 # PHASE 6 — CONSTRUCTION: API CODE GEN, UI CODE GEN
 # =============================================================================
-L1-WF-construction-design-to-code:
+L0-WF-construction-design-to-code:
   description: Generates, tests, reviews, and documents API and UI implementation code.
   preconditions: [gate-architecture-review == approved]
   steps:
     - step_id: 1
-      agent: L1-construction-api-code-generator
+      agent: L0-construction-api-code-generator
       input:
         source: agent_output
-        source_agents: [L1-design-lld, L1-design-api-spec, L1-design-data-architect]
+        source_agents: [L0-design-lld, L0-design-api-spec, L0-design-data-architect]
         artifacts: [lld.md, openapi.yaml, db-schema.sql]
         external: { repo_scaffold: "{{integrations.github_repo_scaffold}}" }
-      tool: tool-L1-github-fetch-file
-      knowledge_bases: [kb-L1-enterprise-architecture, kb-L1-enterprise-security]
-      guardrails_additional: [gr-L1-secret-scanner, gr-L1-license-compliance-check]
+      tool: tool-L0-github-fetch-file
+      knowledge_bases: [kb-L0-enterprise-architecture, kb-L0-enterprise-security]
+      guardrails_additional: [gr-L0-secret-scanner, gr-L0-license-compliance-check]
       output: { artifact: api-code/, type: code, format: java }
-      quality_gate: qg-L1-api-code-quality
-      verified_by: L1-quality-verifier
+      quality_gate: qg-L0-api-code-quality
+      verified_by: L0-quality-verifier
       latency_p95_s: 120
     - step_id: 2
-      agent: L1-construction-ui-code-generator
+      agent: L0-construction-ui-code-generator
       input:
         source: agent_output
-        source_agents: [L1-design-ux-wireframe, L1-design-user-journey-mapper, L1-design-api-spec]
+        source_agents: [L0-design-ux-wireframe, L0-design-user-journey-mapper, L0-design-api-spec]
         artifacts: [wireframes.md, user-journeys.md, openapi.yaml]
         external: { repo_scaffold: "{{integrations.github_repo_scaffold}}" }
-      tool: tool-L1-github-fetch-file
-      knowledge_bases: [kb-L1-enterprise-architecture]
-      guardrails_additional: [gr-L1-secret-scanner, gr-L1-license-compliance-check]
+      tool: tool-L0-github-fetch-file
+      knowledge_bases: [kb-L0-enterprise-architecture]
+      guardrails_additional: [gr-L0-secret-scanner, gr-L0-license-compliance-check]
       output: { artifact: ui-code/, type: code, format: typescript }
-      quality_gate: qg-L1-ui-code-quality
-      verified_by: L1-quality-verifier
+      quality_gate: qg-L0-ui-code-quality
+      verified_by: L0-quality-verifier
       latency_p95_s: 120
       parallel_with: step_1
     - step_id: 3
-      agent: L1-construction-unit-test-generator
-      input: { source: agent_output, source_agents: [L1-construction-api-code-generator, L1-construction-ui-code-generator], artifacts: [api-code/, ui-code/] }
-      knowledge_bases: [kb-L1-testing-standards]
+      agent: L0-construction-unit-test-generator
+      input: { source: agent_output, source_agents: [L0-construction-api-code-generator, L0-construction-ui-code-generator], artifacts: [api-code/, ui-code/] }
+      knowledge_bases: [kb-L0-testing-standards]
       output: { artifact: unit-tests/, type: test_suite, format: java }
-      quality_gate: qg-L1-unit-test-coverage
+      quality_gate: qg-L0-unit-test-coverage
       hard_fail_on: coverage_below_80pct
     - step_id: 4
-      agent: L1-construction-code-reviewer
-      input: { source: agent_output, source_agents: [L1-construction-api-code-generator, L1-construction-ui-code-generator, L1-construction-unit-test-generator], artifacts: [api-code/, ui-code/, unit-tests/] }
-      tool: tool-L1-github-fetch-file
-      knowledge_bases: [kb-L1-enterprise-security, kb-L1-enterprise-architecture]
-      guardrails_additional: [gr-L1-secret-scanner, gr-L1-license-compliance-check]
+      agent: L0-construction-code-reviewer
+      input: { source: agent_output, source_agents: [L0-construction-api-code-generator, L0-construction-ui-code-generator, L0-construction-unit-test-generator], artifacts: [api-code/, ui-code/, unit-tests/] }
+      tool: tool-L0-github-fetch-file
+      knowledge_bases: [kb-L0-enterprise-security, kb-L0-enterprise-architecture]
+      guardrails_additional: [gr-L0-secret-scanner, gr-L0-license-compliance-check]
       output: { artifact: review-report.md, type: report, format: markdown }
       quality_gate: null
       blocker_findings_halt: true   # blocker-severity findings prevent PR from being marked ready
     - step_id: 5
-      agent: L1-construction-doc-generator
-      input: { source: agent_output, source_agents: [L1-construction-api-code-generator, L1-construction-ui-code-generator, L1-design-api-spec], artifacts: [api-code/, ui-code/, openapi.yaml] }
-      knowledge_bases: [kb-L1-sdlc-templates]
+      agent: L0-construction-doc-generator
+      input: { source: agent_output, source_agents: [L0-construction-api-code-generator, L0-construction-ui-code-generator, L0-design-api-spec], artifacts: [api-code/, ui-code/, openapi.yaml] }
+      knowledge_bases: [kb-L0-sdlc-templates]
       output: { artifact: docs/, type: document, format: markdown }
       quality_gate: null
     - step_id: 6
-      agent: L1-github-orchestrator
+      agent: L0-github-orchestrator
       invocation_context: impl-commit
       input:
         source: agent_output
-        source_agents: [L1-construction-api-code-generator, L1-construction-ui-code-generator, L1-construction-unit-test-generator, L1-construction-doc-generator]
+        source_agents: [L0-construction-api-code-generator, L0-construction-ui-code-generator, L0-construction-unit-test-generator, L0-construction-doc-generator]
         artifacts: [api-code/, ui-code/, unit-tests/, docs/]
-      tool: [tool-L1-github-upload-file, tool-L1-github-create-branch]
+      tool: [tool-L0-github-upload-file, tool-L0-github-create-branch]
       output: { artifact: impl_branch, type: code, storage: { provider: github, location: "aava/impl-{{feature_id}}" } }
       idempotency: no_overwrite_without_update_flag
       quality_gate: null
@@ -465,18 +465,18 @@ L1-WF-construction-design-to-code:
 # =============================================================================
 # PHASE 7 — PR CREATION
 # =============================================================================
-L1-WF-release-code-to-pr:
+L0-WF-release-code-to-pr:
   description: Bundles Jira, design, code, and test references into a single pull request.
-  preconditions: [step_completed(L1-WF-construction-design-to-code), step_completed(L1-WF-testing-stories-to-xray)]
+  preconditions: [step_completed(L0-WF-construction-design-to-code), step_completed(L0-WF-testing-stories-to-xray)]
   steps:
     - step_id: 1
-      agent: L1-github-orchestrator
+      agent: L0-github-orchestrator
       invocation_context: pr-creation
       input:
         source: agent_output
-        source_agents: [L1-github-orchestrator, L1-jira-orchestrator, L1-xray-orchestrator]
+        source_agents: [L0-github-orchestrator, L0-jira-orchestrator, L0-xray-orchestrator]
         artifacts: [impl_branch, design_branch, jira_issue_keys, xray_test_keys]
-      tool: tool-L1-github-create-pr
+      tool: tool-L0-github-create-pr
       output: { artifact: pull_request, type: report }
       idempotency: no_duplicate_pr_for_branch_pair
       quality_gate: null
@@ -488,19 +488,19 @@ L1-WF-release-code-to-pr:
 # concurrently once Phase 4's architecture-review gate is approved, per the
 # 5-day Feature Cycle model in 00-ai-augmented-sdlc.html.
 # =============================================================================
-L1-WF-greenfield-idea-to-pr:
+L0-WF-greenfield-idea-to-pr:
   description: End-to-end greenfield delivery — Idea through Pull Request.
   trigger: { type: manual_or_api, payload: { idea_text: string, confluence_page_ref: string, rice_wsjf_fields: object } }
   steps:
-    - workflow: L1-WF-vision-idea-to-statement
-    - workflow: L1-WF-requirements-vision-to-dependency-graph
-    - workflow: L1-WF-backlog-to-roadmap
-    - workflow: L1-WF-roadmap-to-tasks
-    - workflow: L1-WF-design-stories-to-lld
+    - workflow: L0-WF-vision-idea-to-statement
+    - workflow: L0-WF-requirements-vision-to-dependency-graph
+    - workflow: L0-WF-backlog-to-roadmap
+    - workflow: L0-WF-roadmap-to-tasks
+    - workflow: L0-WF-design-stories-to-lld
     - parallel:
-        - workflow: L1-WF-testing-stories-to-xray
-        - workflow: L1-WF-construction-design-to-code
-    - workflow: L1-WF-release-code-to-pr
+        - workflow: L0-WF-testing-stories-to-xray
+        - workflow: L0-WF-construction-design-to-code
+    - workflow: L0-WF-release-code-to-pr
   on_any_blocking_gate_reject:
     action: halt_workflow
     notify: [Product Lead, Feature Owner]

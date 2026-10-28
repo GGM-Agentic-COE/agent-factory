@@ -1,4 +1,4 @@
-# Evaluation — L1-regulatory-feasibility-checker
+# Evaluation — L0-regulatory-feasibility-checker
 
 ## Quality Gates
 - [ ] All required fields present: constraints (≥1), overall_status, open_items

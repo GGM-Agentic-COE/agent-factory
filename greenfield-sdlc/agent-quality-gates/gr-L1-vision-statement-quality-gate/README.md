@@ -1,25 +1,25 @@
-# gr-L1-vision-statement-quality-gate
+# gr-L0-vision-statement-quality-gate
 
-**Layer:** L1
-**Triggers on:** post_execution (output rail) — fires when `L1-vision-statement-generator-evaluator` concludes
+**Layer:** L0
+**Triggers on:** post_execution (output rail) — fires when `L0-vision-statement-generator-evaluator` concludes
 **On fail:** Retry once, then escalate to HITL
 **Implementation:** LLM-driven (Colang) — Python actions preserved for hybrid mode
-**Applies to:** `L1-vision-statement-generator-evaluator` only (`configured_agents`)
+**Applies to:** `L0-vision-statement-generator-evaluator` only (`configured_agents`)
 
 ## What does it do?
 
-`L1-vision-statement-generator-evaluator` is the last automated checkpoint
+`L0-vision-statement-generator-evaluator` is the last automated checkpoint
 before a human (the Product Lead) reads `vision.md`. This guardrail fires
 at that point but validates a different thing: the **resultant**
-`L1-vision-statement-generator` output — its own `items`, with the
+`L0-vision-statement-generator` output — its own `items`, with the
 evaluator's `fixes_applied` resolved in — is what actually reaches that
 approval gate. This gate checks THAT content:
 
 1. **Output schema validation** — does the resultant content conform to
-   `L1-vision-statement-generator/output_schema.json` (not the evaluator's
+   `L0-vision-statement-generator/output_schema.json` (not the evaluator's
    own output shape)?
 2. **Capability checklist / rubric adherence** — does the resultant
-   content actually satisfy `L1-vision-statement-generator/evaluation.md`'s
+   content actually satisfy `L0-vision-statement-generator/evaluation.md`'s
    rubric — above all, the reconciliation-coverage BLOCKER (every
    regulatory constraint covered by `open_risks`), roadmap phase 1
    addressing the worst risk, executive_summary introducing no new claim,
@@ -52,7 +52,7 @@ constraint slipping through this gate especially avoidable.
 ## How It Works
 
 ```
-L1-vision-statement-generator-evaluator concludes
+L0-vision-statement-generator-evaluator concludes
         ↓
 ┌────────────────────────────────────────────────────────────────────┐
 │  VISION-STATEMENT QUALITY GATE (post_execution, fires on evaluator) │
@@ -85,10 +85,10 @@ Resultant vision.md content reaches the Product Lead approval gate
 ## File Structure
 
 ```
-gr-L1-vision-statement-quality-gate/
+gr-L0-vision-statement-quality-gate/
 ├── config.yml                                # Rail configuration
 ├── prompts.yml                               # LLM evaluation prompt (7 checks)
-├── gr-L1-vision-statement-quality-gate.co     # LLM-only Colang flow
+├── gr-L0-vision-statement-quality-gate.co     # LLM-only Colang flow
 ├── vision_statement_quality_gate.co           # Python-hybrid Colang flow (calls actions.py)
 ├── actions.py                                 # Deterministic Python (schema, coverage BLOCKER, roadmap ordering, viability_score)
 ├── spec.yaml                                  # Guardrail specification
@@ -96,7 +96,7 @@ gr-L1-vision-statement-quality-gate/
 ```
 
 **Two modes:**
-- **LLM-only** (`gr-L1-vision-statement-quality-gate.co`): all 7 checks via `self_check_output`.
+- **LLM-only** (`gr-L0-vision-statement-quality-gate.co`): all 7 checks via `self_check_output`.
 - **Python-hybrid** (`vision_statement_quality_gate.co`): the 6 deterministic checks (1, 2, 3, 4, 6, 7) reconstruct the resultant content and validate it directly in `actions.py` (7 additionally needs `original_input` for the received `viability_score`); the LLM handles the 1 genuinely semantic check (5).
 
 ## Testing
@@ -140,7 +140,7 @@ gr-L1-vision-statement-quality-gate/
 ```python
 from nemoguardrails import LLMRails, RailsConfig
 
-config = RailsConfig.from_path("./gr-L1-vision-statement-quality-gate")
+config = RailsConfig.from_path("./gr-L0-vision-statement-quality-gate")
 rails = LLMRails(config)
 
 response = await rails.generate_async(

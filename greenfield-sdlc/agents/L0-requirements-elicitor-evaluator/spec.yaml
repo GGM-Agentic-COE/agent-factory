@@ -47,12 +47,12 @@ context:
     - ref: "../L0-requirements-elicitor/evaluation.md"   # source of truth for scoring, retrieved from GitHub at runtime — never duplicated in this agent's prompt
     - kb-L0-requirements-quality-standard               # full ISO/IEC/IEEE 29148 characteristics (Complete, Verifiable, Consistent, Feasible, Correct)
   guardrails:
-    - gr-L1-output-schema-validator
-    - gr-L1-pii-detection
+    - gr-L0-output-schema-validator
+    - gr-L0-pii-detection
     - gr-L3-hallucination-detector
     - gr-L3-citation-validator      # re-checked independently, not by trusting the elicitor's own pass/fail claim
     - gr-L3-consistency-checker
-    - gr-L2-tool-permissions
+    - gr-L1-tool-permissions
     - gr-L3-agent-rate-limit
   tools:
     - tool-L0-github-reader-using-PAT    # reads the evaluation file and the KB; tool-L0-github-reader-using-app takes the same parameters if that variant is deployed instead

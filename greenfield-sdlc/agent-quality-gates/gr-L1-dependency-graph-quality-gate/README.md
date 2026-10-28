@@ -1,21 +1,21 @@
-# gr-L1-dependency-graph-quality-gate
+# gr-L0-dependency-graph-quality-gate
 
-**Layer:** L1
-**Triggers on:** post_execution (output rail) — fires when `L1-dependency-mapper-evaluator` concludes
+**Layer:** L0
+**Triggers on:** post_execution (output rail) — fires when `L0-dependency-mapper-evaluator` concludes
 **On fail:** Retry once, then escalate to HITL
 **Implementation:** LLM-driven (Colang) — Python actions preserved for hybrid mode (recommended)
-**Applies to:** `L1-dependency-mapper-evaluator` only (`configured_agents`)
+**Applies to:** `L0-dependency-mapper-evaluator` only (`configured_agents`)
 
 ## What does it do?
 
-`L1-dependency-mapper-evaluator` independently scores
-`L1-dependency-mapper`'s draft dependency graph against
-`L1-dependency-mapper/evaluation.md` and fixes what it can. This
+`L0-dependency-mapper-evaluator` independently scores
+`L0-dependency-mapper`'s draft dependency graph against
+`L0-dependency-mapper/evaluation.md` and fixes what it can. This
 guardrail fires at that point but validates a different thing: the
-**resultant** `L1-dependency-mapper` output — its own `items`, with
+**resultant** `L0-dependency-mapper` output — its own `items`, with
 the evaluator's `fixes_applied` resolved in — is what actually flows to
-`L1-backlog-prioritizer` (as literal topological-sort input) and
-Phase 4's `L1-design-hld`. This gate checks THAT content.
+`L0-backlog-prioritizer` (as literal topological-sort input) and
+Phase 4's `L0-design-hld`. This gate checks THAT content.
 
 Unlike the other three quality gates in this batch, most of what this gate
 checks is **not** a schema/regex check. `cycle_check` and `critical_path`
@@ -29,7 +29,7 @@ resultant content claims — never trusting either the generator's own
 self-reported) re-derivation, at face value.
 
 This is exactly the class of bug
-`L1-dependency-mapper-evaluator/golden/v1.0.0/golden-02-edge-direction-bug.json`
+`L0-dependency-mapper-evaluator/golden/v1.0.0/golden-02-edge-direction-bug.json`
 exists to demonstrate: a reversed `depends-on` edge that is schema-valid,
 does not happen to create a cycle in that particular graph, and still
 produces a `critical_path` that inverts the real build order.
@@ -39,7 +39,7 @@ independent, mechanical check that catches it regardless of what either
 agent in the pair concluded.
 
 1. **Output schema validation** — does the resultant content conform to
-   `L1-dependency-mapper/output_schema.json` (not the evaluator's
+   `L0-dependency-mapper/output_schema.json` (not the evaluator's
    own output shape)?
 2. **Rubric adherence (independent re-derivation)** — does the resultant
    content's `cycle_check` and `critical_path` actually match what a real
@@ -59,7 +59,7 @@ still doesn't match, or a genuine tie exists that the fix's rationale never
 mentions, that is exactly the defect this gate exists to catch — independent
 of what either agent's own bookkeeping says. A cyclic graph silently shipped
 downstream is not a quality nuance; it is a build-blocking defect that only
-surfaces two phases later, in `L1-design-hld`, when it is far more expensive
+surfaces two phases later, in `L0-design-hld`, when it is far more expensive
 to unwind.
 
 ### Rules
@@ -77,7 +77,7 @@ to unwind.
 ## How It Works
 
 ```
-L1-dependency-mapper-evaluator concludes
+L0-dependency-mapper-evaluator concludes
         ↓
 ┌────────────────────────────────────────────────────────────────────────┐
 │  DEPENDENCY GRAPH QUALITY GATE (post_execution, fires on evaluator)    │
@@ -119,10 +119,10 @@ Resultant dependency graph flows to backlog-prioritizer / design-hld
 ## File Structure
 
 ```
-gr-L1-dependency-graph-quality-gate/
+gr-L0-dependency-graph-quality-gate/
 ├── config.yml                                # Rail configuration
 ├── prompts.yml                               # LLM evaluation prompt (7 checks, LLM traces DFS/longest-path itself in LLM-only mode)
-├── gr-L1-dependency-graph-quality-gate.co    # LLM-only Colang flow
+├── gr-L0-dependency-graph-quality-gate.co    # LLM-only Colang flow
 ├── dependency_graph_quality_gate.co          # Python-hybrid Colang flow (calls actions.py)
 ├── actions.py                                # Deterministic Python (schema, edge endpoints, independent DFS cycle recheck, cycle-status escalation, independent longest-path recheck, FR coverage)
 ├── spec.yaml                                 # Guardrail specification
@@ -130,7 +130,7 @@ gr-L1-dependency-graph-quality-gate/
 ```
 
 **Two modes:**
-- **LLM-only** (`gr-L1-dependency-graph-quality-gate.co`): all 7 checks via
+- **LLM-only** (`gr-L0-dependency-graph-quality-gate.co`): all 7 checks via
   `self_check_output` — the LLM is instructed to trace the DFS and
   longest-path computation itself, step by step. Weaker for this particular
   guardrail than the hybrid mode, because a graph traversal is exactly the
@@ -205,7 +205,7 @@ but a real cycle exists (an added edge back to `sso-provider`):
 ```python
 from nemoguardrails import LLMRails, RailsConfig
 
-config = RailsConfig.from_path("./gr-L1-dependency-graph-quality-gate")
+config = RailsConfig.from_path("./gr-L0-dependency-graph-quality-gate")
 rails = LLMRails(config)
 
 response = await rails.generate_async(

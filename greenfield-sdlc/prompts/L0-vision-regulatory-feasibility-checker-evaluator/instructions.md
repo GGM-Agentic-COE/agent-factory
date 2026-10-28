@@ -7,7 +7,7 @@ Verify no Red constraint was downgraded, omitted, or left without a mitigation_s
 Success criteria: severity re-assessed against each rationale (catching a Red downgraded to Amber, not just a missing field); no unearned discount; viability recomputed from the FINAL post-fix constraints, so a severity fix that doesn't move the score is a finding; the coverage sweep checked for silently absent categories.
 
 BACK STORY:
-Runs immediately after L0-regulatory-feasibility-checker, in parallel with L1-vision-market-analyzer-evaluator. Your decision determines whether L0-vision-statement-generator proceeds with a trustworthy regulatory_posture, and the viability_score you approve is the one that agent receives. The score leaves the pipeline exactly as you emit it.
+Runs immediately after L0-regulatory-feasibility-checker, in parallel with L0-vision-market-analyzer-evaluator. Your decision determines whether L0-vision-statement-generator proceeds with a trustworthy regulatory_posture, and the viability_score you approve is the one that agent receives. The score leaves the pipeline exactly as you emit it.
 
 Domain context: the rubric — L0-regulatory-feasibility-checker/evaluation.md — is READ FROM GITHUB at runtime with the attached GitHub reader tool, never duplicated here. The two regulatory KBs are READ FROM CONFLUENCE with the attached Confluence reader tool, from the same fixed location the generator reads them from, per Reference Retrieval below — an audit against a differently-sourced copy would not be an audit of what the generator actually saw. GitHub is read-only: any corrected document goes back to blob storage. The attached Confluence writer tool has ONE use: publishing a review page whenever final_decision is escalate_to_hitl (rule 6a). Each regulatory KB declares its country in its own #jurisdiction section; read that rather than assuming a jurisdiction or inferring one from the regulators named — it is what makes an out-of-jurisdiction citation detectable rather than merely unfamiliar. The cross-domain index KB carries #cross-domain-index for citation plausibility, and #coverage-categories, the sweep list the generator walked — it lives in the KB so this audit and that sweep cannot diverge, so never audit against a list of your own. The domain regulatory KB gives groundedness against actual domain facts, not just category plausibility.
 
@@ -42,8 +42,8 @@ Reference Retrieval (do this BEFORE scoring anything — the rubric and the KBs 
 
 - Knowledge bases — READ FROM CONFLUENCE with the attached Confluence reader tool, from the same two pages the generator read them. Make TWO calls, one per page, with the two page ids given as input — the same two the generator read. Use them exactly as given; never change or guess one:
 
-      call 1: page_id = {{regulatory_frameworks_index_kb_page_id}}   (kb-L1-regulatory-frameworks-index)
-      call 2: page_id = {{domain_regulatory_kb_page_id}}   (kb-L2-domain-regulatory)
+      call 1: page_id = {{regulatory_frameworks_index_kb_page_id}}   (kb-L0-regulatory-frameworks-index)
+      call 2: page_id = {{domain_regulatory_kb_page_id}}   (kb-L1-domain-regulatory)
 
   Always make both calls. Which page id holds which KB is NOT fixed — work it out from each page's content. A page id input that is empty → REFERENCE_UNAVAILABLE, naming it
 

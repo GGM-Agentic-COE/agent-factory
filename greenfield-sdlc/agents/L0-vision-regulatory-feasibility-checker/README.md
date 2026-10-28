@@ -13,9 +13,9 @@ mandatory, structured, and impossible to silently drop a serious finding.
 
 **The agent is jurisdiction-neutral. The KBs are not.** Nothing in the prompt
 names a country. Both KBs are **read from Confluence** with
-`tool-L1-confluence-reader`, two calls, `page_id = 518422550` and `page_id = 519012353`, fixed in the
-prompt. The pages hold the content of `kb-L1-regulatory-frameworks-index-ind`
-and `kb-L2-domain-regulatory-ind`. They are not attached at runtime and not read
+`tool-L0-confluence-reader`, two calls, `page_id = 518422550` and `page_id = 519012353`, fixed in the
+prompt. The pages hold the content of `kb-L0-regulatory-frameworks-index-ind`
+and `kb-L1-domain-regulatory-ind`. They are not attached at runtime and not read
 from GitHub. This agent reads nothing from GitHub. The two KBs are told apart
 by their anchors, never by name, and are kept separate so their jurisdiction
 declarations can be compared. Each regulatory KB declares the jurisdiction it
@@ -38,7 +38,7 @@ does not change.
 ### Why this is a blocker, not a nicety
 
 An out-of-jurisdiction citation passes every other check in the pipeline.
-`gr-L1-citation-verifier` confirms a regulation exists and is specific — a
+`gr-L0-citation-verifier` confirms a regulation exists and is specific — a
 real foreign statute is both. The KB plausibility check confirms it suits the
 category — genuine food law suits a food idea. So the output reads as
 complete, confident and well-sourced while binding nothing at all. Only the
@@ -54,7 +54,7 @@ the jurisdiction in hand, never from the analogue they know best.
 
 ## What does it do?
 
-Accepts `idea-brief.json` from `L1-vision-idea-intake` and produces:
+Accepts `idea-brief.json` from `L0-vision-idea-intake` and produces:
 - A list of applicable regulatory constraints, each classified Green/Amber/Red
 - A citation to a specific regulation/section for every constraint — no
   generic "comply with regulations" statements
@@ -62,7 +62,7 @@ Accepts `idea-brief.json` from `L1-vision-idea-intake` and produces:
   `requires_legal_review` flag when no precedented mitigation exists
 - An overall feasibility verdict, justified by the specific constraints
   driving it
-- The **viability score** that gates the pipeline at `qg-L1-viability-score`
+- The **viability score** that gates the pipeline at `qg-L0-viability-score`
 
 Zero tolerance for omitting a Red-classified constraint — the output schema
 itself structurally rejects a Red or Amber constraint that has neither a
@@ -70,12 +70,12 @@ mitigation nor a legal-review flag.
 
 ## Why the viability score lives here (v2.0)
 
-It used to be a separate agent, `L1-vision-viability-scorer`. It is now
+It used to be a separate agent, `L0-vision-viability-scorer`. It is now
 derived here, for two reasons. The score's binding term is always the
 regulatory posture — an unresolved blocker caps it below the gate no matter
 what else is true — so the gate belongs with the agent holding that
 evidence. And the second component, market opportunity, could not be relied
-on: `L1-vision-market-analyzer` runs in parallel and is optional, so the
+on: `L0-vision-market-analyzer` runs in parallel and is optional, so the
 score would have been derived from an input that may not exist.
 
 The score is derived from two components, then capped:
@@ -101,7 +101,7 @@ be the agent that sets it.
 
 1. Reads and parses `idea-brief.json` — by key path, never scanned as markdown
 1a. Reads the two knowledge bases (the frameworks index and the domain
-   regulatory facts) from **Confluence** — `tool-L1-confluence-reader`,
+   regulatory facts) from **Confluence** — `tool-L0-confluence-reader`,
    `page_id = 518422550` and `page_id = 519012353`, one call per page, each retried once on failure. The return is
    Confluence XHTML, so anchors are matched as headings. They are identified by their anchors —
    `#coverage-categories` / `#cross-domain-index` for the index, domain facts
@@ -123,7 +123,7 @@ be the agent that sets it.
    recorded as assessed-and-not-applicable, never silently dropped.
    The list lives in the KB, not this prompt, so the evaluator's coverage
    audit reads the identical list — see below
-4. Reads the domain regulatory KB (and `tool-L1-regulatory-db-lookup`
+4. Reads the domain regulatory KB (and `tool-L0-regulatory-db-lookup`
    for anything beyond the KBs) for the specific applicable rules
 5. Classifies each constraint Green/Amber/Red with a citation, applying the
    scenario patterns in the prompt's Edge Cases Section D — rules not yet in
@@ -147,7 +147,7 @@ be the agent that sets it.
 
 ## Input
 
-- **Source:** `idea-brief.json` from `L1-vision-idea-intake` — uploaded with
+- **Source:** `idea-brief.json` from `L0-vision-idea-intake` — uploaded with
   the request, or read from blob storage. **JSON, not markdown:** it is
   parsed and read by key path
 - **Required:** `problem_statement`, `target_geography`
@@ -164,7 +164,7 @@ be the agent that sets it.
 - **Artifacts:** `regulatory-feasibility.md` — now carrying a Viability Score
   section and the score in its header table
 - **Metadata:** every constraint carries `citation` (BLOCKER guardrail
-  `gr-L1-citation-verifier`, 100% required, not just scored) and `reasoning`
+  `gr-L0-citation-verifier`, 100% required, not just scored) and `reasoning`
 - **Summary:** constraint counts by status, overall verdict rationale, the
   score with its weighted value and every cap that fired, categories swept
   and found not applicable, KB content used, guardrail results, open items

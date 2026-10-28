@@ -7,7 +7,7 @@
     ]
   },
   "generator_output": {
-    "agent_id": "L1-vision-idea-intake",
+    "agent_id": "L0-vision-idea-intake",
     "agent_version": "1.0.0",
     "execution_id": "exec-a1b2c3d4",
     "workflow_execution_id": "wf-e5f6a7b8",
@@ -82,7 +82,7 @@
           }
         ]
       },
-      "execution_summary": "\u2022 Produced 1 problem statement, 3 target users, 1 value proposition, 2 suggested success metrics (0 stated), 2 open questions.\n\u2022 Key decision: both candidate metrics were graded 'suggested' since the input describes pain qualitatively ('takes too long', 'hours a week') without stating a target number.\n\u2022 Reflection: confirmed all 3 target users trace to distinct input phrases; renumbered no IDs (already sequential).\n\u2022 Knowledge bases consulted: none \u2014 idea-brief structure is embedded in this agent's instructions per S4.\n\u2022 Guardrails evaluated: gr-L1-output-schema-validator (pass), gr-L1-pii-detection (pass), gr-L1-hallucination-check (pass), gr-L1-consistency-check (pass).\n\u2022 Tools invoked: none \u2014 idea_brief_text was provided inline, no Confluence fetch needed.\n\u2022 Gaps flagged: target metric magnitude (OQ-01), accounting system integration target (OQ-02)."
+      "execution_summary": "\u2022 Produced 1 problem statement, 3 target users, 1 value proposition, 2 suggested success metrics (0 stated), 2 open questions.\n\u2022 Key decision: both candidate metrics were graded 'suggested' since the input describes pain qualitatively ('takes too long', 'hours a week') without stating a target number.\n\u2022 Reflection: confirmed all 3 target users trace to distinct input phrases; renumbered no IDs (already sequential).\n\u2022 Knowledge bases consulted: none \u2014 idea-brief structure is embedded in this agent's instructions per S4.\n\u2022 Guardrails evaluated: gr-L0-output-schema-validator (pass), gr-L0-pii-detection (pass), gr-L0-hallucination-check (pass), gr-L0-consistency-check (pass).\n\u2022 Tools invoked: none \u2014 idea_brief_text was provided inline, no Confluence fetch needed.\n\u2022 Gaps flagged: target metric magnitude (OQ-01), accounting system integration target (OQ-02)."
     }
   }
 }

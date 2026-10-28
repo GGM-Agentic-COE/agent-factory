@@ -5,7 +5,7 @@ Sole quality gate between `L0-impact-assessor` and `L0-backlog-prioritizer`. The
 
 ## What does it do?
 - **Accepts:** `generator_output` + `original_input` from the impact assessor; fresh `service_catalog` and `cmdb_export`.
-- **Fetches:** generator rubric `evaluation.md` (GitHub), `kb-L1-architecture-principles` (Confluence page 524091393).
+- **Fetches:** generator rubric `evaluation.md` (GitHub), `kb-L0-architecture-principles` (Confluence page 524091393).
 - **Produces:**
   - `items.scores`, `overall_score`, `pass`
   - `items.findings[]` — one per gate, each citing an id and showing re-derived results
