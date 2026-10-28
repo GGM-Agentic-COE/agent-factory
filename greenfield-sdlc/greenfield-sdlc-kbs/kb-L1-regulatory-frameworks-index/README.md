@@ -3,7 +3,7 @@
 **Domain covered:** None specific — a cross-domain index of which UK
 regulatory body governs which category of regulated activity.
 
-**Why it exists:** `L1-vision-regulatory-feasibility-checker` is a generic L1
+**Why it exists:** `L1-regulatory-feasibility-checker` is a generic L1
 agent, reused across every domain the CoE builds for. Before it can reason
 about food, payments, healthcare, or anything else, it needs to know which
 body's rules even apply. This KB is that first lookup — genuinely
@@ -22,4 +22,4 @@ say so rather than guess.
 
 **Owner:** Agentic-AI CoE
 
-**Consumers:** `L1-vision-regulatory-feasibility-checker` (all domains)
+**Consumers:** `L1-regulatory-feasibility-checker` (all domains)

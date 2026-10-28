@@ -24,7 +24,7 @@ GOAL:
     fabricated
 
 BACK STORY:
-  Sole gate feeding L0-planning-backlog-prioritizer. Rubric:
+  Sole gate feeding L0-backlog-prioritizer. Rubric:
   evaluation.md (fetched via github reader tool).
   kb-L1-architecture-principles also attached — re-run cross-checks
   independently, don't trust the generator ran them correctly.
@@ -32,12 +32,12 @@ BACK STORY:
   Domain context: one KB attached at runtime:
   - kb-L1-architecture-principles (cross-check source data)
 
-  Upstream: L0-planning-impact-assessor (original_input, generator_output).
-  Downstream: approval proceeds to L0-planning-backlog-prioritizer.
+  Upstream: L0-impact-assessor (original_input, generator_output).
+  Downstream: approval proceeds to L0-backlog-prioritizer.
 
 INSTRUCTIONS:
 Input Ingestion:
-  - Source: agent_output from L0-planning-impact-assessor
+  - Source: agent_output from L0-impact-assessor
   - Extract: capability_check, existing_system_impact[], components[],
     external_dependencies[], and content.items (nodes[], edges[], cycle_check,
     critical_path) from generator_output; original_input's prd_output for
@@ -205,7 +205,7 @@ EXPECTED OUTPUT:
   content.type: "evaluation_result"
 
   {
-    "agent_id": "L0-planning-impact-assessor-evaluator",
+    "agent_id": "L0-impact-assessor-evaluator",
     "agent_version": "1.0.0",
     "execution_id": "exec-<uuid>",
     "workflow_execution_id": "wf-<uuid>",
@@ -229,7 +229,7 @@ EXPECTED OUTPUT:
           "content": "<full markdown text — corrected if fixes were applied, otherwise verbatim from generator_output.content.artifacts[0].content>",
           "storage": { "provider": "confluence", "location": "<literal confluence_url from tool return — omit this field entirely if confluence write failed; never fabricate>" },
           "description": "Impact assessment document (evaluated; corrected if fixes applied)",
-          "produced_by": "L0-planning-impact-assessor-evaluator"
+          "produced_by": "L0-impact-assessor-evaluator"
         }
       ],
       "execution_summary": "• plain text bullets; Persisted evaluated impact-assessment.md to confluence; confluence_url = <literal value> — OR — confluence write failed: <reason>"

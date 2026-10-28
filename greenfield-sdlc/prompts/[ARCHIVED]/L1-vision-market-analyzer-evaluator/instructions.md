@@ -18,7 +18,7 @@ GOAL:
 
 BACK STORY:
   Runs immediately after L1-vision-market-analyzer, in parallel with
-  L1-vision-regulatory-feasibility-checker-evaluator.
+  L1-regulatory-feasibility-checker-evaluator.
 
   Domain context: rubric is L1-vision-market-analyzer/evaluation.md,
   attached at runtime — never duplicated here. gr-L1-citation-verifier is a

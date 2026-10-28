@@ -12,12 +12,12 @@ to put in it without fabricating an organisation). That framing was
 incomplete: greenfield describes the *product*, not necessarily the
 *enterprise* — a genuinely new application is very often built inside an
 already-established company with its own existing systems, and assessing
-impact against that landscape is exactly `L1-planning-impact-assessor`'s
+impact against that landscape is exactly `L1-impact-assessor`'s
 job. This KB supplies that landscape for the reference scenario, so
 impact-assessment.md's existing-system checks are actually exercised
 against something real, not "CMDB returned no entries" every time.
 
-**Who uses it?** `L1-planning-impact-assessor`, `L1-planning-dependency-mapper`,
+**Who uses it?** `L1-impact-assessor`, `L1-dependency-mapper`,
 and `L1-requirements-nfr-classifier` (for SLA-tier context, not as a
 substitute for confirming HarvestLink's own tier).
 
@@ -52,5 +52,5 @@ wiki, it's grounding for impact assessment specifically.
 
 **Owner:** Agentic-AI CoE
 
-**Consumers:** `L1-planning-impact-assessor`, `L1-planning-dependency-mapper`,
+**Consumers:** `L1-impact-assessor`, `L1-dependency-mapper`,
 `L1-requirements-nfr-classifier`

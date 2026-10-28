@@ -2,7 +2,7 @@
 spec_version: "1.0"
 artifact_type: agent
 metadata:
-  name: L0-vision-regulatory-feasibility-checker-evaluator
+  name: L0-regulatory-feasibility-checker-evaluator
   version: "2.0.0"
   layer: L0
   phase: vision
@@ -11,31 +11,31 @@ metadata:
   updated: "2026-08-21"
 
 purpose:
-  description: "Independently scores L0-vision-regulatory-feasibility-checker's output, with zero tolerance for a Red constraint that lacks a mitigation or legal-review flag, or that appears to have been downgraded to avoid writing one — and re-derives the viability score from the final constraints rather than accepting the one reported."
-  input: "L0-vision-regulatory-feasibility-checker's original input plus its draft output, including its viability object."
+  description: "Independently scores L0-regulatory-feasibility-checker's output, with zero tolerance for a Red constraint that lacks a mitigation or legal-review flag, or that appears to have been downgraded to avoid writing one — and re-derives the viability score from the final constraints rather than accepting the one reported."
+  input: "L0-regulatory-feasibility-checker's original input plus its draft output, including its viability object."
   output: "The corrected regulatory feasibility result including the re-derived viability score, plus scores, findings, fixes applied, and a final decision."
   business_value: "This is the highest-stakes evaluator in Phase 0 — a false negative here (a Red constraint that slips through unmitigated, or gets quietly relabeled Amber) is a compliance risk that reaches a human decision-maker as if it were already handled. Since v2.0 it also holds the gate number itself: the viability score it approves is what qg-L1-viability-score thresholds and what L0-vision-statement-generator receives, so a severity fix that fails to move the score would let a blocked idea auto-publish."
 
 prompt:
-  ref: "prompts/L0-vision-regulatory-feasibility-checker-evaluator/instructions.md"
+  ref: "prompts/L0-regulatory-feasibility-checker-evaluator/instructions.md"
   version: "2.0.0"
-  description: "Scores against L0-vision-regulatory-feasibility-checker/evaluation.md; re-derives severity, category coverage, and the viability score independently rather than trusting the generator's own classification or arithmetic at face value."
+  description: "Scores against L0-regulatory-feasibility-checker/evaluation.md; re-derives severity, category coverage, and the viability score independently rather than trusting the generator's own classification or arithmetic at face value."
 
 contract:
   input_schema: "$ref: schemas/agent-input-contract-schema.json"
   output_schema: "$ref: schemas/agent-output-schema.json"
 
   input:
-    accepts_from_agents: [L0-vision-regulatory-feasibility-checker]
+    accepts_from_agents: [L0-regulatory-feasibility-checker]
     accepts_direct_input: false
     accepts_file_upload:
       enabled: false
     required_parameters:
-      original_input: { type: object, description: "The input L0-vision-regulatory-feasibility-checker received" }
-      generator_output: { type: object, description: "L0-vision-regulatory-feasibility-checker's draft items output, including constraints, overall_status, categories_not_applicable, viability and open_items" }
+      original_input: { type: object, description: "The input L0-regulatory-feasibility-checker received" }
+      generator_output: { type: object, description: "L0-regulatory-feasibility-checker's draft items output, including constraints, overall_status, categories_not_applicable, viability and open_items" }
       # The rubric is NOT a request parameter. It is read from GitHub with fixed values in the prompt:
       #   repo agentic-sdlc-knowledge-bases, branch main,
-      #   folder planning/vision-regulatory-feasiblity/L0-vision-regulatory-feasibility-checker (file evaluation.md).
+      #   folder planning/vision-regulatory-feasiblity/L0-regulatory-feasibility-checker (file evaluation.md).
       # The KBs are NOT a request parameter either — they come from Confluence (context.knowledge_base_sources).
 
   output:
@@ -44,7 +44,7 @@ contract:
 context:
   # No KB is attached at runtime. Both regulatory KBs are READ FROM CONFLUENCE with
   # tool-L1-confluence-reader, page ids 518422550 and 519012353 fixed in the prompt — the SAME two pages
-  # L0-vision-regulatory-feasibility-checker reads, so the coverage audit and the generator's
+  # L0-regulatory-feasibility-checker reads, so the coverage audit and the generator's
   # sweep cannot diverge. The rubric (evaluation.md) is READ FROM GITHUB at a fixed location (see contract.input).
   # Jurisdiction is read from each KB's own #jurisdiction section at runtime, never assumed here.
   knowledge_bases: []
@@ -57,7 +57,7 @@ context:
     - gr-L1-output-schema-validator
     - gr-L1-pii-detection
     - gr-L1-citation-verifier
-    - gr-L1-regulatory-feasibility-quality-gate   # fires when THIS evaluator concludes; validates L0-vision-regulatory-feasibility-checker's RESULTANT output against its own schema+evaluation.md, zero-tolerance mitigation rule re-checked directly (guardrails/gr-L1-regulatory-feasibility-quality-gate)
+    - gr-L1-regulatory-feasibility-quality-gate   # fires when THIS evaluator concludes; validates L0-regulatory-feasibility-checker's RESULTANT output against its own schema+evaluation.md, zero-tolerance mitigation rule re-checked directly (guardrails/gr-L1-regulatory-feasibility-quality-gate)
   tools:
     - tool-L1-confluence-reader        # reads BOTH regulatory KBs — page ids 518422550 and 519012353, fixed in the prompt, same as the generator; read-only
     - tool-L1-github-reader-using-app  # reads the rubric (evaluation.md) ONLY — repo agentic-sdlc-knowledge-bases, branch main, fixed folder; one call

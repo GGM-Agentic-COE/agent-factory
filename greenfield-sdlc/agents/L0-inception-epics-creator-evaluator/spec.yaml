@@ -1,7 +1,7 @@
 spec_version: '1.0'
 artifact_type: agent
 metadata:
-  name: L0-inception-epics-creator-evaluator
+  name: L0-epics-creator-evaluator
   version: 1.0.0
   layer: L0
   phase: inception
@@ -15,7 +15,7 @@ purpose:
   business_value: Blocks ungrounded or structurally invalid Epics and makes safe evidence-based
     corrections.
 prompt:
-  ref: prompts/L0-inception-epics-creator-evaluator/instructions.md
+  ref: prompts/L0-epics-creator-evaluator/instructions.md
   version: 1.0.0
   description: Independently evaluate and safely correct PRD-derived Jira Epics before
     Feature decomposition.
@@ -24,7 +24,7 @@ contract:
   output_schema: '$ref: schemas/agent-output-schema.json'
   input:
     accepts_from_agents:
-    - L0-inception-epics-creator
+    - L0-epics-creator
     accepts_direct_input: true
     accepts_file_upload:
       enabled: true
@@ -41,7 +41,7 @@ contract:
     $ref: output_schema.json
 context:
   knowledge_bases:
-  - ref: ../L0-inception-epics-creator/evaluation.md
+  - ref: ../L0-epics-creator/evaluation.md
   - kb-L1-epics-best-practices.md
   guardrails:
   - gr-L1-output-schema-validator

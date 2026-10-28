@@ -1,4 +1,4 @@
-# L0-inception-feature-decomposer-evaluator
+# L0-feature-decomposer-evaluator
 
 ## Purpose
 Independently evaluate and safely correct Features against their evaluator-approved parent Epics.
@@ -29,7 +29,7 @@ Independently evaluate and safely correct Features against their evaluator-appro
 
 ## Composition
 ```text
-agents/L0-inception-feature-decomposer-evaluator/
+agents/L0-feature-decomposer-evaluator/
 ├── spec.yaml
 ├── evaluation.md
 ├── output_schema.json
@@ -44,6 +44,6 @@ agents/L0-inception-feature-decomposer-evaluator/
     ├── golden-01-happy-path.json
     ├── input-golden-02-failure.json
     └── golden-02-failure.json
-prompts/L0-inception-feature-decomposer-evaluator/
+prompts/L0-feature-decomposer-evaluator/
 └── instructions.md
 ```

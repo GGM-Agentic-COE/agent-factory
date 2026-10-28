@@ -1,14 +1,14 @@
-# L0-inception-jira-epic-formatter-and-uploader
+# L0-jira-epic-formatter-and-uploader
 
 ## Purpose
 
-This utility agent is the controlled hand-off between approved inception-planning outputs and Jira. It accepts evaluator-approved Epic and Feature AgentOutputs, validates that they belong to the same workflow execution, converts the approved content into one flat Jira upload payload, invokes the Jira uploader exactly once, and returns a reconciled upload-status AgentOutput. It does not return, log, or persist the internal Jira payload.
+This utility agent is the controlled hand-off between approved inception outputs and Jira. It accepts evaluator-approved Epic and Feature AgentOutputs, validates that they belong to the same workflow execution, converts the approved content into one flat Jira upload payload, invokes the Jira uploader exactly once, and returns a reconciled upload-status AgentOutput. It does not return, log, or persist the internal Jira payload.
 
 ## What does it do?
 
 The agent:
 
-- Accepts approved outputs from `L0-inception-epics-creator-evaluator` and `L0-inception-feature-decomposer-evaluator`.
+- Accepts approved outputs from `L0-epics-creator-evaluator` and `L0-feature-decomposer-evaluator`.
 - Verifies both upstream outputs succeeded, passed evaluation, and have a final decision of `approved` or `fixed_and_approved`.
 - Requires both inputs to contain the same `workflow_execution_id` and inherits that ID unchanged.
 - Uses only evaluator-approved `content.items.epics` and `content.items.features` as its working sets.
@@ -38,8 +38,8 @@ The agent:
 ## Input
 
 - **Source:** `agent_output`
-- **Required:** `epic_evaluator_output` — Approved AgentOutput from `L0-inception-epics-creator-evaluator`.
-- **Required:** `feature_evaluator_output` — Approved AgentOutput from `L0-inception-feature-decomposer-evaluator`.
+- **Required:** `epic_evaluator_output` — Approved AgentOutput from `L0-epics-creator-evaluator`.
+- **Required:** `feature_evaluator_output` — Approved AgentOutput from `L0-feature-decomposer-evaluator`.
 - **Optional:** `projectKey` — Explicit Jira project-key override. It must be supplied or grounded in the retained Epic set.
 - **Optional:** `site` — Jira site parameter required by the upload tool when applicable.
 - **Optional:** `base_url` — Jira base URL used only to construct the returned project URL.
@@ -67,7 +67,7 @@ The agent:
 ## Composition
 
 ```text
-agents/L0-inception-jira-epic-formatter-and-uploader/
+agents/L0-jira-epic-formatter-and-uploader/
 ├── spec.yaml
 ├── evaluation.md
 ├── output_schema.json
@@ -83,11 +83,11 @@ agents/L0-inception-jira-epic-formatter-and-uploader/
     ├── input-golden-02-failure.json
     └── golden-02-failure.json
 
-prompts/L0-inception-jira-epic-formatter-and-uploader/
+prompts/L0-jira-epic-formatter-and-uploader/
 └── instructions.md
 ```
 
 ## Upstream and Downstream
 
-- **Upstream:** `L0-inception-epics-creator-evaluator`, `L0-inception-feature-decomposer-evaluator`
+- **Upstream:** `L0-epics-creator-evaluator`, `L0-feature-decomposer-evaluator`
 - **Downstream:** Workflow orchestrator and audit logging consume the status AgentOutput; Jira receives the created Epic and Feature issues through the uploader tool.

@@ -46,14 +46,14 @@ This agent creates business-level Jira Epics from an approved PRD. It is a Core 
 
   Downstream:
 
-  - L0-inception-epics-creator-evaluator independently evaluates and safely corrects the generated Epic output.
+  - L0-epics-creator-evaluator independently evaluates and safely corrects the generated Epic output.
 
-  - L0-inception-feature-decomposer consumes only evaluator-approved or evaluator-corrected Epics.
+  - L0-feature-decomposer consumes only evaluator-approved or evaluator-corrected Epics.
 
 
   Pipeline:
 
-  prd.md → L0-inception-epics-creator → L0-inception-epics-creator-evaluator → L0-inception-feature-decomposer
+  prd.md → L0-epics-creator → L0-epics-creator-evaluator → L0-feature-decomposer
 
 
 
@@ -61,8 +61,8 @@ INSTRUCTION:
 INSTRUCTIONS:
   Input Ingestion:
   - Require exactly two upstream AgentOutputs:
-    1. feature_decomposer_output from L0-inception-feature-decomposer
-    2. epic_evaluator_output from L0-inception-epics-creator-evaluator
+    1. feature_decomposer_output from L0-feature-decomposer
+    2. epic_evaluator_output from L0-epics-creator-evaluator
   - Do not combine AgentOutputs from different workflow executions.
   - Inherit workflow_execution_id verbatim when both values match.
   - Generate a fresh execution_id using exec-<uuid>.
@@ -324,7 +324,7 @@ EXPECTED OUTPUT:
   content.type: feature_evaluation
 
   {
-    "agent_id": "L0-inception-feature-decomposer-evaluator",
+    "agent_id": "L0-feature-decomposer-evaluator",
     "agent_version": "1.0.0",
     "execution_id": "exec-<uuid>",
     "workflow_execution_id": "wf-<uuid>",
@@ -393,7 +393,7 @@ EXPECTED OUTPUT:
       },
 
       "description": "Evaluator-approved Feature output for downstream Jira processing.",
-      "produced_by": "L0-inception-feature-decomposer-evaluator",
+      "produced_by": "L0-feature-decomposer-evaluator",
 
       "execution_summary": "• Overall result: overall_score=<score>, pass=<true|false>, final_decision=<decision>.\n• Rubric gates: evaluated=<count>, passed=<count>, corrected=<count>, failed=<count>, not_applicable=<count>.\n• Traceability and quality gates: <concise final result>.\n• Findings and fixes: failed=<count>, corrected=<count>, fixes_applied=<count>, unresolved=<count>.\n• Score thresholds: <concise dimension-level threshold result>.\n• Knowledge bases consulted: paired Feature Decomposer evaluation standard; kb-L0-feature-best-practices.\n• Downstream handoff: <permitted|blocked>."
     }

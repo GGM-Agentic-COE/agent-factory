@@ -1,6 +1,6 @@
 {
   "expected_output": {
-    "agent_id": "L0-planning-impact-assessor",
+    "agent_id": "L0-impact-assessor",
     "agent_version": "1.0.0",
     "execution_id": "exec-e8a8d83f-7570-50db-a87c-5e63c4e91a39",
     "workflow_execution_id": "wf-2d83bf55-b63d-5f2f-a027-dcf67cf74fd0",

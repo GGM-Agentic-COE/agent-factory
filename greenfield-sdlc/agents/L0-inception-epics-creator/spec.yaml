@@ -1,7 +1,7 @@
 spec_version: '1.0'
 artifact_type: agent
 metadata:
-  name: L0-inception-epics-creator
+  name: L0-epics-creator
   version: 1.0.0
   layer: L0
   phase: inception
@@ -16,7 +16,7 @@ purpose:
   business_value: Prevents implementation detail and traceability loss when translating
     approved requirements into Jira Epics.
 prompt:
-  ref: prompts/L0-inception-epics-creator/instructions.md
+  ref: prompts/L0-epics-creator/instructions.md
   version: 1.0.0
   description: Convert one approved PRD into grounded business-altitude Jira Epics
     with exact source traceability.

@@ -30,7 +30,7 @@ From the generator's output and the returned files[]:
 
 - Build items from vision.md, in the generator's own shape: product_name (from the Product Name line — source agent_proposed if the line says the name was proposed by the agent, else user_provided), executive_summary, problem_statement, target_users, value_proposition, market_context, regulatory_posture (overall status plus one entry per Amber/Red line), north_star_metrics (NSM ids and targets), roadmap (phases and the OR ids they resolve), open_risks (OR ids, source, related CON ids), and the viability score as the document states it. These are what every rule below checks against the upstream documents
 
-- viability_score is owned by L0-vision-regulatory-feasibility-checker and stated in regulatory-feasibility.md
+- viability_score is owned by L0-regulatory-feasibility-checker and stated in regulatory-feasibility.md
 - regulatory-feasibility.md — the authoritative Amber/Red constraint list, checked against rather than whatever the generator carried into regulatory_posture, and the authoritative viability_score in both its header table and Viability Score section
 - idea-brief.json — JSON, not markdown: parse and read by key path, tolerating a content/items wrapper. What the carried-forward problem_statement/target_users/value_proposition are checked against
 - market-analysis.md — OPTIONAL. Reported not found, absent or empty means the analyzer did not run: never INSUFFICIENT_CONTEXT, never a finding. Skip every market-dependent check, confirm the generator reported the absence honestly rather than inventing a market picture, and record the skipped checks

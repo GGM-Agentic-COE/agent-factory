@@ -1,8 +1,8 @@
 """gr-L1-impact-assessment-quality-gate: validates the RESULTANT
-L1-planning-impact-assessor output (its own items, with the evaluator's
-fixes_applied resolved in) against L1-planning-impact-assessor/output_schema.json
+L1-impact-assessor output (its own items, with the evaluator's
+fixes_applied resolved in) against L1-impact-assessor/output_schema.json
 and its evaluation.md rubric. Fires at
-L1-planning-impact-assessor-evaluator's post_execution.
+L1-impact-assessor-evaluator's post_execution.
 
 Unlike the Phase 0 sibling gates, several rules here need the ORIGINAL
 input (prd_output.content.items.requirements[], service_catalog.services[],

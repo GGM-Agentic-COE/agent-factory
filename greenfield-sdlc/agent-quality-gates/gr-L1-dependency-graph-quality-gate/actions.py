@@ -1,8 +1,8 @@
 """gr-L1-dependency-graph-quality-gate: validates the RESULTANT
-L1-planning-dependency-mapper output (its own items, with the evaluator's
-fixes_applied resolved in) against L1-planning-dependency-mapper/
+L1-dependency-mapper output (its own items, with the evaluator's
+fixes_applied resolved in) against L1-dependency-mapper/
 output_schema.json and its evaluation.md rubric. Fires at
-L1-planning-dependency-mapper-evaluator's post_execution.
+L1-dependency-mapper-evaluator's post_execution.
 
 Unlike most other quality gates in this framework, the single most
 important check here is NOT a schema/regex check — it is an INDEPENDENT
@@ -12,7 +12,7 @@ nodes/edges, compared against what the resultant content claims. Neither
 the generator's own cycle_check/critical_path fields nor the evaluator's
 own re-derivation (scored, self-reported) are trusted at face value — a
 reversed edge or an unverified cycle claim is schema-valid and still wrong
-(see L1-planning-dependency-mapper-evaluator/golden/v1.0.0/
+(see L1-dependency-mapper-evaluator/golden/v1.0.0/
 golden-02-edge-direction-bug.json).
 """
 import json

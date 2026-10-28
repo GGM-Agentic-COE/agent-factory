@@ -1,6 +1,6 @@
-# Evaluation — L0-planning-impact-assessor-evaluator
+# Evaluation — L0-impact-assessor-evaluator
 Meta-quality of THIS evaluator's findings and fixes. The generator's rubric
-(../L0-planning-impact-assessor/evaluation.md) is the scoring source of truth — not restated here.
+(../L0-impact-assessor/evaluation.md) is the scoring source of truth — not restated here.
 
 ## Quality Gates
 - [ ] Generator rubric fetched (github) and KB re-fetched (confluence) — tool outcomes recorded

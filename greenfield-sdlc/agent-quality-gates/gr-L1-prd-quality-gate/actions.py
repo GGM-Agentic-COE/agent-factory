@@ -2,7 +2,7 @@
 output (its own items, with the evaluator's fixes_applied resolved in) against
 L1-requirements-prd-composer/output_schema.json and its evaluation.md rubric.
 Fires at L1-requirements-prd-composer-evaluator's post_execution. Gates what
-actually flows to L1-planning-impact-assessor and L1-planning-dependency-mapper.
+actually flows to L1-impact-assessor and L1-dependency-mapper.
 """
 import json
 import logging

@@ -36,7 +36,7 @@ content:
 consumers:
   agents:
     - L1-requirements-nfr-classifier
-    - L1-planning-impact-assessor
+    - L1-impact-assessor
   usage: >
     nfr-classifier checks ES3/ES4 before marking a Compliance or
     Availability boundary condition "TBD" — if this KB already states a
@@ -46,7 +46,7 @@ consumers:
     checks ES1 when assessing any new external-identity integration.
 
 grounding_rules:
-  accessed_by: [L1-requirements-nfr-classifier, L1-planning-impact-assessor]
+  accessed_by: [L1-requirements-nfr-classifier, L1-impact-assessor]
   visibility: "L1 — visible to all layers (L1/L2/L3/L4); enterprise-wide and cross-phase, not owned by any single phase directory"
 
 freshness:

@@ -2,7 +2,7 @@
 spec_version: "1.0"
 artifact_type: agent
 metadata:
-  name: L1-vision-regulatory-feasibility-checker
+  name: L1-regulatory-feasibility-checker
   version: "1.0.0"
   layer: L1
   phase: vision
@@ -16,7 +16,7 @@ purpose:
   business_value: "A viable-looking idea can be dead on arrival for regulatory reasons — this must surface before roadmap commitment, not after. Zero tolerance for omitting a Red-classified constraint: a false negative here is a compliance risk, not a quality nuance."
 
 prompt:
-  ref: "prompts/L1-vision-regulatory-feasibility-checker/instructions.md"
+  ref: "prompts/L1-regulatory-feasibility-checker/instructions.md"
   version: "1.0.0"
   description: "Assesses regulatory constraints against a generic cross-domain regulator index and a domain-specific regulatory KB; every constraint is cited, every Amber/Red carries a mitigation or legal-review flag."
 

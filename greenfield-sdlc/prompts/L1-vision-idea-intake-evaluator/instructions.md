@@ -22,7 +22,7 @@ BACK STORY:
 
   Upstream: L1-vision-idea-intake (original_input, generator_output).
   Downstream: approval proceeds to L1-vision-market-analyzer and
-  L1-vision-regulatory-feasibility-checker. Escalation opens a Jira subtask
+  L1-regulatory-feasibility-checker. Escalation opens a Jira subtask
   for human review.
 
 INSTRUCTIONS:

@@ -33,8 +33,8 @@ You are the hand-off agent between inception planning and Jira tooling in the AI
   - label[0] is the logical id the tool uses to map the issue to its created Jira key.
   - Jira labels cannot contain spaces — use only short tokens (logical id, sprint id).
 
-  Upstream:   L0-inception-epics-creator-evaluator        
-              L0-inception-feature-decomposer-evaluator  
+  Upstream:   L0-epics-creator-evaluator        
+              L0-feature-decomposer-evaluator  
   Downstream: workflow orchestrator, audit logs (consume the status AgentOutput);
 Jira (receives the created epics and features)
 
@@ -44,9 +44,9 @@ Jira (receives the created epics and features)
   Input Ingestion:
  
   Source 1:
-  - epic_evaluator_output from agent L0-inception-epics-creator-evaluator 
+  - epic_evaluator_output from agent L0-epics-creator-evaluator 
   Source 2:
-  - feature_evaluator_output from L0-inception-feature-decomposer-evaluator 
+  - feature_evaluator_output from L0-feature-decomposer-evaluator 
   Extract from epic_evaluator_output:
   - status
   - workflow_execution_id
@@ -707,7 +707,7 @@ Jira (receives the created epics and features)
 
 {
 
-  "agent_id": "L0-inception-jira-epic-formatter-and-uploader",
+  "agent_id": "L0-jira-epic-formatter-and-uploader",
 
   "agent_version": "1.0.0",
 
@@ -721,9 +721,9 @@ Jira (receives the created epics and features)
 
     "source_agent_ids": [
 
-      "L0-inception-epics-creator-evaluator",
+      "L0-epics-creator-evaluator",
 
-      "L0-inception-feature-decomposer-evaluator"
+      "L0-feature-decomposer-evaluator"
 
     ],
 

@@ -2,31 +2,31 @@
 spec_version: "1.0"
 artifact_type: agent
 metadata:
-  name: L0-planning-impact-assessor-evaluator
+  name: L0-impact-assessor-evaluator
   version: "1.0.0"
   layer: L0
   phase: planning
   owner: agentic-ai-coe
   created: 2026-10-28
 purpose:
-  description: "Independently re-derives L0-planning-impact-assessor's impact findings, cycle_check, critical_path and mermaid from source data; fixes mechanically-recoverable gaps, escalates ambiguity, and persists the evaluated impact-assessment.md to Confluence."
-  input: "original_input (prd_output, service_catalog, cmdb_export) and generator_output from L0-planning-impact-assessor; freshly-fetched service_catalog/cmdb_export; kb-L1-architecture-principles; generator's evaluation.md from GitHub."
+  description: "Independently re-derives L0-impact-assessor's impact findings, cycle_check, critical_path and mermaid from source data; fixes mechanically-recoverable gaps, escalates ambiguity, and persists the evaluated impact-assessment.md to Confluence."
+  input: "original_input (prd_output, service_catalog, cmdb_export) and generator_output from L0-impact-assessor; freshly-fetched service_catalog/cmdb_export; kb-L1-architecture-principles; generator's evaluation.md from GitHub."
   output: "AgentOutput (content.type evaluation_result) with scores, findings, fixes_applied, final_decision, and the evaluated impact-assessment.md as artifact-001 with storage.location = literal Confluence URL returned by the writer tool."
-  business_value: "Sole quality gate before L0-planning-backlog-prioritizer — a wrong impact finding or unproven graph becomes a wrong build sequence; this agent proves or corrects it before anything is topologically sorted."
+  business_value: "Sole quality gate before L0-backlog-prioritizer — a wrong impact finding or unproven graph becomes a wrong build sequence; this agent proves or corrects it before anything is topologically sorted."
 prompt:
-  ref: "prompts/L0-planning-impact-assessor-evaluator/instructions.md"
+  ref: "prompts/L0-impact-assessor-evaluator/instructions.md"
   version: "1.0.0"
   description: "Re-derives capability/technical-impact checks, DFS cycle_check, longest-path critical_path and mermaid 1:1; fixes or escalates; unconditional Confluence write of the evaluated document."
 contract:
   input_schema: "$ref: schemas/agent-input-contract-schema.json"
   output_schema: "$ref: schemas/agent-output-schema.json"
   input:
-    accepts_from_agents: [L0-planning-impact-assessor]
+    accepts_from_agents: [L0-impact-assessor]
     accepts_direct_input: false
     accepts_file_upload:
       enabled: false
     required_parameters:
-      generator_output: {type: object, description: "AgentOutput from L0-planning-impact-assessor (content.items + artifacts[0].content inline markdown)"}
+      generator_output: {type: object, description: "AgentOutput from L0-impact-assessor (content.items + artifacts[0].content inline markdown)"}
       original_input: {type: object, description: "Generator's input: prd_output, service_catalog, cmdb_export, run_date"}
       service_catalog: {type: object, description: "Freshly-fetched service catalog export at evaluation time"}
       cmdb_export: {type: object, description: "Freshly-fetched CMDB export (configuration_items[], relationships[], export_metadata)"}
@@ -36,7 +36,7 @@ contract:
     $ref: "output_schema.json"
 context:
   knowledge_bases:
-    - ref: "../L0-planning-impact-assessor/evaluation.md"   # source of truth for scoring; fetched via tool-L1-github-fetch-file — never duplicated into this prompt
+    - ref: "../L0-impact-assessor/evaluation.md"   # source of truth for scoring; fetched via tool-L1-github-fetch-file — never duplicated into this prompt
     - kb-L1-architecture-principles                       # cross-check source data; fetched via tool-L1-confluence-fetch-page (page_id 524091393)
   guardrails:
     - gr-L1-output-schema-validator

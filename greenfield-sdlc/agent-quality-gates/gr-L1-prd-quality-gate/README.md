@@ -13,8 +13,8 @@ draft `prd.md` composition against `L1-requirements-prd-composer/evaluation.md`
 and fixes what it can. This guardrail fires at that point but validates a
 different thing: the **resultant** `L1-requirements-prd-composer` output — its
 own `items`, with the evaluator's `fixes_applied` resolved in — is what
-actually flows to `L1-planning-impact-assessor` and
-`L1-planning-dependency-mapper`. This gate checks THAT content:
+actually flows to `L1-impact-assessor` and
+`L1-dependency-mapper`. This gate checks THAT content:
 
 1. **Output schema validation** — does the resultant content conform to
    `L1-requirements-prd-composer/output_schema.json` (not the evaluator's

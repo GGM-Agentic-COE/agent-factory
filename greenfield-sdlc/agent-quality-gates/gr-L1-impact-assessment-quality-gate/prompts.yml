@@ -1,15 +1,15 @@
 prompts:
   - task: self_check_output
     content: |
-      L1-planning-impact-assessor's original input (prd_output, service_catalog,
+      L1-impact-assessor's original input (prd_output, service_catalog,
       cmdb_export): {{ original_input }}
-      L1-planning-impact-assessor's original output (items): {{ generator_output }}
-      L1-planning-impact-assessor-evaluator's verdict (fixes_applied, final_decision): {{ bot_response }}
+      L1-impact-assessor's original output (items): {{ generator_output }}
+      L1-impact-assessor-evaluator's verdict (fixes_applied, final_decision): {{ bot_response }}
 
-      Reconstruct the RESULTANT output: L1-planning-impact-assessor's items
+      Reconstruct the RESULTANT output: L1-impact-assessor's items
       with every fixes_applied[].before → after substitution resolved in.
       Check that resultant content — not the evaluator's own scoring
-      bookkeeping — against L1-planning-impact-assessor/output_schema.json
+      bookkeeping — against L1-impact-assessor/output_schema.json
       and its evaluation.md rubric:
 
       1. Schema compliance: does capability_check have summary (>=20 chars),
@@ -54,4 +54,4 @@ prompts:
 
       Answer "yes" if ALL checks pass on the RESULTANT content. Answer "no"
       if ANY check fails — this gates what actually flows to
-      L1-planning-dependency-mapper and L1-planning-backlog-prioritizer.
+      L1-dependency-mapper and L1-backlog-prioritizer.

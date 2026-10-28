@@ -22,7 +22,7 @@ BACK STORY:
   - No template KB. Document template embedded below; graph schema IS output_schema.json.
 
   Upstream: L0-requirements-prd-composer (prd_output), plus raw service_catalog/cmdb_export.
-  Downstream: L0-planning-backlog-prioritizer (topological-sort input).
+  Downstream: L0-backlog-prioritizer (topological-sort input).
 
 INSTRUCTIONS:
 Input Ingestion:
@@ -193,7 +193,7 @@ EXPECTED OUTPUT:
   Format: JSON (AgentOutput standard), content.type: "impact_assesment"
 
   {
-    "agent_id": "L0-planning-impact-assessor",
+    "agent_id": "L0-impact-assessor",
     "agent_version": "1.0.0",
     "execution_id": "exec-<uuid>",
     "workflow_execution_id": "wf-<uuid>",
@@ -229,7 +229,7 @@ EXPECTED OUTPUT:
           "format": "md",
           "content": "<full markdown text of <Product name>-impact-assessment.md>",
           "description": "Generated impact assessment",
-          "produced_by": "L0-planning-impact-assessor"
+          "produced_by": "L0-impact-assessor"
         }
       ],
       "execution_summary": "• plain text bullets"

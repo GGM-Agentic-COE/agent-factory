@@ -81,7 +81,7 @@ Every Feature must carry:
 | Full test scripts / test case IDs | Execution-level detail, changes constantly, no strategic value at Feature altitude | Story-level acceptance criteria / test management tool |
 | UI wireframes / mockups | Design-execution artifact | Story or design doc, linked not embedded |
 | API contracts, data schemas, code-level design | Implementation detail | Technical design doc / Story |
-| Sprint assignment, story points, delivery dates | Delivery-planning detail, not part of Feature definition | Sprint planning / Story fields |
+| Sprint assignment, story points, delivery dates | Delivery detail, not part of Feature definition | Sprint planning / Story fields |
 | Content not traceable to the parent Epic's pillar, out-of-scope, constraints, or risks | Introduces ungrounded/hallucinated scope | Removed; flagged as a gap if genuinely needed |
 
 ---

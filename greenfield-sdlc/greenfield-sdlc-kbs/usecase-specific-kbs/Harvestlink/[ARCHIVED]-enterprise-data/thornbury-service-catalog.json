@@ -4,7 +4,7 @@
     "org": "Thornbury Foods Group",
     "exported_at": "2026-08-05T09:00:00Z",
     "record_count": 7,
-    "note": "HarvestLink's own proposed services are deliberately NOT included — this export represents the estate BEFORE assessment, which is exactly what L1-planning-impact-assessor checks new requirements against. A service-level check here answers 'does something like this already exist' (avoid duplicate build, find the right owner) — a different question from the CMDB's CI-level 'what technical integration touchpoint exists' (see thornbury-cmdb-export.json)."
+    "note": "HarvestLink's own proposed services are deliberately NOT included — this export represents the estate BEFORE assessment, which is exactly what L1-impact-assessor checks new requirements against. A service-level check here answers 'does something like this already exist' (avoid duplicate build, find the right owner) — a different question from the CMDB's CI-level 'what technical integration touchpoint exists' (see thornbury-cmdb-export.json)."
   },
   "services": [
     { "service_id": "SVC-FIN-001", "name": "Finance & Ledger", "description": "Core financial ledger, invoicing, accounts payable/receivable", "owner_team": "Group Finance / Core IT", "tier": 1, "status": "active", "technical_components": ["CI-APP-001"] },

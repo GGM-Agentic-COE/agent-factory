@@ -1,4 +1,4 @@
-# L0-inception-epics-creator
+# L0-epics-creator
 
 ## Purpose
 Convert one approved PRD into grounded business-altitude Jira Epics with exact source traceability.
@@ -29,7 +29,7 @@ Convert one approved PRD into grounded business-altitude Jira Epics with exact s
 
 ## Composition
 ```text
-agents/L0-inception-epics-creator/
+agents/L0-epics-creator/
 ├── spec.yaml
 ├── evaluation.md
 ├── output_schema.json
@@ -44,6 +44,6 @@ agents/L0-inception-epics-creator/
     ├── golden-01-happy-path.json
     ├── input-golden-02-failure.json
     └── golden-02-failure.json
-prompts/L0-inception-epics-creator/
+prompts/L0-epics-creator/
 └── instructions.md
 ```

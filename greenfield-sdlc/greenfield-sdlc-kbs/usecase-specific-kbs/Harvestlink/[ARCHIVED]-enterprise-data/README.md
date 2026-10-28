@@ -14,7 +14,7 @@ retrieval — the standard KB pattern in this framework
 
 The files here are *data*: a raw, timestamped export from Thornbury's own
 systems (illustrative ServiceNow-style Service Catalog and CMDB), exactly
-as `L1-planning-impact-assessor`'s BOM row has always described its input:
+as `L1-impact-assessor`'s BOM row has always described its input:
 `"External: service catalog / CMDB export (e.g. Backstage, ServiceNow)"`
 — an external system export, not an agent-factory-governed artifact. It
 has no `spec.yaml` (no chunking/embedding model applies to it), no review
@@ -40,7 +40,7 @@ tier/owner, CIs with type/criticality/relationships) is the reusable part.
 
 ## Consumers
 
-`L1-planning-impact-assessor` (primary — both files); `L1-planning-dependency-mapper`
+`L1-impact-assessor` (primary — both files); `L1-dependency-mapper`
 (CMDB relationships, as a cross-check against its own computed graph).
 
 ## Refresh cadence

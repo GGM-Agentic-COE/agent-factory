@@ -1,4 +1,4 @@
-# Evaluation — L0-planning-impact-assessor
+# Evaluation — L0-impact-assessor
 
 ## Quality Gates
 - [ ] prd_output.status != success → status failed, INSUFFICIENT_CONTEXT, no artifact

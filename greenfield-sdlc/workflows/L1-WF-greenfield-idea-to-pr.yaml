@@ -7,7 +7,7 @@
 #
 # NAMING NOTE: agent/tool/kb/guardrail IDs below follow the no-suffix convention
 # from 01-agent-development-naming-standard.html's canonical table (e.g.
-# `L1-inception-story-generator`), matching the original Agent_Factory_E2E_SDLC_
+# `L1-story-generator`), matching the original Agent_Factory_E2E_SDLC_
 # Diagram.html and all three companion docs already produced. This does NOT match
 # the regex in schemas/agent-output-schema.json and schemas/agent-input-contract-
 # schema.json, which require agent_id to match `^L[0-4]-.+-agent$` (i.e. an
@@ -76,7 +76,7 @@ hitl_gates:
     approves: [prd.md, impact-assessment.md, dependency-graph.json]
     blocking: true
   - id: gate-backlog-approval
-    after_workflow: L1-WF-planning-backlog-to-roadmap
+    after_workflow: L1-WF-backlog-to-roadmap
     role: Product Lead
     approves: roadmap.md
     blocking: true
@@ -119,7 +119,7 @@ L1-WF-vision-idea-to-statement:
       output: { type: json }   # items-only, no document — market-analysis.md dropped as an artifact 2026-08-07
       quality_gate: null
     - step_id: 3
-      agent: L1-vision-regulatory-feasibility-checker
+      agent: L1-regulatory-feasibility-checker
       input: { source: agent_output, source_agent: L1-vision-idea-intake }   # items-only upstream, no artifact to name
       tool: tool-L1-regulatory-db-lookup
       knowledge_bases: [kb-L1-regulatory-frameworks-index, kb-L2-domain-regulatory]
@@ -131,7 +131,7 @@ L1-WF-vision-idea-to-statement:
       agent: L1-vision-statement-generator
       input:
         source: agent_output
-        source_agents: [L1-vision-idea-intake, L1-vision-market-analyzer, L1-vision-regulatory-feasibility-checker]   # all three items-only now; no artifacts to name
+        source_agents: [L1-vision-idea-intake, L1-vision-market-analyzer, L1-regulatory-feasibility-checker]   # all three items-only now; no artifacts to name
         parameters: { viability_score: "{{step_3.quality_gate.score}}" }
       tool: tool-L1-confluence-create-page
       # no knowledge_bases: vision structure is folded into instructions.md per S4;
@@ -182,22 +182,22 @@ L1-WF-requirements-vision-to-dependency-graph:
       output: { artifact: prd.md, type: document, format: markdown }
       quality_gate: null
     - step_id: 4
-      agent: L1-planning-impact-assessor
+      agent: L1-impact-assessor
       input:
         source: agent_output
         source_agent: L1-requirements-prd-composer
         artifact: prd.md
         external: { service_catalog: "{{integrations.service_catalog | default: empty}}", cmdb_export: "{{integrations.cmdb_export | default: empty}}" }
       knowledge_bases: [kb-L1-enterprise-architecture]
-      evaluator: L1-planning-impact-assessor-evaluator
+      evaluator: L1-impact-assessor-evaluator
       guardrails_additional: [gr-L2-food-domain-compliance, gr-L1-impact-assessment-quality-gate]   # 2nd fires on the evaluator's post_execution; validates the RESULTANT (post-fix) impact-assessment content
       output: { artifact: impact-assessment.md, type: document, format: markdown }
       quality_gate: null
     - step_id: 5
-      agent: L1-planning-dependency-mapper
-      input: { source: agent_output, source_agents: [L1-planning-impact-assessor, L1-requirements-prd-composer], artifacts: [impact-assessment.md, prd.md] }
+      agent: L1-dependency-mapper
+      input: { source: agent_output, source_agents: [L1-impact-assessor, L1-requirements-prd-composer], artifacts: [impact-assessment.md, prd.md] }
       knowledge_bases: [kb-L1-enterprise-architecture]
-      evaluator: L1-planning-dependency-mapper-evaluator
+      evaluator: L1-dependency-mapper-evaluator
       guardrails_additional: [gr-L1-dependency-graph-quality-gate]   # fires on the evaluator's post_execution; independently re-computes cycle_check/critical_path over the RESULTANT (post-fix) graph rather than trusting either agent's claim
       output: { artifact: dependency-graph.json, type: data, format: json }
       quality_gate: qg-L1-dependency-graph-integrity
@@ -207,15 +207,15 @@ L1-WF-requirements-vision-to-dependency-graph:
 # =============================================================================
 # PHASE 2 — PROJECT / SPRINT PLANNING
 # =============================================================================
-L1-WF-planning-backlog-to-roadmap:
+L1-WF-backlog-to-roadmap:
   description: Sequences and allocates approved requirements into 5-day Feature Cycles.
   preconditions: [gate-requirements-validation == approved]
   steps:
     - step_id: 1
-      agent: L1-planning-backlog-prioritizer
+      agent: L1-backlog-prioritizer
       input:
         source: agent_output
-        source_agents: [L1-planning-dependency-mapper, L1-requirements-elicitor]
+        source_agents: [L1-dependency-mapper, L1-requirements-elicitor]
         artifacts: [dependency-graph.json]   # requirements.md is items-only — read via agent_output, not a fetched document
         parameters: { value_scoring_inputs: "{{trigger.rice_wsjf_fields}}" }
       tool: tool-L1-jira-fetch-issue
@@ -224,10 +224,10 @@ L1-WF-planning-backlog-to-roadmap:
       quality_gate: qg-L1-backlog-sequencing-validity
       postcheck: assert_topological_sort(dependency-graph.json)   # programmatic, not LLM-judged
     - step_id: 2
-      agent: L1-planning-sprint-planner
+      agent: L1-sprint-planner
       input:
         source: agent_output
-        source_agent: L1-planning-backlog-prioritizer
+        source_agent: L1-backlog-prioritizer
         artifact: prioritized-backlog.md
         external: { team_capacity: "{{integrations.jira_velocity_report}}" }
       tool: [tool-L1-jira-create-issue, tool-L1-jira-update-issue]
@@ -239,27 +239,27 @@ L1-WF-planning-backlog-to-roadmap:
 # =============================================================================
 # PHASE 3 — INCEPTION: EPICS, FEATURES, STORIES, TASKS
 # =============================================================================
-L1-WF-inception-roadmap-to-tasks:
+L1-WF-roadmap-to-tasks:
   description: Breaks the approved roadmap down into Jira-ready epics, features, stories, and tasks.
   preconditions: [gate-backlog-approval == approved]
   steps:
     - step_id: 1
-      agent: L1-inception-epic-creator
-      input: { source: agent_output, source_agents: [L1-planning-sprint-planner, L1-vision-statement-generator], artifacts: [roadmap.md, vision.md] }
+      agent: L1-epic-creator
+      input: { source: agent_output, source_agents: [L1-sprint-planner, L1-vision-statement-generator], artifacts: [roadmap.md, vision.md] }
       tool: tool-L1-jira-fetch-issue
       knowledge_bases: [kb-L1-sdlc-templates, kb-L1-enterprise-security]
       guardrails_additional: [gr-L1-pii-detection, gr-L2-food-domain-compliance]
       output: { artifact: epics.json, type: data, format: json }
       quality_gate: qg-L1-epic-quality
     - step_id: 2
-      agent: L1-inception-feature-decomposer
-      input: { source: agent_output, source_agent: L1-inception-epic-creator, artifact: epics.json }
+      agent: L1-feature-decomposer
+      input: { source: agent_output, source_agent: L1-epic-creator, artifact: epics.json }
       knowledge_bases: [kb-L1-sdlc-templates]
       output: { artifact: features.json, type: data, format: json }
       quality_gate: qg-L1-feature-completeness
     - step_id: 3
-      agent: L1-inception-story-generator
-      input: { source: agent_output, source_agents: [L1-inception-feature-decomposer, L1-requirements-elicitor], artifacts: [features.json] }   # requirements.md is items-only — read via agent_output, not a fetched document
+      agent: L1-story-generator
+      input: { source: agent_output, source_agents: [L1-feature-decomposer, L1-requirements-elicitor], artifacts: [features.json] }   # requirements.md is items-only — read via agent_output, not a fetched document
       knowledge_bases: [kb-L1-sdlc-templates, kb-L2-food-domain]
       guardrails_additional: [gr-L1-pii-detection, gr-L1-citation-verifier]
       output: { artifact: stories.json, type: data, format: json }
@@ -267,14 +267,14 @@ L1-WF-inception-roadmap-to-tasks:
       scored_by: [L1-quality-verifier]
       verified_by: L1-quality-verifier   # A12 independent review, per diagram
     - step_id: 4
-      agent: L1-inception-task-generator
-      input: { source: agent_output, source_agent: L1-inception-story-generator, artifact: stories.json }
+      agent: L1-task-generator
+      input: { source: agent_output, source_agent: L1-story-generator, artifact: stories.json }
       knowledge_bases: [kb-L1-sdlc-templates]
       output: { artifact: tasks.json, type: data, format: json }
       quality_gate: qg-L1-task-completeness
     - step_id: 5
       agent: L1-jira-orchestrator
-      input: { source: agent_output, source_agents: [L1-inception-epic-creator, L1-inception-feature-decomposer, L1-inception-story-generator, L1-inception-task-generator], artifacts: [epics.json, features.json, stories.json, tasks.json] }
+      input: { source: agent_output, source_agents: [L1-epic-creator, L1-feature-decomposer, L1-story-generator, L1-task-generator], artifacts: [epics.json, features.json, stories.json, tasks.json] }
       tool: [tool-L1-jira-create-issue, tool-L1-jira-fetch-issue, tool-L1-jira-update-issue]
       output: { artifact: jira_issue_keys, type: report }
       quality_gate: null
@@ -287,20 +287,20 @@ L1-WF-design-stories-to-lld:
   steps:
     - step_id: 1
       agent: L1-design-user-journey-mapper
-      input: { source: agent_output, source_agents: [L1-inception-story-generator, L1-vision-statement-generator], artifacts: [stories.json, vision.md] }
+      input: { source: agent_output, source_agents: [L1-story-generator, L1-vision-statement-generator], artifacts: [stories.json, vision.md] }
       knowledge_bases: [kb-L1-sdlc-templates]
       output: { artifact: user-journeys.md, type: document, format: markdown }
       quality_gate: qg-L1-journey-coverage
     - step_id: 2
       agent: L1-design-ux-wireframe
-      input: { source: agent_output, source_agents: [L1-inception-story-generator, L1-design-user-journey-mapper], artifacts: [stories.json, user-journeys.md] }
+      input: { source: agent_output, source_agents: [L1-story-generator, L1-design-user-journey-mapper], artifacts: [stories.json, user-journeys.md] }
       tool: tool-L1-figma-create-frame   # optional
       knowledge_bases: [kb-L1-sdlc-templates]
       output: { artifact: wireframes.md, type: document, format: markdown }
       quality_gate: qg-L1-ux-completeness
     - step_id: 3
       agent: L1-design-api-spec
-      input: { source: agent_output, source_agents: [L1-inception-story-generator, L1-requirements-nfr-classifier], artifacts: [stories.json] }   # nfr-spec.md is items-only — read via agent_output, not a fetched document
+      input: { source: agent_output, source_agents: [L1-story-generator, L1-requirements-nfr-classifier], artifacts: [stories.json] }   # nfr-spec.md is items-only — read via agent_output, not a fetched document
       knowledge_bases: [kb-L1-enterprise-architecture, kb-L2-food-domain-api-patterns]
       output: { artifact: openapi.yaml, type: api_spec, format: yaml }
       quality_gate: null
@@ -311,7 +311,7 @@ L1-WF-design-stories-to-lld:
       agent: L1-design-hld
       input:
         source: agent_output
-        source_agents: [L1-requirements-elicitor, L1-requirements-nfr-classifier, L1-planning-dependency-mapper, L1-design-api-spec]
+        source_agents: [L1-requirements-elicitor, L1-requirements-nfr-classifier, L1-dependency-mapper, L1-design-api-spec]
         artifacts: [dependency-graph.json, openapi.yaml]   # requirements.md/nfr-spec.md are items-only — read via agent_output, not fetched documents
       knowledge_bases: [kb-L1-enterprise-architecture]
       output: { artifact: hld.md, type: document, format: markdown }
@@ -354,7 +354,7 @@ L1-WF-testing-stories-to-xray:
   steps:
     - step_id: 1
       agent: L1-testing-scenario-writer
-      input: { source: agent_output, source_agent: L1-inception-story-generator, artifact: stories.json }
+      input: { source: agent_output, source_agent: L1-story-generator, artifact: stories.json }
       knowledge_bases: [kb-L1-testing-standards, kb-L2-food-domain]
       guardrails_additional: [gr-L1-citation-verifier]
       output: { artifact: test-scenarios.md, type: document, format: markdown }
@@ -494,8 +494,8 @@ L1-WF-greenfield-idea-to-pr:
   steps:
     - workflow: L1-WF-vision-idea-to-statement
     - workflow: L1-WF-requirements-vision-to-dependency-graph
-    - workflow: L1-WF-planning-backlog-to-roadmap
-    - workflow: L1-WF-inception-roadmap-to-tasks
+    - workflow: L1-WF-backlog-to-roadmap
+    - workflow: L1-WF-roadmap-to-tasks
     - workflow: L1-WF-design-stories-to-lld
     - parallel:
         - workflow: L1-WF-testing-stories-to-xray

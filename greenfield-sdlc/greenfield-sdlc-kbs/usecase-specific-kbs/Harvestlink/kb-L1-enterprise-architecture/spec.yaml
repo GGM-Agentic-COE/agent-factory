@@ -14,8 +14,8 @@ purpose:
     Thornbury Foods Group's technology landscape, existing systems, and
     integration boundaries — for the reference scenario where HarvestLink
     is built as a new digital product WITHIN an already-established
-    enterprise, not from a blank slate. Grounds L1-planning-impact-assessor
-    and L1-planning-dependency-mapper's existing-system impact checks, and
+    enterprise, not from a blank slate. Grounds L1-impact-assessor
+    and L1-dependency-mapper's existing-system impact checks, and
     any later-phase design agent (HLD/LLD) that needs to know what a new
     HarvestLink component might touch, integrate with, or must deliberately
     avoid touching. Enterprise-wide and cross-phase by nature — not scoped
@@ -34,8 +34,8 @@ content:
 
 consumers:
   agents:
-    - L1-planning-impact-assessor
-    - L1-planning-dependency-mapper
+    - L1-impact-assessor
+    - L1-dependency-mapper
     - L1-requirements-nfr-classifier
   usage: >
     impact-assessor checks each proposed component against EA3's
@@ -48,7 +48,7 @@ consumers:
     note: "new digital products define their own SLA tier").
 
 grounding_rules:
-  accessed_by: [L1-planning-impact-assessor, L1-planning-dependency-mapper, L1-requirements-nfr-classifier]
+  accessed_by: [L1-impact-assessor, L1-dependency-mapper, L1-requirements-nfr-classifier]
   visibility: "L1 — visible to all layers (L1/L2/L3/L4); enterprise-wide and cross-phase, not owned by any single phase directory"
 
 freshness:

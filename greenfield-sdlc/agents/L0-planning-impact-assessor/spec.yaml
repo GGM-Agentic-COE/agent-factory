@@ -2,7 +2,7 @@
 spec_version: "1.0"
 artifact_type: agent
 metadata:
-  name: L0-planning-impact-assessor
+  name: L0-impact-assessor
   version: "1.0.0"
   layer: L0
   phase: planning
@@ -14,7 +14,7 @@ purpose:
   output: "AgentOutput (content.type impact_assesment) with impact_assessment + dependency_graph meta-point items and the full <Product name>-impact-assessment.md inlined in artifacts[0].content."
   business_value: "Prevents duplicate builds and wrong build sequencing by grounding every FR in the real estate and proving cycle_check / critical_path by traversal before backlog prioritisation."
 prompt:
-  ref: "prompts/L0-planning-impact-assessor/instructions.md"
+  ref: "prompts/L0-impact-assessor/instructions.md"
   version: "1.0.0"
   description: "Two-part prompt: Part 1 impact assessment against catalog/CMDB/KB; Part 2 dependency graph (DFS cycle check, longest-path critical path, 1:1 mermaid) built from Part 1, inlined as artifact."
 contract:

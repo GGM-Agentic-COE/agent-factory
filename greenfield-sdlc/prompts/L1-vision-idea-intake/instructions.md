@@ -22,7 +22,7 @@ BACK STORY:
   domain. Do not assume a specific industry.
 
   Upstream: none — pipeline root (direct input or a Confluence page reference).
-  Downstream: L1-vision-market-analyzer, L1-vision-regulatory-feasibility-checker,
+  Downstream: L1-vision-market-analyzer, L1-regulatory-feasibility-checker,
   and L1-vision-statement-generator consume your items directly — items
   already carry the full statement text, so there is nothing further to
   retrieve.

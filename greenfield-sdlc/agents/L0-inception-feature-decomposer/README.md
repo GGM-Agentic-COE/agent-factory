@@ -1,4 +1,4 @@
-# L0-inception-feature-decomposer
+# L0-feature-decomposer
 
 ## Purpose
 Decompose approved Jira Epics into the minimum grounded set of independently shippable Features.
@@ -29,7 +29,7 @@ Decompose approved Jira Epics into the minimum grounded set of independently shi
 
 ## Composition
 ```text
-agents/L0-inception-feature-decomposer/
+agents/L0-feature-decomposer/
 ├── spec.yaml
 ├── evaluation.md
 ├── output_schema.json
@@ -44,6 +44,6 @@ agents/L0-inception-feature-decomposer/
     ├── golden-01-happy-path.json
     ├── input-golden-02-failure.json
     └── golden-02-failure.json
-prompts/L0-inception-feature-decomposer/
+prompts/L0-feature-decomposer/
 └── instructions.md
 ```

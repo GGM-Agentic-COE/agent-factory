@@ -1,7 +1,7 @@
 spec_version: '1.0'
 artifact_type: agent
 metadata:
-  name: L0-inception-feature-decomposer
+  name: L0-feature-decomposer
   version: 1.0.0
   layer: L0
   phase: inception
@@ -15,7 +15,7 @@ purpose:
   business_value: Creates the missing capability layer between coarse Epics and detailed
     Stories while preserving lineage.
 prompt:
-  ref: prompts/L0-inception-feature-decomposer/instructions.md
+  ref: prompts/L0-feature-decomposer/instructions.md
   version: 1.0.0
   description: Decompose approved Jira Epics into the minimum grounded set of independently
     shippable Features.
@@ -24,7 +24,7 @@ contract:
   output_schema: '$ref: schemas/agent-output-schema.json'
   input:
     accepts_from_agents:
-    - L0-inception-epics-creator-evaluator
+    - L0-epics-creator-evaluator
     accepts_direct_input: true
     accepts_file_upload:
       enabled: true

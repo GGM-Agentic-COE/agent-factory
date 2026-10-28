@@ -1,20 +1,20 @@
 # gr-L1-dependency-graph-quality-gate
 
 **Layer:** L1
-**Triggers on:** post_execution (output rail) — fires when `L1-planning-dependency-mapper-evaluator` concludes
+**Triggers on:** post_execution (output rail) — fires when `L1-dependency-mapper-evaluator` concludes
 **On fail:** Retry once, then escalate to HITL
 **Implementation:** LLM-driven (Colang) — Python actions preserved for hybrid mode (recommended)
-**Applies to:** `L1-planning-dependency-mapper-evaluator` only (`configured_agents`)
+**Applies to:** `L1-dependency-mapper-evaluator` only (`configured_agents`)
 
 ## What does it do?
 
-`L1-planning-dependency-mapper-evaluator` independently scores
-`L1-planning-dependency-mapper`'s draft dependency graph against
-`L1-planning-dependency-mapper/evaluation.md` and fixes what it can. This
+`L1-dependency-mapper-evaluator` independently scores
+`L1-dependency-mapper`'s draft dependency graph against
+`L1-dependency-mapper/evaluation.md` and fixes what it can. This
 guardrail fires at that point but validates a different thing: the
-**resultant** `L1-planning-dependency-mapper` output — its own `items`, with
+**resultant** `L1-dependency-mapper` output — its own `items`, with
 the evaluator's `fixes_applied` resolved in — is what actually flows to
-`L1-planning-backlog-prioritizer` (as literal topological-sort input) and
+`L1-backlog-prioritizer` (as literal topological-sort input) and
 Phase 4's `L1-design-hld`. This gate checks THAT content.
 
 Unlike the other three quality gates in this batch, most of what this gate
@@ -29,7 +29,7 @@ resultant content claims — never trusting either the generator's own
 self-reported) re-derivation, at face value.
 
 This is exactly the class of bug
-`L1-planning-dependency-mapper-evaluator/golden/v1.0.0/golden-02-edge-direction-bug.json`
+`L1-dependency-mapper-evaluator/golden/v1.0.0/golden-02-edge-direction-bug.json`
 exists to demonstrate: a reversed `depends-on` edge that is schema-valid,
 does not happen to create a cycle in that particular graph, and still
 produces a `critical_path` that inverts the real build order.
@@ -39,7 +39,7 @@ independent, mechanical check that catches it regardless of what either
 agent in the pair concluded.
 
 1. **Output schema validation** — does the resultant content conform to
-   `L1-planning-dependency-mapper/output_schema.json` (not the evaluator's
+   `L1-dependency-mapper/output_schema.json` (not the evaluator's
    own output shape)?
 2. **Rubric adherence (independent re-derivation)** — does the resultant
    content's `cycle_check` and `critical_path` actually match what a real
@@ -77,7 +77,7 @@ to unwind.
 ## How It Works
 
 ```
-L1-planning-dependency-mapper-evaluator concludes
+L1-dependency-mapper-evaluator concludes
         ↓
 ┌────────────────────────────────────────────────────────────────────────┐
 │  DEPENDENCY GRAPH QUALITY GATE (post_execution, fires on evaluator)    │

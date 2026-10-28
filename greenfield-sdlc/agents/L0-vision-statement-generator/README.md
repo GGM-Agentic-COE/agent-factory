@@ -12,7 +12,7 @@ it's this agent's reconciliation logic that would have caught it.
 ## What does it do?
 
 Accepts the full outputs of `L1-vision-idea-intake` (as `idea-brief.json`)
-and `L0-vision-regulatory-feasibility-checker` — plus `L1-vision-market-analyzer`
+and `L0-regulatory-feasibility-checker` — plus `L1-vision-market-analyzer`
 where it ran — and the viability score, and produces one reconciled vision
 statement:
 - Problem, target users, and value proposition carried forward without drift
@@ -66,7 +66,7 @@ name is supplied, the agent proposes one from the idea brief and labels it
 
 ## Where the viability score comes from
 
-`L0-vision-regulatory-feasibility-checker` derives it, and its evaluator
+`L0-regulatory-feasibility-checker` derives it, and its evaluator
 re-derives it from the final constraints. It reaches this agent two ways
 that must agree exactly: as the `viability_score` input parameter, and in
 `regulatory-feasibility.md`'s header table and Viability Score section. A

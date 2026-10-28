@@ -1,13 +1,13 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "agents/L0-planning-impact-assessor/output_schema.json",
-  "title": "L0-planning-impact-assessor AgentOutput",
+  "$id": "agents/L0-impact-assessor/output_schema.json",
+  "title": "L0-impact-assessor AgentOutput",
   "description": "Items + Artifacts (meta-points) pattern. items carry meta-point summaries only (executive_summary <=20 words, rationale_summary <=15 words); the full narrative lives ONLY in artifacts[0].content as the inlined <Product name>-impact-assessment.md. Structural fields (ids, enums, counts, graph) stay complete. No storage block: persistence is owned by the downstream evaluator.",
   "type": "object",
   "required": ["agent_id", "agent_version", "execution_id", "workflow_execution_id", "status", "content"],
   "additionalProperties": false,
   "properties": {
-    "agent_id": {"const": "L0-planning-impact-assessor", "description": "Agent name"},
+    "agent_id": {"const": "L0-impact-assessor", "description": "Agent name"},
     "agent_version": {"type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$", "description": "Semantic version"},
     "execution_id": {"type": "string", "pattern": "^exec-[0-9a-f-]{36}$", "description": "This run's id"},
     "workflow_execution_id": {"type": "string", "pattern": "^wf-[0-9a-f-]{36}$", "description": "Inherited from prd_output.workflow_execution_id"},
@@ -120,7 +120,7 @@
         "format": {"const": "md"},
         "content": {"type": "string", "minLength": 200, "pattern": "^# Impact Assessment: ", "description": "Full inlined markdown"},
         "description": {"type": "string"},
-        "produced_by": {"const": "L0-planning-impact-assessor"}
+        "produced_by": {"const": "L0-impact-assessor"}
       }
     }
   },

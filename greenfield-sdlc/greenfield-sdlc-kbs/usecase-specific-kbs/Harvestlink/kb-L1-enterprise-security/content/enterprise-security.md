@@ -6,7 +6,7 @@ security standards, which HarvestLink (a new digital product built within
 the group) must satisfy. Not a real company; not a real product
 commitment. Cross-references kb-L1-enterprise-architecture for system
 landscape rather than duplicating it. Grounds L1-requirements-nfr-classifier
-(Security/Compliance/Availability categories) and L1-planning-impact-assessor.
+(Security/Compliance/Availability categories) and L1-impact-assessor.
 -->
 
 # Thornbury Foods Group — Enterprise Security Standards

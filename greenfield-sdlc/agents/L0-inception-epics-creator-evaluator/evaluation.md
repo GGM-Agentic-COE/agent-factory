@@ -1,6 +1,6 @@
-# Evaluation — L1-inception-epics-creator-evaluator
+# Evaluation — L1-epics-creator-evaluator
 
-This covers THIS evaluator's own meta-quality — not the L1-inception-epics-
+This covers THIS evaluator's own meta-quality — not the L1-epics-
 creator's generation rubric. The Epic Creator's evaluation.md and the applicable
 Epic-authoring knowledge base are loaded at runtime and are not duplicated here.
 

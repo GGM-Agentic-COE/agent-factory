@@ -3,7 +3,7 @@ spec_version: "1.0"
 artifact_type: agent
 
 metadata:
-  name: L0-inception-jira-epic-formatter-and-uploader
+  name: L0-jira-epic-formatter-and-uploader
   version: "1.0.0"
   layer: L0
   phase: inception
@@ -18,7 +18,7 @@ purpose:
   business_value: "Provides a controlled, traceable, single-call hand-off from inception planning to Jira without exposing raw payloads or requiring downstream consumers to parse Jira responses."
 
 prompt:
-  ref: "prompts/L0-inception-jira-epic-formatter-and-uploader/instructions.md"
+  ref: "prompts/L0-jira-epic-formatter-and-uploader/instructions.md"
   version: "1.0.0"
   description: "Validates evaluator-approved planning content, formats an internal Jira payload, performs one upload, and reports reconciled status."
 
@@ -27,8 +27,8 @@ contract:
   output_schema: "$ref: schemas/agent-output-schema.json"
   input:
     accepts_from_agents:
-      - L0-inception-epics-creator-evaluator
-      - L0-inception-feature-decomposer-evaluator
+      - L0-epics-creator-evaluator
+      - L0-feature-decomposer-evaluator
     accepts_direct_input: false
     accepts_file_upload:
       enabled: false
@@ -36,10 +36,10 @@ contract:
     required_parameters:
       epic_evaluator_output:
         type: object
-        description: "Approved AgentOutput from L0-inception-epics-creator-evaluator containing content.items.epics."
+        description: "Approved AgentOutput from L0-epics-creator-evaluator containing content.items.epics."
       feature_evaluator_output:
         type: object
-        description: "Approved AgentOutput from L0-inception-feature-decomposer-evaluator containing content.items.features."
+        description: "Approved AgentOutput from L0-feature-decomposer-evaluator containing content.items.features."
     optional_parameters:
       projectKey:
         type: string

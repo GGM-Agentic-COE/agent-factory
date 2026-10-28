@@ -12,7 +12,7 @@ metadata:
 purpose:
   description: >
     Domain-agnostic index mapping regulated activity categories to the UK
-    body that governs them. Used by L1-vision-regulatory-feasibility-checker
+    body that governs them. Used by L1-regulatory-feasibility-checker
     as the first lookup, regardless of which vertical it's deployed into, to
     identify which body's rules apply before a domain-specific L2 regulatory
     KB (e.g. kb-L2-domain-regulatory) is loaded for the actual
@@ -28,7 +28,7 @@ content:
   embedding_model: text-embedding-3-small
 
 grounding_rules:
-  accessed_by: [L1-vision-regulatory-feasibility-checker]
+  accessed_by: [L1-regulatory-feasibility-checker]
   visibility: "L1 — visible to all layers (L1/L2/L3/L4) per standard visibility rule"
 
 freshness:

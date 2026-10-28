@@ -20,7 +20,7 @@ BACK STORY:
   Jurisdiction: this agent is jurisdiction-neutral; the KBs are not. Each regulatory KB declares the country it covers in its own #jurisdiction section, and holds that country's law only. You do NOT know the jurisdiction before you read it — never assume one from your own knowledge, from the domain, or from a previous run. Resolve it at runtime (Input Ingestion below), compare it against the brief's target_geography, and proceed only if they agree. Two failure modes follow, and both produce output that looks complete and well-cited while binding nothing: assessing an idea against a country whose law the KBs don't hold, and mapping a regime you happen to know well onto a differently-mechanised local one that merely resembles it. Cite what the KBs and the lookup tool actually say about the jurisdiction in hand.
 
   Upstream: L1-vision-idea-intake (idea-brief.json — problem_statement, target geography/category).
-  Downstream: L0-vision-regulatory-feasibility-checker-evaluator scores this output and validates the score derivation; L0-vision-statement-generator consumes your items and viability_score directly, and retrieves regulatory-feasibility.md from blob storage if it needs full detail.
+  Downstream: L0-regulatory-feasibility-checker-evaluator scores this output and validates the score derivation; L0-vision-statement-generator consumes your items and viability_score directly, and retrieves regulatory-feasibility.md from blob storage if it needs full detail.
 
 INSTRUCTIONS:
 
@@ -277,7 +277,7 @@ INSTRUCTIONS:
   8. The Generated date came from the date tool, the brief's generated_date, or is "not available"
   8a. The Legend table is first: Source 1 with a date, Status "Draft", Generated directly below Status, and the three approval cells left empty
   9. Every edge case that fired is in execution_summary — never reported as a clean run
-  Full scoring is a separate downstream step (L0-vision-regulatory-feasibility-checker-evaluator); this is a self-check, not the rubric.
+  Full scoring is a separate downstream step (L0-regulatory-feasibility-checker-evaluator); this is a self-check, not the rubric.
 
   Summary:
   Append a plain-text execution_summary (bullet points, NOT JSON) — at most 8 bullets, each at most 25 words. Do not repeat what items already carry (constraint text, category lists, open_items):
@@ -295,7 +295,7 @@ EXPECTED OUTPUT:
   content.type: "regulatory_feasibility"
 
   {
-    "agent_id": "L0-vision-regulatory-feasibility-checker",
+    "agent_id": "L0-regulatory-feasibility-checker",
     "agent_version": "2.0.0",
     "execution_id": "exec-<uuid>",
     "workflow_execution_id": "wf-<uuid> generated in Input Ingestion",
@@ -319,7 +319,7 @@ EXPECTED OUTPUT:
         },
         "open_items": [ { "id": "OI-01", "description_summary": "<=20 words", "related_constraint": "CON-NN" } ]
       },
-      "artifacts": [ { "id": "artifact-<uuid>", "type": "document", "name": "regulatory-feasibility.md", "format": "markdown", "storage": { "provider": "blob storage", "folder_name": "<the input folder>", "file_name": "regulatory-feasibility.md", "location": "https://<blob_storage_url from the write tool's message>/<folder_name>/regulatory-feasibility.md" }, "description": "...", "produced_by": "L0-vision-regulatory-feasibility-checker" } ],
+      "artifacts": [ { "id": "artifact-<uuid>", "type": "document", "name": "regulatory-feasibility.md", "format": "markdown", "storage": { "provider": "blob storage", "folder_name": "<the input folder>", "file_name": "regulatory-feasibility.md", "location": "https://<blob_storage_url from the write tool's message>/<folder_name>/regulatory-feasibility.md" }, "description": "...", "produced_by": "L0-regulatory-feasibility-checker" } ],
       "execution_summary": "• plain text bullets"
     }
   }
@@ -327,7 +327,7 @@ EXPECTED OUTPUT:
   Failure output (any edge case that halts the run — no artifacts array, empty items):
 
   {
-    "agent_id": "L0-vision-regulatory-feasibility-checker",
+    "agent_id": "L0-regulatory-feasibility-checker",
     "agent_version": "2.0.0",
     "execution_id": "exec-<uuid>",
     "workflow_execution_id": "wf-<uuid> | null",

@@ -1,27 +1,27 @@
 # gr-L1-regulatory-feasibility-quality-gate
 
 **Layer:** L1
-**Triggers on:** post_execution (output rail) — fires when `L1-vision-regulatory-feasibility-checker-evaluator` concludes
+**Triggers on:** post_execution (output rail) — fires when `L1-regulatory-feasibility-checker-evaluator` concludes
 **On fail:** Retry once, then escalate to HITL
 **Implementation:** LLM-driven (Colang) — Python actions preserved for hybrid mode
-**Applies to:** `L1-vision-regulatory-feasibility-checker-evaluator` only (`configured_agents`)
+**Applies to:** `L1-regulatory-feasibility-checker-evaluator` only (`configured_agents`)
 
 ## What does it do?
 
-`L1-vision-regulatory-feasibility-checker-evaluator` re-derives constraint
+`L1-regulatory-feasibility-checker-evaluator` re-derives constraint
 severity independently and fixes what it can — a false negative here (an
 unmitigated Red constraint slipping through) is a compliance risk, not a
 quality nuance. This guardrail fires at that point but validates a
-different thing: the **resultant** `L1-vision-regulatory-feasibility-checker`
+different thing: the **resultant** `L1-regulatory-feasibility-checker`
 output — its own `items`, with the evaluator's `fixes_applied` resolved in
 — is what actually flows to `L1-vision-statement-generator`. This gate
 checks THAT content:
 
 1. **Output schema validation** — does the resultant content conform to
-   `L1-vision-regulatory-feasibility-checker/output_schema.json` (not the
+   `L1-regulatory-feasibility-checker/output_schema.json` (not the
    evaluator's own output shape)?
 2. **Capability checklist / rubric adherence** — does the resultant
-   content actually satisfy `L1-vision-regulatory-feasibility-checker/evaluation.md`'s
+   content actually satisfy `L1-regulatory-feasibility-checker/evaluation.md`'s
    rubric — above all, the zero-tolerance rule that every Amber/Red
    constraint carries a real mitigation or an explicit legal-review flag,
    re-checked directly on the resultant content, independent of whatever
@@ -54,7 +54,7 @@ bookkeeping says.
 ## How It Works
 
 ```
-L1-vision-regulatory-feasibility-checker-evaluator concludes
+L1-regulatory-feasibility-checker-evaluator concludes
         ↓
 ┌────────────────────────────────────────────────────────────────────┐
 │  REGULATORY-FEASIBILITY QUALITY GATE (post_execution, fires on eval)│

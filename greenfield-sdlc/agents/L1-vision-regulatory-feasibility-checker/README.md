@@ -1,4 +1,4 @@
-# L1-vision-regulatory-feasibility-checker
+# L1-regulatory-feasibility-checker
 
 ## Purpose
 
@@ -39,7 +39,7 @@ mitigation nor a legal-review flag.
    item has a precedented mitigation — in which case it explicitly justifies
    why the verdict is one level better than the worst individual item
 7. Self-checks that no Red item was silently dropped before returning (full
-   scoring delegated to `L1-vision-regulatory-feasibility-checker-evaluator`, per S6)
+   scoring delegated to `L1-regulatory-feasibility-checker-evaluator`, per S6)
 
 ## Input
 
@@ -62,7 +62,7 @@ mitigation nor a legal-review flag.
 ## Composition
 
 ```
-agents/L1-vision-regulatory-feasibility-checker/
+agents/L1-regulatory-feasibility-checker/
 ├── spec.yaml
 ├── evaluation.md
 ├── output_schema.json
@@ -78,6 +78,6 @@ agents/L1-vision-regulatory-feasibility-checker/
     ├── input-golden-02-insufficient.json
     └── golden-02-insufficient.json
 
-prompts/L1-vision-regulatory-feasibility-checker/
+prompts/L1-regulatory-feasibility-checker/
 └── instructions.md
 ```

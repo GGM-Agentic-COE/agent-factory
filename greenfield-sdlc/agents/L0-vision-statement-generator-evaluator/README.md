@@ -50,7 +50,7 @@ generator ──► blob: <folder_name>/vision.md ──► this evaluator (eval
 5. Checks viability_score wasn't silently altered — against
    `regulatory-feasibility.md` as the authoritative source. It is **never
    re-derived here**: that already happened in
-   `L0-vision-regulatory-feasibility-checker-evaluator`, and a discrepancy at
+   `L0-regulatory-feasibility-checker-evaluator`, and a discrepancy at
    this point is a finding to report, not arithmetic to redo
 6. Checks the Product Name: the H1 and the Product Name row carry the same
    name, and an agent-proposed name is labelled as proposed. It aligns or

@@ -1,4 +1,4 @@
-# L0-vision-regulatory-feasibility-checker-evaluator
+# L0-regulatory-feasibility-checker-evaluator
 
 ## Purpose
 
@@ -17,7 +17,7 @@ let a blocked idea clear `qg-L1-viability-score` and auto-publish.
 ## What does it do?
 
 Accepts the original input and draft output from
-`L0-vision-regulatory-feasibility-checker` and produces:
+`L0-regulatory-feasibility-checker` and produces:
 - Independent scores across 5 dimensions
 - A severity-mismatch check: does each constraint's rationale actually
   support its stated Green/Amber/Red label?
@@ -53,7 +53,7 @@ Accepts the original input and draft output from
 4. Reads the scoring rubric (`evaluation.md`) from GitHub with
    `tool-L1-github-reader-using-app` — one call, fixed in the prompt: repo
    `agentic-sdlc-knowledge-bases`, branch `main`, folder
-   `planning/vision-regulatory-feasiblity/L0-vision-regulatory-feasibility-checker`.
+   `planning/vision-regulatory-feasiblity/L0-regulatory-feasibility-checker`.
    No examples are read. An unreadable rubric, or no KB carrying `#coverage-categories`, fails with
    `REFERENCE_UNAVAILABLE`. Corrections still go back to blob storage, never
    to the repository or Confluence
@@ -72,7 +72,7 @@ Accepts the original input and draft output from
 
 ## Input
 
-- **Source:** agent_output from `L0-vision-regulatory-feasibility-checker`
+- **Source:** agent_output from `L0-regulatory-feasibility-checker`
 - **Required:** `original_input`, `generator_output` (constraints,
   overall_status, categories_not_applicable, viability, open_items)
 
@@ -94,7 +94,7 @@ Accepts the original input and draft output from
 ## Composition
 
 ```
-agents/L0-vision-regulatory-feasibility-checker-evaluator/
+agents/L0-regulatory-feasibility-checker-evaluator/
 ├── spec.yaml
 ├── evaluation.md
 ├── output_schema.json
@@ -110,6 +110,6 @@ agents/L0-vision-regulatory-feasibility-checker-evaluator/
     ├── input-golden-02-unmitigated-red.json
     └── golden-02-unmitigated-red.json
 
-prompts/L0-vision-regulatory-feasibility-checker-evaluator/
+prompts/L0-regulatory-feasibility-checker-evaluator/
 └── instructions.md
 ```

@@ -1,8 +1,8 @@
 """gr-L1-regulatory-feasibility-quality-gate: validates the RESULTANT
-L1-vision-regulatory-feasibility-checker output (its own items, with the
+L1-regulatory-feasibility-checker output (its own items, with the
 evaluator's fixes_applied resolved in) against
-L1-vision-regulatory-feasibility-checker/output_schema.json and its
-evaluation.md. Fires at L1-vision-regulatory-feasibility-checker-evaluator's
+L1-regulatory-feasibility-checker/output_schema.json and its
+evaluation.md. Fires at L1-regulatory-feasibility-checker-evaluator's
 post_execution. Highest-stakes gate in Phase 0 — zero tolerance.
 """
 import json

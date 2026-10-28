@@ -1,13 +1,13 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "agents/L0-planning-impact-assessor-evaluator/output_schema.json",
-  "title": "L0-planning-impact-assessor-evaluator AgentOutput",
-  "description": "Evaluation result for L0-planning-impact-assessor. items hold scores, findings (each citing an id) and fixes; the evaluated document lives ONLY in artifacts[0].content. storage.location must be the literal URL returned by tool-L1-confluence-create-page and is omitted if the write failed.",
+  "$id": "agents/L0-impact-assessor-evaluator/output_schema.json",
+  "title": "L0-impact-assessor-evaluator AgentOutput",
+  "description": "Evaluation result for L0-impact-assessor. items hold scores, findings (each citing an id) and fixes; the evaluated document lives ONLY in artifacts[0].content. storage.location must be the literal URL returned by tool-L1-confluence-create-page and is omitted if the write failed.",
   "type": "object",
   "required": ["agent_id", "agent_version", "execution_id", "workflow_execution_id", "status", "content"],
   "additionalProperties": false,
   "properties": {
-    "agent_id": {"const": "L0-planning-impact-assessor-evaluator", "description": "Agent name"},
+    "agent_id": {"const": "L0-impact-assessor-evaluator", "description": "Agent name"},
     "agent_version": {"type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$", "description": "Semantic version"},
     "execution_id": {"type": "string", "pattern": "^exec-[0-9a-f-]{36}$", "description": "New id for this evaluation run"},
     "workflow_execution_id": {"type": "string", "pattern": "^wf-[0-9a-f-]{36}$", "description": "Inherited from generator_output (new only on INSUFFICIENT_CONTEXT with no upstream id)"},
@@ -83,7 +83,7 @@
           }
         },
         "description": {"type": "string"},
-        "produced_by": {"const": "L0-planning-impact-assessor-evaluator"}
+        "produced_by": {"const": "L0-impact-assessor-evaluator"}
       }
     }
   }

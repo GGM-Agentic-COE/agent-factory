@@ -14,7 +14,7 @@ This guardrail fires at that point (post-evaluation) but validates a
 different thing entirely: the **resultant** `L1-vision-idea-intake` output
 — its own `items`, with the evaluator's `fixes_applied` resolved in — is
 what actually flows to `L1-vision-market-analyzer` and
-`L1-vision-regulatory-feasibility-checker`. This gate checks THAT content:
+`L1-regulatory-feasibility-checker`. This gate checks THAT content:
 
 1. **Output schema validation** — does the resultant content conform to
    `L1-vision-idea-intake/output_schema.json` (not the evaluator's own
@@ -75,7 +75,7 @@ L1-vision-idea-intake-evaluator concludes (scores, fixes, final_decision)
 └────────────────────────────────────────────────────────────────────┘
         ↓
 Resultant idea-brief content flows to L1-vision-market-analyzer /
-L1-vision-regulatory-feasibility-checker
+L1-regulatory-feasibility-checker
 ```
 
 ## File Structure

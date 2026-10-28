@@ -1,4 +1,4 @@
-# L0-planning-impact-assessor
+# L0-impact-assessor
 
 ## Purpose
 Combines Impact Assessment and Dependency Graph construction into one execution. The assessment grounds every PRD functional requirement against the real enterprise estate (service catalog, CMDB, architecture KB); its components and external dependencies become the node set of a dependency graph whose cycle check and critical path are proven by traversal. A wrong finding here becomes a wrong build sequence downstream, so both are produced from the same in-memory findings.
@@ -35,7 +35,7 @@ Combines Impact Assessment and Dependency Graph construction into one execution.
 
 ## Composition
 ```
-agents/L0-planning-impact-assessor/
+agents/L0-impact-assessor/
 ├── spec.yaml
 ├── evaluation.md
 ├── output_schema.json
@@ -50,6 +50,6 @@ agents/L0-planning-impact-assessor/
     ├── golden-01-claims-intake.json
     ├── input-golden-02-prd-failed.json
     └── golden-02-prd-failed.json
-prompts/L0-planning-impact-assessor/
+prompts/L0-impact-assessor/
 └── instructions.md
 ```

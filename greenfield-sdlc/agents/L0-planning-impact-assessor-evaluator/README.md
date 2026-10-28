@@ -1,7 +1,7 @@
-# L0-planning-impact-assessor-evaluator
+# L0-impact-assessor-evaluator
 
 ## Purpose
-Sole quality gate between `L0-planning-impact-assessor` and `L0-planning-backlog-prioritizer`. The generator only runs a light self-check; this agent independently re-derives every impact finding and every graph result (DFS cycle check, longest-path critical path, mermaid 1:1) from freshly-fetched source data, fixes what the data mechanically supports, escalates what it doesn't, and is the only agent that persists the final impact-assessment document.
+Sole quality gate between `L0-impact-assessor` and `L0-backlog-prioritizer`. The generator only runs a light self-check; this agent independently re-derives every impact finding and every graph result (DFS cycle check, longest-path critical path, mermaid 1:1) from freshly-fetched source data, fixes what the data mechanically supports, escalates what it doesn't, and is the only agent that persists the final impact-assessment document.
 
 ## What does it do?
 - **Accepts:** `generator_output` + `original_input` from the impact assessor; fresh `service_catalog` and `cmdb_export`.
@@ -37,7 +37,7 @@ Sole quality gate between `L0-planning-impact-assessor` and `L0-planning-backlog
 
 ## Composition
 ```
-agents/L0-planning-impact-assessor-evaluator/
+agents/L0-impact-assessor-evaluator/
 ├── spec.yaml
 ├── evaluation.md
 ├── output_schema.json
@@ -50,7 +50,7 @@ agents/L0-planning-impact-assessor-evaluator/
 └── golden/v1.0.0/
     ├── input-golden-01-fixable-cycle.json      golden-01-fixable-cycle.json
     └── input-golden-02-missing-generator-output.json  golden-02-missing-generator-output.json
-prompts/L0-planning-impact-assessor-evaluator/
+prompts/L0-impact-assessor-evaluator/
 └── instructions.md
 ```
 > Example inputs carry a `_test_harness_tool_returns` block simulating tool responses (KB excerpt, rubric fetch, Confluence URL) so outputs are reproducible. It is not part of the runtime contract.

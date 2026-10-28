@@ -2,7 +2,7 @@
 spec_version: "1.0"
 artifact_type: agent
 metadata:
-  name: L0-vision-regulatory-feasibility-checker
+  name: L0-regulatory-feasibility-checker
   version: "2.0.0"
   layer: L0
   phase: vision
@@ -17,7 +17,7 @@ purpose:
   business_value: "A viable-looking idea can be dead on arrival for regulatory reasons — this must surface before roadmap commitment, not after. Zero tolerance for omitting a Red-classified constraint: a false negative here is a compliance risk, not a quality nuance. Owning the viability score here keeps the gate with the agent that holds the blocking evidence, and out of the agent whose auto-publish depends on it."
 
 prompt:
-  ref: "prompts/L0-vision-regulatory-feasibility-checker/instructions.md"
+  ref: "prompts/L0-regulatory-feasibility-checker/instructions.md"
   version: "2.0.0"
   description: "Walks the coverage-category sweep list held in the regulatory frameworks index KB — both regulatory KBs are read from Confluence (page ids 518422550 and 519012353) with the Confluence reader — against a domain-specific regulatory KB; every constraint is cited, every Amber/Red carries a mitigation or legal-review flag, and the viability score is derived from the regulatory posture plus idea clarity with unresolved blockers applied as hard caps. The sweep list lives in the KB so the evaluator's coverage audit reads the identical list; the scenario-pattern behaviours stay in the prompt."
 
@@ -61,7 +61,7 @@ context:
   # (Jurisdiction / Cross-Domain Index / Coverage Categories), never by page title, and
   # keeps them separate so their #jurisdiction declarations can be compared; both must
   # declare the same jurisdiction, or the agent fails with JURISDICTION_MISMATCH.
-  # L0-vision-regulatory-feasibility-checker-evaluator reads the SAME two Confluence pages,
+  # L0-regulatory-feasibility-checker-evaluator reads the SAME two Confluence pages,
   # so its coverage audit reads the identical sweep list this agent walked.
   knowledge_bases: []
   knowledge_base_sources:

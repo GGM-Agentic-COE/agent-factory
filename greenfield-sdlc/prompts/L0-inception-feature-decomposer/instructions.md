@@ -14,15 +14,15 @@ Convert one approved Epic set epics.json into a set of scannable, independently-
 
 BACK STORY:
 
-This agent sits in the middle of the delivery pipeline: PRD → Epic (L0-inception-epics-creator) → Feature (this agent) → Stories/Tasks (downstream agent) → Sub-tasks/technical design.
+This agent sits in the middle of the delivery pipeline: PRD → Epic (L0-epics-creator) → Feature (this agent) → Stories/Tasks (downstream agent) → Sub-tasks/technical design.
   It exists because jumping directly from Epic pillars to Stories skips a critical scoping step — pillars are too coarse to plan against, and Stories are too granular to review with stakeholders. Features are the missing, independently-releasable middle layer.
 
   Domain context:
   - Attached at runtime: kb-feature-best-practices — the Schreiber Foods Feature Decomposition Best Practices & SOP. This KB is the single source of truth for pillar-to-feature rollup, altitude, exclusion, ID format, and traceability rules. Do not rely on memory of it — treat the attached KB content as authoritative and current.
   - Attached at runtime: kb-epic-best-practices — used to confirm Features do not reintroduce content the Epic already correctly excluded (Traceability Matrix, Assumptions, Open Questions, Glossary, individual requirements).
 
-  Upstream: epics.json produced by L0-inception-epics-creator (via L0-inception-epics-creator-evaluator's corrected_output).
-  Downstream: L0-inception-feature-decomposer-evaluator consumes features.json next. Ultimately, a Story-generation agent consumes Features (one Feature → one or more Stories), using each Feature's `acceptance_criteria` as Story seeds.
+  Upstream: epics.json produced by L0-epics-creator (via L0-epics-creator-evaluator's corrected_output).
+  Downstream: L0-feature-decomposer-evaluator consumes features.json next. Ultimately, a Story-generation agent consumes Features (one Feature → one or more Stories), using each Feature's `acceptance_criteria` as Story seeds.
 
 
 
@@ -32,14 +32,14 @@ INPUT INGESTION
 Use whichever source contains real, non-empty, explicitly supplied Epic content.
 Never infer, guess, fabricate, or combine Epic content across sources.
 Apply this source precedence:
-1. Agent Output from `L0-inception-epics-creator-evaluator`
+1. Agent Output from `L0-epics-creator-evaluator`
 2. Direct Input
 3. File Upload
 Select the first source containing valid Epic content. Use exactly one source.
 ### 1. Agent Output
 Source:
 ```text
-agent_output from L0-inception-epics-creator-evaluator
+agent_output from L0-epics-creator-evaluator
 Extract:
 agent_output.status
 agent_output.workflow_execution_id
@@ -71,11 +71,11 @@ Do not bypass, override, or reinterpret the Epic Evaluator decision.
 epics.json =
 
 Use Direct Input only when Agent Output does not contain valid approved Epic content.
-Direct Input must contain the same Epic structure produced by L0-inception-epics-creator.
+Direct Input must contain the same Epic structure produced by L0-epics-creator.
 3. File Upload
 epics.json
 Use File Upload only when Agent Output and Direct Input do not contain valid Epic content.
-The uploaded file must contain the same Epic structure produced by L0-inception-epics-creator.
+The uploaded file must contain the same Epic structure produced by L0-epics-creator.
 Workflow Execution ID
 When Agent Output is selected, inherit workflow_execution_id verbatim.
 When Direct Input or File Upload is selected, inherit the supplied workflow_execution_id.
@@ -422,7 +422,7 @@ Return [] when no material gaps exist.
 Do not turn known defects or validation failures into questions when the issue can be stated directly.
 OUTPUT HANDOFF
 Return the Feature AgentOutput directly to the caller.
-The output is consumed directly by L0-inception-feature-decomposer-evaluator.
+The output is consumed directly by L0-feature-decomposer-evaluator.
 After evaluation and approval, the Feature output may be consumed by downstream Jira formatting and upload agents.
 No blob persistence is performed.
 No storage operation is performed.
@@ -573,7 +573,7 @@ content.type: features
 
 {
 
-  "agent_id": "L0-inception-feature-decomposer",
+  "agent_id": "L0-feature-decomposer",
 
   "agent_version": "1.0.0",
 
@@ -696,7 +696,7 @@ content.type: features
 
     "description": "Generated Feature output for evaluation and downstream Jira processing.",
 
-    "produced_by": "L0-inception-feature-decomposer",
+    "produced_by": "L0-feature-decomposer",
 
     "execution_summary": "• What was produced...\n• MVP classification...\n• Requirement and Epic-criteria coverage...\n• Gaps and self-check...\n• Knowledge bases consulted...\n• Upstream evaluator decision..."
 

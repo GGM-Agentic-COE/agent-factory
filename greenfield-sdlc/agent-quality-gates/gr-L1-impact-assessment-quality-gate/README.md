@@ -1,28 +1,28 @@
 # gr-L1-impact-assessment-quality-gate
 
 **Layer:** L1
-**Triggers on:** post_execution (output rail) — fires when `L1-planning-impact-assessor-evaluator` concludes
+**Triggers on:** post_execution (output rail) — fires when `L1-impact-assessor-evaluator` concludes
 **On fail:** Retry once, then escalate to HITL
 **Implementation:** LLM-driven (Colang) — Python actions preserved for hybrid mode
-**Applies to:** `L1-planning-impact-assessor-evaluator` only (`configured_agents`)
+**Applies to:** `L1-impact-assessor-evaluator` only (`configured_agents`)
 
 ## What does it do?
 
-`L1-planning-impact-assessor-evaluator` independently re-runs
-`L1-planning-impact-assessor`'s capability check and technical-touch check
+`L1-impact-assessor-evaluator` independently re-runs
+`L1-impact-assessor`'s capability check and technical-touch check
 against the same `service_catalog`/`cmdb_export` exports and
 `kb-L1-enterprise-architecture`, and fixes what it can. This guardrail
 fires at that point but validates a different thing: the **resultant**
-`L1-planning-impact-assessor` output — its own `items`, with the
+`L1-impact-assessor` output — its own `items`, with the
 evaluator's `fixes_applied` resolved in — is what actually flows to
-`L1-planning-dependency-mapper` and `L1-planning-backlog-prioritizer`.
+`L1-dependency-mapper` and `L1-backlog-prioritizer`.
 This gate checks THAT content:
 
 1. **Output schema validation** — does the resultant content conform to
-   `L1-planning-impact-assessor/output_schema.json` (not the evaluator's
+   `L1-impact-assessor/output_schema.json` (not the evaluator's
    own output shape)?
 2. **Rubric adherence** — does the resultant content actually satisfy
-   `L1-planning-impact-assessor/evaluation.md`'s five Quality Gates:
+   `L1-impact-assessor/evaluation.md`'s five Quality Gates:
    capability check genuinely run (not vacuous), every relevant CMDB CI
    checked and cross-referenced (not skipped, not silently reconciled),
    every FR mapped to a component with a blast-radius rationale, every
@@ -63,7 +63,7 @@ source data the generator's output does not itself carry.
 ## How It Works
 
 ```
-L1-planning-impact-assessor-evaluator concludes
+L1-impact-assessor-evaluator concludes
         ↓
 ┌────────────────────────────────────────────────────────────────────┐
 │  IMPACT-ASSESSMENT QUALITY GATE (post_execution, fires on eval)    │

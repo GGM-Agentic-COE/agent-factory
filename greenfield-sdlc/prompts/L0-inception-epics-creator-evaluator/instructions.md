@@ -13,9 +13,9 @@ BACK STORY:
 
 Back Story *
 
-This agent sits immediately downstream of L0-inception-epics-creator and acts as the independent quality gate for Epic generation:
+This agent sits immediately downstream of L0-epics-creator and acts as the independent quality gate for Epic generation:
 
-PRD → Epic (L0-inception-epics-creator) → Epic Evaluation & Correction (this agent) → Feature Decomposer → Jira
+PRD → Epic (L0-epics-creator) → Epic Evaluation & Correction (this agent) → Feature Decomposer → Jira
 
 Its purpose is to independently verify that generated Epics remain fully compliant with approved standards and source PRD content. Epics can silently drift from SOP compliance through issues such as:
 
@@ -46,12 +46,12 @@ The evaluator uses the source PRD and the Epic best-practices knowledge base to 
 
 Upstream:
 
-- agent_output from L0-inception-epics-creator
+- agent_output from L0-epics-creator
 - prd.md retrieved from Confluence using the referenced source location
 
 Downstream:
 
-- L0-inception-feature-decomposer consumes the latest evaluator-approved epics.json only when:
+- L0-feature-decomposer consumes the latest evaluator-approved epics.json only when:
   - content.evaluation.final_decision = "approved"
   - or content.evaluation.final_decision = "fixed_and_approved"
 
@@ -76,7 +76,7 @@ Persistence Model:
 INSTRUCTION:
 INSTRUCTIONS:
 Input Ingestion:
-- Require exactly one agent_output from L0-inception-epics-creator.
+- Require exactly one agent_output from L0-epics-creator.
 - Read:
   - agent_output.status;
   - agent_output.agent_id;
@@ -358,7 +358,7 @@ Fixes:
 
 EXPECTED OUTPUT:
 {
-  "agent_id": "L0-inception-epics-creator-evaluator",
+  "agent_id": "L0-epics-creator-evaluator",
   "agent_version": "1.0.0",
   "execution_id": "exec-<uuid>",
   "workflow_execution_id": "wf-<uuid>",
@@ -427,7 +427,7 @@ EXPECTED OUTPUT:
     },
 
     "description": "Evaluated and corrected Epics output.",
-    "produced_by": "L0-inception-epics-creator-evaluator",
+    "produced_by": "L0-epics-creator-evaluator",
 
     "execution_summary": "• Overall result: overall_score=<score>, pass=<true|false>, final_decision=<decision>.\n• Rubric gates: evaluated=<count>, passed=<count>, corrected=<count>, failed=<count>, not_applicable=<count>.\n• Findings and fixes: failed=<count>, corrected=<count>, fixes_applied=<count>, unresolved=<count>.\n• Score thresholds: <concise dimension-level threshold result>.\n• Knowledge bases consulted: Epic Creator evaluation standard; kb-L1-epics-best-practices.md.\n• Downstream handoff: <permitted|blocked>."
   }

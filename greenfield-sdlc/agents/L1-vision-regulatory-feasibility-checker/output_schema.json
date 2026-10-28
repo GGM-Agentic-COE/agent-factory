@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "L1-vision-regulatory-feasibility-checker-output-schema-v1.0",
+  "$id": "L1-regulatory-feasibility-checker-output-schema-v1.0",
   "title": "RegulatoryFeasibilityItems",
-  "description": "Shape of content.items for L1-vision-regulatory-feasibility-checker. This agent produces no separate document — items carry the FULL, authoritative rationale and mitigation narrative directly; there is no artifact to retrieve for more detail. Status, citation, id, and requires_legal_review are structural facts, not prose duplication, and stay in full. Every constraint is a primary category and MUST carry a citation. Every Amber/Red constraint MUST carry a mitigation or an explicit requires_legal_review flag — a Red constraint with no mitigation and requires_legal_review=false is an invalid output, not a stylistic gap.",
+  "description": "Shape of content.items for L1-regulatory-feasibility-checker. This agent produces no separate document — items carry the FULL, authoritative rationale and mitigation narrative directly; there is no artifact to retrieve for more detail. Status, citation, id, and requires_legal_review are structural facts, not prose duplication, and stay in full. Every constraint is a primary category and MUST carry a citation. Every Amber/Red constraint MUST carry a mitigation or an explicit requires_legal_review flag — a Red constraint with no mitigation and requires_legal_review=false is an invalid output, not a stylistic gap.",
   "type": "object",
   "required": ["constraints", "overall_status", "open_items"],
   "properties": {

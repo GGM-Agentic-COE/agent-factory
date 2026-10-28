@@ -12,7 +12,7 @@ policy set, several of `nfr-spec.md`'s open "TBD — needs stakeholder
 input" boundary conditions turn out to already have an answer here — see
 "What this resolves" below.
 
-**Who uses it?** `L1-requirements-nfr-classifier` (primary), `L1-planning-impact-assessor`.
+**Who uses it?** `L1-requirements-nfr-classifier` (primary), `L1-impact-assessor`.
 
 **What does it cover?**
 - Identity/access boundary: employee SSO vs. external-party identity
@@ -56,4 +56,4 @@ this bar.
 
 **Owner:** Agentic-AI CoE
 
-**Consumers:** `L1-requirements-nfr-classifier`, `L1-planning-impact-assessor`
+**Consumers:** `L1-requirements-nfr-classifier`, `L1-impact-assessor`

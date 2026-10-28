@@ -1,14 +1,14 @@
 prompts:
   - task: self_check_output
     content: |
-      L1-vision-regulatory-feasibility-checker's original output (items): {{ generator_output }}
-      L1-vision-regulatory-feasibility-checker-evaluator's verdict (fixes_applied, final_decision): {{ bot_response }}
+      L1-regulatory-feasibility-checker's original output (items): {{ generator_output }}
+      L1-regulatory-feasibility-checker-evaluator's verdict (fixes_applied, final_decision): {{ bot_response }}
 
-      Reconstruct the RESULTANT output: L1-vision-regulatory-feasibility-checker's
+      Reconstruct the RESULTANT output: L1-regulatory-feasibility-checker's
       items with every fixes_applied[].before → after substitution resolved
       in. This guardrail checks that resultant content — not the
       evaluator's own scoring bookkeeping — against
-      L1-vision-regulatory-feasibility-checker/output_schema.json and its
+      L1-regulatory-feasibility-checker/output_schema.json and its
       evaluation.md. This is the highest-stakes gate in Phase 0: a false
       negative here is a compliance risk, not a quality nuance.
 

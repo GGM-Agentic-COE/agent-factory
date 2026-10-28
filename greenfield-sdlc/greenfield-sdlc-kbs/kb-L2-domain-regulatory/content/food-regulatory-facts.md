@@ -1,7 +1,7 @@
 <!--
 kb-L2-domain-regulatory · content · food-regulatory-facts.md
 Layer: L2 (domain: food production & distribution). Consumed by:
-L1-vision-regulatory-feasibility-checker. Micro-KB content rules apply:
+L1-regulatory-feasibility-checker. Micro-KB content rules apply:
 max 1 line/bullet, max 15 words, no explanations, numbers not words,
 annotated with target category.
 -->

@@ -20,7 +20,7 @@ GOAL:
 
 BACK STORY:
   Second agent in the Idea → Vision pipeline (Phase 0), running in parallel
-  with L1-vision-regulatory-feasibility-checker.
+  with L1-regulatory-feasibility-checker.
 
   Domain context: kb-L2-domain-market is attached at runtime (not
   fetched by you) — distribution channels, known UK player categories,

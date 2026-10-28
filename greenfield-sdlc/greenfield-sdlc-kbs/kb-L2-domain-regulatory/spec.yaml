@@ -11,7 +11,7 @@ metadata:
 
 purpose:
   description: >
-    A domain-KB slot: L1-vision-regulatory-feasibility-checker's prompt and
+    A domain-KB slot: L1-regulatory-feasibility-checker's prompt and
     spec reference this id generically, so a different vertical deployment
     can populate the same slot with its own regulatory facts without
     changing the agent. This deployment's slot holds food production &
@@ -34,7 +34,7 @@ content:
   embedding_model: text-embedding-3-small
 
 grounding_rules:
-  accessed_by: [L1-vision-regulatory-feasibility-checker]
+  accessed_by: [L1-regulatory-feasibility-checker]
   visibility: "L2 — visible to L2 and below within this deployment's domain projects/squads (L3/L4); not visible to other L2 domain deployments using the same slot id"
 
 freshness:

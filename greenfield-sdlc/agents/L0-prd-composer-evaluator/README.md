@@ -2,8 +2,8 @@
 
 ## Purpose
 
-The PRD is the single source of truth that `L0-planning-impact-assessor` and
-`L0-planning-dependency-mapper` read from Confluence, so a requirement
+The PRD is the single source of truth that `L0-impact-assessor` and
+`L0-dependency-mapper` read from Confluence, so a requirement
 dropped or attached to the wrong FR during composition propagates into every
 plan built on it. This agent is the independent check (S6) on the
 composition, and the only agent permitted to publish the PRD. Nothing is
@@ -88,5 +88,5 @@ agents/L0-prd-composer-evaluator/
 ```
 
 Upstream: `L0-prd-composer`.
-Downstream: `L0-planning-impact-assessor`, `L0-planning-dependency-mapper`
+Downstream: `L0-impact-assessor`, `L0-dependency-mapper`
 (read the published PRD from Confluence).

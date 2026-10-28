@@ -1,4 +1,4 @@
-# L0-inception-epics-creator-evaluator
+# L0-epics-creator-evaluator
 
 ## Purpose
 Independently evaluate and safely correct PRD-derived Jira Epics before Feature decomposition.
@@ -29,7 +29,7 @@ Independently evaluate and safely correct PRD-derived Jira Epics before Feature 
 
 ## Composition
 ```text
-agents/L0-inception-epics-creator-evaluator/
+agents/L0-epics-creator-evaluator/
 ├── spec.yaml
 ├── evaluation.md
 ├── output_schema.json
@@ -44,6 +44,6 @@ agents/L0-inception-epics-creator-evaluator/
     ├── golden-01-happy-path.json
     ├── input-golden-02-failure.json
     └── golden-02-failure.json
-prompts/L0-inception-epics-creator-evaluator/
+prompts/L0-epics-creator-evaluator/
 └── instructions.md
 ```

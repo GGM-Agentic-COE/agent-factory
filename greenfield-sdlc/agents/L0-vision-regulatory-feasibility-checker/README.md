@@ -1,4 +1,4 @@
-# L0-vision-regulatory-feasibility-checker
+# L0-regulatory-feasibility-checker
 
 ## Purpose
 
@@ -143,7 +143,7 @@ be the agent that sets it.
    qualifying cap
 9. Self-checks that no Red item was silently dropped and that the score
    derivation is arithmetically sound before returning (full scoring
-   delegated to `L0-vision-regulatory-feasibility-checker-evaluator`, per S6)
+   delegated to `L0-regulatory-feasibility-checker-evaluator`, per S6)
 
 ## Input
 
@@ -172,7 +172,7 @@ be the agent that sets it.
 ## Composition
 
 ```
-agents/L0-vision-regulatory-feasibility-checker/
+agents/L0-regulatory-feasibility-checker/
 ├── spec.yaml
 ├── evaluation.md
 ├── output_schema.json
@@ -188,6 +188,6 @@ agents/L0-vision-regulatory-feasibility-checker/
     ├── input-golden-02-insufficient.json
     └── golden-02-insufficient.json
 
-prompts/L0-vision-regulatory-feasibility-checker/
+prompts/L0-regulatory-feasibility-checker/
 └── instructions.md
 ```
