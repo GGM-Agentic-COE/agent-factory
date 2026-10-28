@@ -1,0 +1,49 @@
+prompts:
+  - task: self_check_output
+    content: |
+      L1-requirements-nfr-classifier's original output (items): {{ generator_output }}
+      L1-requirements-nfr-classifier-evaluator's verdict (fixes_applied, final_decision): {{ bot_response }}
+
+      Reconstruct the RESULTANT output: L1-requirements-nfr-classifier's
+      nfr_classifications with every fixes_applied[].before → after
+      substitution resolved in. Check that resultant content — not the
+      evaluator's own scoring bookkeeping — against
+      L1-requirements-nfr-classifier/output_schema.json and its
+      evaluation.md rubric (grounded in kb-L1-nfr-classification-taxonomy's
+      six categories: Performance, Security, Scalability, Availability,
+      Compliance, Usability):
+
+      1. Schema compliance: does every nfr_classifications[] entry have id,
+         title, boundary_conditions[], confidence, reasoning? Does every
+         boundary_condition have category, boundary_condition (>=5 chars),
+         and source? Is an empty boundary_conditions[] always accompanied
+         by reasoning stating "No NFR categories apply"?
+      2. ID sequencing: are FR-NNN ids sequential, no gaps, no duplicates,
+         no invented ids relative to requirements.md?
+      3. TBD/source consistency: is source "—" if and only if
+         boundary_condition ends in the literal "TBD — needs stakeholder
+         input" phrase?
+      4. Citation form: does every non-TBD source match one of
+         "requirements.md § FR-NNN", "vision.md § <section>" (including
+         "vision.md § Regulatory Posture" for Compliance-category
+         conditions), or "kb-L1-enterprise-security § ES<n>" — never a bare
+         guess?
+      5. Category coverage: for each FR, does at least one genuinely-
+         applicable category appear in boundary_conditions — or, if
+         boundary_conditions is empty, does reasoning explicitly say "No
+         NFR categories apply"? Flag an FR where an obviously-applicable
+         category (e.g. the FR itself states an authentication/identity
+         behavior but no Security category appears) was silently skipped.
+      6. Fabrication plausibility: does every non-TBD boundary_condition's
+         number/rule plausibly match what its cited source would actually
+         say? Flag a figure that looks fabricated or unrelated to its own
+         citation (spot-check plausibility, not exhaustive fact-checking
+         against documents you cannot see).
+      7. TBD honesty: is any boundary_condition marked TBD when a grounded
+         value was clearly already available — e.g. the same FR's own
+         statement plainly states it, or another entry's cited
+         kb-L1-enterprise-security clause plainly also applies here?
+
+      Answer "yes" if ALL checks pass on the RESULTANT content. Answer "no"
+      if ANY check fails — this gates what actually flows to
+      L1-requirements-prd-composer.

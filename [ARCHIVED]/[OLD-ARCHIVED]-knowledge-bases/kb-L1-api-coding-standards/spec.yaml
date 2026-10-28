@@ -1,0 +1,9 @@
+spec_version: "1.0"
+metadata:
+  name: kb-L0-api-coding-standards
+  version: "1.0.0"
+  layer: L0
+purpose: "Language-agnostic API coding standards for code generator agents"
+freshness:
+  review_cadence: quarterly
+  last_reviewed: "2026-04-21"

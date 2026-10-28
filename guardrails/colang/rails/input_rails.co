@@ -1,0 +1,76 @@
+# L1 Enterprise Input Rails
+# These apply to ALL agents and cannot be overridden
+
+define flow check input jailbreak
+  """Block jailbreak attempts — role-play manipulation, DAN, encoding tricks."""
+  $input_text = $user_message
+  $is_jailbreak = execute detect_jailbreak(text=$input_text)
+
+  if $is_jailbreak
+    bot refuse jailbreak
+    stop
+
+define bot refuse jailbreak
+  "This request has been identified as a jailbreak attempt and cannot be processed."
+
+define flow check input injection
+  """Block prompt injection patterns in user input."""
+  $injection_patterns = ["ignore previous instructions", "you are now a", "system:", "forget everything above", "override your instructions", "new instructions:"]
+
+  $input_text = $user_message
+  $is_injection = execute check_patterns(text=$input_text, patterns=$injection_patterns)
+
+  if $is_injection
+    bot refuse injection
+    stop
+
+define bot refuse injection
+  "I've detected a potential prompt injection attempt. This request cannot be processed."
+
+define flow check input pii
+  """Detect and block PII in input before processing."""
+  $input_text = $user_message
+  $pii_found = execute detect_pii(text=$input_text)
+
+  if $pii_found
+    bot refuse pii input
+    stop
+
+define bot refuse pii input
+  "Your input contains personally identifiable information. Please remove PII and try again."
+
+define flow check input content safety
+  """Block toxic, harmful, or unsafe content in input."""
+  $input_text = $user_message
+  $is_unsafe = execute check_content_safety(text=$input_text)
+
+  if $is_unsafe
+    bot refuse unsafe content
+    stop
+
+define bot refuse unsafe content
+  "I cannot process this request as it contains content that violates safety policies."
+
+define flow check input validation
+  """Validate input structure — required fields, types, length."""
+  $input_text = $user_message
+  $is_valid = execute validate_input_schema(text=$input_text)
+
+  if not $is_valid
+    bot refuse invalid input
+    stop
+
+define bot refuse invalid input
+  "Your input does not match the expected format. Please check required fields and try again."
+
+define flow check input topic adherence
+  """Block out-of-scope requests based on agent's domain."""
+  $input_text = $user_message
+  $is_on_topic = execute check_topic_adherence(text=$input_text)
+
+  if not $is_on_topic
+    bot refuse off topic
+    stop
+
+define bot refuse off topic
+  "OUT_OF_SCOPE: This request is outside my designated domain. I can only help with topics within my assigned scope."

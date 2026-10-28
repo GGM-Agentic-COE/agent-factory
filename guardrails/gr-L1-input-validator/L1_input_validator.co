@@ -1,0 +1,20 @@
+# gr-L1-input-validator — Colang Implementation
+# Layer: L1 Enterprise — applies to ALL agents
+# Triggers: pre_execution (input rail)
+
+define flow check input validation
+  """Validate incoming request structure, types, and length limits."""
+  $valid = execute validate_input_structure(input=$user_message)
+
+  if not $valid
+    bot block invalid input
+    stop
+
+  $result = execute self_check_input
+
+  if not $result
+    bot block invalid input
+    stop
+
+define bot block invalid input
+  "Input rejected: request does not match expected structure. Ensure all required fields are present, types are correct, and string lengths are within limits."

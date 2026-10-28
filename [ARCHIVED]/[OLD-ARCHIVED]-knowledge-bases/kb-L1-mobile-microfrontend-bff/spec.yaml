@@ -1,0 +1,43 @@
+id: kb-L1-mobile-microfrontend-bff
+name: Mobile Micro-Frontend with BFF Pattern
+layer: L1
+description: >
+  Architecture patterns for modular mobile applications using feature modules
+  as independent units with a Backend-for-Frontend (BFF) layer optimized for
+  mobile consumption. Covers module structure, navigation, shared design system,
+  offline sync, authentication, and testing strategies.
+version: "1.0"
+created: "2026-04-21"
+sections:
+  - id: MM1
+    title: Core Principles
+  - id: MM2
+    title: Architecture Overview
+  - id: MM3
+    title: Feature Module Pattern
+  - id: MM4
+    title: Module Structure
+  - id: MM5
+    title: Mobile BFF
+  - id: MM6
+    title: BFF API Design for Mobile
+  - id: MM7
+    title: Shared Design System Module
+  - id: MM8
+    title: Navigation Between Modules
+  - id: MM9
+    title: Shared Authentication
+  - id: MM10
+    title: Offline & Sync
+  - id: MM11
+    title: Testing
+  - id: MM12
+    title: Cross-References
+content:
+  - content/kb-L1-mobile-microfrontend-bff.md
+cross_references:
+  - kb-L1-microservices (MS1-MS12)
+  - kb-L1-web-microfrontend (MF1-MF14)
+  - kb-L1-enterprise-architecture (EA10)
+  - kb-L1-kotlin-standards (KS1-KS17)
+  - kb-L1-mobile-standards (MC1-MC12)

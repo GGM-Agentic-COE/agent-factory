@@ -1,0 +1,747 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">
+<title>{/agent-catalog}</title>
+<style>
+:root{--navy:#1B2A4A;--teal:#0A7E8C;--teal-lt:#E8F6F7;--amber:#D4880F;--gray:#F4F5F7;--gray-mid:#E0E3E8;--gray-txt:#666;--charcoal:#2D3748;--idea:#AD1457;--green:#1B8C3A;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:Calibri,Candara,Segoe,"Segoe UI",Optima,Arial,sans-serif;background:#fff;color:var(--charcoal);font-size:16px;}
+.page{max-width:1500px;margin:0 auto;padding:28px;}
+h2{font-size:21px;font-weight:800;color:var(--navy);margin:14px 0 6px;}
+h3{font-size:14px;font-weight:700;color:var(--gray-txt);text-transform:uppercase;letter-spacing:.5px;margin:6px 0 12px;}
+h4{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin:0 0 6px;color:var(--gray-txt);}
+.sub{font-size:14px;color:var(--gray-txt);margin-bottom:8px;}
+code{background:#E5E7EB;padding:2px 6px;border-radius:4px;font-size:13.5px;white-space:nowrap;font-family:Consolas,Calibri,monospace;}
+.src-ext{color:#8a4400;font-weight:600;}.src-agent{color:var(--teal);font-weight:600;}.src-human{color:var(--idea);font-weight:600;}.src-kb{color:var(--amber);font-weight:600;}
+.legend{display:flex;gap:18px;flex-wrap:wrap;margin:12px 0 20px;font-size:13px;}
+.legend-item{display:flex;align-items:center;gap:6px;}
+.tabs{display:flex;gap:8px;margin-top:16px;flex-wrap:wrap;}
+.tab-btn{cursor:pointer;padding:12px 26px;border-radius:10px 10px 0 0;background:rgba(255,255,255,.14);color:rgba(255,255,255,.75);font-weight:700;font-size:15px;border:none;border-bottom:3px solid transparent;transition:all .15s;}
+.tab-btn:hover{background:rgba(255,255,255,.24);color:#fff;}
+.tab-btn.active{background:#fff;color:var(--navy);border-bottom:3px solid var(--teal);}
+.tab-count{display:inline-block;margin-left:8px;font-size:12px;font-weight:700;opacity:.8;background:rgba(0,0,0,.12);padding:1px 8px;border-radius:10px;}
+.tab-btn.active .tab-count{background:var(--teal-lt);color:var(--teal);}
+.tab-content{display:none;}
+.tab-content.active{display:block;}
+.tabdesc{background:var(--teal-lt);border:1px solid rgba(10,126,140,.3);border-radius:8px;padding:12px 16px;margin:16px 0 8px;font-size:13.5px;line-height:1.55;}
+.subhead{font-size:16px;font-weight:800;color:var(--teal);margin:22px 0 10px;padding-bottom:6px;border-bottom:2px solid var(--teal-lt);}
+.phase{display:inline-block;padding:4px 12px;border-radius:12px;font-size:11px;font-weight:700;color:#fff;margin:20px 0 6px;letter-spacing:.4px;}
+.agent-card{border:1px solid var(--gray-mid);border-radius:10px;padding:18px 20px;margin-bottom:16px;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.03);}
+.agent-card.new{border-color:var(--teal);box-shadow:0 0 0 2px var(--teal-lt);}
+.agent-card .name-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap;}
+.agent-card .name-row code{font-size:16px;background:var(--navy);color:#fff;padding:4px 10px;}
+.badge-new{font-size:11px;font-weight:800;letter-spacing:.5px;color:#fff;background:var(--teal);padding:3px 8px;border-radius:10px;}
+.prev{font-size:12px;color:var(--gray-txt);font-style:italic;}
+.agent-card .desc{font-size:15px;line-height:1.6;margin-bottom:14px;color:var(--charcoal);}
+.io-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;}
+.io-panel{background:var(--gray);border-radius:8px;padding:12px 14px;font-size:14px;line-height:1.5;}
+.io-panel.outputs{background:var(--teal-lt);}
+.io-panel .src-line{margin-top:6px;font-size:12.5px;color:var(--gray-txt);}
+.tags-row{display:flex;flex-wrap:wrap;gap:16px;font-size:13px;color:var(--gray-txt);border-top:1px dashed var(--gray-mid);padding-top:10px;}
+.tag-label{font-weight:700;color:var(--charcoal);margin-right:4px;}
+.table-wrap{overflow-x:auto;border:1px solid var(--gray-mid);border-radius:8px;margin-bottom:10px;}
+table{width:100%;border-collapse:collapse;font-size:13.5px;min-width:800px;}
+th{padding:10px 12px;background:var(--navy);color:#fff;font-weight:700;font-size:12px;text-transform:uppercase;text-align:left;}
+td{padding:9px 12px;border-bottom:1px solid var(--gray-mid);vertical-align:top;line-height:1.5;}
+tbody tr:nth-child(even) td{background:#FAFBFC;}tbody tr:hover td{background:#F0F4F8;}
+</style></head><body>
+<div style="background:linear-gradient(135deg,var(--navy),#2A3F6A);padding:26px 40px 0;color:#fff;">
+<div style="max-width:1500px;margin:0 auto;">
+<h1 style="font-size:30px;font-weight:800;">{/agent-catalog}</h1>
+<p style="opacity:.75;font-size:14px;margin-top:6px;">A catalog of available agents and tools — what each is expected to do, with its inputs and outputs, side by side. Aligned to the Greenfield BOM (35 agents; PI-planning structure).</p>
+<div class="tabs">
+<button class="tab-btn active" onclick="showTab('pe',this)">Platform Engineering <span class="tab-count">35</span></button>
+<button class="tab-btn" onclick="showTab('data',this)">Data <span class="tab-count">26</span></button>
+<button class="tab-btn" onclick="showTab('ops',this)">Operations <span class="tab-count">0</span></button>
+</div>
+</div></div>
+<div class="page">
+<h3>Input Source Legend</h3>
+<div class="legend">
+<div class="legend-item"><span class="src-human">&#9679;</span> Human-authored</div>
+<div class="legend-item"><span class="src-ext">&#9679;</span> External system of record</div>
+<div class="legend-item"><span class="src-agent">&#9679;</span> Prior agent output (workflow context)</div>
+<div class="legend-item"><span class="src-kb">&#9679;</span> Knowledge base (inference-time)</div>
+</div>
+<div class="tab-content active" id="tab-pe">
+<div class="tabdesc"><strong>Platform Engineering</strong> — the product/platform build agents that carry an idea from vision through requirements, PI planning, inception, design, test strategy, and construction. These are the content-generating agents of the greenfield SDLC.</div>
+<div class="subhead">Agents <span style="color:var(--gray-txt);font-weight:700;">(35)</span></div>
+<span class="phase" style="background:#AD1457;">Phase 0 — Vision</span>
+<div class="agent-card">
+<div class="name-row"><code>L1-vision-idea-intake</code></div>
+<div class="desc">Takes a raw idea — free-text brief, or a reference to an existing Confluence page — and structures it into a clear problem statement, target user definition, and a set of candidate success metrics. Every downstream agent depends on this producing the same structured starting facts, so each reasons from a shared foundation rather than re-interpreting the raw idea text and drifting apart.</div>
+<div class="io-grid">
+<div class="io-panel"><h4>Inputs</h4>Raw idea brief (free text); sponsoring stakeholder list (optional)
+<div class="src-line"><span class="src-human">Human:</span> Product Lead submission via intake form or Confluence "Idea Brief" page<br><span class="src-ext">External:</span> stakeholder registry (org directory / HRIS export)</div></div>
+<div class="io-panel outputs"><h4>Outputs</h4><code>idea_brief</code> items (JSON only)</div>
+</div>
+<div class="tags-row"><span><span class="tag-label">Tools:</span> <code>tool-L1-confluence-fetch-page</code></span><span><span class="tag-label">Knowledge Bases:</span> — <em>(structure embedded in prompt per S4)</em></span><span><span class="tag-label">Guardrails:</span> <code>gr-L1-hallucination-check</code>, <code>gr-L1-consistency-check</code></span></div>
+</div>
+<div class="agent-card">
+<div class="name-row"><code>L1-vision-market-analyzer</code></div>
+<div class="desc">Given the problem statement and target users, performs a five-dimension market analysis: competitive intelligence (competitor matrix), market sizing (TAM/SAM/SOM), industry trends, customer insights, and pricing benchmarks — plus a SWOT synthesis. Every citable figure is held to the citation-verifier as a BLOCKER: an ungrounded number is reported as a low-confidence gap, never fabricated.</div>
+<div class="io-grid">
+<div class="io-panel"><h4>Inputs</h4>Problem statement + target market; known competitor list (optional)
+<div class="src-line"><span class="src-agent">Agent:</span> <code>idea_brief</code> items from idea-intake<br><span class="src-ext">External:</span> live web search; <span class="src-kb">KB:</span> prior competitor/market/pricing knowledge</div></div>
+<div class="io-panel outputs"><h4>Outputs</h4><code>market_analysis</code> items (competitor_matrix, market_sizing, industry_trends, customer_insights, pricing_benchmarks, swot, data_sufficiency)</div>
+</div>
+<div class="tags-row"><span><span class="tag-label">Tools:</span> <code>tool-L1-web-search-competitor-scan</code></span><span><span class="tag-label">Knowledge Bases:</span> <code>kb-L2-domain-market</code></span><span><span class="tag-label">Guardrails:</span> <code>gr-L1-hallucination-check</code>, <code>gr-L1-citation-verifier</code></span></div>
+</div>
+<div class="agent-card">
+<div class="name-row"><code>L1-vision-regulatory-feasibility-checker</code></div>
+<div class="desc">Assesses regulatory feasibility against the licensing and compliance regimes relevant to the target geography and product category, classifying each constraint Green/Amber/Red with a citation and mitigation. Runs under a zero-tolerance rule for omitting a Red-classified constraint — a false negative here is a compliance risk, not a quality slip.</div>
+<div class="io-grid">
+<div class="io-panel"><h4>Inputs</h4>Problem statement + target geography/product category
+<div class="src-line"><span class="src-agent">Agent:</span> <code>idea_brief</code> items from idea-intake<br><span class="src-ext">External:</span> regulatory database/API lookup</div></div>
+<div class="io-panel outputs"><h4>Outputs</h4><code>regulatory_feasibility</code> items (reconciled into <code>vision.md</code> § Regulatory Posture)</div>
+</div>
+<div class="tags-row"><span><span class="tag-label">Tools:</span> <code>tool-L1-regulatory-db-lookup</code></span><span><span class="tag-label">Knowledge Bases:</span> <code>kb-L1-regulatory-frameworks-index</code>, <code>kb-L2-domain-regulatory</code></span><span><span class="tag-label">Guardrails:</span> <code>gr-L1-hallucination-check</code>, <code>gr-L1-citation-verifier</code></span></div>
+</div>
+<div class="agent-card">
+<div class="name-row"><code>L1-vision-statement-generator</code></div>
+<div class="desc">Synthesizes idea brief, market analysis, and regulatory feasibility — plus the viability score from the QG — into one reconciled vision statement and roadmap outline carrying a north-star metric and a Regulatory Posture section. It is the last automated checkpoint that could catch a dropped regulatory finding before a human reviewer.</div>
+<div class="io-grid">
+<div class="io-panel"><h4>Inputs</h4>Idea brief; market analysis; regulatory feasibility; viability score
+<div class="src-line"><span class="src-agent">Agent:</span> items of idea-intake, market-analyzer, regulatory-feasibility-checker; viability score from <code>L1-quality-verifier</code></div></div>
+<div class="io-panel outputs"><h4>Outputs</h4><code>vision.md</code></div>
+</div>
+<div class="tags-row"><span><span class="tag-label">Tools:</span> <code>tool-L1-confluence-create-page</code></span><span><span class="tag-label">Knowledge Bases:</span> — <em>(structure embedded per S4)</em></span><span><span class="tag-label">Guardrails:</span> <code>gr-L1-consistency-check</code>, <code>gr-L1-output-schema-validator</code></span></div>
+</div>
+<span class="phase" style="background:#3949AB;">Phase 1 — Requirements / Impact / Dependency</span>
+<div class="agent-card">
+<div class="name-row"><code>L1-requirements-elicitor</code></div>
+<div class="desc">Converts an approved vision into atomic, traceable functional requirements, refusing to run unless a recorded Product Lead approval comment accompanies the vision. Every downstream step depends on this same atomic requirement set; without it, each agent would re-interpret <code>vision.md</code> independently and drift.</div>
+<div class="io-grid">
+<div class="io-panel"><h4>Inputs</h4>Approved vision statement; Product Lead approval comment
+<div class="src-line"><span class="src-agent">Agent:</span> <code>vision.md</code> from vision-statement-generator<br><span class="src-human">Human:</span> Product Lead approval comment</div></div>
+<div class="io-panel outputs"><h4>Outputs</h4><code>functional_requirements</code> / <code>compound_splits</code> items (JSON only)</div>
+</div>
+<div class="tags-row"><span><span class="tag-label">Tools:</span> <code>tool-L1-confluence-fetch-page</code></span><span><span class="tag-label">Knowledge Bases:</span> — <em>(template embedded per S4)</em></span><span><span class="tag-label">Guardrails:</span> <code>gr-L1-hallucination-check</code>, <code>gr-L1-consistency-check</code></span></div>
+</div>
+<div class="agent-card">
+<div class="name-row"><code>L1-requirements-nfr-classifier</code></div>
+<div class="desc">Classifies every requirement's non-functional boundary conditions across performance, security, scalability, availability, compliance, and usability, citing a grounded source for each real number or rule and marking TBD when none resolves. Compliance-category conditions cite <code>vision.md</code> § Regulatory Posture directly.</div>
+<div class="io-grid">
+<div class="io-panel"><h4>Inputs</h4>Functional requirements list; approved vision statement (Regulatory Posture)
+<div class="src-line"><span class="src-agent">Agent:</span> <code>functional_requirements</code> items from elicitor; <code>vision.md</code> (Regulatory Posture cited directly)</div></div>
+<div class="io-panel outputs"><h4>Outputs</h4><code>nfr_classifications</code> items (JSON only)</div>
+</div>
+<div class="tags-row"><span><span class="tag-label">Tools:</span> —</span><span><span class="tag-label">Knowledge Bases:</span> <code>kb-L1-nfr-classification-taxonomy</code>; <code>kb-L1-enterprise-architecture</code>, <code>kb-L1-enterprise-security</code></span><span><span class="tag-label">Guardrails:</span> <code>gr-L1-output-schema-validator</code>, <code>gr-L1-consistency-check</code></span></div>
+</div>
+<div class="agent-card">
+<div class="name-row"><code>L1-requirements-prd-composer</code></div>
+<div class="desc">Composes the functional requirements and NFR spec into one authoritative PRD — every requirement together with its cross-functional constraints in a single place — and folds forward Assumptions/Constraints/Risks from the vision. Zero-drop composition is the concrete test it is held to, not just formatting.</div>
+<div class="io-grid">
+<div class="io-panel"><h4>Inputs</h4>Functional requirements; NFR spec; approved vision (carry-forward only)
+<div class="src-line"><span class="src-agent">Agent:</span> <code>functional_requirements</code> items from elicitor; <code>nfr_classifications</code> items from nfr-classifier; <code>vision.md</code> + <code>approval_comment</code></div></div>
+<div class="io-panel outputs"><h4>Outputs</h4><code>prd.md</code></div>
+</div>
+<div class="tags-row"><span><span class="tag-label">Tools:</span> —</span><span><span class="tag-label">Knowledge Bases:</span> —</span><span><span class="tag-label">Guardrails:</span> <code>gr-L1-output-schema-validator</code>, <code>gr-L1-consistency-check</code> (zero requirements dropped)</span></div>
+</div>
+<div class="agent-card">
+<div class="name-row"><code>L1-planning-impact-assessor</code></div>
+<div class="desc">Assesses a PRD's blast-radius impact against the existing estate through a service-catalog capability-duplication check, a CMDB technical-touch check, and a cross-reference against enterprise-architecture narrative. Wherever a real catalog and CMDB exist, this check is genuinely load-bearing, not a rubber stamp.</div>
+<div class="io-grid">
+<div class="io-panel"><h4>Inputs</h4>PRD; existing system/service inventory
+<div class="src-line"><span class="src-agent">Agent:</span> <code>prd.md</code> from prd-composer<br><span class="src-ext">External:</span> service catalog + CMDB export (e.g. Backstage, ServiceNow)</div></div>
+<div class="io-panel outputs"><h4>Outputs</h4><code>impact-assessment.md</code></div>
+</div>
+<div class="tags-row"><span><span class="tag-label">Tools:</span> <code>tool-L1-confluence-fetch-page</code> (architecture registry)</span><span><span class="tag-label">Knowledge Bases:</span> <code>kb-L1-enterprise-architecture</code></span><span><span class="tag-label">Guardrails:</span> <code>gr-L1-consistency-check</code>, <code>gr-L2-food-domain-compliance</code></span></div>
+</div>
+<div class="agent-card">
+<div class="name-row"><code>L1-planning-dependency-mapper</code></div>
+<div class="desc">Builds a dependency graph across the components and external dependencies identified in the impact assessment and PRD, independently computing — never just asserting — a cycle check and a critical path. Backlog prioritizer, roadmap creator, and HLD all need the real build-order constraints.</div>
+<div class="io-grid">
+<div class="io-panel"><h4>Inputs</h4>Impact assessment; PRD
+<div class="src-line"><span class="src-agent">Agent:</span> outputs of impact-assessor, prd-composer</div></div>
+<div class="io-panel outputs"><h4>Outputs</h4><code>dependency-graph.json</code></div>
+</div>
+<div class="tags-row"><span><span class="tag-label">Tools:</span> —</span><span><span class="tag-label">Knowledge Bases:</span> <code>kb-L1-enterprise-architecture</code></span><span><span class="tag-label">Guardrails:</span> <code>gr-L1-output-schema-validator</code> (rejects cyclic graphs)</span></div>
+</div>
+<span class="phase" style="background:#EF6C00;">Phase 2 — PI Planning</span>
+<div class="agent-card">
+<div class="name-row"><code>L1-inception-epic-creator</code></div>
+<div class="desc">Generates epics directly from the approved PRD and vision — the plannable deliverables must exist before anything can be sequenced into a PI, which is why epic creation now sits at the front of planning rather than after a roadmap it should be feeding.</div>
+<div class="io-grid">
+<div class="io-panel"><h4>Inputs</h4>PRD; vision statement; dependency graph
+<div class="src-line"><span class="src-agent">Agent:</span> <code>prd.md</code>, <code>vision.md</code>, <code>dependency-graph.json</code><br><span class="src-human">Human:</span> Product Lead vision/PRD approval (<code>gate-requirements-validation</code>)</div></div>
+<div class="io-panel outputs"><h4>Outputs</h4><code>epics.json</code></div>
+</div>
+<div class="tags-row"><span><span class="tag-label">Tools:</span> <code>tool-L1-jira-fetch-issue</code></span><span><span class="tag-label">Knowledge Bases:</span> <code>kb-L1-sdlc-templates</code>, <code>kb-L1-enterprise-security</code></span><span><span class="tag-label">Guardrails:</span> <code>gr-L1-schema-validator</code>, <code>gr-L1-pii-detection</code>, <code>gr-L1-hallucination-check</code>, <code>gr-L2-food-domain-compliance</code></span></div>
+</div>
+<div class="agent-card">
+<div class="name-row"><code>L1-inception-feature-decomposer</code></div>
+<div class="desc">Decomposes each epic into features with rough T-shirt sizing and a critical-path flag — the unit PI planning schedules. Emits a <code>needs_slicing</code> flag: a feature that won't fit one Feature Cycle is split into optional Story slices first. Runs the decomposition right-sizing guardrail on every feature.</div>
+<div class="io-grid">
+<div class="io-panel"><h4>Inputs</h4>Epics; dependency graph
+<div class="src-line"><span class="src-agent">Agent:</span> <code>epics.json</code> from epic-creator; <code>dependency-graph.json</code> from dependency-mapper</div></div>
+<div class="io-panel outputs"><h4>Outputs</h4><code>features.json</code> (coarse size + critical-path flag)</div>
+</div>
+<div class="tags-row"><span><span class="tag-label">Tools:</span> —</span><span><span class="tag-label">Knowledge Bases:</span> <code>kb-L1-sdlc-templates</code></span><span><span class="tag-label">Guardrails:</span> <code>gr-L1-schema-validator</code>, <code>gr-L1-hallucination-check</code>, <code>gr-L1-decomposition-rightsizing</code></span></div>
+</div>
+<div class="agent-card">
+<div class="name-row"><code>L1-planning-backlog-prioritizer</code></div>
+<div class="desc">Prioritizes <strong>features</strong> (not raw requirements) by value, effort, and dependency-unblocking risk — WSJF/RICE at feature granularity. A feature's rank respects both its value and what the dependency graph says must precede it; the output feeds the roadmap creator directly.</div>
+<div class="io-grid">
+<div class="io-panel"><h4>Inputs</h4>Features; dependency graph; business value scoring inputs (RICE/WSJF)
+<div class="src-line"><span class="src-agent">Agent:</span> <code>features.json</code> from feature-decomposer; <code>dependency-graph.json</code> from dependency-mapper<br><span class="src-human">Human:</span> value-scoring inputs from Product Lead</div></div>
+<div class="io-panel outputs"><h4>Outputs</h4><code>prioritized-backlog.md</code> (ranked features)</div>
+</div>
+<div class="tags-row"><span><span class="tag-label">Tools:</span> <code>tool-L1-jira-fetch-issue</code></span><span><span class="tag-label">Knowledge Bases:</span> <code>kb-L1-sdlc-templates</code></span><span><span class="tag-label">Guardrails:</span> <code>gr-L1-consistency-check</code></span></div>
+</div>
+<div class="agent-card new">
+<div class="name-row"><code>L1-planning-roadmap-creator</code> <span class="badge-new">NEW</span></div>
+<div class="desc">Allocates prioritized <strong>features</strong> into sprint-bands across the whole PI horizon (e.g. 4 × 5-day Feature Cycles), sequenced by the dependency critical path — the "what and roughly when" a sponsor or cross-cell lead reads. Invariant: a feature may only be banded at or after every feature it depends on, and every backlog feature appears exactly once.</div>
+<div class="io-grid">
+<div class="io-panel"><h4>Inputs</h4>Prioritized feature backlog; dependency graph; team capacity/velocity; PI cadence config
+<div class="src-line"><span class="src-agent">Agent:</span> <code>prioritized-backlog.md</code>, <code>dependency-graph.json</code><br><span class="src-ext">External:</span> Jira velocity/capacity report; PI cadence config</div></div>
+<div class="io-panel outputs"><h4>Outputs</h4><code>roadmap.md</code> (feature → sprint-band map)</div>
+</div>
+<div class="tags-row"><span><span class="tag-label">Tools:</span> <code>tool-L1-jira-update-issue</code></span><span><span class="tag-label">Knowledge Bases:</span> <code>kb-L1-sdlc-templates</code></span><span><span class="tag-label">Guardrails:</span> <code>gr-L1-consistency-check</code> (every feature placed; none before its dependency)</span></div>
+</div>
+<div class="agent-card">
+<div class="name-row"><code>L1-planning-feature-cycle-planner</code> <span class="prev">was: L1-planning-sprint-planner</span></div>
+<div class="desc">Takes only the <strong>near committed cycle(s)</strong> from the roadmap and fits them to team capacity at Work-Unit granularity — triggering just-in-time elaboration for those features only, then rolling forward. Never re-bands features: if Work Units overflow, it marks them <code>overflow</code> with a reflow band and lets the roadmap creator re-run.</div>
+<div class="io-grid">
+<div class="io-panel"><h4>Inputs</h4>Roadmap (committed cycle's features); team capacity / velocity; Definition of Ready
+<div class="src-line"><span class="src-agent">Agent:</span> <code>roadmap.md</code> from roadmap-creator<br><span class="src-ext">External:</span> Jira velocity/capacity report</div></div>
+<div class="io-panel outputs"><h4>Outputs</h4><code>cycle-plan.md</code> (Work Unit → cycle, capacity-balanced)</div>
+</div>
+<div class="tags-row"><span><span class="tag-label">Tools:</span> <code>tool-L1-jira-create-issue</code>, <code>tool-L1-jira-update-issue</code></span><span><span class="tag-label">Knowledge Bases:</span> <code>kb-L1-sdlc-templates</code></span><span><span class="tag-label">Guardrails:</span> <code>gr-L1-consistency-check</code> (committed points ≤ capacity)</span></div>
+</div>
+<span class="phase" style="background:#0052CC;">Phase 3 — Inception (Just-in-Time)</span>
+<div class="agent-card">
+<div class="name-row"><code>L1-inception-story-generator</code></div>
+<div class="desc">Generates user stories with acceptance criteria for the features the feature-cycle-planner has <em>committed</em> to the near cycle(s), grounding each story in the functional requirements it implements. Elaborates only committed features — the just-in-time boundary that keeps decomposition off features that may still be re-sequenced.</div>
+<div class="io-grid">
+<div class="io-panel"><h4>Inputs</h4>Committed features (from cycle plan); features; functional requirements
+<div class="src-line"><span class="src-agent">Agent:</span> <code>cycle-plan.md</code> from feature-cycle-planner; <code>features.json</code> from feature-decomposer; <code>functional_requirements</code> items from elicitor</div></div>
+<div class="io-panel outputs"><h4>Outputs</h4><code>stories.json</code></div>
+</div>
+<div class="tags-row"><span><span class="tag-label">Tools:</span> —</span><span><span class="tag-label">Knowledge Bases:</span> <code>kb-L1-sdlc-templates</code>, <code>kb-L2-food-domain</code></span><span><span class="tag-label">Guardrails:</span> <code>gr-L1-schema-validator</code>, <code>gr-L1-pii-detection</code>, <code>gr-L1-citation-verifier</code></span></div>
+</div>
+<div class="agent-card">
+<div class="name-row"><code>L1-inception-task-generator</code></div>
+<div class="desc">Decomposes stories into <strong>Work Units</strong> — the atomic executable an agent picks up: one coherent thing, one session, independently verifiable. Each carries a <code>layer</code> and a <code>verification_ref</code>, and must clear right-sizing tests T1–T3 to be emitted. <code>tasks.json</code> keeps its name for tooling continuity — a task <em>is</em> a Work Unit.</div>
+<div class="io-grid">
+<div class="io-panel"><h4>Inputs</h4>Stories
+<div class="src-line"><span class="src-agent">Agent:</span> <code>stories.json</code> from story-generator</div></div>
+<div class="io-panel outputs"><h4>Outputs</h4><code>tasks.json</code> (Work Units, each with <code>layer</code> + <code>verification_ref</code>)</div>
+</div>
+<div class="tags-row"><span><span class="tag-label">Tools:</span> —</span><span><span class="tag-label">Knowledge Bases:</span> <code>kb-L1-sdlc-templates</code>, <code>kb-L1-decomposition-standard</code></span><span><span class="tag-label">Guardrails:</span> <code>gr-L1-schema-validator</code>, <code>gr-L1-decomposition-rightsizing</code></span></div>
+</div>
+<span class="phase" style="background:#0A7E8C;">Phase 4 — Design</span>
+<div class="agent-card">
+<div class="name-row"><code>L1-design-user-journey-mapper</code></div>
+<div class="desc">Maps end-to-end persona journeys and touchpoints across the stories, ahead of any wireframing — establishing the flow a user actually moves through before anyone designs a single screen for it.</div>
+<div class="io-grid">
+<div class="io-panel"><h4>Inputs</h4>Stories; target user personas
+<div class="src-line"><span class="src-agent">Agent:</span> <code>stories.json</code> from story-generator; personas from <code>vision.md</code></div></div>
+<div class="io-panel outputs"><h4>Outputs</h4><code>user-journeys.md</code></div>
+</div>
+<div class="tags-row"><span><span class="tag-label">Tools:</span> —</span><span><span class="tag-label">Knowledge Bases:</span> <code>kb-L1-sdlc-templates</code></span><span><span class="tag-label">Guardrails:</span> <code>gr-L1-consistency-check</code></span></div>
+</div>
+<div class="agent-card">
+<div class="name-row"><code>L1-design-ux-wireframe</code></div>
+<div class="desc">Generates wireframes and screen layouts from the stories and the user journeys, optionally pushing the result into an actual Figma file rather than leaving it as markdown/mermaid only.</div>
+<div class="io-grid">
+<div class="io-panel"><h4>Inputs</h4>Stories; user journeys
+<div class="src-line"><span class="src-agent">Agent:</span> <code>stories.json</code> from story-generator; <code>user-journeys.md</code> from user-journey-mapper</div></div>
+<div class="io-panel outputs"><h4>Outputs</h4><code>wireframes.md</code></div>
+</div>
+<div class="tags-row"><span><span class="tag-label">Tools:</span> <code>tool-L1-figma-create-frame</code> (optional)</span><span><span class="tag-label">Knowledge Bases:</span> <code>kb-L1-sdlc-templates</code></span><span><span class="tag-label">Guardrails:</span> <code>gr-L1-consistency-check</code></span></div>
+</div>
+<div class="agent-card">
+<div class="name-row"><code>L1-design-api-spec</code></div>
+<div class="desc">Generates the OpenAPI contract from the in-scope stories and their NFR spec, so the API's shape is derived directly from what was promised to users and the constraints classified for it — not authored separately and reconciled later.</div>
+<div class="io-grid">
+<div class="io-panel"><h4>Inputs</h4>Stories; NFR spec
+<div class="src-line"><span class="src-agent">Agent:</span> <code>stories.json</code> from story-generator; <code>nfr_classifications</code> items from nfr-classifier</div></div>
+<div class="io-panel outputs"><h4>Outputs</h4><code>openapi.yaml</code></div>
+</div>
+<div class="tags-row"><span><span class="tag-label">Tools:</span> —</span><span><span class="tag-label">Knowledge Bases:</span> <code>kb-L1-enterprise-architecture</code>, <code>kb-L2-food-domain-api-patterns</code></span><span><span class="tag-label">Guardrails:</span> <code>gr-L1-schema-validator</code> (OpenAPI)</span></div>
+</div>
+<div class="agent-card">
+<div class="name-row"><code>L1-design-hld</code></div>
+<div class="desc">Generates the high-level design — C4 diagrams, components, data flow, integrations — drawing on requirements, NFR spec, dependency graph, and API spec together, so the HLD reflects real build-order constraints rather than an idealized architecture.</div>
+<div class="io-grid">
+<div class="io-panel"><h4>Inputs</h4>Requirements; NFR spec; dependency graph; API spec
+<div class="src-line"><span class="src-agent">Agent:</span> outputs of requirements-elicitor, nfr-classifier, dependency-mapper, api-spec</div></div>
+<div class="io-panel outputs"><h4>Outputs</h4><code>hld.md</code></div>
+</div>
+<div class="tags-row"><span><span class="tag-label">Tools:</span> —</span><span><span class="tag-label">Knowledge Bases:</span> <code>kb-L1-enterprise-architecture</code></span><span><span class="tag-label">Guardrails:</span> <code>gr-L1-consistency-check</code>, <code>gr-L1-hallucination-check</code></span></div>
+</div>
+<div class="agent-card">
+<div class="name-row"><code>L1-design-lld</code></div>
+<div class="desc">Generates the low-level design — classes, sequence diagrams, error-handling — directly from the HLD and API spec, turning architecture-level decisions into implementation-level detail a construction agent can build from.</div>
+<div class="io-grid">
+<div class="io-panel"><h4>Inputs</h4>HLD; API spec
+<div class="src-line"><span class="src-agent">Agent:</span> <code>hld.md</code> from design-hld; <code>openapi.yaml</code> from design-api-spec</div></div>
+<div class="io-panel outputs"><h4>Outputs</h4><code>lld.md</code></div>
+</div>
+<div class="tags-row"><span><span class="tag-label">Tools:</span> —</span><span><span class="tag-label">Knowledge Bases:</span> <code>kb-L1-enterprise-architecture</code></span><span><span class="tag-label">Guardrails:</span> <code>gr-L1-consistency-check</code></span></div>
+</div>
+<div class="agent-card">
+<div class="name-row"><code>L1-design-data-architect</code></div>
+<div class="desc">Designs the data model — schema, lineage, migration plan — from the LLD and functional requirements, optionally diffing against an existing production database when reconciling with a brownfield-adjacent environment.</div>
+<div class="io-grid">
+<div class="io-panel"><h4>Inputs</h4>LLD; functional requirements
+<div class="src-line"><span class="src-agent">Agent:</span> <code>lld.md</code> from design-lld; <code>functional_requirements</code> items from elicitor</div></div>
+<div class="io-panel outputs"><h4>Outputs</h4><code>db-schema.sql</code></div>
+</div>
+<div class="tags-row"><span><span class="tag-label">Tools:</span> <code>tool-L1-db-schema-diff</code> (optional)</span><span><span class="tag-label">Knowledge Bases:</span> <code>kb-L1-enterprise-architecture</code></span><span><span class="tag-label">Guardrails:</span> <code>gr-L1-schema-validator</code>, <code>gr-L1-pii-detection</code></span></div>
+</div>
+<span class="phase" style="background:#D4880F;">Phase 5 — Test Strategy</span>
+<div class="agent-card">
+<div class="name-row"><code>L1-testing-scenario-writer</code></div>
+<div class="desc">Generates test scenarios directly from the stories and their acceptance criteria — every scenario traces back to a specific story's AC, not a free-floating test idea.</div>
+<div class="io-grid">
+<div class="io-panel"><h4>Inputs</h4>Stories (with AC)
+<div class="src-line"><span class="src-agent">Agent:</span> <code>stories.json</code> from story-generator</div></div>
+<div class="io-panel outputs"><h4>Outputs</h4><code>test-scenarios.md</code></div>
+</div>
+<div class="tags-row"><span><span class="tag-label">Tools:</span> —</span><span><span class="tag-label">Knowledge Bases:</span> <code>kb-L1-testing-standards</code>, <code>kb-L2-food-domain</code></span><span><span class="tag-label">Guardrails:</span> <code>gr-L1-citation-verifier</code></span></div>
+</div>
+<div class="agent-card">
+<div class="name-row"><code>L1-testing-case-writer</code></div>
+<div class="desc">Generates Cucumber Given/When/Then cases from the test scenarios, turning prose test intent into the structured, executable-adjacent format the script generator can work from.</div>
+<div class="io-grid">
+<div class="io-panel"><h4>Inputs</h4>Test scenarios
+<div class="src-line"><span class="src-agent">Agent:</span> <code>test-scenarios.md</code> from scenario-writer</div></div>
+<div class="io-panel outputs"><h4>Outputs</h4><code>test-cases.feature</code></div>
+</div>
+<div class="tags-row"><span><span class="tag-label">Tools:</span> —</span><span><span class="tag-label">Knowledge Bases:</span> <code>kb-L1-testing-standards</code></span><span><span class="tag-label">Guardrails:</span> <code>gr-L1-schema-validator</code></span></div>
+</div>
+<div class="agent-card">
+<div class="name-row"><code>L1-testing-script-generator</code></div>
+<div class="desc">Generates executable automation scripts (Playwright for UI, REST Assured for API) from the Cucumber cases, cross-referencing the API spec and wireframes so scripts target real endpoints and screens.</div>
+<div class="io-grid">
+<div class="io-panel"><h4>Inputs</h4>Test cases; API spec; wireframes
+<div class="src-line"><span class="src-agent">Agent:</span> <code>test-cases.feature</code> from case-writer; <code>openapi.yaml</code> from design-api-spec; <code>wireframes.md</code> from ux-wireframe</div></div>
+<div class="io-panel outputs"><h4>Outputs</h4>Automation scripts (Playwright / REST Assured)</div>
+</div>
+<div class="tags-row"><span><span class="tag-label">Tools:</span> —</span><span><span class="tag-label">Knowledge Bases:</span> <code>kb-L1-testing-standards</code></span><span><span class="tag-label">Guardrails:</span> <code>gr-L1-schema-validator</code></span></div>
+</div>
+<div class="agent-card">
+<div class="name-row"><code>L1-testing-synthetic-data-generator</code></div>
+<div class="desc">Generates PII-safe synthetic test data and fixtures from the data schema and test cases, so automated tests never depend on real customer data. Its guardrail is critical, not advisory — any real PII is blocked outright.</div>
+<div class="io-grid">
+<div class="io-panel"><h4>Inputs</h4>Data schema; test cases
+<div class="src-line"><span class="src-agent">Agent:</span> <code>db-schema.sql</code> from data-architect; <code>test-cases.feature</code> from case-writer</div></div>
+<div class="io-panel outputs"><h4>Outputs</h4><code>synthetic-data.json</code></div>
+</div>
+<div class="tags-row"><span><span class="tag-label">Tools:</span> —</span><span><span class="tag-label">Knowledge Bases:</span> <code>kb-L1-testing-standards</code></span><span><span class="tag-label">Guardrails:</span> <code>gr-L1-pii-detection</code> (critical — blocks real PII)</span></div>
+</div>
+<span class="phase" style="background:#1B8C3A;">Phase 6 — Construction</span>
+<div class="agent-card">
+<div class="name-row"><code>L1-construction-api-code-generator</code></div>
+<div class="desc">Generates the backend/API implementation (Spring Boot + PostgreSQL) from the LLD, API spec, and data model, against a base repo scaffold. One of two agents that produce shipped source code, so it carries the heaviest guardrail set — schema validation, secret scanning, and license compliance.</div>
+<div class="io-grid">
+<div class="io-panel"><h4>Inputs</h4>LLD; API spec; data schema; base repo scaffold
+<div class="src-line"><span class="src-agent">Agent:</span> outputs of design-lld, design-api-spec, data-architect<br><span class="src-ext">External:</span> repo scaffold via GitHub</div></div>
+<div class="io-panel outputs"><h4>Outputs</h4>API source code</div>
+</div>
+<div class="tags-row"><span><span class="tag-label">Tools:</span> <code>tool-L1-github-fetch-file</code></span><span><span class="tag-label">Knowledge Bases:</span> <code>kb-L1-enterprise-architecture</code>, <code>kb-L1-enterprise-security</code></span><span><span class="tag-label">Guardrails:</span> <code>gr-L1-schema-validator</code>, <code>gr-L1-secret-scanner</code>, <code>gr-L1-license-compliance-check</code></span></div>
+</div>
+<div class="agent-card">
+<div class="name-row"><code>L1-construction-ui-code-generator</code></div>
+<div class="desc">Generates the frontend/UI implementation (React) from the wireframes, user journeys, and API spec, against the same base repo scaffold so both halves of the application land in the same repository structure.</div>
+<div class="io-grid">
+<div class="io-panel"><h4>Inputs</h4>Wireframes; user journeys; API spec; base repo scaffold
+<div class="src-line"><span class="src-agent">Agent:</span> outputs of ux-wireframe, user-journey-mapper, api-spec<br><span class="src-ext">External:</span> repo scaffold via GitHub</div></div>
+<div class="io-panel outputs"><h4>Outputs</h4>UI source code</div>
+</div>
+<div class="tags-row"><span><span class="tag-label">Tools:</span> <code>tool-L1-github-fetch-file</code></span><span><span class="tag-label">Knowledge Bases:</span> <code>kb-L1-enterprise-architecture</code></span><span><span class="tag-label">Guardrails:</span> <code>gr-L1-secret-scanner</code>, <code>gr-L1-license-compliance-check</code></span></div>
+</div>
+<div class="agent-card">
+<div class="name-row"><code>L1-construction-unit-test-generator</code></div>
+<div class="desc">Generates unit test suites for both the API and UI code just produced, so generated implementation code never ships without generated test coverage alongside it.</div>
+<div class="io-grid">
+<div class="io-panel"><h4>Inputs</h4>API source code; UI source code
+<div class="src-line"><span class="src-agent">Agent:</span> outputs of api-code-generator, ui-code-generator</div></div>
+<div class="io-panel outputs"><h4>Outputs</h4>Unit test suites</div>
+</div>
+<div class="tags-row"><span><span class="tag-label">Tools:</span> —</span><span><span class="tag-label">Knowledge Bases:</span> <code>kb-L1-testing-standards</code></span><span><span class="tag-label">Guardrails:</span> <code>gr-L1-schema-validator</code></span></div>
+</div>
+<div class="agent-card">
+<div class="name-row"><code>L1-construction-code-reviewer</code></div>
+<div class="desc">Reviews the generated API and UI code with its unit tests for standards compliance, vulnerabilities, and refactor opportunities — an automated review pass before human reviewers see the PR, producing a written report and inline comments.</div>
+<div class="io-grid">
+<div class="io-panel"><h4>Inputs</h4>API + UI source code; unit tests
+<div class="src-line"><span class="src-agent">Agent:</span> outputs of api-code-generator, ui-code-generator, unit-test-generator</div></div>
+<div class="io-panel outputs"><h4>Outputs</h4><code>review-report.md</code>; inline PR comments</div>
+</div>
+<div class="tags-row"><span><span class="tag-label">Tools:</span> <code>tool-L1-github-fetch-file</code></span><span><span class="tag-label">Knowledge Bases:</span> <code>kb-L1-enterprise-security</code>, <code>kb-L1-enterprise-architecture</code></span><span><span class="tag-label">Guardrails:</span> <code>gr-L1-secret-scanner</code>, <code>gr-L1-license-compliance-check</code></span></div>
+</div>
+<div class="agent-card">
+<div class="name-row"><code>L1-construction-doc-generator</code></div>
+<div class="desc">Generates API/code documentation and a changelog from the generated source code and API spec, so the documentation a developer reads is derived from what was actually built, not a separately-authored description that can drift.</div>
+<div class="io-grid">
+<div class="io-panel"><h4>Inputs</h4>API + UI source code; API spec
+<div class="src-line"><span class="src-agent">Agent:</span> outputs of api-code-generator, ui-code-generator, design-api-spec</div></div>
+<div class="io-panel outputs"><h4>Outputs</h4>README, changelog, API docs</div>
+</div>
+<div class="tags-row"><span><span class="tag-label">Tools:</span> —</span><span><span class="tag-label">Knowledge Bases:</span> <code>kb-L1-sdlc-templates</code></span><span><span class="tag-label">Guardrails:</span> <code>gr-L1-consistency-check</code></span></div>
+</div>
+<span class="phase" style="background:#1B2A4A;">Orchestration &amp; Integration</span>
+<div class="agent-card">
+<div class="name-row"><code>L1-jira-orchestrator</code></div>
+<div class="desc">Takes the epics and features from PI planning and the stories and Work Units from inception, and creates them as linked issues in Jira — an actual, navigable hierarchy (Epic &gt; Story[feature] &gt; Story[slice] &gt; Sub-task). A Utility agent: it materializes what the generator agents decided, it does not author planning content itself.</div>
+<div class="io-grid">
+<div class="io-panel"><h4>Inputs</h4>Epics; features; stories; tasks (all as JSON)
+<div class="src-line"><span class="src-agent">Agent:</span> <code>epics.json</code>/<code>features.json</code> from epic-creator/feature-decomposer; outputs of story-generator, task-generator</div></div>
+<div class="io-panel outputs"><h4>Outputs</h4>Jira issue keys (epics/features/stories/tasks)</div>
+</div>
+<div class="tags-row"><span><span class="tag-label">Tools:</span> <code>tool-L1-jira-create-issue</code>, <code>tool-L1-jira-fetch-issue</code>, <code>tool-L1-jira-update-issue</code></span><span><span class="tag-label">Knowledge Bases:</span> —</span><span><span class="tag-label">Guardrails:</span> <code>gr-L1-output-schema-validator</code></span></div>
+</div>
+<div class="agent-card">
+<div class="name-row"><code>L1-github-orchestrator</code></div>
+<div class="desc">One agent invoked at three points — <strong>design-publish</strong> (commits design docs to a design branch + publishes to Confluence), <strong>impl-commit</strong> (commits API/UI code, unit tests, docs to the implementation branch), and <strong>PR</strong> (opens the pull request bundling Jira, design, code, and test references). It materializes upstream decisions, it does not generate content.</div>
+<div class="io-grid">
+<div class="io-panel"><h4>Inputs</h4>Design/construction outputs; Jira issue keys; XRay test keys
+<div class="src-line"><span class="src-agent">Agent:</span> outputs of design &amp; construction agents; issue keys from jira-orchestrator; test keys from xray-orchestrator</div></div>
+<div class="io-panel outputs"><h4>Outputs</h4>GitHub branches <code>aava/design-*</code>, <code>aava/impl-*</code>; Confluence pages; Pull Request</div>
+</div>
+<div class="tags-row"><span><span class="tag-label">Tools:</span> <code>tool-L1-github-upload-file</code>, <code>tool-L1-github-create-branch</code>, <code>tool-L1-github-create-pr</code>, <code>tool-L1-confluence-create-page</code></span><span><span class="tag-label">Knowledge Bases:</span> —</span><span><span class="tag-label">Guardrails:</span> <code>gr-L1-output-schema-validator</code></span></div>
+</div>
+<div class="agent-card">
+<div class="name-row"><code>L1-xray-orchestrator</code></div>
+<div class="desc">Creates test cases in XRay and links the executable automation scripts to them — mirroring the Jira orchestrator's role for the testing phase, materializing what the case writer and script generator produced into XRay's tracked structure, linked back to the originating stories.</div>
+<div class="io-grid">
+<div class="io-panel"><h4>Inputs</h4>Test cases; automation scripts
+<div class="src-line"><span class="src-agent">Agent:</span> outputs of case-writer, script-generator</div></div>
+<div class="io-panel outputs"><h4>Outputs</h4>XRay test entries linked to stories</div>
+</div>
+<div class="tags-row"><span><span class="tag-label">Tools:</span> <code>tool-L1-xray-create-test</code></span><span><span class="tag-label">Knowledge Bases:</span> —</span><span><span class="tag-label">Guardrails:</span> <code>gr-L1-output-schema-validator</code></span></div>
+</div>
+<span class="phase" style="background:#5E35B1;">Governance &amp; Quality</span>
+<div class="agent-card">
+<div class="name-row"><code>L1-quality-verifier</code></div>
+<div class="desc">Provides independent, rubric-based scoring at every one of the 18 quality gates across the lifecycle, taking the draft output of whichever agent just ran together with that gate's rubric, and returning a quality score, a pass/fail verdict, and a rationale. It never re-fetches its own inputs, and it is the mechanism by which a blocking gate can actually stop a workflow.</div>
+<div class="io-grid">
+<div class="io-panel"><h4>Inputs</h4>Draft output of the agent being scored, plus the rubric for that gate
+<div class="src-line"><span class="src-agent">Agent:</span> the draft artifact from whichever agent just ran (workflow context, not re-fetched)</div></div>
+<div class="io-panel outputs"><h4>Outputs</h4>Quality score (0–10) + pass/fail + rationale</div>
+</div>
+<div class="tags-row"><span><span class="tag-label">Tools:</span> —</span><span><span class="tag-label">Knowledge Bases:</span> <code>kb-L1-sdlc-templates</code> (rubric definitions)</span><span><span class="tag-label">Guardrails:</span> <code>gr-L1-output-schema-validator</code></span></div>
+</div>
+<div class="subhead">Tools <span style="color:var(--gray-txt);font-weight:700;">(22)</span></div>
+<div class="table-wrap"><table>
+<thead><tr><th>Tool</th><th>What It Does</th><th>Used By</th><th>What It Needs</th></tr></thead>
+<tbody>
+<tr><td><code>tool-L1-confluence-fetch-page</code></td><td>Reads a Confluence page — idea brief, approved vision, or architecture-registry entry.</td><td>Idea Intake, Requirements Elicitor, Impact Assessor</td><td>Confluence API token scoped to the space</td></tr>
+<tr><td><code>tool-L1-confluence-create-page</code></td><td>Publishes a new Confluence page — the vision statement or a design document.</td><td>Vision Statement Generator, GitHub Orchestrator</td><td>Confluence API token scoped to the space</td></tr>
+<tr><td><code>tool-L1-web-search-competitor-scan</code></td><td>Runs a live web search for competitors/comparables for the five-dimension market analysis.</td><td>Market Analyzer</td><td>Web search API or licensed market-intel provider</td></tr>
+<tr><td><code>tool-L1-regulatory-db-lookup</code></td><td>Looks up licensing/compliance-regime data for a geography and product category.</td><td>Regulatory Feasibility Checker</td><td>Regulatory content provider or internal compliance KB API</td></tr>
+<tr><td><code>tool-L1-figma-create-frame</code></td><td>Pushes generated wireframes into a Figma file as frames.</td><td>UX Wireframe Agent <em>(optional)</em></td><td>Figma API token</td></tr>
+<tr><td><code>tool-L1-db-schema-diff</code></td><td>Diffs a proposed schema against a live target-environment database.</td><td>Data Architect <em>(optional)</em></td><td>Read access to the target DB (brownfield-adjacent)</td></tr>
+<tr><td><code>tool-L1-github-fetch-file</code></td><td>Reads files from a GitHub repo — the base scaffold, or existing source for review.</td><td>API/UI Code Generators, Code Reviewer</td><td>GitHub API token/App scoped to the repo</td></tr>
+<tr><td><code>tool-L1-jira-fetch-issue</code></td><td>Fetches Jira issues — an adjacent backlog, epics/features to decompose, or an issue with its full nested child hierarchy — as fixed-schema JSON.</td><td>Backlog Prioritizer, Epic Creator, Jira Orchestrator</td><td>Jira base URL, user email, API token/OAuth scoped to the project</td></tr>
+<tr><td><code>tool-L1-jira-create-issue</code></td><td>Creates new Jira issues — cycle allocations, epics/features/stories/tasks from JSON — auto-linking cross-references in the same batch.</td><td>Feature Cycle Planner, Jira Orchestrator</td><td>Jira token/OAuth with issue-create permission</td></tr>
+<tr><td><code>tool-L1-jira-update-issue</code></td><td>Updates existing Jira issues — roadmap-band/cycle fields, status changes.</td><td>Roadmap Creator, Feature Cycle Planner, Jira Orchestrator</td><td>Jira token/OAuth with issue-edit permission</td></tr>
+<tr><td><code>tool-L1-github-upload-file</code></td><td>Commits generated files to a GitHub branch.</td><td>GitHub Orchestrator</td><td>GitHub API token/App with write access</td></tr>
+<tr><td><code>tool-L1-github-create-branch</code></td><td>Creates a new branch (e.g. <code>aava/impl-*</code>) before committing generated files.</td><td>GitHub Orchestrator</td><td>GitHub token/App with branch-create permission</td></tr>
+<tr><td><code>tool-L1-github-create-pr</code></td><td>Opens the pull request bundling Jira, design, code, and test references.</td><td>GitHub Orchestrator</td><td>GitHub token/App with PR-create permission</td></tr>
+<tr><td><code>tool-L1-xray-create-test</code></td><td>Creates test entries in XRay and links them back to their originating stories.</td><td>XRay Orchestrator</td><td>XRay/Jira API token scoped to the project</td></tr>
+<tr><td><code>tool-L1-confluence-reader</code></td><td>Reads a Confluence page's title and full body via REST (storage-format XHTML).</td><td>Any read-permitted orchestrator agent</td><td>Confluence API key + user email (Basic Auth)</td></tr>
+<tr><td><code>tool-L1-confluence-page-writer</code></td><td>Creates or appends to a Confluence page via a read-modify-write cycle; version bumping mandatory.</td><td>Any write-permitted orchestrator agent</td><td>Confluence API key + user email</td></tr>
+<tr><td><code>tool-L1-github-reader</code></td><td>Recursively reads and decodes every file under a folder in a repo branch.</td><td>Any read-permitted orchestrator agent</td><td>GitHub PAT (5,000 req/hr)</td></tr>
+<tr><td><code>tool-L1-github-writer</code></td><td>Creates a branch and commits files atomically; idempotent on branch name.</td><td>Any write-permitted orchestrator agent</td><td>GitHub token + repo owner</td></tr>
+<tr><td><code>tool-L1-jira-upload-epics</code></td><td>Creates Jira Epics and child Stories from an ordered payload, resolving logical parent IDs; supports dry-run.</td><td>Jira payload converter, write-permitted agents</td><td>Jira base URL, user email, API token</td></tr>
+<tr><td><code>tool-L1-azure-blob-reader</code></td><td>Reads the decoded text of every file under a blob prefix in one formatted string.</td><td>Any read-permitted orchestrator agent</td><td>Azure Blob connection string + container</td></tr>
+<tr><td><code>tool-L1-azure-blob-writer</code></td><td>Creates a blob prefix and uploads a file (path-traversal sanitized, 10 MB cap).</td><td>Any write-permitted orchestrator agent</td><td>Azure Blob connection string, container, URL</td></tr>
+<tr><td><code>AWS Secret Reader (Pod Identity)</code></td><td>Reads a named secret from AWS Secrets Manager and returns its key-value pairs.</td><td>Any agent needing a runtime credential lookup</td><td>AWS IAM Pod Identity bound to the service</td></tr>
+</tbody>
+</table></div>
+</div>
+<div class="tab-content" id="tab-data">
+<div class="tabdesc"><strong>Data</strong> — the data-migration and data-lineage agents (DMS PL/SQL→Python conversion, and DLAS ETL/lineage analysis). Names conformed to the agent naming standard.</div>
+<div class="subhead">Agents <span style="color:var(--gray-txt);font-weight:700;">(26)</span></div>
+<span class="phase" style="background:#0A7E8C;">DMS — PL/SQL → Python Migration</span>
+<div class="agent-card">
+<div class="name-row"><code>L1-dms-plsql-documenter</code> <span class="prev">was: L1 dms plsql documentation</span></div>
+<div class="desc">Analyzes the input PL/SQL code and generates comprehensive technical documentation — procedure/function definitions, package structures, variables, control flow, and database interactions — and identifies dependencies between tables, views, and other objects for a clear picture of the existing system before migration.</div>
+<div class="io-grid">
+<div class="io-panel"><h4>Inputs</h4>PL/SQL Source Code (.sql)
+<div class="src-line"><span class="src-human">Human:</span> uploaded source file</div></div>
+<div class="io-panel outputs"><h4>Outputs</h4><code>PLSQL_Documentation.md</code></div>
+</div>
+<div class="tags-row"><span><span class="tag-label">Tools:</span> <code>tool-L1-datetime-get-current-date</code></span></div>
+</div>
+<div class="agent-card">
+<div class="name-row"><code>L1-dms-plsql-to-python-analyzer</code> <span class="prev">was: L1 dms plsql to python analyzer</span></div>
+<div class="desc">Performs in-depth analysis of PL/SQL code to determine complexity and conversion readiness — cursors, joins, nested queries, exception handling, procedural logic — highlighting challenges and categorizing objects by complexity for better planning.</div>
+<div class="io-grid">
+<div class="io-panel"><h4>Inputs</h4>PL/SQL Source Code (.sql)
+<div class="src-line"><span class="src-human">Human:</span> uploaded source file</div></div>
+<div class="io-panel outputs"><h4>Outputs</h4><code>Analyzer_Summary.md</code></div>
+</div>
+<div class="tags-row"><span><span class="tag-label">Tools:</span> <code>tool-L1-datetime-get-current-date</code></span></div>
+</div>
+<div class="agent-card">
+<div class="name-row"><code>L1-dms-plsql-to-python-converter</code> <span class="prev">was: L1 dms plsql to python converter</span></div>
+<div class="desc">Converts PL/SQL into standard Python — procedures, functions, SQL queries, and control flow into equivalent Python constructs — with proper handling of variables, loops, and exceptions, producing clean, structured, executable code.</div>
+<div class="io-grid">
+<div class="io-panel"><h4>Inputs</h4>PL/SQL Source Code (.sql)
+<div class="src-line"><span class="src-human">Human:</span> uploaded source file</div></div>
+<div class="io-panel outputs"><h4>Outputs</h4>Converted Python Code (<code>.py</code>)</div>
+</div>
+<div class="tags-row"><span><span class="tag-label">Tools:</span> <code>tool-L1-datetime-get-current-date</code></span></div>
+</div>
+<div class="agent-card">
+<div class="name-row"><code>L1-dms-python-functional-tester</code> <span class="prev">was: L1 dms python functional tester</span></div>
+<div class="desc">Generates functional test scenarios to validate that the converted Python preserves the original business logic, defining cases based on expected input-output behavior and transformation rules.</div>
+<div class="io-grid">
+<div class="io-panel"><h4>Inputs</h4>Converted Python Code (.py)
+<div class="src-line"><span class="src-agent">Agent:</span> output of <code>L1-dms-plsql-to-python-converter</code></div></div>
+<div class="io-panel outputs"><h4>Outputs</h4><code>Functional_Test_Cases.md</code></div>
+</div>
+<div class="tags-row"><span><span class="tag-label">Tools:</span> <code>tool-L1-datetime-get-current-date</code></span></div>
+</div>
+<div class="agent-card">
+<div class="name-row"><code>L1-dms-plsql-to-python-unit-tester</code> <span class="prev">was: L1 dms plsql to python unit tester</span></div>
+<div class="desc">Creates unit test scripts for the converted Python using pytest, validating individual functions and components, covering edge cases, and ensuring each unit works correctly in isolation.</div>
+<div class="io-grid">
+<div class="io-panel"><h4>Inputs</h4>Converted Python Code (.py) + functional tester output
+<div class="src-line"><span class="src-agent">Agent:</span> outputs of <code>L1-dms-plsql-to-python-converter</code>, <code>L1-dms-python-functional-tester</code></div></div>
+<div class="io-panel outputs"><h4>Outputs</h4><code>Unit_Test_Scripts.py</code></div>
+</div>
+<div class="tags-row"><span><span class="tag-label">Tools:</span> <code>tool-L1-datetime-get-current-date</code></span></div>
+</div>
+<div class="agent-card">
+<div class="name-row"><code>L1-dms-plsql-to-python-recon-tester</code> <span class="prev">was: L1 dms plsql to python recon tester</span></div>
+<div class="desc">Performs data reconciliation between source PL/SQL and target Python — comparing row counts, aggregates, and detailed records to identify mismatches — ensuring data consistency and integrity after migration.</div>
+<div class="io-grid">
+<div class="io-panel"><h4>Inputs</h4>PL/SQL (.sql) + Converted Python (.py)
+<div class="src-line"><span class="src-human">Human:</span> uploaded PL/SQL source file<br><span class="src-agent">Agent:</span> output of <code>L1-dms-plsql-to-python-converter</code></div></div>
+<div class="io-panel outputs"><h4>Outputs</h4><code>Recon_Report.md</code></div>
+</div>
+<div class="tags-row"><span><span class="tag-label">Tools:</span> <code>tool-L1-datetime-get-current-date</code></span></div>
+</div>
+<div class="agent-card">
+<div class="name-row"><code>L1-dms-plsql-to-python-conversion-tester</code> <span class="prev">was: L1 dms plsql to python conversion tester</span></div>
+<div class="desc">Validates the converted Python logic by comparing outputs from the original PL/SQL and the transformed Python, ensuring transformation accuracy and highlighting discrepancies for correction.</div>
+<div class="io-grid">
+<div class="io-panel"><h4>Inputs</h4>PL/SQL (.sql) + Python (.py) + analyzer output
+<div class="src-line"><span class="src-human">Human:</span> uploaded PL/SQL source file<br><span class="src-agent">Agent:</span> outputs of converter, analyzer</div></div>
+<div class="io-panel outputs"><h4>Outputs</h4><code>Conversion_Test_Report.md</code></div>
+</div>
+<div class="tags-row"><span><span class="tag-label">Tools:</span> <code>tool-L1-datetime-get-current-date</code></span></div>
+</div>
+<div class="agent-card">
+<div class="name-row"><code>L1-dms-plsql-to-python-conversion-reviewer</code> <span class="prev">was: L1 dms plsql to python conversion reviewer</span></div>
+<div class="desc">Reviews the converted Python for correctness and completeness — verifying alignment with source logic, identifying missing or incorrect transformations, and providing actionable feedback.</div>
+<div class="io-grid">
+<div class="io-panel"><h4>Inputs</h4>Converted Python Code (.py)
+<div class="src-line"><span class="src-agent">Agent:</span> output of <code>L1-dms-plsql-to-python-converter</code></div></div>
+<div class="io-panel outputs"><h4>Outputs</h4><code>Conversion_Review_Report.md</code></div>
+</div>
+<div class="tags-row"><span><span class="tag-label">Tools:</span> <code>tool-L1-datetime-get-current-date</code></span></div>
+</div>
+<div class="agent-card">
+<div class="name-row"><code>L1-dms-python-code-standard-reviewer</code> <span class="prev">was: L1 dms python code standard review</span></div>
+<div class="desc">Evaluates the Python code against coding standards and best practices — readability, naming conventions, modular design, performance optimization, and error handling — to ensure production-ready quality.</div>
+<div class="io-grid">
+<div class="io-panel"><h4>Inputs</h4>Converted Python Code (.py)
+<div class="src-line"><span class="src-agent">Agent:</span> output of <code>L1-dms-plsql-to-python-converter</code></div></div>
+<div class="io-panel outputs"><h4>Outputs</h4><code>Code_Standard_Review_Report.md</code></div>
+</div>
+<div class="tags-row"><span><span class="tag-label">Tools:</span> <code>tool-L1-datetime-get-current-date</code></span></div>
+</div>
+<span class="phase" style="background:#5E35B1;">DLAS — ETL / Data-Lineage Analysis</span>
+<div class="agent-card">
+<div class="name-row"><code>L1-dlas-plsql-asset-rationalizer</code> <span class="prev">was: L1 dlas plsql asset rationalizer</span></div>
+<div class="desc">Parses package definitions and configuration files to catalog every pipeline, data flow, source, and target, then maps their dependencies. Flags duplicate/overlapping logic, unused components, and bottlenecked designs, and closes with consolidation, optimization, and modularization recommendations.</div>
+<div class="io-grid">
+<div class="io-panel"><h4>Inputs</h4>Stored procedure.sql
+<div class="src-line"><span class="src-human">Human:</span> uploaded source file</div></div>
+<div class="io-panel outputs"><h4>Outputs</h4><code>asset rationalizer.md</code></div>
+</div>
+<div class="tags-row"><span><span class="tag-label">Tools:</span> —</span><span><span class="tag-label">Knowledge Bases:</span> —</span><span><span class="tag-label">Guardrails:</span> —</span></div>
+</div>
+<div class="agent-card">
+<div class="name-row"><code>L1-dlas-plsql-program-mapper</code> <span class="prev">was: L1 dlas plsql program mapper</span></div>
+<div class="desc">Reads raw ETL program content and breaks it into its core building blocks — orchestration units, sessions, and transformation steps — mapping each to its equivalent construct on the target platform, and estimates size, complexity, and conversion automation potential.</div>
+<div class="io-grid">
+<div class="io-panel"><h4>Inputs</h4>Stored procedure.sql
+<div class="src-line"><span class="src-human">Human:</span> uploaded source file</div></div>
+<div class="io-panel outputs"><h4>Outputs</h4><code>program mapper.md</code></div>
+</div>
+<div class="tags-row"><span><span class="tag-label">Tools:</span> —</span><span><span class="tag-label">Knowledge Bases:</span> —</span><span><span class="tag-label">Guardrails:</span> —</span></div>
+</div>
+<div class="agent-card">
+<div class="name-row"><code>L1-dlas-plsql-design-pattern-detector</code> <span class="prev">was: L1 dlas plsql design pattern</span></div>
+<div class="desc">Reviews SQL scripts and stored procedures and tags each piece of logic — sources, transformations, DML, platform-specific features — with a standardized pattern code, documenting for each how that behavior should be implemented on the target platform.</div>
+<div class="io-grid">
+<div class="io-panel"><h4>Inputs</h4>Stored procedure.sql
+<div class="src-line"><span class="src-human">Human:</span> uploaded source file</div></div>
+<div class="io-panel outputs"><h4>Outputs</h4><code>design pattern.md</code></div>
+</div>
+<div class="tags-row"><span><span class="tag-label">Tools:</span> —</span><span><span class="tag-label">Knowledge Bases:</span> —</span><span><span class="tag-label">Guardrails:</span> —</span></div>
+</div>
+<div class="agent-card">
+<div class="name-row"><code>L1-dlas-plsql-documenter</code> <span class="prev">was: L1 dlas plsql documentation</span></div>
+<div class="desc">Analyzes stored procedures line by line to extract technical structure, business purpose, and data lineage. Scores complexity, flags optimization opportunities and technical debt, and produces a structured record for governance and knowledge transfer.</div>
+<div class="io-grid">
+<div class="io-panel"><h4>Inputs</h4>Stored procedure.sql
+<div class="src-line"><span class="src-human">Human:</span> uploaded source file</div></div>
+<div class="io-panel outputs"><h4>Outputs</h4><code>documentation.md</code></div>
+</div>
+<div class="tags-row"><span><span class="tag-label">Tools:</span> —</span><span><span class="tag-label">Knowledge Bases:</span> —</span><span><span class="tag-label">Guardrails:</span> —</span></div>
+</div>
+<div class="agent-card">
+<div class="name-row"><code>L1-dlas-plsql-architecture-mapper</code> <span class="prev">was: L1 dlas plsql architecture</span></div>
+<div class="desc">Infers the layered data architecture implied by previously detected design patterns, assigning each object to a layer — landing, staging, curated, or reporting — and reconstructs the data flow as connected nodes, each backed by reasoning tied to specific patterns.</div>
+<div class="io-grid">
+<div class="io-panel"><h4>Inputs</h4>Design pattern.md
+<div class="src-line"><span class="src-agent">Agent:</span> Output of <code>L1-dlas-plsql-design-pattern-detector</code></div></div>
+<div class="io-panel outputs"><h4>Outputs</h4><code>Source architecture.md</code></div>
+</div>
+<div class="tags-row"><span><span class="tag-label">Tools:</span> —</span><span><span class="tag-label">Knowledge Bases:</span> —</span><span><span class="tag-label">Guardrails:</span> —</span></div>
+</div>
+<div class="agent-card">
+<div class="name-row"><code>L1-dlas-plsql-to-python-architecture-designer</code> <span class="prev">was: L1 dlas plsql to python architecture</span></div>
+<div class="desc">Takes an existing source-system architecture and produces two alternative target designs — one mirroring the original, one modernized for the target platform's native capabilities — documenting the reasoning per layer and summarizing key differences.</div>
+<div class="io-grid">
+<div class="io-panel"><h4>Inputs</h4>design pattern.md; source architecture.md
+<div class="src-line"><span class="src-agent">Agent:</span> Output of design-pattern-detector and architecture-mapper</div></div>
+<div class="io-panel outputs"><h4>Outputs</h4><code>target architecture.md</code></div>
+</div>
+<div class="tags-row"><span><span class="tag-label">Tools:</span> —</span><span><span class="tag-label">Knowledge Bases:</span> —</span><span><span class="tag-label">Guardrails:</span> —</span></div>
+</div>
+<div class="agent-card">
+<div class="name-row"><code>L1-dlas-plsql-to-python-analyzer</code> <span class="prev">was: L1 dlas plsql to python analyzer</span></div>
+<div class="desc">Evaluates each ETL object for migration difficulty — scoring automated conversion feasibility, transformation complexity, and testing effort — and recommends migrate-as-is vs rebuild, every sizing decision backed by specific evidence.</div>
+<div class="io-grid">
+<div class="io-panel"><h4>Inputs</h4>stored procedure.sql; domain mapper.xlsx
+<div class="src-line"><span class="src-human">Human:</span> uploaded source files</div></div>
+<div class="io-panel outputs"><h4>Outputs</h4><code>analyzer.md</code></div>
+</div>
+<div class="tags-row"><span><span class="tag-label">Tools:</span> —</span><span><span class="tag-label">Knowledge Bases:</span> —</span><span><span class="tag-label">Guardrails:</span> —</span></div>
+</div>
+<div class="agent-card">
+<div class="name-row"><code>L1-dlas-plsql-to-python-summarizer</code> <span class="prev">was: L1 dlas plsql to python summarizer</span></div>
+<div class="desc">Consolidates detailed findings from many analyzed objects into a single aggregate summary, grouping and counting objects by business domain, type, and assigned sizing — a compact reference table rather than a repeat of each object's detail.</div>
+<div class="io-grid">
+<div class="io-panel"><h4>Inputs</h4>analyzer.md
+<div class="src-line"><span class="src-agent">Agent:</span> Output of <code>L1-dlas-plsql-to-python-analyzer</code></div></div>
+<div class="io-panel outputs"><h4>Outputs</h4><code>summarizer.md</code></div>
+</div>
+<div class="tags-row"><span><span class="tag-label">Tools:</span> —</span><span><span class="tag-label">Knowledge Bases:</span> —</span><span><span class="tag-label">Guardrails:</span> —</span></div>
+</div>
+<div class="agent-card">
+<div class="name-row"><code>L1-dlas-plsql-to-python-planner</code> <span class="prev">was: L1 dlas plsql to python planner</span></div>
+<div class="desc">Turns a summarized inventory, a risk/timeline narrative, and a database inventory into a full migration plan — sequenced waves by business domain, effort/timeline per wave, a delivery team structure, and key risks and change-management considerations.</div>
+<div class="io-grid">
+<div class="io-panel"><h4>Inputs</h4>summarizer.md
+<div class="src-line"><span class="src-agent">Agent:</span> Output of <code>L1-dlas-plsql-to-python-summarizer</code></div></div>
+<div class="io-panel outputs"><h4>Outputs</h4><code>planner.md</code></div>
+</div>
+<div class="tags-row"><span><span class="tag-label">Tools:</span> —</span><span><span class="tag-label">Knowledge Bases:</span> —</span><span><span class="tag-label">Guardrails:</span> —</span></div>
+</div>
+<div class="agent-card">
+<div class="name-row"><code>L1-dlas-plsql-to-python-glossary-generator</code> <span class="prev">was: L1 dlas plsql to python glossary</span></div>
+<div class="desc">Reads a full inventory of source tables and attributes with business context per domain, then generates a plain-English business glossary with a short description for every table and attribute, organized by domain.</div>
+<div class="io-grid">
+<div class="io-panel"><h4>Inputs</h4>Source data scoping.xlsx; Domain mapping.xlsx
+<div class="src-line"><span class="src-agent">Agent:</span> Partial output from asset-rationalizer and plsql-to-python-analyzer</div></div>
+<div class="io-panel outputs"><h4>Outputs</h4><code>glossary.md</code></div>
+</div>
+<div class="tags-row"><span><span class="tag-label">Tools:</span> —</span><span><span class="tag-label">Knowledge Bases:</span> —</span><span><span class="tag-label">Guardrails:</span> —</span></div>
+</div>
+<div class="agent-card">
+<div class="name-row"><code>L1-dlas-plsql-to-python-orchestration-mapper</code> <span class="prev">was: L1 dlas plsql to python orchestration</span></div>
+<div class="desc">Reconstructs the full execution order of a workflow by chaining every session and task from the true start to the true end, rather than leaving related steps as disconnected fragments — classifying each step by processing type and linking success/failure handling.</div>
+<div class="io-grid">
+<div class="io-panel"><h4>Inputs</h4>asset rationalizer.md
+<div class="src-line"><span class="src-agent">Agent:</span> Output of <code>L1-dlas-plsql-asset-rationalizer</code></div></div>
+<div class="io-panel outputs"><h4>Outputs</h4><code>orchestration.md</code></div>
+</div>
+<div class="tags-row"><span><span class="tag-label">Tools:</span> —</span><span><span class="tag-label">Knowledge Bases:</span> —</span><span><span class="tag-label">Guardrails:</span> —</span></div>
+</div>
+<div class="agent-card">
+<div class="name-row"><code>L1-dlas-plsql-to-python-rules-classifier</code> <span class="prev">was: L1 dlas plsql to python rules classification</span></div>
+<div class="desc">Extracts every distinct business and data-quality rule embedded in source code — validations, transformations, joins, deduplication, reference-data lookups — and classifies each by category and by the processing layer where it should be enforced, with a plain-language description and a confidence level.</div>
+<div class="io-grid">
+<div class="io-panel"><h4>Inputs</h4>stored procedure.sql; domain mapping.xlsx
+<div class="src-line"><span class="src-human">Human:</span> uploaded source files</div></div>
+<div class="io-panel outputs"><h4>Outputs</h4><code>rules classification.md</code></div>
+</div>
+<div class="tags-row"><span><span class="tag-label">Tools:</span> —</span><span><span class="tag-label">Knowledge Bases:</span> —</span><span><span class="tag-label">Guardrails:</span> —</span></div>
+</div>
+<div class="agent-card">
+<div class="name-row"><code>L1-dlas-plsql-to-python-business-requirement-generator</code> <span class="prev">was: L1 plsql to python business requirement</span></div>
+<div class="desc">Synthesizes program documentation, the business glossary, data-quality rules, and cross-domain dependencies into a full business requirements document for non-technical stakeholders — the domains involved, how they interact, the governing rules, and inferred governance considerations, in plain business language.</div>
+<div class="io-grid">
+<div class="io-panel"><h4>Inputs</h4>documentation.xlsx; glossary.xlsx; dependency.xlsx; rules.xlsx
+<div class="src-line"><span class="src-agent">Agent:</span> Partial outputs from glossary-generator, documenter, asset-rationalizer, rules-classifier</div></div>
+<div class="io-panel outputs"><h4>Outputs</h4><code>business requirement.md</code></div>
+</div>
+<div class="tags-row"><span><span class="tag-label">Tools:</span> —</span><span><span class="tag-label">Knowledge Bases:</span> —</span><span><span class="tag-label">Guardrails:</span> —</span></div>
+</div>
+<div class="agent-card">
+<div class="name-row"><code>L1-dlas-plsql-to-python-streaming-classifier</code> <span class="prev">was: L1 dlas plsql to python Streaming Classifier</span></div>
+<div class="desc">Reviews every business rule identified in a program and determines whether it could run as-is under real-time streaming, would need windowed processing, or would require a redesign before it could stream at all.</div>
+<div class="io-grid">
+<div class="io-panel"><h4>Inputs</h4>rules.xlsx; documentation.xlsx
+<div class="src-line"><span class="src-agent">Agent:</span> Output of documenter, rules-classifier</div></div>
+<div class="io-panel outputs"><h4>Outputs</h4><code>streaming.md</code></div>
+</div>
+<div class="tags-row"><span><span class="tag-label">Tools:</span> —</span><span><span class="tag-label">Knowledge Bases:</span> —</span><span><span class="tag-label">Guardrails:</span> —</span></div>
+</div>
+<div class="agent-card">
+<div class="name-row"><code>L1-dlas-plsql-to-python-pipeline-dependency-analyzer</code> <span class="prev">was: L1 dlas plsql to python Pipeline Dependency Analyzer</span></div>
+<div class="desc">Builds the full execution order of a set of procedures based on their dependencies — identifying which can run independently, which must wait on others, and which act as blocking points across the pipeline.</div>
+<div class="io-grid">
+<div class="io-panel"><h4>Inputs</h4>documentation.xlsx; dependency.xlsx
+<div class="src-line"><span class="src-agent">Agent:</span> Output of documenter, partial output of asset-rationalizer</div></div>
+<div class="io-panel outputs"><h4>Outputs</h4><code>pipeline dependency.md</code></div>
+</div>
+<div class="tags-row"><span><span class="tag-label">Tools:</span> —</span><span><span class="tag-label">Knowledge Bases:</span> —</span><span><span class="tag-label">Guardrails:</span> —</span></div>
+</div>
+<div class="agent-card">
+<div class="name-row"><code>L1-dlas-plsql-to-python-streaming-readiness-scorer</code> <span class="prev">was: L1 dlas plsql to python Streaming Readiness Scorer</span></div>
+<div class="desc">Scores each remaining procedure across five readiness dimensions for a streaming migration, then assigns it to a migration wave. Low-value or duplicate procedures from earlier stages are eliminated from the carried-forward list.</div>
+<div class="io-grid">
+<div class="io-panel"><h4>Inputs</h4>streaming.md; pipeline dependency.md
+<div class="src-line"><span class="src-agent">Agent:</span> Output of streaming-classifier, pipeline-dependency-analyzer</div></div>
+<div class="io-panel outputs"><h4>Outputs</h4><code>streaming readiness score.md</code></div>
+</div>
+<div class="tags-row"><span><span class="tag-label">Tools:</span> —</span><span><span class="tag-label">Knowledge Bases:</span> —</span><span><span class="tag-label">Guardrails:</span> —</span></div>
+</div>
+<div class="agent-card">
+<div class="name-row"><code>L1-dlas-plsql-to-python-real-time-architecture-recommender</code> <span class="prev">was: L1 dlas plsql to python Real-Time Architecture Recommender</span></div>
+<div class="desc">Draws on every prior stage plus a stated target-platform requirement to produce a complete real-time architecture recommendation — a layer-by-layer design, a migration roadmap, and a risk register — so the team can make an informed platform decision.</div>
+<div class="io-grid">
+<div class="io-panel"><h4>Inputs</h4>streaming.md; pipeline dependency.md; streaming readiness score.md; target requirement.txt
+<div class="src-line"><span class="src-agent">Agent:</span> Output of streaming-classifier, pipeline-dependency-analyzer, streaming-readiness-scorer<br><span class="src-human">Human:</span> target platform and cloud name</div></div>
+<div class="io-panel outputs"><h4>Outputs</h4><code>real time.md</code></div>
+</div>
+<div class="tags-row"><span><span class="tag-label">Tools:</span> —</span><span><span class="tag-label">Knowledge Bases:</span> —</span><span><span class="tag-label">Guardrails:</span> —</span></div>
+</div>
+<div class="subhead">Tools <span style="color:var(--gray-txt);font-weight:700;">(1)</span></div>
+<div class="table-wrap"><table>
+<thead><tr><th>Tool</th><th>What It Does</th><th>Used By</th><th>What It Needs</th></tr></thead>
+<tbody>
+<tr><td><code>tool-L1-datetime-get-current-date</code></td><td>Supplies the current system date/timestamp at runtime, so generated documentation, reports, and code artifacts can be accurately dated.</td><td>All 9 DMS agents in this catalog</td><td>Runtime clock access <em>(was: L1 Current Date Provider)</em></td></tr>
+</tbody>
+</table></div>
+</div>
+<div class="tab-content" id="tab-ops">
+<div class="tabdesc"><strong>Operations</strong> — reserved for live-service and run-time operations agents (monitoring, incident response, deployment, SRE). No agents populated yet.</div>
+<div style="text-align:center;padding:60px 20px;color:var(--gray-txt);border:2px dashed var(--gray-mid);border-radius:12px;margin:16px 0;">
+<div style="font-size:42px;margin-bottom:8px;">&#128295;</div>
+<div style="font-size:16px;font-weight:700;color:var(--charcoal);margin-bottom:4px;">Operations agents coming soon</div>
+<div style="font-size:13.5px;">This section is intentionally empty for now.</div>
+</div>
+</div>
+</div>
+<div style="text-align:center;padding:20px 0;font-size:13px;color:var(--gray-txt);">Copyright Ascendion 2026</div>
+<script>
+function showTab(id, btn){
+  document.querySelectorAll('.tab-content').forEach(function(t){t.classList.remove('active');});
+  document.querySelectorAll('.tab-btn').forEach(function(b){b.classList.remove('active');});
+  document.getElementById('tab-'+id).classList.add('active');
+  btn.classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+</script>
+</body></html>

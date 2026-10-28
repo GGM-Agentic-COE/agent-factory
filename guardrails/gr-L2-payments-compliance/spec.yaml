@@ -1,0 +1,36 @@
+spec_version: "1.0"
+artifact_type: guardrail
+metadata:
+  name: gr-L2-payments-compliance
+  version: "1.0.0"
+  layer: L2
+  owner: domain-ai-champion
+  implementation: colang
+
+purpose:
+  description: "Validate PSD2/SCA regulatory references and payments domain compliance"
+
+triggers_on:
+  - post_execution
+
+on_fail: block_and_escalate
+applies_to: payments_domain_agents
+
+rules:
+  - name: regulatory-accuracy
+    description: "All cited regulations must exist and be correctly referenced"
+    action: block
+    severity: critical
+
+  - name: sca-requirements
+    description: "Payment stories must include SCA where applicable"
+    action: flag
+    severity: high
+
+  - name: terminology-check
+    description: "Domain terms must match payments KB definitions"
+    action: flag
+    severity: medium
+
+evaluation:
+  false_positive_threshold: 0.05

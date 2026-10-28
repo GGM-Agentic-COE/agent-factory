@@ -1,0 +1,18 @@
+prompts:
+  - task: self_check_output
+    content: |
+      Agent output: {{ bot_response }}
+
+      Check if ALL of these audit trail fields are present and non-empty:
+      1. agent_id (format: L[0-4]-*-agent)
+      2. execution_id (format: exec-*)
+      3. agent_version (format: x.y.z)
+      4. input_summary.source (one of: agent_output, direct_input, file_upload)
+      5. input_summary.parameters (non-empty object)
+      6. output.type (one of: story, epic, test_case, code, design, document, decision, api_spec, config, report, fact)
+      7. output.schema_version (non-empty string)
+
+      Also check:
+      - Any PII in parameters (emails, phones, SSNs) should be flagged.
+
+      Answer "yes" if ALL fields are present and valid. Answer "no" if ANY field is missing or invalid.

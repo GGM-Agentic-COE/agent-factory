@@ -1,0 +1,362 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">
+<title>{Agent Catalog}</title>
+<style>
+:root{--navy:#1B2A4A;--teal:#0A7E8C;--teal-lt:#E8F6F7;--amber:#D4880F;--gray:#F4F5F7;--gray-mid:#E0E3E8;--gray-txt:#666;--charcoal:#2D3748;--idea:#AD1457;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:Calibri,Candara,Segoe,"Segoe UI",Optima,Arial,sans-serif;background:#fff;color:var(--charcoal);font-size:16px;}
+.page{max-width:1500px;margin:0 auto;padding:28px;}
+h1{font-size:30px;}
+h2{font-size:21px;font-weight:800;color:var(--navy);margin:34px 0 12px;}
+h3{font-size:14px;font-weight:700;color:var(--gray-txt);text-transform:uppercase;letter-spacing:.5px;margin:6px 0 12px;}
+h4{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin:0 0 6px;color:var(--gray-txt);}
+.sub{font-size:14px;color:var(--gray-txt);margin-bottom:8px;}
+.subhead{font-size:16px;font-weight:800;color:var(--teal);margin:22px 0 14px;padding-bottom:6px;border-bottom:2px solid var(--teal-lt);}
+code{background:#E5E7EB;padding:2px 6px;border-radius:4px;font-size:13.5px;white-space:nowrap;font-family:Consolas,Calibri,monospace;}
+.src-ext{color:#8a4400;font-weight:600;}
+.src-agent{color:var(--teal);font-weight:600;}
+.src-human{color:var(--idea);font-weight:600;}
+.src-kb{color:var(--amber);font-weight:600;}
+.legend{display:flex;gap:18px;flex-wrap:wrap;margin:12px 0 20px;font-size:13px;}
+.legend-item{display:flex;align-items:center;gap:6px;}
+.navpills{display:flex;gap:12px;margin-top:14px;}
+.navpills a{display:inline-block;padding:8px 20px;border-radius:20px;background:rgba(255,255,255,.15);color:#fff;font-weight:700;font-size:14px;text-decoration:none;border:1px solid rgba(255,255,255,.35);}
+.navpills a:hover{background:rgba(255,255,255,.28);}
+.agent-card{border:1px solid var(--gray-mid);border-radius:10px;padding:18px 20px;margin-bottom:16px;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.03);}
+.agent-card .name-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap;}
+.agent-card .name-row code{font-size:16px;background:var(--navy);color:#fff;padding:4px 10px;}
+.agent-card .desc{font-size:15.5px;line-height:1.65;margin-bottom:14px;color:var(--charcoal);}
+.io-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;}
+.io-panel{background:var(--gray);border-radius:8px;padding:12px 14px;font-size:14.5px;line-height:1.55;}
+.io-panel.outputs{background:var(--teal-lt);}
+.io-panel .src-line{margin-top:6px;font-size:13px;color:var(--gray-txt);}
+.tags-row{display:flex;flex-wrap:wrap;gap:16px;font-size:13.5px;color:var(--gray-txt);border-top:1px dashed var(--gray-mid);padding-top:10px;}
+.tag-label{font-weight:700;color:var(--charcoal);margin-right:4px;}
+.table-wrap{overflow-x:auto;border:1px solid var(--gray-mid);border-radius:8px;margin-bottom:10px;}
+table{width:100%;border-collapse:collapse;font-size:14px;min-width:700px;}
+th{padding:10px 12px;background:var(--navy);color:#fff;font-weight:700;font-size:13px;text-transform:uppercase;text-align:left;}
+td{padding:10px 12px;border-bottom:1px solid var(--gray-mid);vertical-align:top;line-height:1.55;}
+tbody tr:nth-child(even) td{background:#FAFBFC;}
+tbody tr:hover td{background:#F0F4F8;}
+</style></head><body>
+
+<div style="background:linear-gradient(135deg,var(--navy),#2A3F6A);padding:26px 40px;color:#fff;">
+<div style="max-width:1500px;margin:0 auto;">
+<h1 style="font-size:30px;font-weight:800;">{Agent Catalog}</h1>
+<p style="opacity:.75;font-size:14px;margin-top:6px;">Combined DMS and DLAS agent catalog — what each agent is expected to do, with its inputs and outputs, side by side.</p>
+<div class="navpills"><a href="#agents">Agents</a><a href="#tools">Tools</a></div>
+</div></div>
+
+<div class="page">
+
+<h3>Input Source Legend</h3>
+<div class="legend">
+<div class="legend-item"><span class="src-human">●</span> Human-authored (file uploaded by the user)</div>
+<div class="legend-item"><span class="src-ext">●</span> External system of record</div>
+<div class="legend-item"><span class="src-agent">●</span> Prior agent output, passed as workflow context (no external fetch)</div>
+<div class="legend-item"><span class="src-kb">●</span> Knowledge base (retrieved at inference time, not passed as workflow input)</div>
+</div>
+
+<h2 id="agents">Agents</h2>
+<p class="sub">26 agents currently in the catalog (9 DMS, 17 DLAS). Each card gives a description of what the agent is expected to do, with its inputs and outputs laid out side by side, plus the tools, knowledge bases, and guardrails it uses.</p>
+
+<div class="subhead">DMS Agents</div>
+<div class="agent-card">
+<div class="name-row"><code>L1 dms plsql documentation</code></div>
+<div class="desc">This agent analyzes the input PL/SQL code and generates comprehensive technical documentation. It captures procedure and function definitions, package structures, variables, control flow (loops and conditions), and database interactions. It also identifies dependencies between tables, views, and other objects, providing a clear understanding of the existing system before migration.</div>
+<div class="io-grid">
+<div class="io-panel"><h4>Input File</h4>PL/SQL Source Code (.sql)
+<div class="src-line"><span class="src-human">Human:</span> uploaded source file</div></div>
+<div class="io-panel outputs"><h4>Output File</h4><code>PLSQL_Documentation.md</code></div>
+</div>
+<div class="tags-row"><span><span class="tag-label">Tools:</span> <code>L1 Current Date Provider</code></span></div>
+</div>
+
+<div class="agent-card">
+<div class="name-row"><code>L1 dms plsql to python analyzer</code></div>
+<div class="desc">This agent performs in-depth analysis of PL/SQL code to determine complexity and conversion readiness. It identifies cursors, joins, nested queries, exception handling, and procedural logic. It also highlights potential challenges and categorizes objects based on complexity, enabling better planning for conversion and testing.</div>
+<div class="io-grid">
+<div class="io-panel"><h4>Input File</h4>PL/SQL Source Code (.sql)
+<div class="src-line"><span class="src-human">Human:</span> uploaded source file</div></div>
+<div class="io-panel outputs"><h4>Output File</h4><code>Analyzer_Summary.md</code></div>
+</div>
+<div class="tags-row"><span><span class="tag-label">Tools:</span> <code>L1 Current Date Provider</code></span></div>
+</div>
+
+<div class="agent-card">
+<div class="name-row"><code>L1 dms plsql to python converter</code></div>
+<div class="desc">This agent converts PL/SQL code into standard Python code. It transforms procedures, functions, SQL queries, and control flow logic into equivalent Python constructs. It ensures proper handling of variables, loops, and exception handling while generating clean, structured, and executable Python code.</div>
+<div class="io-grid">
+<div class="io-panel"><h4>Input File</h4>PL/SQL Source Code (.sql)
+<div class="src-line"><span class="src-human">Human:</span> uploaded source file</div></div>
+<div class="io-panel outputs"><h4>Output File</h4>Converted Python Code (<code>.py</code>)</div>
+</div>
+<div class="tags-row"><span><span class="tag-label">Tools:</span> <code>L1 Current Date Provider</code></span></div>
+</div>
+
+<div class="agent-card">
+<div class="name-row"><code>L1 dms python functional tester</code></div>
+<div class="desc">This agent generates functional test scenarios to validate that the converted Python code preserves the original business logic. It defines test cases based on expected input-output behavior and transformation rules, ensuring the solution meets functional requirements.</div>
+<div class="io-grid">
+<div class="io-panel"><h4>Input File</h4>Converted Python Code (.py)
+<div class="src-line"><span class="src-agent">Agent:</span> output of <code>L1 dms plsql to python converter</code></div></div>
+<div class="io-panel outputs"><h4>Output File</h4><code>Functional_Test_Cases.md</code></div>
+</div>
+<div class="tags-row"><span><span class="tag-label">Tools:</span> <code>L1 Current Date Provider</code></span></div>
+</div>
+
+<div class="agent-card">
+<div class="name-row"><code>L1 dms plsql to python unit tester</code></div>
+<div class="desc">This agent creates unit test scripts for the converted Python code using frameworks like pytest. It validates individual functions and components, covering edge cases and ensuring each unit of code works correctly in isolation.</div>
+<div class="io-grid">
+<div class="io-panel"><h4>Input File</h4>Converted Python Code (.py) and output of <code>L1 dms python functional tester</code>
+<div class="src-line"><span class="src-agent">Agent:</span> outputs of <code>L1 dms plsql to python converter</code>, <code>L1 dms python functional tester</code></div></div>
+<div class="io-panel outputs"><h4>Output File</h4><code>Unit_Test_Scripts.py</code></div>
+</div>
+<div class="tags-row"><span><span class="tag-label">Tools:</span> <code>L1 Current Date Provider</code></span></div>
+</div>
+
+<div class="agent-card">
+<div class="name-row"><code>L1 dms plsql to python recon tester</code></div>
+<div class="desc">This agent performs data reconciliation between source (PL/SQL Source Code (.sql)) and target (Converted Python Code (.py)). It compares row counts, aggregates, and detailed records to identify mismatches, ensuring data consistency and integrity after migration.</div>
+<div class="io-grid">
+<div class="io-panel"><h4>Input File</h4>PL/SQL Source Code (.sql) and Converted Python Code (.py)
+<div class="src-line"><span class="src-human">Human:</span> uploaded PL/SQL source file<br><span class="src-agent">Agent:</span> output of <code>L1 dms plsql to python converter</code></div></div>
+<div class="io-panel outputs"><h4>Output File</h4><code>Recon_Report.md</code></div>
+</div>
+<div class="tags-row"><span><span class="tag-label">Tools:</span> <code>L1 Current Date Provider</code></span></div>
+</div>
+
+<div class="agent-card">
+<div class="name-row"><code>L1 dms plsql to python conversion tester</code></div>
+<div class="desc">This agent validates the converted Python logic by comparing outputs from the original PL/SQL code and the transformed Python code. It ensures transformation accuracy and highlights discrepancies for correction.</div>
+<div class="io-grid">
+<div class="io-panel"><h4>Input File</h4>PL/SQL Source Code (.sql) + Converted Python Code (.py) and output of <code>L1 dms plsql to python analyzer</code>
+<div class="src-line"><span class="src-human">Human:</span> uploaded PL/SQL source file<br><span class="src-agent">Agent:</span> outputs of <code>L1 dms plsql to python converter</code>, <code>L1 dms plsql to python analyzer</code></div></div>
+<div class="io-panel outputs"><h4>Output File</h4><code>Conversion_Test_Report.md</code></div>
+</div>
+<div class="tags-row"><span><span class="tag-label">Tools:</span> <code>L1 Current Date Provider</code></span></div>
+</div>
+
+<div class="agent-card">
+<div class="name-row"><code>L1 dms plsql to python conversion reviewer</code></div>
+<div class="desc">This agent reviews the converted Python code to ensure correctness and completeness. It verifies alignment with source logic, identifies missing or incorrect transformations, and provides actionable feedback for improvement.</div>
+<div class="io-grid">
+<div class="io-panel"><h4>Input File</h4>Converted Python Code (.py)
+<div class="src-line"><span class="src-agent">Agent:</span> output of <code>L1 dms plsql to python converter</code></div></div>
+<div class="io-panel outputs"><h4>Output File</h4><code>Conversion_Review_Report.md</code></div>
+</div>
+<div class="tags-row"><span><span class="tag-label">Tools:</span> <code>L1 Current Date Provider</code></span></div>
+</div>
+
+<div class="agent-card">
+<div class="name-row"><code>L1 dms python code standard review</code></div>
+<div class="desc">This agent evaluates the Python code against coding standards and best practices. It checks for readability, naming conventions, modular design, performance optimization, and error handling to ensure production-ready code quality.</div>
+<div class="io-grid">
+<div class="io-panel"><h4>Input File</h4>Converted Python Code (.py)
+<div class="src-line"><span class="src-agent">Agent:</span> output of <code>L1 dms plsql to python converter</code></div></div>
+<div class="io-panel outputs"><h4>Output File</h4><code>Code_Standard_Review_Report.md</code></div>
+</div>
+<div class="tags-row"><span><span class="tag-label">Tools:</span> <code>L1 Current Date Provider</code></span></div>
+</div>
+
+<div class="subhead">DLAS Agents</div>
+<div class="agent-card">
+<div class="name-row"><code>L1 dlas plsql asset rationalizer</code></div>
+<div class="desc">Parses raw package definition files and their supporting configuration files to catalog every pipeline, data flow, source, and target, then maps the dependencies between them. It flags duplicate or overlapping logic, unused components, and inefficient or bottlenecked designs, and closes with consolidation, optimization, and modularization recommendations.</div>
+<div class="io-grid">
+<div class="io-panel"><h4>Inputs</h4>Stored procedure.sql
+<div class="src-line"><span class="src-human">Human:</span> uploaded source file</div></div>
+<div class="io-panel outputs"><h4>Outputs</h4><code>asset rationalizer.md</code></div>
+</div>
+<div class="tags-row"><span><span class="tag-label">Tools:</span> —</span><span><span class="tag-label">Knowledge Bases:</span> —</span><span><span class="tag-label">Guardrails:</span> —</span></div>
+</div>
+
+<div class="agent-card">
+<div class="name-row"><code>L1 dlas plsql program mapper</code></div>
+<div class="desc">Reads raw ETL program content and breaks it down into its core building blocks — orchestration units, execution sessions, and individual transformation steps — then maps each one to its equivalent construct on the target platform. It also estimates the size and complexity of each object and how much of its conversion could be automated without manual rework.</div>
+<div class="io-grid">
+<div class="io-panel"><h4>Inputs</h4>Stored procedure.sql
+<div class="src-line"><span class="src-human">Human:</span> uploaded source file</div></div>
+<div class="io-panel outputs"><h4>Outputs</h4><code>program mapper.md</code></div>
+</div>
+<div class="tags-row"><span><span class="tag-label">Tools:</span> —</span><span><span class="tag-label">Knowledge Bases:</span> —</span><span><span class="tag-label">Guardrails:</span> —</span></div>
+</div>
+
+<div class="agent-card">
+<div class="name-row"><code>L1 dlas plsql design pattern</code></div>
+<div class="desc">Reviews SQL scripts and stored procedures and tags each piece of logic — sources, transformations, DML operations, and platform-specific features — with a standardized pattern code. For every pattern it finds, it documents how that same behavior should be implemented on the target platform.</div>
+<div class="io-grid">
+<div class="io-panel"><h4>Inputs</h4>Stored procedure.sql
+<div class="src-line"><span class="src-human">Human:</span> uploaded source file</div></div>
+<div class="io-panel outputs"><h4>Outputs</h4><code>design pattern.md</code></div>
+</div>
+<div class="tags-row"><span><span class="tag-label">Tools:</span> —</span><span><span class="tag-label">Knowledge Bases:</span> —</span><span><span class="tag-label">Guardrails:</span> —</span></div>
+</div>
+
+<div class="agent-card">
+<div class="name-row"><code>L1 dlas plsql documentation</code></div>
+<div class="desc">Analyzes stored procedures line by line to extract their technical structure, business purpose, and data lineage. It scores overall complexity, flags optimization opportunities and technical debt, and produces a structured record suitable for governance and knowledge transfer.</div>
+<div class="io-grid">
+<div class="io-panel"><h4>Inputs</h4>Stored procedure.sql
+<div class="src-line"><span class="src-human">Human:</span> uploaded source file</div></div>
+<div class="io-panel outputs"><h4>Outputs</h4><code>documentation.md</code></div>
+</div>
+<div class="tags-row"><span><span class="tag-label">Tools:</span> —</span><span><span class="tag-label">Knowledge Bases:</span> —</span><span><span class="tag-label">Guardrails:</span> —</span></div>
+</div>
+
+<div class="agent-card">
+<div class="name-row"><code>L1 dlas plsql architecture</code></div>
+<div class="desc">Infers the underlying layered data architecture implied by a set of previously detected design patterns, working out which layer — landing, staging, curated, or reporting — each object belongs to. It reconstructs the resulting data flow as a set of connected nodes, each backed by reasoning tied to the specific patterns detected.</div>
+<div class="io-grid">
+<div class="io-panel"><h4>Inputs</h4>Design pattern.md
+<div class="src-line"><span class="src-agent">Agent:</span> Output of L1 dlas plsql design pattern</div></div>
+<div class="io-panel outputs"><h4>Outputs</h4><code>Source architecture.md</code></div>
+</div>
+<div class="tags-row"><span><span class="tag-label">Tools:</span> —</span><span><span class="tag-label">Knowledge Bases:</span> —</span><span><span class="tag-label">Guardrails:</span> —</span></div>
+</div>
+
+<div class="agent-card">
+<div class="name-row"><code>L1 dlas plsql to python architecture</code></div>
+<div class="desc">Takes an existing source-system architecture and produces two alternative target-platform designs — one that mirrors the original as closely as possible, and one that is modernized to take advantage of the target platform's native capabilities. It documents the reasoning behind each layer and summarizes the key differences between the two options.</div>
+<div class="io-grid">
+<div class="io-panel"><h4>Inputs</h4>design pattern.md; source architecture.md
+<div class="src-line"><span class="src-agent">Agent:</span> Output of L1 dlas plsql design pattern and L1 dlas plsql architecture</div></div>
+<div class="io-panel outputs"><h4>Outputs</h4><code>target architecture.md</code></div>
+</div>
+<div class="tags-row"><span><span class="tag-label">Tools:</span> —</span><span><span class="tag-label">Knowledge Bases:</span> —</span><span><span class="tag-label">Guardrails:</span> —</span></div>
+</div>
+
+<div class="agent-card">
+<div class="name-row"><code>L1 dlas plsql to python analyzer</code></div>
+<div class="desc">Evaluates each ETL object to judge how difficult it would be to migrate — scoring automated conversion feasibility, transformation complexity, and testing effort — and recommends whether the object should be migrated as-is or rebuilt from scratch. Every sizing decision is backed by specific, evidence-based reasoning rather than a generic judgment.</div>
+<div class="io-grid">
+<div class="io-panel"><h4>Inputs</h4>stored procedure.sql; domain mapper.xlsx
+<div class="src-line"><span class="src-human">Human:</span> uploaded source files</div></div>
+<div class="io-panel outputs"><h4>Outputs</h4><code>analyzer.md</code></div>
+</div>
+<div class="tags-row"><span><span class="tag-label">Tools:</span> —</span><span><span class="tag-label">Knowledge Bases:</span> —</span><span><span class="tag-label">Guardrails:</span> —</span></div>
+</div>
+
+<div class="agent-card">
+<div class="name-row"><code>L1 dlas plsql to python summarizer</code></div>
+<div class="desc">Consolidates the detailed findings from many individually analyzed objects into a single aggregate summary, grouping and counting objects by business domain, type, and assigned sizing. The result is a compact reference table rather than a repeat of each object's full detail.</div>
+<div class="io-grid">
+<div class="io-panel"><h4>Inputs</h4>analyzer.md
+<div class="src-line"><span class="src-agent">Agent:</span> Output of L1 dlas plsql to python analyzer</div></div>
+<div class="io-panel outputs"><h4>Outputs</h4><code>summarizer.md</code></div>
+</div>
+<div class="tags-row"><span><span class="tag-label">Tools:</span> —</span><span><span class="tag-label">Knowledge Bases:</span> —</span><span><span class="tag-label">Guardrails:</span> —</span></div>
+</div>
+
+<div class="agent-card">
+<div class="name-row"><code>L1 dlas plsql to python planner</code></div>
+<div class="desc">Turns a summarized inventory of objects, a narrative risk and timeline document, and a database inventory into a full migration plan. It groups work into sequenced waves by business domain, estimates effort and timeline for each wave, proposes a delivery team structure, and surfaces key risks and change-management considerations.</div>
+<div class="io-grid">
+<div class="io-panel"><h4>Inputs</h4>summarizer.md
+<div class="src-line"><span class="src-agent">Agent:</span> Output of L1 dlas plsql to python summarizer</div></div>
+<div class="io-panel outputs"><h4>Outputs</h4><code>planner.md</code></div>
+</div>
+<div class="tags-row"><span><span class="tag-label">Tools:</span> —</span><span><span class="tag-label">Knowledge Bases:</span> —</span><span><span class="tag-label">Guardrails:</span> —</span></div>
+</div>
+
+<div class="agent-card">
+<div class="name-row"><code>L1 dlas plsql to python glossary</code></div>
+<div class="desc">Reads a full inventory of source tables and attributes together with business context for each domain, then generates a plain-English business glossary with a short description for every table and every attribute, organized by domain.</div>
+<div class="io-grid">
+<div class="io-panel"><h4>Inputs</h4>Source data scoping.xlsx; Domain mapping.xlsx
+<div class="src-line"><span class="src-agent">Agent:</span> Partial output from L1 dlas plsql asset rationalizer and L1 dlas plsql to python analyzer</div></div>
+<div class="io-panel outputs"><h4>Outputs</h4><code>glossary.md</code></div>
+</div>
+<div class="tags-row"><span><span class="tag-label">Tools:</span> —</span><span><span class="tag-label">Knowledge Bases:</span> —</span><span><span class="tag-label">Guardrails:</span> —</span></div>
+</div>
+
+<div class="agent-card">
+<div class="name-row"><code>L1 dlas plsql to python orchestration</code></div>
+<div class="desc">Reconstructs the full execution order of a workflow by chaining together every session and task it contains, from the true starting point through to the true end point, rather than leaving related steps as disconnected fragments. Each step is classified by the type of processing it performs and linked with its success and failure handling.</div>
+<div class="io-grid">
+<div class="io-panel"><h4>Inputs</h4>asset rationalizer.md
+<div class="src-line"><span class="src-agent">Agent:</span> Output of L1 dlas plsql asset rationalizer</div></div>
+<div class="io-panel outputs"><h4>Outputs</h4><code>orchestration.md</code></div>
+</div>
+<div class="tags-row"><span><span class="tag-label">Tools:</span> —</span><span><span class="tag-label">Knowledge Bases:</span> —</span><span><span class="tag-label">Guardrails:</span> —</span></div>
+</div>
+
+<div class="agent-card">
+<div class="name-row"><code>L1 dlas plsql to python rules classification</code></div>
+<div class="desc">Extracts every distinct business and data-quality rule embedded in source code — validations, transformations, joins, deduplication logic, and reference-data lookups — and classifies each one by category and by the processing layer where it should be enforced, along with a plain-language description and a confidence level.</div>
+<div class="io-grid">
+<div class="io-panel"><h4>Inputs</h4>stored procedure.sql; domain mapping.xlsx
+<div class="src-line"><span class="src-human">Human:</span> uploaded source files</div></div>
+<div class="io-panel outputs"><h4>Outputs</h4><code>rules classification.md</code></div>
+</div>
+<div class="tags-row"><span><span class="tag-label">Tools:</span> —</span><span><span class="tag-label">Knowledge Bases:</span> —</span><span><span class="tag-label">Guardrails:</span> —</span></div>
+</div>
+
+<div class="agent-card">
+<div class="name-row"><code>L1 plsql to python business requirement</code></div>
+<div class="desc">Synthesizes program documentation, the business glossary, data quality rules, and cross-domain dependencies into a full business requirements document written for non-technical stakeholders. It covers the business domains involved, how they interact, the rules that govern the data, and inferred governance considerations, all in plain business language.</div>
+<div class="io-grid">
+<div class="io-panel"><h4>Inputs</h4>documentation.xlsx; glossary.xlsx; dependency.xlsx; rules.xlsx
+<div class="src-line"><span class="src-agent">Agent:</span> Partial outputs from L1 dlas plsql to python glossary, L1 dlas plsql documentation, L1 dlas plsql asset rationalizer, L1 dlas plsql to python rules classification</span></div></div>
+<div class="io-panel outputs"><h4>Outputs</h4><code>business requirement.md</code></div>
+</div>
+<div class="tags-row"><span><span class="tag-label">Tools:</span> —</span><span><span class="tag-label">Knowledge Bases:</span> —</span><span><span class="tag-label">Guardrails:</span> —</span></div>
+</div>
+
+<div class="agent-card">
+<div class="name-row"><code>L1 dlas plsql to python Streaming Classifier</code></div>
+<div class="desc">Reviews every business rule identified in a program and determines whether it could run as-is under real-time streaming, would need windowed processing, or would require a redesign before it could stream at all.</div>
+<div class="io-grid">
+<div class="io-panel"><h4>Inputs</h4>rules.xlsx; documentation.xlsx
+<div class="src-line"><span class="src-agent">Agent:</span> Output of L1 dlas plsql documentation, L1 dlas plsql to python rules classification</div></div>
+<div class="io-panel outputs"><h4>Outputs</h4><code>streaming.md</code></div>
+</div>
+<div class="tags-row"><span><span class="tag-label">Tools:</span> —</span><span><span class="tag-label">Knowledge Bases:</span> —</span><span><span class="tag-label">Guardrails:</span> —</span></div>
+</div>
+
+<div class="agent-card">
+<div class="name-row"><code>L1 dlas plsql to python Pipeline Dependency Analyzer</code></div>
+<div class="desc">Builds the full execution order of a set of procedures based on their dependencies, identifying which ones can run independently, which must wait on others, and which act as blocking points across the overall pipeline.</div>
+<div class="io-grid">
+<div class="io-panel"><h4>Inputs</h4>documentation.xlsx; dependency.xlsx
+<div class="src-line"><span class="src-agent">Agent:</span> Output of L1 dlas plsql documentation, partial output of L1 dlas plsql asset rationalizer</div></div>
+<div class="io-panel outputs"><h4>Outputs</h4><code>pipeline dependency.md</code></div>
+</div>
+<div class="tags-row"><span><span class="tag-label">Tools:</span> —</span><span><span class="tag-label">Knowledge Bases:</span> —</span><span><span class="tag-label">Guardrails:</span> —</span></div>
+</div>
+
+<div class="agent-card">
+<div class="name-row"><code>L1 dlas plsql to python Streaming Readiness Scorer</code></div>
+<div class="desc">Scores each remaining procedure across five readiness dimensions to determine how well suited it is for a streaming migration, then assigns it to a migration wave. Low-value or duplicate procedures identified in earlier stages are eliminated from the final carried-forward list.</div>
+<div class="io-grid">
+<div class="io-panel"><h4>Inputs</h4>streaming.md; pipeline dependency.md
+<div class="src-line"><span class="src-agent">Agent:</span> Output of L1 dlas plsql to python Streaming Classifier, L1 dlas plsql to python Pipeline Dependency Analyzer</div></div>
+<div class="io-panel outputs"><h4>Outputs</h4><code>streaming readiness score.md</code></div>
+</div>
+<div class="tags-row"><span><span class="tag-label">Tools:</span> —</span><span><span class="tag-label">Knowledge Bases:</span> —</span><span><span class="tag-label">Guardrails:</span> —</span></div>
+</div>
+
+<div class="agent-card">
+<div class="name-row"><code>L1 dlas plsql to python Real-Time Architecture Recommender</code></div>
+<div class="desc">Draws on every prior stage of analysis, together with a stated target platform requirement, to produce a complete real-time architecture recommendation — a layer-by-layer design, a migration roadmap, and a risk register — so the team can make an informed platform decision.</div>
+<div class="io-grid">
+<div class="io-panel"><h4>Inputs</h4>streaming.md; pipeline dependency.md; streaming readiness score.md; target requirement.txt
+<div class="src-line"><span class="src-agent">Agent:</span> Output of L1 dlas plsql to python Streaming Classifier, L1 dlas plsql to python Pipeline Dependency Analyzer, L1 dlas plsql to python Streaming Readiness Scorer<br><span class="src-human">Human:</span> target platform and cloud name</div></div>
+<div class="io-panel outputs"><h4>Outputs</h4><code>real time.md</code></div>
+</div>
+<div class="tags-row"><span><span class="tag-label">Tools:</span> —</span><span><span class="tag-label">Knowledge Bases:</span> —</span><span><span class="tag-label">Guardrails:</span> —</span></div>
+</div>
+
+<h2 id="tools">Tools</h2>
+<p class="sub">1 shared tool integration used across the DMS agents in this catalog.</p>
+
+<div class="table-wrap"><table>
+<thead><tr><th>Tool</th><th>What It Does</th><th>Used By</th></tr></thead>
+<tbody>
+<tr><td><code>L1 Current Date Provider</code></td><td>Supplies the current system date/timestamp to the agent at runtime, so generated documentation, reports, and code artifacts can be accurately dated.</td><td>All 9 agents in this catalog</td></tr>
+</tbody>
+</table></div>
+
+</div>
+<div style="text-align:center;padding:20px 0;font-size:13px;color:var(--gray-txt);">Copyright Ascendion 2026</div>
+</body></html>

@@ -1,0 +1,5 @@
+{
+  "source": "agent_output",
+  "source_agent_id": "L1-topic-selector-agent",
+  "parameters": {"topic": "black holes"}
+}

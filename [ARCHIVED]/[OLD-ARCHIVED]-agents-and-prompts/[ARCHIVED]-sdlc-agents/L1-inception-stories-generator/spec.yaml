@@ -1,0 +1,63 @@
+# Agent Specification Document
+spec_version: "1.0"
+artifact_type: agent
+metadata:
+  name: L1-inception-stories-generator
+  version: "1.0.0"
+  layer: L1
+  phase: inception
+  owner: agentic-ai-coe
+  created: 2026-06-14
+
+purpose:
+  description: "Decomposes epics and features into implementable user stories ordered for incremental delivery — from foundational setup to simple features to complex ones"
+  input: "Structured epics with features from L1-inception-epics-generator-agent"
+  output: "User stories in As a/I want/So that format with acceptance criteria, ordered by implementation sequence"
+  business_value: "Produces sprint-ready stories that teams can pick up immediately, sequenced to build incrementally on prior work"
+
+prompt:
+  ref: "prompts/L1-inception-stories-generator-agent/instructions.md"
+  version: "1.0.0"
+  description: "Generates stories from features with incremental delivery ordering"
+
+contract:
+  input_schema: "$ref: schemas/agent-input-contract-schema.json"
+  output_schema: "$ref: schemas/agent-output-schema.json"
+
+  input:
+    accepts_from_agents: [L1-inception-epics-generator-agent]
+    accepts_direct_input: true
+    accepts_file_upload:
+      enabled: true
+      formats: [".json", ".md"]
+    required_parameters:
+      epics: {type: array, description: "Array of epics with features from the epics generator"}
+    optional_parameters:
+      target_feature: {type: string, default: null, description: "Generate stories for a specific feature only"}
+      cycle_duration_days: {type: integer, default: 5, description: "Feature cycle length in days"}
+
+  output:
+    $ref: "output_schema.json"
+
+context:
+  knowledge_bases:
+    - kb-L1-ntuc-enterprise-architecture
+    - kb-L1-story-best-practices
+    - kb-L1-inception-stories-generator-evaluation
+  guardrails:
+    - gr-L1-output-schema-validator
+    - gr-L1-pii-detection
+    - gr-L3-hallucination-detector
+    - gr-L3-citation-validator
+    - gr-L3-consistency-checker
+
+quality:
+  evaluation_ref: "evaluation.md"
+  min_score: 7.0
+  hallucination_check: true
+  consistency_check: true
+
+versioning:
+  input_version: "1.0"
+  output_version: "1.0"
+  instruction_hash: "sha256:pending"

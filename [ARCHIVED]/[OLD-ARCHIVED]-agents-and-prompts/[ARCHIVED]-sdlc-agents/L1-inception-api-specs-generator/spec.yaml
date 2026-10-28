@@ -1,0 +1,92 @@
+# Agent Specification Document
+spec_version: "1.0"
+artifact_type: agent
+metadata:
+  name: L1-inception-template-agent
+  version: "1.0.0"
+  layer: L1
+  phase: inception
+  owner: agentic-ai-coe
+  created: 2026-04-09
+
+purpose:
+  description: "Generates one exciting fact for the topic mentioned"
+  input: "Topic to state a fact for"
+  output: "A unique fact for the topic mentioned in the input"
+  business_value: "To know a new fact for the mentioned topic"
+
+prompt:
+  ref: "prompts/L1-inception-template-agent/instructions.md"  # External prompt file
+  version: "1.0.0"
+  description: "Generates the fact in plain text"
+
+contract:
+  # Schemas: schemas/agent-input-contract-schema.json & schemas/agent-output-schema.json
+  input_schema: "$ref: schemas/agent-input-contract-schema.json"
+  output_schema: "$ref: schemas/agent-output-schema.json"
+
+  input:
+    accepts_from_agents: [any]
+    accepts_direct_input: true
+    accepts_file_upload:
+      enabled: false
+    required_parameters:
+      topic: {type: string, max_length: 5000, description: "Topic to state the fact about"}
+  
+  output:
+    type: fact
+    schema_version: "1.0"
+    items_schema:
+      type: object
+      required: [title, description]
+      properties:
+        title: {type: string}
+        description: {type: string, format: "A unique fact is: "}
+    metadata_per_item:
+      confidence: {type: float, range: "0.7"}
+      reasoning: {type: string, description: "Explanation of how the agent arrived at this item"}
+      sources_cited: {type: array, items: {type: string}}
+
+context:
+  knowledge_bases: []
+  guardrails: []
+  tools: []
+
+quality:
+  evaluation_rubric: story-quality-rubric-v1
+  min_score: 7.0
+  hallucination_check: true
+  consistency_check: true  # same input → same structure output
+
+#performance:
+#  target_latency_seconds: 30
+#  max_token_budget: 8000  # input + output combined
+
+#security:
+#  pii_handling: "Never include real PII in output; use placeholders"
+#  data_classification: "Agent processes Confidential data"
+#  audit_logging: required
+
+#identity:
+#  agent_id: "agt-L1-inception-story-gen-001"       # globally unique, assigned at registration
+#  role: content-generator                            # content-generator | orchestrator | verifier | tool-executor
+#  service_account: "sa-agt-story-gen-001"
+#  credential_path: "platform/agents/sa-agt-story-gen-001"
+  
+#  permissions:
+#    tools_allowed: [L1-jira-fetch-issue]             # only tools this agent can invoke
+#    tools_denied: [L1-jira-delete-issue]             # explicit deny list
+#    knowledge_bases_allowed:                          # only KBs this agent can read
+#      - kb-L1-enterprise-security
+#      - kb-L1-sdlc-templates
+#      - kb-L2-payments-domain
+#    agents_can_invoke: []                            # content-generators don't invoke other agents
+ #   data_classification_max: Confidential            # max data sensitivity this agent can process
+#    org_scope: ["*"]                                 # L1 agents serve all orgs
+#    can_write_external: false                        # only orchestrators can write to Jira/GitHub
+  
+versioning:
+  input_version: "1.0"   # schema version of input
+  output_version: "1.0"  # schema version of output
+  instruction_hash: "sha256:abc123..."  # hash of instructions for drift detection
+#  kb_versions: {kb-L1-enterprise-security: "2.1", kb-L1-enterprise-architecture: "3.0"}

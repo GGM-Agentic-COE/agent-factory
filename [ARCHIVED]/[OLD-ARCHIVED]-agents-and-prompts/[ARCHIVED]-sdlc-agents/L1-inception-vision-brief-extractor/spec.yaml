@@ -1,0 +1,43 @@
+spec_version: "1.0"
+artifact_type: agent
+metadata:
+  name: L1-inception-vision-brief-extractor
+  version: "1.0.0"
+  layer: L1
+  phase: inception
+  owner: agentic-ai-coe
+  created: 2026-06-29
+
+purpose:
+  description: "Compresses vision documents into structured extraction briefs for downstream PRD generation (S5 token optimisation)"
+  input: "Vision document (markdown) — typically 10-15K tokens"
+  output: "Structured brief (≤3K tokens) containing all requirement-relevant facts"
+  business_value: "Enables requirements-extractor to operate within 16K context windows by reducing input from ~12K to ~3K tokens"
+
+prompt:
+  ref: "prompts/L1-inception-vision-brief-extractor/instructions-concise.md"
+  version: "1.0.0"
+
+contract:
+  input:
+    accepts_from_agents: [L1-inception-vision-generator]
+    accepts_direct_input: true
+    accepts_file_upload:
+      enabled: true
+      formats: [".md", ".txt", ".pdf"]
+    required_parameters:
+      vision_document: {type: string, description: "Full vision document content or blob URL"}
+
+  output:
+    $ref: "output_schema.json"
+
+context:
+  knowledge_bases: []  # No KB needed — extraction only
+  guardrails:
+    - gr-L1-output-schema-validator
+  tools:
+    - tool-L1-azure-blob-reader
+
+quality:
+  evaluation_ref: "evaluation.md"
+  min_score: 7.0

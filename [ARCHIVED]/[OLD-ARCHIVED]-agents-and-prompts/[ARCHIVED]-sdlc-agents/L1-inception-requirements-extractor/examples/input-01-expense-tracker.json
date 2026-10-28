@@ -1,0 +1,8 @@
+{
+  "source": "direct_input",
+  "source_agent_id": null,
+  "parameters": {
+    "idea": "We want to build a mobile expense tracker app for small business owners. Users should be able to photograph receipts and the app automatically extracts the amount, date, and vendor. It should categorise expenses (travel, meals, office supplies, etc.) and generate monthly reports. Users need to set budgets per category and get alerts when they're close to the limit. The app must work offline and sync when back online. We're building on AWS with React Native.",
+    "domain": "fintech"
+  }
+}

@@ -1,0 +1,47 @@
+id: kb-L1-microfrontend-bff
+name: Micro-Frontend with BFF Pattern
+layer: L1
+purpose: Micro-frontend architecture with Backend-for-Frontend pattern
+status: active
+created: "2026-04-21"
+updated: "2026-04-21"
+
+sections:
+  - id: MF1
+    title: Core Principles
+  - id: MF2
+    title: Architecture Overview
+  - id: MF3
+    title: Composition Patterns
+  - id: MF4
+    title: Module Federation Config
+  - id: MF5
+    title: BFF Pattern
+  - id: MF6
+    title: BFF Implementation
+  - id: MF7
+    title: Shared Design System
+  - id: MF8
+    title: Shared Authentication
+  - id: MF9
+    title: Routing
+  - id: MF10
+    title: Communication Between MFEs
+  - id: MF11
+    title: Testing Strategy
+  - id: MF12
+    title: Deployment
+  - id: MF13
+    title: Anti-Patterns
+  - id: MF14
+    title: Cross-References
+
+content:
+  - path: content/kb-L1-microfrontend-bff.md
+    format: markdown
+
+cross_references:
+  - kb-L1-microservices (MS1-MS12)
+  - kb-L1-enterprise-architecture (EA2, EA6)
+  - kb-L1-ui-component-standards (UC1-UC12)
+  - kb-L1-react-standards (RS1-RS17)

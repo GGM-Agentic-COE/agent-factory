@@ -1,0 +1,30 @@
+{
+  "agent_id": "L1-inception-workflow-summariser",
+  "execution_id": "exec-ddd-444",
+  "workflow_execution_id": "wf-abc-123",
+  "status": "success",
+  "content": {
+    "type": "workflow_summary",
+    "schema_version": "1.0",
+    "items": {
+      "request_and_intent": "The workflow was triggered to take a product idea for a mobile expense tracker app (ExpenseTrack) for small business owners and produce a complete inception package — vision document, structured requirements, and epic decomposition with sprint planning.",
+      "execution_flow": [
+        "L1-inception-vision-generator: Generated a 5-section vision document for ExpenseTrack covering 5 feature areas, 7 MVP features, 4 risks, and 3 open questions. Uploaded as markdown artifact.",
+        "L1-inception-requirements-extractor: Extracted 8 functional requirements, 4 non-functional requirements, 2 constraints, 3 assumptions, and 2 gaps from the vision document. Prioritised using MoSCoW.",
+        "L1-inception-epics-generator: Decomposed requirements into 4 epics with 12 features allocated across 3 sprints. Achieved 100% requirements coverage."
+      ],
+      "artifacts_and_content": [
+        "Vision document (markdown): uploaded to /exec-aaa-111/vision-doc/vision-expensetrack.md",
+        "8 functional requirements with MoSCoW priority and acceptance-level detail",
+        "4 non-functional requirements with measurable criteria",
+        "4 epics (Receipt Capture & OCR, Expense Categorisation, Budget Management, Reporting & Insights)",
+        "12 features mapped to epics with sprint allocation across 3 sprints"
+      ],
+      "outcome": "Workflow completed successfully. All 3 agents passed. Delivered a complete inception package: vision document, 8 FRs + 4 NFRs, and 4 epics across 3 sprints with 100% requirements coverage. 2 gaps remain open for stakeholder input (authentication method, supported currencies).",
+      "metadata": {
+        "confidence": 0.95,
+        "reasoning": "All 3 agent execution_summaries were detailed with explicit counts, KB references, guardrail results, and tool outcomes. High confidence in accuracy."
+      }
+    }
+  }
+}

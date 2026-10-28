@@ -1,0 +1,28 @@
+{
+  "test_id": "golden-02-empty-input",
+  "description": "Correct handling of empty epics input — returns empty with INSUFFICIENT_CONTEXT",
+  "agent_id": "L1-inception-stories-generator-agent",
+  "agent_version": "1.0.0",
+  "execution_id": "exec-golden-stories-002",
+  "input_summary": {
+    "source": "direct_input",
+    "source_agent_id": null,
+    "parameters": {"epic_count": 0, "feature_count": 0}
+  },
+  "content": {
+    "type": "stories",
+    "schema_version": "1.0",
+    "items": {
+      "total_stories": 0,
+      "total_story_points": 0,
+      "epics": []
+    },
+    "execution_summary": "• Produced 0 stories — INSUFFICIENT_CONTEXT.\n• No epics or features provided in input.\n• Cannot generate stories without at least one epic containing features.\n• Suggested: run L1-inception-epics-generator-agent first to produce structured epics with features."
+  },
+  "evaluation_criteria": {
+    "items_empty": true,
+    "has_execution_summary": true,
+    "no_hallucination": true,
+    "no_invented_stories": true
+  }
+}

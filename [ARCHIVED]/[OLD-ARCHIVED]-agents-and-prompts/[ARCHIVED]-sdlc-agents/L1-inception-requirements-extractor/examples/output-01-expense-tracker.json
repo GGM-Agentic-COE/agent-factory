@@ -1,0 +1,43 @@
+{
+  "agent_id": "L1-inception-requirements-extractor",
+  "agent_version": "1.0.0",
+  "execution_id": "exec-expense-001",
+  "workflow_execution_id": "wf-expense-001",
+  "status": "success",
+  "input_summary": {
+    "source": "direct_input",
+    "source_agent_id": null,
+    "parameters": {"idea": "We want to build a mobile expense tracker app for small business owners..."}
+  },
+  "content": {
+    "type": "prd_document",
+    "schema_version": "1.0",
+    "items": {
+      "product_name": "SmartExpense",
+      "document_summary": {
+        "total_requirements": 21,
+        "functional_requirements_count": 6,
+        "non_functional_requirements_count": 1,
+        "constraints_count": 2,
+        "assumptions_count": 2,
+        "gaps_count": 2,
+        "dependencies_count": 2,
+        "data_requirements_count": 2,
+        "integration_requirements_count": 2,
+        "success_metrics_count": 2,
+        "risks_count": 2
+      },
+      "artifact": {
+        "type": "prd_document",
+        "format": "markdown",
+        "location": "https://agentfactory.blob.core.windows.net/artifacts/wf-expense-001/prd/prd-smartexpense.md"
+      },
+      "metadata": {
+        "template_kb_used": "kb-L1-prd-document-template",
+        "confidence": 0.87,
+        "extraction_coverage": 0.82
+      }
+    },
+    "execution_summary": "• Produced 6 FRs, 1 NFR, 2 constraints, 2 assumptions, 2 gaps, 2 dependencies, 2 data requirements, 2 integrations, 2 success metrics, 2 risks (21 total)\n• Key decisions: classified offline/sync as NFR-Reliability (not FR); AWS/React Native as constraints (not requirements)\n• Reflection: initially had FR-04 (reports) as Must-Have — downgraded to Should-Have. Added OCR dependency and risk which were initially missed.\n• PRD uploaded to /wf-expense-001/prd/prd-smartexpense.md\n• 2 gaps need stakeholder input: authentication approach and data retention/export requirements.\n• Knowledge bases consulted: kb-L1-prd-document-template (used as PRD structure template)\n• Guardrails evaluated: gr-L1-output-schema-validator (pass), gr-L1-pii-detection (pass)\n• Tools invoked: tool-L1-azure-blob-writer (success — PRD uploaded)"
+  }
+}

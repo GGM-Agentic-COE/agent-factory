@@ -1,0 +1,25 @@
+prompts:
+  - task: self_check_output
+    content: |
+      Your task is to check if the bot response contains unsafe content.
+
+      Bot response: "{{ bot_response }}"
+
+      Flag ONLY if the response contains:
+      - Content promoting violence, self-harm, or instructions to harm others
+      - Hate speech or discrimination based on protected characteristics (race, religion, gender, sexuality, disability)
+      - Instructions for illegal activities (fraud, hacking, drug manufacturing, weapons)
+      - Sexually explicit or gratuitously violent content
+      - Content targeting or exploiting minors
+      - Content that could cause real-world harm if acted upon
+
+      Do NOT flag:
+      - Factual discussion of violence in historical or news context
+      - Educational content about cybersecurity, chemistry, or law enforcement
+      - Discussion of discrimination for awareness or critique purposes
+      - Medical or health-related content including mental health discussions
+      - Fiction or creative writing that references conflict without glorifying harm
+      - Professional language with mild expletives
+
+      Answer "yes" if the response contains unsafe content (should be blocked).
+      Answer "no" if the response is safe (no violations found).

@@ -1,0 +1,39 @@
+{
+  "agent_id": "L1-vision-statement-generator-evaluator",
+  "agent_version": "1.0.0",
+  "execution_id": "exec-f9a0b1c2",
+  "workflow_execution_id": "wf-e5f6a7b8",
+  "status": "success",
+  "content": {
+    "type": "evaluation_result",
+    "schema_version": "1.0",
+    "items": {
+      "scores": {
+        "faithfulness": 0.75,
+        "hallucination": 0.05,
+        "consistency": 0.55,
+        "relevance": 0.85,
+        "reasoning_quality": 0.8,
+        "citation_completeness": null
+      },
+      "overall_score": 6.5,
+      "pass": false,
+      "findings": [
+        { "id": "FND-01", "gate": "Reconciliation coverage check (this evaluator's own rule) — BLOCKER", "status": "fail", "detail": "CON-02 (the only Amber constraint in regulatory_posture) does not appear in any open_risks entry's related_ids — OR-01, which covered it, is missing entirely. This is exactly the defect the reconciliation requirement exists to prevent." },
+        { "id": "FND-02", "gate": "Executive-summary integrity check", "status": "pass", "detail": "Every sentence in executive_summary is still grounded elsewhere in the document." },
+        { "id": "FND-03", "gate": "viability_score consistency", "status": "pass", "detail": "7.8 reported matches what the generator received." }
+      ],
+      "fixes_applied": [
+        {
+          "id": "FIX-01",
+          "finding_id": "FND-01",
+          "description": "Re-added an open_risks entry covering CON-02, built directly from its own mitigation_summary already present in regulatory_posture — no new analysis invented.",
+          "before": "open_risks: [{\"id\": \"OR-02\", ...WK-01...}] (CON-02 uncovered)",
+          "after": "open_risks: [{\"id\": \"OR-01\", \"description\": \"Financial record retention (CON-02) is Amber and must be designed for from the start.\", \"source\": \"regulatory\", \"related_ids\": [\"CON-02\"]}, {\"id\": \"OR-02\", ...WK-01...}]"
+        }
+      ],
+      "final_decision": "fixed_and_approved"
+    },
+    "execution_summary": "• overall_score: 6.5 (fail as submitted), final_decision: fixed_and_approved after correction.\n• Reconciliation coverage: CON-02 was uncovered — FAIL, then fixed by restoring an open_risks entry built from CON-02's own mitigation_summary.\n• Executive-summary integrity: pass.\n• viability_score consistency: pass (7.8, matches input).\n• Fixes applied: 1 (restored OR-01).\n• Knowledge bases consulted: L1-vision-statement-generator/evaluation.md.\n• Guardrails evaluated: gr-L1-output-schema-validator (pass), gr-L1-pii-detection (pass), gr-L1-consistency-check (fail as submitted, pass after fix).\n• Gaps flagged: none after fix."
+  }
+}

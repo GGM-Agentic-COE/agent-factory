@@ -1,0 +1,10 @@
+# gr-L1-content-safety — Prompt-Only Mode (LLM-Driven)
+# Layer: L1 — Enterprise (all agents)
+# Uses NeMo's built-in "self check output" flow
+# Overrides default refusal with structured JSON
+
+define bot refuse to respond
+  "{\"detected\": true, \"verdict\": \"rejected\", \"reason\": \"Unsafe content detected: violates content safety policy\", \"severity\": \"critical\", \"category\": \"content_safety\", \"rail\": \"output\"}"
+
+define bot inform cannot answer
+  "{\"detected\": true, \"verdict\": \"rejected\", \"reason\": \"Unsafe content detected: violates content safety policy\", \"severity\": \"critical\", \"category\": \"content_safety\", \"rail\": \"output\"}"

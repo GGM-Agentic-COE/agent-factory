@@ -1,0 +1,15 @@
+# gr-L3-citation-validator — LLM-Driven Colang Implementation
+# Layer: L3 — Citation Validator
+# Validation: LLM self_check (pure Colang)
+# Python actions preserved in actions.py for reference/hybrid mode
+
+define flow check output citations
+  """LLM validates citation validator rules on output."""
+  $result = execute self_check_output
+
+  if not $result
+    bot block L3 citation validator
+    stop
+
+define bot block L3 citation validator
+  "Output blocked: missing required citations. Every output item must have at least one resolvable citation linking claims to sources."

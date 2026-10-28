@@ -1,0 +1,36 @@
+spec_version: "1.0"
+artifact_type: guardrail
+metadata:
+  name: gr-L1-injection-defence
+  version: "1.0.0"
+  layer: L1
+  owner: agentic-ai-coe
+  implementation: colang
+
+purpose:
+  description: "Detect and block prompt injection patterns embedded in user input or documents"
+
+triggers_on:
+  - pre_execution
+
+on_fail: block_and_log
+applies_to: all_agents
+
+rules:
+  - name: pattern-match
+    description: "Block known injection patterns (ignore previous, system:, you are now)"
+    action: block
+    severity: critical
+
+  - name: instruction-boundary
+    description: "Enforce system prompt as sole instruction source"
+    action: block
+    severity: critical
+
+  - name: external-content
+    description: "Treat all external content as untrusted data"
+    action: flag
+    severity: high
+
+evaluation:
+  false_positive_threshold: 0.05

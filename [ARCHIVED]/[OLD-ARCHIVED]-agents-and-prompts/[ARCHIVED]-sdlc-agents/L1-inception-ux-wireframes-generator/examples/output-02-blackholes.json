@@ -1,0 +1,41 @@
+{
+  "agent_id": "L1-inception-template-agent",
+  "agent_version": "1.0.0",
+  "execution_id": "exec-a1b2c3d4-0002",
+  "input_summary": {
+    "source": "agent_output",
+    "source_agent_id": "L1-topic-selector-agent",
+    "parameters": {"topic": "black holes"}
+  },
+  "output": {
+    "type": "fact",
+    "schema_version": "1.0",
+    "items": [
+      {
+        "id": "item-001",
+        "title": "Black Hole Time Dilation",
+        "content": {
+          "description": "A unique fact is: Time passes measurably slower near a black hole due to gravitational time dilation — a clock at the event horizon would appear to stop entirely when observed from a distance."
+        },
+        "tags": ["black-holes", "physics", "relativity"],
+        "metadata": {
+          "confidence": 0.92,
+          "reasoning": "Derived from Einstein's General Relativity, experimentally confirmed via GPS satellite clock corrections and gravitational wave observations.",
+          "citation": [
+            {
+              "source_reference": "general-knowledge",
+              "source_location": "astrophysics/general-relativity",
+              "start_index": 0,
+              "end_index": 0
+            }
+          ],
+          "trajectory": [
+            {"step": 1, "action": "reason", "tool": null, "detail": "Considered multiple black hole properties — singularity, event horizon, Hawking radiation, time dilation"},
+            {"step": 2, "action": "generate", "tool": null, "detail": "Selected time dilation as it is counterintuitive and directly observable in principle"},
+            {"step": 3, "action": "validate", "tool": null, "detail": "Confirmed claim aligns with GR predictions and experimental evidence"}
+          ]
+        }
+      }
+    ]
+  }
+}

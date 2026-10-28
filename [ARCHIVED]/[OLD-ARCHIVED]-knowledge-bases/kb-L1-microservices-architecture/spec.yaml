@@ -1,0 +1,9 @@
+spec_version: "1.0"
+metadata:
+  name: kb-L1-microservices-architecture
+  version: "1.0.0"
+  layer: L1
+purpose: "Microservices architecture standards for API development"
+freshness:
+  review_cadence: quarterly
+  last_reviewed: "2026-04-21"

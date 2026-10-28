@@ -1,0 +1,34 @@
+spec_version: "1.0"
+artifact_type: knowledge_base
+metadata:
+  name: kb-L2-early-childhood-education-domain
+  version: "1.0.0"
+  layer: L2
+  owner: domain-ai-champion
+  last_reviewed: "2026-06-16"
+  review_cadence: quarterly
+
+purpose:
+  description: "Singapore early childhood education domain knowledge — childcare lifecycle, regulatory framework (ECDA), fee/subsidy structure, attendance/safety protocols, learning framework (NEL), integration landscape, and business rules for NFC"
+
+content:
+  format: markdown
+  documents:
+    - path: content/kb-L2-early-childhood-education-domain.md
+      sections: [childcare-lifecycle, data-model, regulatory-framework, fee-management, attendance-safety, learning-development, integration-landscape, user-personas, business-rules, terminology]
+
+  total_tokens_estimate: 15000
+  chunking: by-section
+  embedding_model: text-embedding-3-small
+
+consumers:
+  agents:
+    - L2-nfc-inception-requirements-extractor-agent
+    - L2-nfc-inception-epics-generator-agent
+    - L2-nfc-inception-stories-generator-agent
+    - L2-nfc-construction-code-generator-agent
+  usage: "Agents reference this KB for domain-specific terminology, business rules, regulatory compliance, and data model constraints when working on NFC products"
+
+visibility:
+  accessible_by: [L2, L3, L4]
+  rule: "Accessible to NFC domain agents and below. Not relevant to non-NFC agents."

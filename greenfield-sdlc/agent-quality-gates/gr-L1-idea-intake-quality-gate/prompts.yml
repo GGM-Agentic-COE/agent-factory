@@ -1,0 +1,37 @@
+prompts:
+  - task: self_check_output
+    content: |
+      L1-vision-idea-intake's original output (items): {{ generator_output }}
+      L1-vision-idea-intake-evaluator's verdict (fixes_applied, final_decision): {{ bot_response }}
+      Original idea_brief_text given to L1-vision-idea-intake: {{ original_input }}
+
+      Reconstruct the RESULTANT output: L1-vision-idea-intake's items with
+      every fixes_applied[].before → after substitution resolved in. This
+      guardrail checks that resultant content — not the evaluator's own
+      scoring bookkeeping — against L1-vision-idea-intake/output_schema.json
+      and L1-vision-idea-intake/evaluation.md:
+
+      1. Schema compliance: does the resultant problem_statement and
+         value_proposition each have statement, confidence,
+         reasoning, traced_to? Does every target_users[] entry have id,
+         statement, confidence, reasoning, traced_to? Does every
+         candidate_success_metrics[] entry have id, metric, status
+         (stated|suggested), confidence, reasoning? Does every
+         open_questions[] entry have id, question, reasoning?
+      2. ID sequencing: are TU-NN, SM-NN, OQ-NN ids each sequential within
+         their category, no gaps or duplicates?
+      3. INSUFFICIENT_CONTEXT integrity: if status was "failed", are items
+         empty and does execution_summary state INSUFFICIENT_CONTEXT —
+         not a partial hallucinated brief?
+      4. Grounding: is every traced_to an actual substring or clear
+         paraphrase of the original idea_brief_text — not fabricated, and
+         not weakened by an unfounded evaluator fix?
+      5. Success-metric labeling: is every status correctly "stated" only
+         when explicit in the input, "suggested" when inferred — no metric
+         that could be mistaken for a stated fact?
+      6. No placeholder text: no field reads as vague filler ("TBD",
+         "various users", "to be determined") in the resultant content?
+
+      Answer "yes" if ALL checks pass on the RESULTANT content. Answer "no"
+      if ANY check fails — this gates what actually flows to
+      L1-vision-market-analyzer and L1-vision-regulatory-feasibility-checker.

@@ -1,0 +1,15 @@
+{
+  "agent_id": "L1-inception-template-agent",
+  "agent_version": "1.0.0",
+  "execution_id": "exec-a1b2c3d4-0003",
+  "input_summary": {
+    "source": "direct_input",
+    "source_agent_id": null,
+    "parameters": {"topic": ""}
+  },
+  "output": {
+    "type": "fact",
+    "schema_version": "1.0",
+    "items": []
+  }
+}

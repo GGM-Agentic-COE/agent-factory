@@ -1,0 +1,33 @@
+id: kb-L1-kotlin-compose-standards
+name: Kotlin / Jetpack Compose Coding Standards
+layer: L1
+version: "1.0.0"
+status: active
+purpose: "Kotlin + Jetpack Compose standards for mobile code generator agents, derived from Tasheel Finance loan-app-ui codebase"
+created: "2026-04-21"
+updated: "2026-04-21"
+source_codebase: "/code/loan-app-ui"
+
+content:
+  format: markdown
+  path: content/kb-L1-kotlin-compose-standards.md
+  sections: 17
+  section_prefix: KS
+
+freshness:
+  review_cadence: quarterly
+  last_reviewed: "2026-04-21"
+
+dependencies:
+  - kb-L1-enterprise-architecture  # EA1 tech stack, EA10 mobile arch, EA11 design system
+  - kb-L0-ui-coding-standards      # UC1-UC12 shared UI standards
+  - kb-L0-automated-testcase-standards  # testing patterns
+
+tags:
+  - kotlin
+  - jetpack-compose
+  - android
+  - mobile
+  - material-design-3
+  - hilt
+  - coding-standards

@@ -1,0 +1,1186 @@
+{
+        "functional_requirements": [
+          {
+            "id": "FR-01",
+            "title": "Credit Score Retrieval on Opt-In",
+            "description": "The system shall retrieve the customer's credit score from at least one CRA (Experian, Equifax, or TransUnion) upon customer opt-in.",
+            "priority": "Must-Have",
+            "citation": {
+              "source_reference": "System shall retrieve credit score from at least one CRA on customer opt-in",
+              "source_location": "Section 6.1 Credit Score Dashboard & Monitoring (FR-1.1)"
+            },
+            "reasoning": "Core capability required for all other features to function. Uses 'shall' indicating Must-Have."
+          },
+          {
+            "id": "FR-02",
+            "title": "Display Current Score and Band",
+            "description": "The system shall display the customer's current credit score, score band classification, and month-on-month change.",
+            "priority": "Must-Have",
+            "citation": {
+              "source_reference": "System shall display current score, score band, and month-on-month change",
+              "source_location": "Section 6.1 Credit Score Dashboard & Monitoring (FR-1.2)"
+            },
+            "reasoning": "Primary dashboard display requirement. Uses 'shall' indicating Must-Have."
+          },
+          {
+            "id": "FR-03",
+            "title": "Display Score Factors in Plain English",
+            "description": "The system shall display credit score factors (both positive and negative) explained in plain English that customers can understand without financial expertise.",
+            "priority": "Must-Have",
+            "citation": {
+              "source_reference": "System shall display score factors (positive and negative) in plain English",
+              "source_location": "Section 6.1 Credit Score Dashboard & Monitoring (FR-1.3)"
+            },
+            "reasoning": "Explainability requirement aligned with FS2/23 and Consumer Duty consumer understanding outcome. Uses 'shall'."
+          },
+          {
+            "id": "FR-04",
+            "title": "Store Score History for Trend Visualisation",
+            "description": "The system shall store credit score history for a minimum of 24 months to enable trend visualisation.",
+            "priority": "Must-Have",
+            "citation": {
+              "source_reference": "System shall store score history for trend visualisation (minimum 24 months)",
+              "source_location": "Section 6.1 Credit Score Dashboard & Monitoring (FR-1.4)"
+            },
+            "reasoning": "Data persistence requirement enabling trend analysis. Uses 'shall'."
+          },
+          {
+            "id": "FR-05",
+            "title": "Monthly Score Refresh",
+            "description": "The system shall refresh the customer's credit score at least monthly, with refresh frequency configurable per CRA agreement.",
+            "priority": "Must-Have",
+            "citation": {
+              "source_reference": "System shall refresh score at least monthly (configurable per CRA agreement)",
+              "source_location": "Section 6.1 Credit Score Dashboard & Monitoring (FR-1.5)"
+            },
+            "reasoning": "Ensures score data remains current. Uses 'shall'."
+          },
+          {
+            "id": "FR-06",
+            "title": "Explain Score Changes",
+            "description": "The system shall explain score changes between refresh periods by identifying and presenting the specific contributing factors.",
+            "priority": "Must-Have",
+            "citation": {
+              "source_reference": "System shall explain score changes with specific contributing factors",
+              "source_location": "Section 6.1 Credit Score Dashboard & Monitoring (FR-1.6)"
+            },
+            "reasoning": "Supports explainability and customer understanding. Uses 'shall'."
+          },
+          {
+            "id": "FR-07",
+            "title": "Generate Ranked Improvement Actions",
+            "description": "The system shall generate a ranked list of credit improvement actions based on the customer's specific credit profile, ordered by estimated impact.",
+            "priority": "Must-Have",
+            "citation": {
+              "source_reference": "System shall generate ranked improvement actions based on customer's credit profile",
+              "source_location": "Section 6.2 Personalised Credit Improvement Action Plans (FR-2.1)"
+            },
+            "reasoning": "Core coaching capability. Uses 'shall'."
+          },
+          {
+            "id": "FR-08",
+            "title": "Estimated Point Impact and Timeframe per Action",
+            "description": "Each improvement action shall include an estimated credit score point impact and an estimated timeframe for the improvement to materialise.",
+            "priority": "Must-Have",
+            "citation": {
+              "source_reference": "Each action shall include estimated point impact and estimated timeframe",
+              "source_location": "Section 6.2 Personalised Credit Improvement Action Plans (FR-2.2)"
+            },
+            "reasoning": "Provides measurable expectations for customers. Uses 'shall'."
+          },
+          {
+            "id": "FR-09",
+            "title": "Track Action Completion",
+            "description": "The system shall track completion of improvement actions and update the action plan accordingly when actions are completed.",
+            "priority": "Must-Have",
+            "citation": {
+              "source_reference": "System shall track action completion and update plan accordingly",
+              "source_location": "Section 6.2 Personalised Credit Improvement Action Plans (FR-2.3)"
+            },
+            "reasoning": "Progress tracking is essential for coaching engagement. Uses 'shall'."
+          },
+          {
+            "id": "FR-10",
+            "title": "Celebrate Milestones",
+            "description": "The system shall celebrate milestones when score thresholds are reached or actions are completed, providing positive reinforcement to the customer.",
+            "priority": "Must-Have",
+            "citation": {
+              "source_reference": "System shall celebrate milestones (score thresholds reached, actions completed)",
+              "source_location": "Section 6.2 Personalised Credit Improvement Action Plans (FR-2.4)"
+            },
+            "reasoning": "Engagement and motivation feature. Uses 'shall'."
+          },
+          {
+            "id": "FR-11",
+            "title": "Dynamic Plan Updates",
+            "description": "The improvement action plans shall update dynamically as the customer's credit profile changes over time.",
+            "priority": "Must-Have",
+            "citation": {
+              "source_reference": "Plans shall update dynamically as the customer's profile changes",
+              "source_location": "Section 6.2 Personalised Credit Improvement Action Plans (FR-2.5)"
+            },
+            "reasoning": "Ensures plans remain relevant. Uses 'shall'."
+          },
+          {
+            "id": "FR-12",
+            "title": "Credit Score Simulation Scenarios",
+            "description": "The system shall support simulation of the following scenarios: paying down debt, closing accounts, opening new credit, missed payments, and reducing utilisation.",
+            "priority": "Must-Have",
+            "citation": {
+              "source_reference": "System shall support simulation of: paying down debt, closing accounts, opening new credit, missed payments, reducing utilisation",
+              "source_location": "Section 6.3 Credit Score Simulator (FR-3.1)"
+            },
+            "reasoning": "Defines the specific simulation scenarios required. Uses 'shall'."
+          },
+          {
+            "id": "FR-13",
+            "title": "Simulation Returns Score Impact and Confidence",
+            "description": "Simulations shall return an estimated score impact value and a confidence level indicating the reliability of the estimate.",
+            "priority": "Must-Have",
+            "citation": {
+              "source_reference": "Simulations shall return estimated score impact and confidence level",
+              "source_location": "Section 6.3 Credit Score Simulator (FR-3.2)"
+            },
+            "reasoning": "Transparency requirement for simulation outputs. Uses 'shall'."
+          },
+          {
+            "id": "FR-14",
+            "title": "Label Simulation Results as Estimates",
+            "description": "The system shall clearly label all simulation results as estimates, not guarantees of future score changes.",
+            "priority": "Must-Have",
+            "citation": {
+              "source_reference": "System shall clearly label results as estimates, not guarantees",
+              "source_location": "Section 6.3 Credit Score Simulator (FR-3.3)"
+            },
+            "reasoning": "Consumer protection and regulatory requirement to avoid misleading customers. Uses 'shall'."
+          },
+          {
+            "id": "FR-15",
+            "title": "Natural Language Scenario Input",
+            "description": "The system shall allow customers to input simulation scenarios using natural language (e.g., 'What if I pay off my overdraft?').",
+            "priority": "Must-Have",
+            "citation": {
+              "source_reference": "System shall allow natural language scenario input ('What if I pay off my overdraft?')",
+              "source_location": "Section 6.3 Credit Score Simulator (FR-3.4)"
+            },
+            "reasoning": "Conversational interface requirement consistent with existing FA architecture. Uses 'shall'."
+          },
+          {
+            "id": "FR-16",
+            "title": "Match Customer Profile Against Lending Criteria",
+            "description": "The system shall match the customer's credit profile against Lloyds' lending product eligibility criteria to identify qualifying products.",
+            "priority": "Must-Have",
+            "citation": {
+              "source_reference": "System shall match customer credit profile against Lloyds lending criteria",
+              "source_location": "Section 6.4 Pre-Approved Offers Engine (FR-4.1)"
+            },
+            "reasoning": "Core offer engine capability. Uses 'shall'."
+          },
+          {
+            "id": "FR-17",
+            "title": "Guaranteed Pre-Approved Offers",
+            "description": "Offers presented to customers shall be guaranteed \u2014 the customer will not be declined if they apply within the offer validity period.",
+            "priority": "Must-Have",
+            "citation": {
+              "source_reference": "Offers presented shall be guaranteed (customer will not be declined if they apply)",
+              "source_location": "Section 6.4 Pre-Approved Offers Engine (FR-4.2)"
+            },
+            "reasoning": "Key differentiator from indicative offers. Uses 'shall'."
+          },
+          {
+            "id": "FR-18",
+            "title": "Contextual Offer Presentation",
+            "description": "The system shall present pre-approved offers at contextually appropriate moments within the customer's credit coaching journey.",
+            "priority": "Must-Have",
+            "citation": {
+              "source_reference": "System shall present offers at contextually appropriate moments",
+              "source_location": "Section 6.4 Pre-Approved Offers Engine (FR-4.3)"
+            },
+            "reasoning": "Timing of offers is critical for conversion and Consumer Duty compliance. Uses 'shall'."
+          },
+          {
+            "id": "FR-19",
+            "title": "One-Tap Application with Pre-Filled Data",
+            "description": "The system shall support one-tap application for pre-approved offers with customer data pre-filled from existing Lloyds records.",
+            "priority": "Must-Have",
+            "citation": {
+              "source_reference": "System shall support one-tap application with pre-filled customer data",
+              "source_location": "Section 6.4 Pre-Approved Offers Engine (FR-4.4)"
+            },
+            "reasoning": "Frictionless application experience. Uses 'shall'."
+          },
+          {
+            "id": "FR-20",
+            "title": "Offer Audit Trail",
+            "description": "The system shall maintain a full audit trail of all offers presented to customers and all customer actions taken on those offers.",
+            "priority": "Must-Have",
+            "citation": {
+              "source_reference": "System shall maintain full audit trail of offers presented and customer actions",
+              "source_location": "Section 6.4 Pre-Approved Offers Engine (FR-4.5)"
+            },
+            "reasoning": "Regulatory compliance requirement for financial promotions and lending decisions. Uses 'shall'."
+          },
+          {
+            "id": "FR-21",
+            "title": "Credit Utilisation Threshold Alerts",
+            "description": "The system shall alert the customer when their credit utilisation approaches configurable thresholds (e.g., 50%, 75%, 90%).",
+            "priority": "Must-Have",
+            "citation": {
+              "source_reference": "System shall alert when credit utilisation approaches configurable thresholds",
+              "source_location": "Section 6.5 Proactive Credit Health Alerts (FR-5.1)"
+            },
+            "reasoning": "Proactive monitoring to prevent score damage. Uses 'shall'."
+          },
+          {
+            "id": "FR-22",
+            "title": "Payment Impact Alerts",
+            "description": "The system shall alert the customer about upcoming payments where a missed payment would negatively impact their credit score.",
+            "user_facing": true,
+            "priority": "Must-Have",
+            "baseline_classification": "new",
+            "baseline_reference": null,
+            "baseline_impact": null,
+            "citation": {
+              "source_reference": "System shall alert for upcoming payments where a miss would impact credit score",
+              "source_location": "Section 6.5 Proactive Credit Health Alerts (FR-5.2)"
+            },
+            "reasoning": "Preventive alert to protect credit health. Uses 'shall'."
+          },
+          {
+            "id": "FR-23",
+            "title": "Product Eligibility Notifications",
+            "description": "The system shall notify the customer when score improvements unlock eligibility for new Lloyds lending products.",
+            "priority": "Must-Have",
+            "citation": {
+              "source_reference": "System shall notify when score improvements unlock new product eligibility",
+              "source_location": "Section 6.5 Proactive Credit Health Alerts (FR-5.3)"
+            },
+            "reasoning": "Connects credit improvement to tangible product access. Uses 'shall'."
+          },
+          {
+            "id": "FR-24",
+            "title": "Alert Preference Configuration and Opt-Out",
+            "description": "The customer shall be able to configure alert preferences (types, frequency, channels) and opt out of any or all alerts.",
+            "priority": "Must-Have",
+            "citation": {
+              "source_reference": "Customer shall be able to configure alert preferences and opt out",
+              "source_location": "Section 6.5 Proactive Credit Health Alerts (FR-5.4)"
+            },
+            "reasoning": "Customer control over notifications. Uses 'shall'."
+          },
+          {
+            "id": "FR-25",
+            "title": "CRA Score Normalisation",
+            "description": "The system shall normalise credit scores from different CRA scales (Experian 0-1250, Equifax 0-1000, TransUnion 0-710) into a consistent customer-facing representation, or clearly label which bureau's score is displayed.",
+            "priority": "Should-Have",
+            "citation": {
+              "source_reference": "The Credit Coach must normalise these into a consistent customer-facing representation, or clearly label which bureau's score is displayed",
+              "source_location": "Section 9.1 CRA Score Context"
+            },
+            "reasoning": "Multi-bureau support requires consistent presentation. Uses 'must' but is Phase 5 scope."
+          },
+          {
+            "id": "FR-26",
+            "title": "Conversational Credit Queries",
+            "description": "The system shall support natural language queries about credit health through the existing Financial Assistant conversational interface.",
+            "priority": "Must-Have",
+            "citation": {
+              "source_reference": "Conversational interface (natural language queries about credit)",
+              "source_location": "Section 4.1 In Scope"
+            },
+            "reasoning": "Core interaction model consistent with existing FA architecture."
+          },
+          {
+            "id": "FR-27",
+            "title": "Score History and Trend Visualisation",
+            "description": "The system shall provide visual representation of credit score history showing trends over time.",
+            "priority": "Must-Have",
+            "citation": {
+              "source_reference": "Score history and trend visualisation",
+              "source_location": "Section 4.1 In Scope"
+            },
+            "reasoning": "Explicitly listed in scope as a capability to deliver."
+          },
+          {
+            "id": "FR-28",
+            "title": "Cross-Lender Debt Visibility",
+            "description": "The system shall display cross-lender debt information sourced from CRA data, giving the customer a complete picture of their total indebtedness.",
+            "priority": "Should-Have",
+            "citation": {
+              "source_reference": "Cross-lender debt visibility (via CRA data)",
+              "source_location": "Section 4.1 In Scope"
+            },
+            "reasoning": "Addresses capability gap identified in Section 2.2. Default priority Should-Have."
+          },
+          {
+            "id": "FR-29",
+            "title": "Explicit Consent Capture for CRA Data",
+            "description": "The system shall capture explicit opt-in consent from the customer before retrieving any CRA data, with separate consent per CRA where multiple bureaux are used.",
+            "priority": "Must-Have",
+            "citation": {
+              "source_reference": "Explicit consent for CRA data retrieval (not legitimate interest \u2014 too intrusive for external credit data)",
+              "source_location": "Section 8.3 UK GDPR (Lawful basis)"
+            },
+            "reasoning": "Legal requirement under UK GDPR Art. 6. Without consent, CRA data cannot be retrieved."
+          },
+          {
+            "id": "FR-30",
+            "title": "Right to Erasure of Score History",
+            "description": "The system shall allow the customer to delete their stored score history and opt out of the Credit Coach service at any time.",
+            "priority": "Must-Have",
+            "citation": {
+              "source_reference": "Customer can delete score history and opt out at any time; CRA data not retained beyond refresh cycle",
+              "source_location": "Section 8.3 UK GDPR (Right to erasure)"
+            },
+            "reasoning": "Legal requirement under UK GDPR Art. 17."
+          },
+          {
+            "id": "FR-31",
+            "title": "Automated Decision Explanation and Human Review",
+            "description": "The system shall provide meaningful information about the logic, significance, and consequences of automated profiling for pre-approved offers, and shall offer a route to human review.",
+            "priority": "Must-Have",
+            "citation": {
+              "source_reference": "Must provide meaningful information about logic, significance, and consequences; must offer human review route",
+              "source_location": "Section 8.3 UK GDPR (Automated decision-making)"
+            },
+            "reasoning": "Legal requirement under UK GDPR Art. 22 for automated decisions with legal/significant effect."
+          },
+          {
+            "id": "FR-32",
+            "title": "Pre-Contract Information for Offers (SECCI)",
+            "description": "The system shall provide adequate pre-contract explanations via the Standard European Consumer Credit Information form (SECCI) for any pre-approved offer for a regulated credit agreement.",
+            "priority": "Must-Have",
+            "citation": {
+              "source_reference": "Pre-approved offers for regulated credit agreements must include adequate pre-contract explanations via the Standard European Consumer Credit Information form (SECCI)",
+              "source_location": "Section 8.4 Consumer Credit Act 1974 (Pre-contract information)"
+            },
+            "reasoning": "Legal requirement under CCA s.55. Non-compliance may render agreement unenforceable."
+          },
+          {
+            "id": "FR-33",
+            "title": "Cooling-Off Period Communication",
+            "description": "The system shall clearly communicate the 14-day withdrawal right at the point of offer acceptance, including that the customer can cancel without giving a reason.",
+            "priority": "Must-Have",
+            "citation": {
+              "source_reference": "14-day withdrawal right must be clearly communicated at point of offer acceptance. Customer can cancel without giving reason.",
+              "source_location": "Section 8.4 Consumer Credit Act 1974 (Cooling-off period)"
+            },
+            "reasoning": "Legal requirement under CCA s.66A."
+          },
+          {
+            "id": "FR-34",
+            "title": "Financial Promotion Compliance for Offers",
+            "description": "Pre-approved offers that constitute financial promotions shall include representative APR, representative example, total amount payable, and give equal prominence to risks.",
+            "priority": "Must-Have",
+            "citation": {
+              "source_reference": "Pre-approved offers are financial promotions and must be clear, fair, and not misleading. Must include representative APR, representative example, and give equal prominence to risks.",
+              "source_location": "Section 8.2 FCA CONC 3 \u2014 Financial promotions"
+            },
+            "reasoning": "Regulatory requirement under CONC 3. Domain KB confirms all cost triggers require representative APR and example."
+          },
+          {
+            "id": "FR-35",
+            "title": "Affordability Assessment for Pre-Approved Offers",
+            "description": "Pre-approved offers shall be based on adequate creditworthiness assessment covering both credit risk (likelihood of default) and affordability (ability to repay without hardship), not just credit score.",
+            "priority": "Must-Have",
+            "citation": {
+              "source_reference": "Pre-approved offers must be based on adequate creditworthiness assessment covering both credit risk and affordability \u2014 not just credit score",
+              "source_location": "Section 8.2 FCA CONC 5 \u2014 Creditworthiness"
+            },
+            "reasoning": "Regulatory requirement under CONC 5.2A. Domain KB confirms this is the most enforced section."
+          },
+          {
+            "id": "FR-36",
+            "title": "Vulnerability Detection and Debt Advice Signposting",
+            "description": "The system shall detect vulnerability indicators and signpost customers in financial difficulty to free debt advice services (StepChange, Citizens Advice, National Debtline). Alerts must not pressure customers showing signs of financial distress.",
+            "priority": "Must-Have",
+            "citation": {
+              "source_reference": "Alerts must not pressure customers in financial difficulty; must signpost to free debt advice (StepChange, Citizens Advice). Credit Coach must detect vulnerability indicators.",
+              "source_location": "Section 8.2 FCA CONC 7 \u2014 Arrears and default"
+            },
+            "reasoning": "Regulatory requirement under CONC 7. Domain KB confirms signposting is mandatory (CONC 7.3.7AR)."
+          },
+          {
+            "id": "FR-37",
+            "title": "Suppress Offers During Financial Distress",
+            "description": "The system shall not present pre-approved offers to customers showing signs of financial distress, to avoid encouraging over-borrowing.",
+            "priority": "Must-Have",
+            "citation": {
+              "source_reference": "Simulator must not encourage over-borrowing; pre-approved offers must include affordability warnings; must not present offers to customers showing signs of financial distress",
+              "source_location": "Section 8.1 FCA Consumer Duty (Avoid causing foreseeable harm)"
+            },
+            "reasoning": "Consumer Duty cross-cutting rule to avoid foreseeable harm."
+          },
+          {
+            "id": "FR-38",
+            "title": "Unbiased Improvement Recommendations",
+            "description": "Credit improvement action plans shall genuinely benefit the customer and not be biased toward driving Lloyds lending revenue.",
+            "priority": "Must-Have",
+            "citation": {
+              "source_reference": "Improvement plans must genuinely benefit the customer, not just drive lending revenue. Recommendations must be unbiased.",
+              "source_location": "Section 8.1 FCA Consumer Duty (Act in good faith)"
+            },
+            "reasoning": "Consumer Duty cross-cutting rule to act in good faith."
+          },
+          {
+            "id": "FR-39",
+            "title": "Orchestrator Integration",
+            "description": "The Credit Coach agent shall integrate with the existing Financial Assistant agentic orchestrator, which routes credit-related queries to the Credit Coach agent.",
+            "priority": "Must-Have",
+            "citation": {
+              "source_reference": "Credit Coach is a module within FA, not a separate chat. Orchestrator routes credit queries to Credit Coach agent",
+              "source_location": "Section 10 Overlap Resolution"
+            },
+            "reasoning": "Architectural integration requirement for the agent to function within the existing system."
+          },
+          {
+            "id": "FR-40",
+            "title": "Transparency at Point of Data Collection",
+            "description": "The system shall inform customers at the point of data collection about automated processing, including profiling for credit purposes, the logic involved, and consequences.",
+            "priority": "Must-Have",
+            "citation": {
+              "source_reference": "Must inform customers at point of data collection about automated processing, including profiling for credit purposes",
+              "source_location": "Section 8.3 UK GDPR (Transparency)"
+            },
+            "reasoning": "Legal requirement under UK GDPR Art. 13(2)(f)."
+          },
+          {
+            "id": "FR-41",
+            "title": "Human Escalation Path",
+            "description": "The system shall provide an escalation path to a human adviser for complex credit situations and edge cases.",
+            "priority": "Must-Have",
+            "citation": {
+              "source_reference": "Escalation path to human adviser for complex credit situations; human-in-the-loop for edge cases",
+              "source_location": "Section 8.5 BoE/PRA/FCA Joint Feedback on AI/ML (Human oversight)"
+            },
+            "reasoning": "Regulatory expectation from FS2/23 and Envoy platform design principle."
+          },
+          {
+            "id": "FR-42",
+            "title": "Data Separation Between Bank and CRA Data",
+            "description": "The system shall keep Lloyds transaction data and CRA data in separate data domains, combining them only in the presentation/coaching layer and never co-mingling in storage.",
+            "priority": "Must-Have",
+            "citation": {
+              "source_reference": "Lloyds transaction data and CRA data are kept in separate domains. They are combined only in the presentation/coaching layer, never co-mingled in storage.",
+              "source_location": "Section 9.2 Data Domains (Key principle)"
+            },
+            "reasoning": "Explicit architectural principle for data governance and GDPR purpose limitation."
+          },
+          {
+            "id": "FR-43",
+            "title": "Purpose Limitation for CRA Data",
+            "description": "CRA data retrieved by the Credit Coach shall be used only for credit coaching purposes and shall not be cross-sold to marketing without separate explicit consent.",
+            "priority": "Must-Have",
+            "citation": {
+              "source_reference": "CRA data used only for credit coaching; not cross-sold to marketing without separate consent",
+              "source_location": "Section 8.3 UK GDPR (Purpose limitation)"
+            },
+            "reasoning": "Legal requirement under UK GDPR Art. 5(1)(b)."
+          },
+          {
+            "id": "FR-44",
+            "title": "Data Minimisation for CRA Retrieval",
+            "description": "The system shall retrieve only the credit score and factors needed for coaching, not the full credit report, unless the customer explicitly requests it.",
+            "priority": "Must-Have",
+            "citation": {
+              "source_reference": "Retrieve only score and factors needed, not full credit report unless customer requests",
+              "source_location": "Section 8.3 UK GDPR (Data minimisation)"
+            },
+            "reasoning": "Legal requirement under UK GDPR Art. 5(1)(c)."
+          },
+          {
+            "id": "FR-45",
+            "title": "Pre-Qualification Gate for FA Product Recommendations",
+            "description": "The Credit Coach shall act as a pre-qualification gate \u2014 the Financial Assistant shall only show lending products the customer actually qualifies for based on their credit profile, eliminating embarrassing declines.",
+            "priority": "Must-Have",
+            "citation": {
+              "source_reference": "Credit Coach acts as a pre-qualification gate \u2014 FA only shows products the customer actually qualifies for",
+              "source_location": "Section 10: Overlap Resolution with Existing Financial Assistant"
+            },
+            "reasoning": "Extracted from overlap resolution section. This is a distinct integration requirement that changes how the existing FA presents products. Priority Must-Have as it's described as the resolution to a 'potential conflict'."
+          },
+          {
+            "id": "FR-46",
+            "title": "Unified Recommendation Engine",
+            "description": "The system shall implement a unified recommendation engine that weighs both spending/savings perspectives (from existing FA) and credit health perspectives (from Credit Coach). Credit health shall take priority when the customer's score is below a configurable threshold.",
+            "priority": "Should-Have",
+            "citation": {
+              "source_reference": "Unified recommendation engine weighs both perspectives. Credit health takes priority when score is below threshold.",
+              "source_location": "Section 10: Overlap Resolution with Existing Financial Assistant"
+            },
+            "reasoning": "Extracted from overlap resolution. Addresses the 'competing recommendations' conflict. Priority Should-Have as it's a resolution strategy rather than a core capability."
+          },
+          {
+            "id": "FR-47",
+            "title": "Spending-to-Credit Impact Connection",
+            "description": "The Credit Coach shall connect spending insights from the existing Financial Assistant to credit impact \u2014 e.g., 'Reducing dining by \u00a3150/month improves affordability by 12%' \u2014 providing actionable credit improvement context to existing spending data.",
+            "priority": "Should-Have",
+            "citation": {
+              "source_reference": "\"Reducing dining by \u00a3150/month improves affordability by 12%\" \u2014 Spending insight \u2192 actionable credit improvement",
+              "source_location": "Section 3.2: How It Augments the Existing Assistant"
+            },
+            "reasoning": "Extracted from augmentation map. This is the core value proposition of combining FA spending data with Credit Coach intelligence. Priority Should-Have as it's described as 'combined value' not a mandatory capability."
+          },
+          {
+            "id": "FR-48",
+            "title": "Breathing Space Compliance",
+            "description": "The system shall detect when a customer enters Breathing Space (Debt Respite Scheme 2021) and automatically: freeze all credit-related alerts, suppress pre-approved offers, stop proactive communications about credit, and freeze any interest/charges on Lloyds products surfaced through the Credit Coach.",
+            "priority": "Must-Have",
+            "citation": {
+              "source_reference": "Alerts must not pressure customers in financial difficulty; must signpost to debt advice",
+              "source_location": "Section 8.2: FCA CONC 7 \u2014 Arrears and default"
+            },
+            "reasoning": "Derived from CONC 7 compliance requirement in the product vision, grounded in domain KB PD7 Breathing Space (Debt Respite Scheme 2021). During breathing space, lenders MUST freeze interest/charges, stop enforcement, and stop contacting the customer about debt. This is a legal obligation not explicitly called out in the vision but required by the cited regulation."
+          },
+          {
+            "id": "FR-49",
+            "title": "Data Subject Access Request Support",
+            "description": "The system shall support Data Subject Access Requests (DSARs) by enabling export of all credit coaching data held about a customer \u2014 including score history, action plans, simulation history, offers presented, consent records, and alert history \u2014 within 1 calendar month of request.",
+            "priority": "Must-Have",
+            "citation": {
+              "source_reference": "Customer can delete score history and opt out at any time",
+              "source_location": "Section 8.3: UK GDPR, Data Protection Act 2018 & Data (Use and Access) Act 2025"
+            },
+            "reasoning": "The product vision mentions right to erasure (Art. 17) but omits the corresponding right to access (Art. 15 / DSAR). Domain KB PD14 confirms DSARs must be responded to within 1 calendar month. This is a mandatory GDPR obligation for any system holding personal data."
+          },
+          {
+            "id": "FR-50",
+            "title": "Multi-Bureau Score Comparison",
+            "description": "The system shall support retrieval and display of credit scores from multiple CRAs (Experian, Equifax, TransUnion) simultaneously, enabling customers to compare their scores across bureaus.",
+            "priority": "Nice-to-Have",
+            "citation": {
+              "source_reference": "Phase 5 \u2014 Optimise: Multi-bureau comparison, advanced alerts, cross-product recommendations",
+              "source_location": "Section 12: Phased Delivery Roadmap"
+            },
+            "reasoning": "Extracted from Phase 5 roadmap. Priority Nice-to-Have as it's in the final phase and described as an optimisation."
+          }
+        ],
+        "non_functional_requirements": [
+          {
+            "id": "NFR-01",
+            "category": "Performance",
+            "title": "Score Retrieval Response Time",
+            "description": "Credit score retrieval shall complete in less than 3 seconds end-to-end.",
+            "priority": "Must-Have",
+            "citation": {
+              "source_reference": "Score retrieval < 3 seconds",
+              "source_location": "Section 7 Non-Functional Requirements (Performance)"
+            },
+            "reasoning": "Explicit measurable performance target provided in the source."
+          },
+          {
+            "id": "NFR-02",
+            "category": "Performance",
+            "title": "Simulation Response Time",
+            "description": "Credit score simulation results shall be returned in less than 5 seconds.",
+            "priority": "Must-Have",
+            "citation": {
+              "source_reference": "Simulation results < 5 seconds",
+              "source_location": "Section 7 Non-Functional Requirements (Performance)"
+            },
+            "reasoning": "Explicit measurable performance target provided in the source."
+          },
+          {
+            "id": "NFR-03",
+            "category": "Availability",
+            "title": "Dashboard Uptime",
+            "description": "The credit score dashboard shall maintain 99.9% uptime availability.",
+            "priority": "Must-Have",
+            "citation": {
+              "source_reference": "99.9% uptime for dashboard",
+              "source_location": "Section 7 Non-Functional Requirements (Availability)"
+            },
+            "reasoning": "Explicit availability target. 99.9% = max 8.76 hours downtime per year."
+          },
+          {
+            "id": "NFR-04",
+            "category": "Availability",
+            "title": "Alert Delivery Timeliness",
+            "description": "Proactive credit health alerts shall be delivered within 15 minutes of the triggering event.",
+            "priority": "Must-Have",
+            "citation": {
+              "source_reference": "Alerts delivered within 15 minutes of trigger",
+              "source_location": "Section 7 Non-Functional Requirements (Availability)"
+            },
+            "reasoning": "Explicit timeliness target for alert delivery."
+          },
+          {
+            "id": "NFR-05",
+            "category": "Scalability",
+            "title": "Enrolled Customer Capacity",
+            "description": "The system shall support 10 million or more enrolled customers with daily score checks without degradation.",
+            "priority": "Must-Have",
+            "citation": {
+              "source_reference": "Support 10M+ enrolled customers with daily score checks",
+              "source_location": "Section 7 Non-Functional Requirements (Scalability)"
+            },
+            "reasoning": "Explicit scalability target aligned with Lloyds' 10M+ mobile app user base."
+          },
+          {
+            "id": "NFR-06",
+            "category": "Security",
+            "title": "Encryption at Rest",
+            "description": "All CRA data shall be encrypted at rest using AES-256 encryption.",
+            "priority": "Must-Have",
+            "citation": {
+              "source_reference": "All CRA data encrypted at rest (AES-256)",
+              "source_location": "Section 7 Non-Functional Requirements (Security)"
+            },
+            "reasoning": "Explicit security requirement. Aligned with enterprise architecture KB confirming AES-256 and Cloud KMS."
+          },
+          {
+            "id": "NFR-07",
+            "category": "Security",
+            "title": "Encryption in Transit",
+            "description": "All CRA data shall be encrypted in transit using TLS 1.3.",
+            "priority": "Must-Have",
+            "citation": {
+              "source_reference": "All CRA data encrypted in transit (TLS 1.3)",
+              "source_location": "Section 7 Non-Functional Requirements (Security)"
+            },
+            "reasoning": "Explicit security requirement. Aligned with enterprise architecture KB confirming TLS 1.3."
+          },
+          {
+            "id": "NFR-08",
+            "category": "Security",
+            "title": "Data Classification",
+            "description": "CRA data shall be classified as Highly Confidential and handled according to Lloyds' data classification policies.",
+            "priority": "Must-Have",
+            "citation": {
+              "source_reference": "Data classified as Highly Confidential",
+              "source_location": "Section 7 Non-Functional Requirements (Security)"
+            },
+            "reasoning": "Explicit data classification requirement."
+          },
+          {
+            "id": "NFR-09",
+            "category": "Compliance",
+            "title": "Score History Retention (6 Years)",
+            "description": "Score history shall be retained for 6 years in compliance with FCA record-keeping requirements.",
+            "priority": "Must-Have",
+            "citation": {
+              "source_reference": "Score history retained for 6 years (FCA record-keeping)",
+              "source_location": "Section 7 Non-Functional Requirements (Data Retention)"
+            },
+            "reasoning": "Regulatory data retention requirement aligned with FCA SYSC 9.1.1R."
+          },
+          {
+            "id": "NFR-10",
+            "category": "Compliance",
+            "title": "Consent Records Retention",
+            "description": "Consent records shall be retained indefinitely (no expiry) to demonstrate ongoing compliance with data protection requirements. Must be retrievable within 24 hours for regulatory audit.",
+            "priority": "Must-Have",
+            "citation": {
+              "source_reference": "Consent records retained indefinitely",
+              "source_location": "Section 7 Non-Functional Requirements (Data Retention)"
+            },
+            "reasoning": "Explicit retention requirement for demonstrating GDPR compliance."
+          },
+          {
+            "id": "NFR-11",
+            "category": "Accessibility",
+            "title": "WCAG 2.1 AA Compliance",
+            "description": "All Credit Coach UI components shall be WCAG 2.1 AA compliant.",
+            "priority": "Must-Have",
+            "citation": {
+              "source_reference": "WCAG 2.1 AA compliant",
+              "source_location": "Section 7 Non-Functional Requirements (Accessibility)"
+            },
+            "reasoning": "Accessibility standard. Aligned with enterprise architecture KB requirement."
+          },
+          {
+            "id": "NFR-12",
+            "category": "Accessibility",
+            "title": "Screen Reader Compatibility",
+            "description": "All Credit Coach UI components shall be compatible with VoiceOver (iOS) and TalkBack (Android) screen readers, with 100% of interactive elements having accessible labels.",
+            "priority": "Must-Have",
+            "citation": {
+              "source_reference": "Screen reader compatible",
+              "source_location": "Section 7 Non-Functional Requirements (Accessibility)"
+            },
+            "reasoning": "Explicit accessibility requirement for visually impaired users."
+          },
+          {
+            "id": "NFR-13",
+            "category": "Accessibility",
+            "title": "Colour-Blind Safe Visualisations",
+            "description": "Score visualisations shall use colour-blind safe palettes (tested against deuteranopia, protanopia, tritanopia) and not rely solely on colour to convey information. All charts must pass WCAG 2.1 AA contrast ratio (4.5:1 for text, 3:1 for UI components).",
+            "priority": "Must-Have",
+            "citation": {
+              "source_reference": "Colour-blind safe score visualisations",
+              "source_location": "Section 7 Non-Functional Requirements (Accessibility)"
+            },
+            "reasoning": "Explicit accessibility requirement for colour-blind users."
+          },
+          {
+            "id": "NFR-14",
+            "category": "Compliance",
+            "title": "FCA Consumer Duty Compliance",
+            "description": "The system shall comply with FCA Consumer Duty (PS22/9) including all four outcomes: products and services, price and value, consumer understanding, and consumer support.",
+            "priority": "Must-Have",
+            "citation": {
+              "source_reference": "A firm must act to deliver good outcomes for retail customers",
+              "source_location": "Section 8.1 FCA Consumer Duty"
+            },
+            "reasoning": "Overarching regulatory requirement. Each cross-cutting rule has specific implications documented."
+          },
+          {
+            "id": "NFR-15",
+            "category": "Compliance",
+            "title": "FCA CONC 3 Financial Promotions Compliance",
+            "description": "All pre-approved offers constituting financial promotions shall comply with FCA CONC 3 requirements for clarity, fairness, and non-misleading content.",
+            "priority": "Must-Have",
+            "citation": {
+              "source_reference": "Pre-approved offers are financial promotions and must be clear, fair, and not misleading",
+              "source_location": "Section 8.2 FCA CONC 3"
+            },
+            "reasoning": "Separate regulation requiring compliance. Domain KB confirms detailed requirements."
+          },
+          {
+            "id": "NFR-16",
+            "category": "Compliance",
+            "title": "FCA CONC 5 Creditworthiness Compliance",
+            "description": "Pre-approved offers shall comply with FCA CONC 5 creditworthiness assessment requirements covering credit risk and affordability.",
+            "priority": "Must-Have",
+            "citation": {
+              "source_reference": "Pre-approved offers must be based on adequate creditworthiness assessment covering both credit risk and affordability",
+              "source_location": "Section 8.2 FCA CONC 5"
+            },
+            "reasoning": "Separate regulation. Source notes this generates the most FCA enforcement action."
+          },
+          {
+            "id": "NFR-17",
+            "category": "Compliance",
+            "title": "FCA CONC 7 Arrears and Default Compliance",
+            "description": "The system shall comply with FCA CONC 7 requirements regarding treatment of customers in financial difficulty, including signposting to free debt advice.",
+            "priority": "Must-Have",
+            "citation": {
+              "source_reference": "Alerts must not pressure customers in financial difficulty; must signpost to free debt advice",
+              "source_location": "Section 8.2 FCA CONC 7"
+            },
+            "reasoning": "Separate regulation with specific implications for alert behaviour."
+          },
+          {
+            "id": "NFR-18",
+            "category": "Compliance",
+            "title": "UK GDPR and DPA 2018 Compliance",
+            "description": "The system shall comply with UK GDPR and Data Protection Act 2018 requirements including lawful basis, purpose limitation, data minimisation, right to erasure, DPIA, and automated decision-making provisions.",
+            "priority": "Must-Have",
+            "citation": {
+              "source_reference": "Explicit consent for CRA data retrieval; purpose limitation; data minimisation; right to erasure; DPIA required; automated decision-making provisions",
+              "source_location": "Section 8.3 UK GDPR, DPA 2018 & DUAA 2025"
+            },
+            "reasoning": "Comprehensive data protection regulation with multiple specific requirements documented."
+          },
+          {
+            "id": "NFR-19",
+            "category": "Compliance",
+            "title": "Consumer Credit Act 1974 Compliance",
+            "description": "Pre-approved offers for regulated credit agreements shall comply with CCA requirements including pre-contract information (SECCI), cooling-off period, and unfair relationships provisions.",
+            "priority": "Must-Have",
+            "citation": {
+              "source_reference": "Pre-contract information, cooling-off period, unfair relationships",
+              "source_location": "Section 8.4 Consumer Credit Act 1974"
+            },
+            "reasoning": "Foundational UK lending legislation. Non-compliance makes agreements unenforceable."
+          },
+          {
+            "id": "NFR-20",
+            "category": "Compliance",
+            "title": "AI/ML Explainability (FS2/23)",
+            "description": "Score factors and simulation logic shall be explainable to customers in plain language (Flesch reading ease score >= 60). Black-box models are not acceptable for customer-facing credit decisions. Every recommendation must include a 'why' explanation.",
+            "priority": "Must-Have",
+            "citation": {
+              "source_reference": "Score factors and simulation logic must be explainable to customers in plain language. 'Black box' models are not acceptable for customer-facing credit decisions.",
+              "source_location": "Section 8.5 BoE/PRA/FCA Joint Feedback on AI/ML (Explainability)"
+            },
+            "reasoning": "Regulatory expectation from FS2/23 joint feedback statement."
+          },
+          {
+            "id": "NFR-21",
+            "category": "Compliance",
+            "title": "AI Fairness and Bias Audits",
+            "description": "Improvement plans and offers shall not discriminate on protected characteristics (Equality Act 2010). Bias audits shall be conducted quarterly across demographic groups, with disparate impact ratio maintained above 0.8 (four-fifths rule).",
+            "priority": "Must-Have",
+            "citation": {
+              "source_reference": "Improvement plans and offers must not discriminate on protected characteristics; regular bias audits required across demographic groups",
+              "source_location": "Section 8.5 BoE/PRA/FCA Joint Feedback on AI/ML (Fairness & bias)"
+            },
+            "reasoning": "Regulatory expectation from FS2/23 and Equality Act 2010 requirement."
+          },
+          {
+            "id": "NFR-22",
+            "category": "Compliance",
+            "title": "Model Risk Management (PRA SS1/23)",
+            "description": "Credit simulation models and offer-matching algorithms shall be inventoried, risk-classified, independently validated before deployment, and revalidated at least annually. Model performance drift exceeding 5% from baseline triggers mandatory review.",
+            "priority": "Must-Have",
+            "citation": {
+              "source_reference": "Credit simulation models and offer-matching algorithms must be inventoried and risk-classified; independent validation before deployment; periodic revalidation",
+              "source_location": "Section 8.6 PRA SS1/23 \u2014 Model Risk Management"
+            },
+            "reasoning": "PRA supervisory statement in force since May 2024. Applies to simulation and offer-matching models."
+          },
+          {
+            "id": "NFR-23",
+            "category": "Compliance",
+            "title": "Equality Act 2010 Non-Discrimination",
+            "description": "The Credit Coach shall not directly or indirectly discriminate in service provision based on protected characteristics (age, disability, gender reassignment, marriage/civil partnership, pregnancy/maternity, race, religion/belief, sex, sexual orientation).",
+            "priority": "Must-Have",
+            "citation": {
+              "source_reference": "The Credit Coach must not directly or indirectly discriminate in the provision of services based on protected characteristics",
+              "source_location": "Section 8.7 Equality Act 2010"
+            },
+            "reasoning": "Separate legislation with specific implications for action plans, offers, and simulation outputs."
+          },
+          {
+            "id": "NFR-24",
+            "category": "Compliance",
+            "title": "DPIA Completion Before Launch",
+            "description": "A Data Protection Impact Assessment shall be completed before the Credit Coach launches, as large-scale profiling of financial data triggers the DPIA requirement.",
+            "priority": "Must-Have",
+            "citation": {
+              "source_reference": "Mandatory Data Protection Impact Assessment before launch \u2014 large-scale profiling of financial data triggers DPIA requirement",
+              "source_location": "Section 8.3 UK GDPR (DPIA required)"
+            },
+            "reasoning": "Legal requirement under UK GDPR Art. 35. Listed as a dependency."
+          },
+          {
+            "id": "NFR-25",
+            "category": "Compliance",
+            "title": "CRA Data Quality Validation",
+            "description": "CRA data inputs shall be validated for quality and currency. Data older than 30 days shall trigger a re-fetch. Stale or incorrect data shall not drive recommendations or offers. Data quality score must be >= 95% before processing.",
+            "priority": "Must-Have",
+            "citation": {
+              "source_reference": "CRA data inputs must be validated; stale or incorrect data must not drive recommendations",
+              "source_location": "Section 8.5 BoE/PRA/FCA Joint Feedback on AI/ML (Data quality)"
+            },
+            "reasoning": "Regulatory expectation from FS2/23 for data quality in AI systems."
+          },
+          {
+            "id": "NFR-26",
+            "category": "Compliance",
+            "title": "DUAA 2025 Automated Decision-Making Compliance",
+            "description": "The system shall comply with the Data (Use and Access) Act 2025 risk-based framework for automated decision-making once ICO guidance is finalised, with credit decisions likely classified as high-risk.",
+            "priority": "Should-Have",
+            "citation": {
+              "source_reference": "DUAA 2025 introduces a risk-based framework distinguishing low and high-risk ADM \u2014 credit decisions are likely high-risk",
+              "source_location": "Section 8.3 UK GDPR (Automated decision-making)"
+            },
+            "reasoning": "Emerging regulation. ICO guidance still pending but must be designed for."
+          },
+          {
+            "id": "NFR-27",
+            "category": "Usability",
+            "title": "Consumer Understanding of Offers",
+            "description": "Pre-approved offer screens shall be designed so that a customer with no financial background can understand the total cost from the offer screen without external help. Validated via user testing with target comprehension rate >= 85%.",
+            "priority": "Must-Have",
+            "citation": {
+              "source_reference": "Enable and support retail customers to pursue their financial objectives",
+              "source_location": "Section 8.1 FCA Consumer Duty (Consumer understanding outcome)"
+            },
+            "reasoning": "Consumer Duty outcome requirement. Domain KB confirms acceptance criteria pattern."
+          }
+        ],
+        "constraints": [
+          {
+            "id": "CON-01",
+            "type": "Technology",
+            "description": "The Credit Coach agent must be deployed on the Envoy platform using standardised agent templates and published to the internal agent marketplace.",
+            "citation": {
+              "source_reference": "The Credit Coach agent will be published to Envoy's internal agent marketplace",
+              "source_location": "Section 5.1 Technical Components (Platform note)"
+            },
+            "reasoning": "Fixed platform constraint \u2014 Envoy is the mandated deployment platform, not a choice."
+          },
+          {
+            "id": "CON-02",
+            "type": "Technology",
+            "description": "The backend must be implemented as Spring Boot (Java) microservices deployed on GKE, with APIs exposed via Apigee gateway.",
+            "citation": {
+              "source_reference": "Microservice per bounded context; Deploy as containerised service on GKE; Expose APIs via Apigee gateway",
+              "source_location": "Enterprise Architecture KB Section 9 (Backend)"
+            },
+            "reasoning": "Enterprise architecture mandates technology stack. Not negotiable for this project."
+          },
+          {
+            "id": "CON-03",
+            "type": "Technology",
+            "description": "The mobile frontend must be native (Swift for iOS, Kotlin for Android) within the existing mobile app shell, using the shared design system component library.",
+            "citation": {
+              "source_reference": "Mobile: Native \u2014 Swift (iOS), Kotlin (Android). NOT React Native. Deploy as a micro-frontend or feature within the existing mobile app shell",
+              "source_location": "Enterprise Architecture KB Section 3.1 and Section 9 (Frontend)"
+            },
+            "reasoning": "Enterprise architecture mandates native mobile development. React Native explicitly excluded."
+          },
+          {
+            "id": "CON-04",
+            "type": "Technology",
+            "description": "AI/ML models must be deployed via Vertex AI endpoints and registered in the Envoy marketplace, following 'Engineering the Lloyds Way' guardrails.",
+            "citation": {
+              "source_reference": "Deploy models via Vertex AI endpoints; Register agents in Envoy marketplace; Follow 'Engineering the Lloyds Way' guardrails",
+              "source_location": "Enterprise Architecture KB Section 9 (AI/ML)"
+            },
+            "reasoning": "Enterprise architecture mandates AI platform. Vertex AI is the confirmed ML platform."
+          },
+          {
+            "id": "CON-05",
+            "type": "Technology",
+            "description": "Asynchronous events (score changes, alerts) must use Google Cloud Pub/Sub. Transactional data stored in Cloud SQL (PostgreSQL). Analytics in BigQuery.",
+            "citation": {
+              "source_reference": "Use Pub/Sub for async events (score changes, alerts); Store state in Cloud SQL (PostgreSQL) for transactional data; Use BigQuery for analytics/reporting",
+              "source_location": "Enterprise Architecture KB Section 9 (Backend)"
+            },
+            "reasoning": "Enterprise architecture mandates specific GCP services for data and messaging."
+          },
+          {
+            "id": "CON-06",
+            "type": "Technology",
+            "description": "External CRA API calls must implement circuit breakers for resilience.",
+            "citation": {
+              "source_reference": "Implement circuit breakers for external CRA calls",
+              "source_location": "Enterprise Architecture KB Section 9 (Backend)"
+            },
+            "reasoning": "Enterprise architecture mandates resilience pattern for external dependencies."
+          },
+          {
+            "id": "CON-07",
+            "type": "Regulatory",
+            "description": "FCA regulatory review of offer mechanics must be completed before Phase 4 (Pre-Approved Offers Engine) can launch.",
+            "citation": {
+              "source_reference": "FCA regulatory review of offer mechanics \u2014 Required before Phase 4",
+              "source_location": "Section 14 Dependencies"
+            },
+            "reasoning": "External regulatory dependency that gates delivery. Cannot be influenced by the team."
+          },
+          {
+            "id": "CON-08",
+            "type": "Regulatory",
+            "description": "DPIA must be completed by the Data Protection Office before any build work commences.",
+            "citation": {
+              "source_reference": "DPIA completion \u2014 Required before build",
+              "source_location": "Section 14 Dependencies"
+            },
+            "reasoning": "Legal prerequisite that gates the entire project start."
+          },
+          {
+            "id": "CON-09",
+            "type": "Organisational",
+            "description": "CRA partnership agreements (Experian, Equifax, TransUnion) must be commercially agreed before CRA integration can begin.",
+            "citation": {
+              "source_reference": "CRA partnership agreement (Experian/Equifax/TU) \u2014 To be initiated",
+              "source_location": "Section 14 Dependencies"
+            },
+            "reasoning": "External commercial dependency. No CRA data access without partnership agreement."
+          },
+          {
+            "id": "CON-10",
+            "type": "Technology",
+            "description": "The Credit Coach must operate within the existing unified conversational UI \u2014 it is not a separate application or chat interface.",
+            "citation": {
+              "source_reference": "It is not a separate application \u2014 it plugs into the same orchestrator, uses the same conversational UI, and follows the same governance-first guardrails",
+              "source_location": "Section 3 Product Overview"
+            },
+            "reasoning": "Architectural constraint on how the product is delivered to customers."
+          },
+          {
+            "id": "CON-11",
+            "type": "Organisational",
+            "description": "The agent must support multi-brand deployment across Lloyds Bank, Halifax, and Bank of Scotland using brand-agnostic components with brand-specific theming.",
+            "citation": {
+              "source_reference": "The Credit Coach agent will be published to Envoy's internal agent marketplace, enabling reuse across Lloyds Bank, Halifax, and Bank of Scotland brands",
+              "source_location": "Section 5.1 Technical Components (Platform note)"
+            },
+            "reasoning": "Organisational constraint from multi-brand architecture. Enterprise KB confirms shared backend with brand-specific theming."
+          },
+          {
+            "id": "CON-12",
+            "type": "Technology",
+            "description": "Event-driven architecture must be used with Pub/Sub \u2192 Dataflow \u2192 BigQuery pipeline, with separate data domains for bank data vs external CRA data.",
+            "citation": {
+              "source_reference": "Event-driven architecture (Pub/Sub \u2192 Dataflow \u2192 BigQuery); Separate data domains (bank data vs external CRA data)",
+              "source_location": "Enterprise Architecture KB Section 9 (Data)"
+            },
+            "reasoning": "Enterprise architecture mandates data pipeline pattern."
+          },
+          {
+            "id": "CON-13",
+            "type": "Timeline",
+            "description": "Delivery must follow the phased roadmap: Phase 1 (Monitor, 3 months), Phase 2 (Coach, +2 months), Phase 3 (Simulate, +2 months), Phase 4 (Convert, +3 months), Phase 5 (Optimise, +3 months). Phase 4 is gated on FCA regulatory review.",
+            "citation": {
+              "source_reference": "Phase 1 \u2014 Monitor: 3 months; Phase 2 \u2014 Coach: +2 months; Phase 3 \u2014 Simulate: +2 months; Phase 4 \u2014 Convert: +3 months; Phase 5 \u2014 Optimise: +3 months",
+              "source_location": "Section 12: Phased Delivery Roadmap"
+            },
+            "reasoning": "This is a constraint (fixed delivery sequence) not a requirement, because the phases are presented as a committed roadmap with dependencies (Phase 4 requires FCA review). The sequencing constrains what can be delivered when."
+          }
+        ],
+        "assumptions": [
+          {
+            "id": "ASM-01",
+            "description": "At least one CRA (likely Experian) will agree to a partnership providing API access to credit scores and factors within the project timeline.",
+            "needs_confirmation": true,
+            "reasoning": "CRA partnership is listed as 'To be initiated' in dependencies. Without it, the entire product cannot function."
+          },
+          {
+            "id": "ASM-02",
+            "description": "The existing Lloyds product eligibility engine API can be extended to support real-time pre-approval matching without a full rebuild.",
+            "needs_confirmation": true,
+            "reasoning": "Dependency states it 'Exists, needs Credit Coach integration' but scope of integration work is unclear."
+          },
+          {
+            "id": "ASM-03",
+            "description": "The Credit Coach service is free to customers (no subscription fee), given the competitive context of free alternatives (ClearScore, Credit Karma).",
+            "needs_confirmation": true,
+            "reasoning": "Section 8.1 mentions 'must demonstrate fair value versus free alternatives if any fee is charged' but does not confirm pricing model."
+          },
+          {
+            "id": "ASM-04",
+            "description": "The existing push notification infrastructure supports the alert delivery SLA of 15 minutes from trigger event.",
+            "needs_confirmation": true,
+            "reasoning": "Push notification infrastructure is listed as 'Available' but no confirmation it meets the 15-minute SLA for high-volume alerts."
+          },
+          {
+            "id": "ASM-05",
+            "description": "CRA APIs support soft-search (no credit footprint) for score retrieval, so regular monitoring does not impact the customer's credit file.",
+            "needs_confirmation": true,
+            "reasoning": "The product requires frequent score checks. Hard searches would damage customer credit \u2014 soft search capability is assumed but not explicitly stated."
+          },
+          {
+            "id": "ASM-06",
+            "description": "The simulation engine will use CRA-provided scoring factor weightings or publicly available scoring methodology, not Lloyds' own proprietary model.",
+            "needs_confirmation": true,
+            "reasoning": "Section 3.1 mentions 'model scenarios against CRA scoring algorithms' but it's unclear if CRAs will share their algorithms or if approximations are acceptable."
+          },
+          {
+            "id": "ASM-07",
+            "description": "Existing Lloyds mobile app authentication (biometric + device) satisfies SCA requirements for accessing Credit Coach data.",
+            "needs_confirmation": true,
+            "reasoning": "Enterprise KB confirms OAuth 2.0/OIDC and biometric auth, but explicit confirmation needed that existing auth level is sufficient for CRA data access."
+          },
+          {
+            "id": "ASM-08",
+            "description": "The Envoy platform's persistent memory capability can store credit coaching session context without violating CRA data retention constraints.",
+            "needs_confirmation": true,
+            "reasoning": "Envoy provides persistent memory but CRA data has strict retention limits. Need to confirm memory scope boundaries."
+          }
+        ],
+        "gaps": [
+          {
+            "id": "GAP-01",
+            "description": "No authentication or authorisation requirements specified for accessing Credit Coach features within the app.",
+            "impact": "Cannot determine if additional SCA is needed beyond app login, or if CRA data access requires step-up authentication.",
+            "suggested_question": "Does accessing Credit Coach data require step-up authentication (e.g., biometric re-confirmation) beyond the standard app login, given the Highly Confidential data classification?",
+            "reasoning": "Common gap. Enterprise KB confirms SCA requirements for sensitive financial data. Domain KB confirms SCA is required for viewing sensitive financial data."
+          },
+          {
+            "id": "GAP-02",
+            "description": "No error handling or fallback behaviour specified when CRA APIs are unavailable or return errors.",
+            "impact": "Cannot design graceful degradation. Customers may see blank dashboards or confusing error states.",
+            "suggested_question": "What should the system display when CRA data is temporarily unavailable? Should it show cached/stale data with a timestamp, or a specific error message? What is the acceptable staleness threshold?",
+            "reasoning": "Common gap. Enterprise KB mandates circuit breakers for CRA calls but product vision doesn't specify UX for failure states."
+          },
+          {
+            "id": "GAP-03",
+            "description": "No offline behaviour specified for the Credit Coach when the customer has no network connectivity.",
+            "impact": "Cannot determine if cached score data should be available offline or if the feature requires connectivity.",
+            "suggested_question": "Should customers be able to view their last-known credit score and action plan offline, or does the Credit Coach require an active network connection for all features?",
+            "reasoning": "Common gap for mobile applications. Native iOS/Android apps typically support some offline capability."
+          },
+          {
+            "id": "GAP-04",
+            "description": "No specification of which notification channels (push, SMS, email, in-app) are supported for proactive alerts.",
+            "impact": "Cannot design the alert delivery system or customer preference configuration UI.",
+            "suggested_question": "Which notification channels should proactive credit health alerts support? Push notification only, or also SMS, email, and in-app inbox? Are there different channels for different alert severities?",
+            "reasoning": "Common gap. Domain KB confirms lending products use push/SMS/email. Product vision mentions 'Push Notification Service' in integrations but doesn't specify channel strategy."
+          },
+          {
+            "id": "GAP-05",
+            "description": "No specification of offer validity period for pre-approved offers.",
+            "impact": "Cannot determine how long a guaranteed offer remains valid, or what happens when it expires.",
+            "suggested_question": "How long should a pre-approved offer remain valid? What happens when it expires \u2014 does the customer need a new credit check, or is the offer silently refreshed?",
+            "reasoning": "Domain KB specifies offer expiry is typically 7-30 days for standard lending. Pre-approved offers may differ but no guidance given."
+          },
+          {
+            "id": "GAP-06",
+            "description": "No specification of how 'guaranteed' pre-approved offers handle the time gap between pre-approval and application (customer circumstances may change).",
+            "impact": "Risk of regulatory breach if customer's circumstances deteriorate between pre-approval and application but offer is still honoured.",
+            "suggested_question": "How does the system handle the scenario where a customer's financial circumstances deteriorate between receiving a pre-approved offer and applying? Is there a real-time re-check at application, and if so, can the 'guarantee' be withdrawn?",
+            "reasoning": "Domain KB emphasises CONC 5 affordability must be assessed at point of agreement. A stale pre-approval may not satisfy this requirement."
+          },
+          {
+            "id": "GAP-07",
+            "description": "No complaints handling process specified for Credit Coach interactions (e.g., incorrect score displayed, misleading simulation result).",
+            "impact": "Cannot design complaint flow or determine FOS jurisdiction for Credit Coach-specific complaints.",
+            "suggested_question": "How should complaints about Credit Coach be handled? Does the existing Lloyds complaints process (DISP rules, 8-week resolution) apply, or is a specific process needed for AI-generated advice complaints?",
+            "reasoning": "Domain KB confirms DISP rules require 5-day acknowledgment and 8-week resolution. Product vision does not address complaints."
+          },
+          {
+            "id": "GAP-08",
+            "description": "No specification of what constitutes 'financial distress' indicators for suppressing offers and triggering vulnerability detection.",
+            "impact": "Cannot implement FR-36 and FR-37 without defined criteria for detecting vulnerability and financial distress.",
+            "suggested_question": "What specific indicators should trigger vulnerability detection and offer suppression? Examples: gambling transactions, payday loan usage, multiple missed payments, sudden income drop, high utilisation increase?",
+            "reasoning": "Domain KB lists risk indicators (gambling, payday loans, returned DDs) but product vision doesn't specify which apply to Credit Coach."
+          },
+          {
+            "id": "GAP-09",
+            "description": "No rate limiting or throttling specification for CRA API calls per customer or globally.",
+            "impact": "Cannot design the score refresh architecture or determine cost implications of 10M+ daily checks.",
+            "suggested_question": "What is the expected CRA API call volume and cost model? Is daily score checking for 10M+ customers feasible within CRA partnership terms, or should checks be event-triggered or batched?",
+            "reasoning": "NFR-05 states 10M+ customers with daily checks but CRA APIs typically have rate limits and per-call costs."
+          },
+          {
+            "id": "GAP-10",
+            "description": "No specification of how the Credit Coach interacts with customers who have thin or no credit files.",
+            "impact": "Cannot design the experience for customers with insufficient credit history for scoring.",
+            "suggested_question": "What should the Credit Coach display for customers with thin credit files (e.g., new to UK, young adults)? Should it offer credit-building guidance even without a score?",
+            "reasoning": "Domain KB mentions thin credit files in fraud detection context. A significant portion of customers may not have scoreable files."
+          },
+          {
+            "id": "GAP-11",
+            "description": "No specification of consent withdrawal process and its downstream effects on active action plans and stored data.",
+            "impact": "Cannot design the full consent lifecycle including what happens to in-progress coaching when consent is withdrawn.",
+            "suggested_question": "When a customer withdraws CRA consent, what happens to their active action plan, score history, and any pending alerts? Is data deleted immediately or after a grace period?",
+            "reasoning": "FR-30 covers right to erasure but doesn't specify the operational impact on active coaching sessions."
+          },
+          {
+            "id": "GAP-12",
+            "description": "No specification of model governance board-level accountability (SMF holder) for Credit Coach AI models.",
+            "impact": "Cannot assign regulatory accountability for model risk as required by PRA SS1/23.",
+            "suggested_question": "Which Senior Management Function (SMF) holder will have board-level accountability for the Credit Coach's simulation and offer-matching models under PRA SS1/23?",
+            "reasoning": "Section 8.6 states 'Board-level accountability via appropriate SMF holder' but doesn't identify who."
+          },
+          {
+            "id": "GAP-13",
+            "description": "No specification of third-party risk assessment and documentation requirements for CRA model reliance.",
+            "impact": "Cannot complete the third-party risk documentation required by FS2/23.",
+            "suggested_question": "How should CRA model reliance be documented and assessed as a third-party risk? What due diligence is required on CRA scoring methodologies?",
+            "reasoning": "Section 8.5 states 'CRA model reliance must be assessed and documented as a third-party risk' but provides no detail."
+          },
+          {
+            "id": "GAP-14",
+            "title": "Breathing Space Integration",
+            "description": "No specification of how the system detects Breathing Space status or integrates with the Insolvency Service's electronic portal for notifications.",
+            "impact": "Cannot implement legally required suppression of communications and offers during Breathing Space. Risk of regulatory breach (Debt Respite Scheme Regulations 2020).",
+            "suggested_question": "How will the Credit Coach be notified when a customer enters Breathing Space? Will it integrate with the Insolvency Service portal directly, or receive notifications from an existing Lloyds collections system?",
+            "reasoning": "Domain KB PD7 specifies that lenders are notified via the Insolvency Service's electronic portal. The product vision mentions CONC 7 compliance but doesn't specify the Breathing Space integration mechanism."
+          },
+          {
+            "id": "GAP-15",
+            "title": "SCA Requirements for CRA Data Access and Offer Acceptance",
+            "description": "No specification of Strong Customer Authentication requirements for accessing sensitive CRA data or accepting pre-approved offers.",
+            "impact": "Cannot determine if viewing credit score requires step-up authentication beyond app login, or if offer acceptance requires dynamic linking (showing amount during biometric prompt).",
+            "suggested_question": "Does viewing the credit score require SCA beyond normal app login? Does accepting a pre-approved offer require SCA with dynamic linking (PSD2 RTS requirement for payment initiation)?",
+            "reasoning": "Domain KB PD10 specifies SCA is required for accessing sensitive financial data and initiating payments. Offer acceptance is effectively a payment initiation. The product vision mentions no authentication requirements."
+          },
+          {
+            "id": "GAP-16",
+            "title": "Success Metrics as Acceptance Criteria",
+            "description": "The product vision defines success metrics (2M enrolment, 60% score improvement, 15% offer conversion, 4.5/5 CSAT) but does not specify whether these are hard acceptance criteria for launch or aspirational targets.",
+            "impact": "Cannot determine go/no-go criteria for each phase. Development team cannot validate whether the product is 'successful' without clear thresholds.",
+            "suggested_question": "Are the success metrics in Section 11 hard launch criteria (must achieve before next phase) or aspirational targets to be tracked post-launch? What is the minimum viable threshold for each?",
+            "reasoning": "Section 11 lists targets with timeframes but doesn't distinguish between launch gates and post-launch monitoring. This affects phased delivery decisions."
+          }
+        ]
+},
+  "execution_summary": "• Produced 50 FRs, 27 NFR, 13 constraints, 8 assumptions, 16 gaps\n• Key decisions: classified offline/sync as NFR-Reliability (not FR) since it's a quality attribute; AWS/React Native as constraints (not requirements) since they're fixed decisions\n• Reflection: initially had FR-04 (reports) as Must-Have — downgraded to Should-Have since core app value is capture+categorise, not reporting. Added ASM-02 about custom categories which was initially missed.\n• 2 gaps need stakeholder input before design: authentication approach and data retention/export requirements."
+}
+}

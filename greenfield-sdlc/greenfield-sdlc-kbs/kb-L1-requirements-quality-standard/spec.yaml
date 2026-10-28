@@ -1,0 +1,44 @@
+spec_version: "1.0"
+artifact_type: knowledge_base
+metadata:
+  name: kb-L1-requirements-quality-standard
+  version: "1.0.0"
+  layer: L1
+  owner: agentic-ai-coe
+  content_hash: "sha256:3b14281220fdb28d68ed44c355a6119a0f0239212ccefe32bf86c1397b070ace"
+  last_reviewed: "2026-08-08"
+  review_cadence: annually
+
+purpose:
+  description: >
+    Domain-agnostic requirements-quality method, grounded in ISO/IEC/IEEE
+    29148's seven requirement characteristics (Unambiguous, Complete,
+    Singular, Feasible, Verifiable, Correct, Traceable) and RFC 2119
+    obligation keywords. Used by L1-requirements-elicitor for a mechanical
+    self-check (vague-term scan, compound-clause scan) and by
+    L1-requirements-elicitor-evaluator as the source-of-truth rubric for
+    the characteristics that need judgment (Complete's coverage check,
+    Verifiable's testability check, Consistent's contradiction check,
+    Feasible/Correct as questions, never verdicts, this KB itself can't
+    supply). Same role as kb-L1-nfr-classification-taxonomy: a small,
+    reusable, cross-domain method, not a domain fact set.
+
+content:
+  format: markdown
+  documents:
+    - path: content/requirements-quality-standard.md
+      sections: [seven-characteristics, unambiguous, complete, singular, verifiable, consistent, feasible, correct, glossary]
+  total_tokens_estimate: 1346
+  chunking: by-section
+  embedding_model: text-embedding-3-small
+
+grounding_rules:
+  accessed_by: [L1-requirements-elicitor, L1-requirements-elicitor-evaluator]
+  visibility: "L1 — visible to all layers (L1/L2/L3/L4) per standard visibility rule"
+
+freshness:
+  trigger_for_update: "the underlying ISO/IEC/IEEE 29148 standard revises, or a new commonly-flagged vague term needs adding"
+  note: >
+    This is a classification/quality METHOD, not a domain fact set — it
+    changes far less frequently than a domain KB. Annual review is
+    sufficient.

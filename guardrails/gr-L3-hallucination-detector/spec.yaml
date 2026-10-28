@@ -1,0 +1,36 @@
+spec_version: "1.0"
+artifact_type: guardrail
+metadata:
+  name: gr-L3-hallucination-detector
+  version: "1.0.0"
+  layer: L3
+  owner: project-lead
+  implementation: colang
+
+purpose:
+  description: "Check that agent outputs are grounded in input and KB content — no fabricated claims"
+
+triggers_on:
+  - post_execution
+
+on_fail: retry_with_stricter_grounding
+applies_to: content_generator_agents
+
+rules:
+  - name: groundedness
+    description: "Every claim must trace to input data or attached KB"
+    action: block
+    severity: critical
+
+  - name: fabrication-patterns
+    description: "Detect invented entities, statistics, or references"
+    action: block
+    severity: critical
+
+  - name: confidence-correlation
+    description: "Low-confidence items must have explicit uncertainty markers"
+    action: flag
+    severity: medium
+
+evaluation:
+  false_positive_threshold: 0.05

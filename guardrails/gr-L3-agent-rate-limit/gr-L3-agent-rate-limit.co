@@ -1,0 +1,15 @@
+# gr-L3-agent-rate-limit — LLM-Driven Colang Implementation
+# Layer: L3 — Agent Rate Limit
+# Validation: LLM self_check (pure Colang)
+# Python actions preserved in actions.py for reference/hybrid mode
+
+define flow check rate limit
+  """LLM validates agent rate limit rules on input."""
+  $result = execute self_check_input
+
+  if not $result
+    bot block L3 agent rate limit
+    stop
+
+define bot block L3 agent rate limit
+  "Rate limit exceeded: maximum tool calls or agent invocations reached for this execution."

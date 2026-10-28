@@ -1,0 +1,557 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">
+<title>Agent Factory — Greenfield Functional &amp; Non-Functional Requirements</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+:root{--navy:#1B2A4A;--teal:#0A7E8C;--teal-lt:#E8F6F7;--green:#1B8C3A;--green-lt:#E8F5E9;--amber:#D4880F;--amber-lt:#FFF8E1;--red:#C62828;--purple:#5E35B1;--gray:#F4F5F7;--gray-mid:#E0E3E8;--gray-txt:#666;--charcoal:#2D3748;
+--idea:#AD1457;--idea-lt:#FCE4EC;--reqs:#3949AB;--reqs-lt:#E8EAF6;--plan:#EF6C00;--plan-lt:#FFF3E0;--incept:#0052CC;--incept-lt:#E9F2FF;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Inter',sans-serif;background:#fff;color:var(--charcoal);}
+.page{max-width:1300px;margin:0 auto;padding:24px;}
+h2{font-size:16px;font-weight:800;color:var(--navy);margin:28px 0 8px;}
+h3{font-size:13px;font-weight:700;color:var(--navy);margin:0;}
+.sub{font-size:12px;color:var(--gray-txt);margin-bottom:6px;}
+.phase-tag{display:inline-block;padding:3px 10px;border-radius:12px;font-size:10px;font-weight:700;color:#fff;}
+.agent-card{border:1px solid var(--gray-mid);border-radius:10px;padding:14px 16px;margin-bottom:12px;}
+.agent-head{display:flex;align-items:baseline;gap:10px;margin-bottom:8px;flex-wrap:wrap;}
+.agent-name{font-size:11px;background:#E5E7EB;padding:2px 7px;border-radius:4px;font-weight:700;color:var(--navy);}
+.agent-desc{font-size:11px;color:var(--gray-txt);}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.fr-col h4,.nfr-col h4{font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px;}
+.fr-col h4{color:var(--teal);}
+.nfr-col h4{color:var(--purple);}
+ol{margin:0 0 0 16px;padding:0;}
+ol li{font-size:10.5px;color:var(--charcoal);margin:3px 0;line-height:1.45;}
+ul.nfr-delta{margin:0 0 0 16px;padding:0;}
+ul.nfr-delta li{font-size:10.5px;color:var(--charcoal);margin:3px 0;line-height:1.45;}
+.none{font-size:10px;color:var(--gray-txt);font-style:italic;}
+code{background:#E5E7EB;padding:1px 4px;border-radius:3px;font-size:9.5px;}
+table{width:100%;border-collapse:collapse;font-size:10.5px;margin:8px 0;}
+th{padding:6px 8px;background:var(--navy);color:#fff;font-weight:700;font-size:9.5px;text-transform:uppercase;text-align:left;}
+td{padding:6px 8px;border-bottom:1px solid var(--gray-mid);vertical-align:top;}
+tbody tr:nth-child(even) td{background:#FAFBFC;}
+.callout{border-radius:8px;padding:10px 14px;margin:10px 0;font-size:11px;border:1px solid;}
+.chip{display:inline-block;padding:1px 6px;border-radius:8px;font-size:8.5px;font-weight:700;margin-left:4px;vertical-align:middle;}
+.chip-blocker{background:#FFEBEE;color:var(--red);}
+</style></head><body>
+
+<div style="background:linear-gradient(135deg,var(--navy),#2A3F6A);padding:20px 40px;color:#fff;">
+<div style="max-width:1300px;margin:0 auto;">
+<div style="font-size:9px;text-transform:uppercase;letter-spacing:1px;opacity:.5;">Agent Factory Reference — Greenfield Extension</div>
+<h1 style="font-size:22px;font-weight:800;">Agent Requirements Spec — Functional &amp; Non-Functional</h1>
+<p style="opacity:.7;font-size:12px;">Developer starting spec for all 34 agents. Read alongside <code style="background:rgba(255,255,255,.15);color:#fff;">Agent_Factory_E2E_SDLC_Diagram_Greenfield.html</code> (topology) and <code style="background:rgba(255,255,255,.15);color:#fff;">Agent_Factory_Greenfield_BOM.html</code> (inputs/outputs/tools/KBs) — this document defines what "done" means for each one.</p>
+</div></div>
+
+<div class="page">
+
+<h2>Global NFR Baseline — Applies to Every Agent</h2>
+<p class="sub">Per-agent sections below list only <em>deltas</em> from this baseline. If an agent has no delta, it inherits these unchanged.</p>
+<div class="table-wrap"><table>
+<thead><tr><th style="width:60px;">ID</th><th style="width:160px;">Category</th><th>Requirement</th></tr></thead>
+<tbody>
+<tr><td><code>NFR-G1</code></td><td>Single Responsibility</td><td>Agent performs exactly one function. Must reject or flag requests outside its declared scope rather than silently expanding it.</td></tr>
+<tr><td><code>NFR-G2</code></td><td>Statelessness</td><td>No retained state between invocations. All context arrives via the input payload and KB retrieval for that call only.</td></tr>
+<tr><td><code>NFR-G3</code></td><td>Structured Output</td><td>Output conforms to a published JSON Schema or Markdown template. Malformed output fails <code>gr-L1-output-schema-validator</code> and is rejected before downstream use.</td></tr>
+<tr><td><code>NFR-G4</code></td><td>Explicit Failure</td><td>On insufficient input, return a structured error stating which required input was missing or ambiguous — never a best-effort hallucinated partial answer.</td></tr>
+<tr><td><code>NFR-G5</code></td><td>Grounding</td><td>Every domain-specific claim must be grounded in a retrieved KB chunk or a provided input. No reliance on model training data for org-specific facts.</td></tr>
+<tr><td><code>NFR-G6</code></td><td>Latency (default)</td><td>P95 ≤ 15s for markdown/JSON drafting agents. Code-generation and diagram-heavy agents override this individually below.</td></tr>
+<tr><td><code>NFR-G7</code></td><td>Idempotency &amp; Retry</td><td>Re-running with identical input yields an equivalent output. Tool-calling agents check-before-create. Workflow retries max 2 (exponential backoff) before escalating to HITL.</td></tr>
+<tr><td><code>NFR-G8</code></td><td>Observability</td><td>Emit start/complete/error events tagged with the workflow correlation ID. Log input hash, output hash, token usage, model version, KB version, guardrail results.</td></tr>
+<tr><td><code>NFR-G9</code></td><td>Security &amp; Secrets</td><td>Never accept, log, or echo raw credentials/tokens. Any secret a tool call needs is injected via SecretsSDK at call time, never embedded in prompt or output.</td></tr>
+<tr><td><code>NFR-G10</code></td><td>Versioning &amp; Layering</td><td>Defined so L2/L3/L4 variants extend it via <code>instructions_append</code>/<code>knowledge_bases_append</code> without modifying the L1 baseline. Breaking changes require a semver major bump and regression testing across dependent layers.</td></tr>
+<tr><td><code>NFR-G11</code></td><td>Guardrail Enforcement</td><td>Every guardrail listed for this agent in the BOM runs synchronously before output is released. A guardrail failure blocks release and raises an HITL escalation event.</td></tr>
+<tr><td><code>NFR-G12</code></td><td>Quality-Gate Compliance</td><td>Output must be deterministically scorable by <code>L1-quality-verifier</code> against the agent's published rubric — expose enough structure (sections/fields) for consistent scoring.</td></tr>
+</tbody>
+</table></div>
+
+<!-- PHASE 0 -->
+<h2><span class="phase-tag" style="background:var(--idea);">PHASE 0</span> Idea → Vision</h2>
+
+<div class="agent-card">
+<div class="agent-head"><span class="agent-name">L1-vision-idea-intake</span><span class="agent-desc">Structures a raw idea into a problem statement, target users, and success metrics.</span></div>
+<div class="g2">
+<div class="fr-col"><h4>Functional Requirements</h4><ol>
+<li>Accept a free-text idea brief (up to ~2,000 words) plus an optional stakeholder list.</li>
+<li>Extract/synthesize: problem statement, target user segment(s), value proposition, candidate success metrics.</li>
+<li>If the brief lacks a clear problem statement or target user, flag the missing field explicitly rather than inventing one.</li>
+<li>Fetch the raw brief via <code>tool-L1-confluence-fetch-page</code> when given a page reference instead of inline text.</li>
+<li>Output <code>idea-brief.md</code> conforming to the <code>kb-L1-sdlc-templates</code> idea-brief schema.</li>
+</ol></div>
+<div class="nfr-col"><h4>NFR Deltas</h4><ul class="nfr-delta">
+<li>Latency: P95 ≤ 10s.</li>
+<li>Any suggested success metric not directly implied by the input must be tagged "suggested — pending stakeholder validation".</li>
+</ul></div>
+</div></div>
+
+<div class="agent-card">
+<div class="agent-head"><span class="agent-name">L1-vision-market-analyzer</span><span class="agent-desc">Competitor analysis and SWOT for the proposed idea.</span></div>
+<div class="g2">
+<div class="fr-col"><h4>Functional Requirements</h4><ol>
+<li>Accept <code>idea-brief.md</code>.</li>
+<li>Issue at least one <code>tool-L1-web-search-competitor-scan</code> query per identified competitor category.</li>
+<li>Produce a competitor matrix (name, positioning, strengths/weaknesses) and a SWOT grid.</li>
+<li>Every competitor claim must carry a source citation (URL + retrieval date).</li>
+<li>If search returns no relevant results, state "insufficient market data" rather than fabricate competitors.</li>
+</ol></div>
+<div class="nfr-col"><h4>NFR Deltas</h4><ul class="nfr-delta">
+<li>Latency: P95 ≤ 30s (bounded by external search round-trip).</li>
+<li><code>gr-L1-citation-verifier</code> <span class="chip chip-blocker">BLOCKER</span> rejects output if any competitor claim lacks a citation.</li>
+</ul></div>
+</div></div>
+
+<div class="agent-card">
+<div class="agent-head"><span class="agent-name">L1-vision-regulatory-feasibility-checker</span><span class="agent-desc">Regulatory feasibility assessment for the target market.</span></div>
+<div class="g2">
+<div class="fr-col"><h4>Functional Requirements</h4><ol>
+<li>Accept <code>idea-brief.md</code> (target geography, product category).</li>
+<li>Query <code>tool-L1-regulatory-db-lookup</code> for applicable regimes (licensing, data residency, consumer protection).</li>
+<li>Classify feasibility Green/Amber/Red per constraint, with rationale.</li>
+<li>Cite the specific regulation/section for every constraint raised.</li>
+<li>Every Amber/Red item must include a mitigation recommendation or a "requires legal review" flag.</li>
+</ol></div>
+<div class="nfr-col"><h4>NFR Deltas</h4><ul class="nfr-delta">
+<li>Latency: P95 ≤ 30s.</li>
+<li>Zero tolerance for omitting a Red-classified constraint <span class="chip chip-blocker">BLOCKER</span> — false negatives here are a compliance risk.</li>
+</ul></div>
+</div></div>
+
+<div class="agent-card">
+<div class="agent-head"><span class="agent-name">L1-vision-statement-generator</span><span class="agent-desc">Synthesizes idea, market, and regulatory findings into a vision statement and roadmap outline.</span></div>
+<div class="g2">
+<div class="fr-col"><h4>Functional Requirements</h4><ol>
+<li>Accept idea brief, market analysis, regulatory feasibility, and viability score.</li>
+<li>Produce <code>vision.md</code>: problem, target users, value proposition, north-star metric(s), phase-level roadmap outline.</li>
+<li>Reconcile conflicts between inputs (e.g. a Red regulatory flag vs. a proposed feature) and surface them as open risks — never silently drop them.</li>
+<li>Publish via <code>tool-L1-confluence-create-page</code>.</li>
+</ol></div>
+<div class="nfr-col"><h4>NFR Deltas</h4><ul class="nfr-delta">
+<li>Latency: P95 ≤ 15s.</li>
+<li>Must block auto-publish if viability score &lt;7 — return for human review instead.</li>
+</ul></div>
+</div></div>
+
+<!-- PHASE 1 -->
+<h2><span class="phase-tag" style="background:var(--reqs);">PHASE 1</span> Requirements → Impact Assessment → Dependency Graph</h2>
+
+<div class="agent-card">
+<div class="agent-head"><span class="agent-name">L1-requirements-elicitor</span><span class="agent-desc">Converts the approved vision into structured functional requirements.</span></div>
+<div class="g2">
+<div class="fr-col"><h4>Functional Requirements</h4><ol>
+<li>Accept approved <code>vision.md</code> + Product Lead approval comment.</li>
+<li>Decompose vision into discrete, testable functional requirements — one requirement per atomic capability.</li>
+<li>Each requirement must trace back to a specific vision clause.</li>
+<li>Flag ambiguous or "and"-joined compound requirements for splitting rather than passing them through as-is.</li>
+</ol></div>
+<div class="nfr-col"><h4>NFR Deltas</h4><ul class="nfr-delta">
+<li>Latency: P95 ≤ 20s.</li>
+<li>Must refuse to proceed if <code>vision.md</code> carries no recorded human-approval comment — enforces the Phase 0→1 gate at the agent level.</li>
+</ul></div>
+</div></div>
+
+<div class="agent-card">
+<div class="agent-head"><span class="agent-name">L1-requirements-nfr-classifier</span><span class="agent-desc">Classifies non-functional requirements and boundary conditions.</span></div>
+<div class="g2">
+<div class="fr-col"><h4>Functional Requirements</h4><ol>
+<li>Accept <code>requirements.md</code>.</li>
+<li>Classify each requirement against NFR categories: performance, security, scalability, availability, compliance, usability.</li>
+<li>Define explicit boundary conditions where the input supports them (e.g. concurrency, latency); mark unsupported numeric NFRs "TBD — needs stakeholder input".</li>
+<li>Output <code>nfr-spec.md</code> with one section per requirement.</li>
+</ol></div>
+<div class="nfr-col"><h4>NFR Deltas</h4><ul class="nfr-delta">
+<li>Must never emit a fabricated numeric SLA <span class="chip chip-blocker">BLOCKER</span> — any numeric NFR either traces to input or is marked TBD.</li>
+</ul></div>
+</div></div>
+
+<div class="agent-card">
+<div class="agent-head"><span class="agent-name">L1-planning-impact-assessor</span><span class="agent-desc">Assesses blast-radius impact of proposed requirements against existing systems (or a proposed component map for pure greenfield).</span></div>
+<div class="g2">
+<div class="fr-col"><h4>Functional Requirements</h4><ol>
+<li>Accept <code>requirements.md</code> + <code>nfr-spec.md</code> + service catalog/CMDB export (may be empty for greenfield).</li>
+<li>For each requirement, identify affected/created components and estimate blast radius (new build vs. touches existing system).</li>
+<li>Score each impact Low/Medium/High with rationale.</li>
+<li>For pure-greenfield projects, explicitly state "no existing systems affected — net-new build" rather than fabricate impacts.</li>
+</ol></div>
+<div class="nfr-col"><h4>NFR Deltas</h4><ul class="nfr-delta">
+<li>Must degrade gracefully (not error) when the CMDB export is empty or absent.</li>
+</ul></div>
+</div></div>
+
+<div class="agent-card">
+<div class="agent-head"><span class="agent-name">L1-planning-dependency-mapper</span><span class="agent-desc">Builds a dependency graph across proposed epics, services, and integrations.</span></div>
+<div class="g2">
+<div class="fr-col"><h4>Functional Requirements</h4><ol>
+<li>Accept <code>impact-assessment.md</code> + <code>requirements.md</code>.</li>
+<li>Construct a directed graph with typed edges (blocks / depends-on / integrates-with).</li>
+<li>Detect cyclic dependencies and surface the cycle explicitly — never silently drop an edge to "resolve" it.</li>
+<li>Output <code>dependency-graph.json</code> conforming to a published graph schema (nodes, edges, critical path).</li>
+</ol></div>
+<div class="nfr-col"><h4>NFR Deltas</h4><ul class="nfr-delta">
+<li><code>gr-L1-output-schema-validator</code> hard-fails on any cycle <span class="chip chip-blocker">BLOCKER</span> — escalate to HITL, do not auto-resolve.</li>
+</ul></div>
+</div></div>
+
+<!-- PHASE 2 -->
+<h2><span class="phase-tag" style="background:var(--plan);">PHASE 2</span> Project / Sprint Planning</h2>
+
+<div class="agent-card">
+<div class="agent-head"><span class="agent-name">L1-planning-backlog-prioritizer</span><span class="agent-desc">Prioritizes backlog items by value, effort, and dependency risk.</span></div>
+<div class="g2">
+<div class="fr-col"><h4>Functional Requirements</h4><ol>
+<li>Accept <code>dependency-graph.json</code> + <code>requirements.md</code> + value-scoring inputs (RICE/WSJF fields).</li>
+<li>Compute a priority ranking that respects dependency ordering — a dependent item cannot outrank its blocker.</li>
+<li>Output <code>prioritized-backlog.md</code> with rank, score, and one-line rationale per item.</li>
+<li>Mark an item's rank "provisional" if its value-scoring input is missing, rather than assigning a default score.</li>
+</ol></div>
+<div class="nfr-col"><h4>NFR Deltas</h4><ul class="nfr-delta">
+<li>Output ordering must be a valid topological sort of the dependency graph — verify programmatically, not just via model judgment.</li>
+</ul></div>
+</div></div>
+
+<div class="agent-card">
+<div class="agent-head"><span class="agent-name">L1-planning-sprint-planner</span><span class="agent-desc">Allocates prioritized backlog into 5-day Feature Cycles by team capacity.</span></div>
+<div class="g2">
+<div class="fr-col"><h4>Functional Requirements</h4><ol>
+<li>Accept <code>prioritized-backlog.md</code> + team capacity/velocity data.</li>
+<li>Allocate items into Feature Cycles without exceeding stated capacity per cycle.</li>
+<li>Flag any item that cannot fit within the visible planning horizon rather than silently overcommitting.</li>
+<li>Create/update roadmap structure in Jira via <code>tool-L1-jira-create-issue</code>/<code>tool-L1-jira-update-issue</code>.</li>
+</ol></div>
+<div class="nfr-col"><h4>NFR Deltas</h4><ul class="nfr-delta">
+<li>Idempotent: re-running with the same backlog + capacity must not create duplicate Jira issues (check-before-create).</li>
+</ul></div>
+</div></div>
+
+<!-- PHASE 3 -->
+<h2><span class="phase-tag" style="background:var(--incept);">PHASE 3</span> Inception — Epics, Features, Stories, Tasks</h2>
+
+<div class="agent-card">
+<div class="agent-head"><span class="agent-name">L1-inception-epic-creator</span><span class="agent-desc">Generates epics from the approved roadmap and vision.</span></div>
+<div class="g2">
+<div class="fr-col"><h4>Functional Requirements</h4><ol>
+<li>Accept approved <code>roadmap.md</code> + <code>vision.md</code>.</li>
+<li>Generate one epic per roadmap Feature Cycle grouping: title, description, business-value statement, target cycle.</li>
+<li>Each epic maps to exactly one roadmap item — no merging or splitting beyond what the roadmap specifies.</li>
+<li>Check for an existing matching epic via <code>tool-L1-jira-fetch-issue</code> before creating a new one.</li>
+</ol></div>
+<div class="nfr-col"><h4>NFR Deltas</h4><ul class="nfr-delta">
+<li>When domain=food-production-distribution, must satisfy <code>gr-L2-food-domain-compliance</code> — epics touching food-safety/traceability/allergen flows carry HACCP/Natasha's-Law scope tags.</li>
+</ul></div>
+</div></div>
+
+<div class="agent-card">
+<div class="agent-head"><span class="agent-name">L1-inception-feature-decomposer</span><span class="agent-desc">Decomposes epics into features.</span></div>
+<div class="g2">
+<div class="fr-col"><h4>Functional Requirements</h4><ol>
+<li>Accept <code>epics.json</code>.</li>
+<li>Decompose each epic into 2–8 independently shippable features (range configurable per L2/L3 extension).</li>
+<li>Each feature restates the parent epic's business value in its own scope.</li>
+<li>Reject a decomposition where a single feature would need more than one epic's worth of scope — signal for epic re-scoping instead.</li>
+</ol></div>
+<div class="nfr-col"><h4>NFR Deltas</h4><p class="none">None beyond baseline.</p></div>
+</div></div>
+
+<div class="agent-card">
+<div class="agent-head"><span class="agent-name">L1-inception-story-generator</span><span class="agent-desc">Generates user stories with acceptance criteria from features.</span></div>
+<div class="g2">
+<div class="fr-col"><h4>Functional Requirements</h4><ol>
+<li>Accept <code>features.json</code> + <code>requirements.md</code>.</li>
+<li>Generate stories in As-a/I-want/So-that format with Given/When/Then acceptance criteria.</li>
+<li>Every story traces to exactly one feature and cites the requirement(s) it satisfies.</li>
+<li>Flag stories that will need PII-shaped test data so <code>testing-synthetic-data-generator</code> knows to route accordingly.</li>
+</ol></div>
+<div class="nfr-col"><h4>NFR Deltas</h4><ul class="nfr-delta">
+<li><code>gr-L1-pii-detection</code> must scan illustrative example data inside acceptance criteria and block any realistic-looking PII, even in examples.</li>
+</ul></div>
+</div></div>
+
+<div class="agent-card">
+<div class="agent-head"><span class="agent-name">L1-inception-task-generator</span><span class="agent-desc">Decomposes stories into engineering tasks.</span></div>
+<div class="g2">
+<div class="fr-col"><h4>Functional Requirements</h4><ol>
+<li>Accept <code>stories.json</code>.</li>
+<li>Decompose each story into backend/frontend/test/docs tasks sized ≤1 developer-day.</li>
+<li>Tag each task with an estimated complexity (S/M/L).</li>
+</ol></div>
+<div class="nfr-col"><h4>NFR Deltas</h4><ul class="nfr-delta">
+<li>Quality-gate threshold is 6/10 (task-completeness), lower than the 7/10 baseline elsewhere — reflects lower blast radius of a mis-scoped task vs. a mis-scoped story.</li>
+</ul></div>
+</div></div>
+
+<div class="agent-card">
+<div class="agent-head"><span class="agent-name">L1-jira-orchestrator</span><span class="agent-desc">Creates epics, stories, and tasks as Jira issues (also used in Phase 2 for roadmap creation).</span></div>
+<div class="g2">
+<div class="fr-col"><h4>Functional Requirements</h4><ol>
+<li>Accept epics/features/stories/tasks JSON.</li>
+<li>Check-before-create against Jira (query by title + parent) to avoid duplicates.</li>
+<li>Preserve hierarchy links (epic→story→task) using Jira's native linking.</li>
+</ol></div>
+<div class="nfr-col"><h4>NFR Deltas</h4><ul class="nfr-delta">
+<li>Retry on Jira 5xx/rate-limit responses (max 2, exponential backoff) before escalating to HITL.</li>
+<li>Must never log or embed the Jira API token in any output artifact.</li>
+</ul></div>
+</div></div>
+
+<!-- PHASE 4 -->
+<h2><span class="phase-tag" style="background:var(--teal);">PHASE 4</span> Design — User Journeys, Wireframes, HLD, LLD, API Spec, Data Model</h2>
+
+<div class="agent-card">
+<div class="agent-head"><span class="agent-name">L1-design-user-journey-mapper</span><span class="agent-desc">Maps end-to-end persona journeys and touchpoints ahead of wireframing.</span></div>
+<div class="g2">
+<div class="fr-col"><h4>Functional Requirements</h4><ol>
+<li>Accept <code>stories.json</code> + personas from <code>vision.md</code>.</li>
+<li>Produce journey maps per persona: stages, touchpoints, pain points, drop-off risks.</li>
+<li>Every journey traces to the stories it exercises.</li>
+</ol></div>
+<div class="nfr-col"><h4>NFR Deltas</h4><p class="none">None beyond baseline.</p></div>
+</div></div>
+
+<div class="agent-card">
+<div class="agent-head"><span class="agent-name">L1-design-ux-wireframe</span><span class="agent-desc">Generates wireframes/screen layouts from stories and journeys.</span></div>
+<div class="g2">
+<div class="fr-col"><h4>Functional Requirements</h4><ol>
+<li>Accept <code>stories.json</code> + <code>user-journeys.md</code>.</li>
+<li>Produce a component hierarchy and screen-by-screen layout per journey stage (or Figma frames, if enabled).</li>
+<li>Flag any story lacking sufficient UI detail to wireframe rather than inventing UI not implied by the story.</li>
+</ol></div>
+<div class="nfr-col"><h4>NFR Deltas</h4><p class="none">None beyond baseline.</p></div>
+</div></div>
+
+<div class="agent-card">
+<div class="agent-head"><span class="agent-name">L1-design-api-spec</span><span class="agent-desc">Generates the OpenAPI contract from story scope and NFRs.</span></div>
+<div class="g2">
+<div class="fr-col"><h4>Functional Requirements</h4><ol>
+<li>Accept <code>stories.json</code> + <code>nfr-spec.md</code>.</li>
+<li>Produce an OpenAPI 3.x spec: endpoints, request/response schemas, auth scheme, error codes, rate limits (from NFR spec where defined).</li>
+<li>Every endpoint traces to at least one story.</li>
+<li>Validate the generated spec against the OpenAPI JSON Schema before returning.</li>
+</ol></div>
+<div class="nfr-col"><h4>NFR Deltas</h4><ul class="nfr-delta">
+<li><code>gr-L1-schema-validator</code> failure on invalid OpenAPI syntax is build-blocking, not advisory <span class="chip chip-blocker">BLOCKER</span>.</li>
+</ul></div>
+</div></div>
+
+<div class="agent-card">
+<div class="agent-head"><span class="agent-name">L1-design-hld</span><span class="agent-desc">Generates the high-level design — C4 diagrams, components, data flow, integrations.</span></div>
+<div class="g2">
+<div class="fr-col"><h4>Functional Requirements</h4><ol>
+<li>Accept <code>requirements.md</code> + <code>nfr-spec.md</code> + <code>dependency-graph.json</code> + <code>openapi.yaml</code>.</li>
+<li>Produce C4 context/container diagrams (Mermaid or PlantUML text), component responsibilities, data flow, integration points.</li>
+<li>Every integration point named must already exist in <code>dependency-graph.json</code> — no undeclared integrations.</li>
+</ol></div>
+<div class="nfr-col"><h4>NFR Deltas</h4><ul class="nfr-delta">
+<li>Latency: P95 ≤ 60s (diagram generation is heavier than plain drafting).</li>
+</ul></div>
+</div></div>
+
+<div class="agent-card">
+<div class="agent-head"><span class="agent-name">L1-design-lld</span><span class="agent-desc">Generates the low-level design — classes, sequence diagrams, error handling.</span></div>
+<div class="g2">
+<div class="fr-col"><h4>Functional Requirements</h4><ol>
+<li>Accept <code>hld.md</code> + <code>openapi.yaml</code>.</li>
+<li>Produce class-level design, sequence diagrams per key flow, and an error-handling strategy.</li>
+<li>Every class/module named must map to a component declared in the HLD.</li>
+</ol></div>
+<div class="nfr-col"><h4>NFR Deltas</h4><p class="none">None beyond baseline.</p></div>
+</div></div>
+
+<div class="agent-card">
+<div class="agent-head"><span class="agent-name">L1-design-data-architect</span><span class="agent-desc">Designs the data model — schema, lineage, migration plan.</span></div>
+<div class="g2">
+<div class="fr-col"><h4>Functional Requirements</h4><ol>
+<li>Accept <code>lld.md</code> + <code>requirements.md</code>.</li>
+<li>Produce schema DDL, entity-relationship description, lineage notes, and an initial migration plan.</li>
+<li>Flag any field storing PII/sensitive data with the required encryption/masking approach.</li>
+</ol></div>
+<div class="nfr-col"><h4>NFR Deltas</h4><ul class="nfr-delta">
+<li><code>gr-L1-pii-detection</code> must verify no PII column is left in plaintext without a documented masking/encryption decision.</li>
+</ul></div>
+</div></div>
+
+<div class="agent-card">
+<div class="agent-head"><span class="agent-name">L1-github-orchestrator <span style="color:var(--gray-txt);font-weight:400;">(design-publish invocation)</span></span><span class="agent-desc">Commits design documents to the design branch and publishes to Confluence.</span></div>
+<div class="g2">
+<div class="fr-col"><h4>Functional Requirements</h4><ol>
+<li>Accept all Phase 4 design outputs.</li>
+<li>Create branch <code>aava/design-{feature-id}</code>, commit each artifact as a separate file, mirror to Confluence pages.</li>
+</ol></div>
+<div class="nfr-col"><h4>NFR Deltas</h4><ul class="nfr-delta">
+<li>Must not overwrite an existing branch/page without an explicit "update" flag — protects prior human edits.</li>
+</ul></div>
+</div></div>
+
+<!-- PHASE 5 -->
+<h2><span class="phase-tag" style="background:var(--amber);">PHASE 5</span> Test Strategy — Scenarios, Cases, Scripts, Synthetic Data</h2>
+
+<div class="agent-card">
+<div class="agent-head"><span class="agent-name">L1-testing-scenario-writer</span><span class="agent-desc">Generates test scenarios from stories and acceptance criteria.</span></div>
+<div class="g2">
+<div class="fr-col"><h4>Functional Requirements</h4><ol>
+<li>Accept <code>stories.json</code>.</li>
+<li>Produce scenarios covering happy path, edge cases, and negative cases per AC clause.</li>
+<li>Minimum coverage: at least one happy-path and one negative scenario per AC clause.</li>
+</ol></div>
+<div class="nfr-col"><h4>NFR Deltas</h4><p class="none">None beyond baseline.</p></div>
+</div></div>
+
+<div class="agent-card">
+<div class="agent-head"><span class="agent-name">L1-testing-case-writer</span><span class="agent-desc">Generates Cucumber Given/When/Then cases from scenarios.</span></div>
+<div class="g2">
+<div class="fr-col"><h4>Functional Requirements</h4><ol>
+<li>Accept <code>test-scenarios.md</code>.</li>
+<li>Produce one Cucumber case per scenario.</li>
+<li>Reuse existing step definitions where semantically identical steps already exist — avoid duplicate step libraries.</li>
+</ol></div>
+<div class="nfr-col"><h4>NFR Deltas</h4><p class="none">None beyond baseline.</p></div>
+</div></div>
+
+<div class="agent-card">
+<div class="agent-head"><span class="agent-name">L1-testing-script-generator</span><span class="agent-desc">Generates executable automation scripts (Playwright/REST Assured) from test cases.</span></div>
+<div class="g2">
+<div class="fr-col"><h4>Functional Requirements</h4><ol>
+<li>Accept <code>test-cases.feature</code> + <code>openapi.yaml</code> + <code>wireframes.md</code>.</li>
+<li>Generate Playwright (UI) or REST Assured (API) scripts implementing each Cucumber step.</li>
+<li>Generated scripts must compile/lint clean (0 syntax errors) before being returned.</li>
+</ol></div>
+<div class="nfr-col"><h4>NFR Deltas</h4><ul class="nfr-delta">
+<li>Executability check <span class="chip chip-blocker">BLOCKER</span>: script must pass a dry-run/lint step, not just schema validation — stricter than baseline.</li>
+</ul></div>
+</div></div>
+
+<div class="agent-card">
+<div class="agent-head"><span class="agent-name">L1-testing-synthetic-data-generator</span><span class="agent-desc">Generates PII-safe synthetic test data and fixtures.</span></div>
+<div class="g2">
+<div class="fr-col"><h4>Functional Requirements</h4><ol>
+<li>Accept <code>db-schema.sql</code> + <code>test-cases.feature</code>.</li>
+<li>Generate fixture data matching schema types/constraints, sufficient to exercise each test case.</li>
+<li>No generated value may resemble real production PII patterns — use recognizably fake ranges/test-only values.</li>
+</ol></div>
+<div class="nfr-col"><h4>NFR Deltas</h4><ul class="nfr-delta">
+<li><code>gr-L1-pii-detection</code> is a hard release-blocker <span class="chip chip-blocker">BLOCKER</span> here, zero tolerance, no override.</li>
+</ul></div>
+</div></div>
+
+<div class="agent-card">
+<div class="agent-head"><span class="agent-name">L1-xray-orchestrator</span><span class="agent-desc">Creates test cases and links executable scripts in XRay.</span></div>
+<div class="g2">
+<div class="fr-col"><h4>Functional Requirements</h4><ol>
+<li>Accept test cases + automation scripts.</li>
+<li>Check-before-create against XRay to avoid duplicate entries; link each test to its parent story.</li>
+</ol></div>
+<div class="nfr-col"><h4>NFR Deltas</h4><p class="none">Standard retry/idempotency baseline.</p></div>
+</div></div>
+
+<!-- PHASE 6 -->
+<h2><span class="phase-tag" style="background:var(--green);">PHASE 6</span> Construction — API Code Gen, UI Code Gen</h2>
+
+<div class="agent-card">
+<div class="agent-head"><span class="agent-name">L1-construction-api-code-generator</span><span class="agent-desc">Generates backend/API implementation from LLD, API spec, and data model.</span></div>
+<div class="g2">
+<div class="fr-col"><h4>Functional Requirements</h4><ol>
+<li>Accept <code>lld.md</code> + <code>openapi.yaml</code> + <code>db-schema.sql</code> + repo scaffold.</li>
+<li>Generate backend source implementing every endpoint in the API spec and every class in the LLD.</li>
+<li>Generated code must compile (0 build errors) and pass static analysis lint before being returned.</li>
+<li>Must not introduce any endpoint/behavior absent from the API spec — no speculative features.</li>
+</ol></div>
+<div class="nfr-col"><h4>NFR Deltas</h4><ul class="nfr-delta">
+<li>Latency: P95 ≤ 120s per service (batchable across files).</li>
+<li><code>gr-L1-secret-scanner</code> and <code>gr-L1-license-compliance-check</code> are hard release-blockers <span class="chip chip-blocker">BLOCKER</span>.</li>
+</ul></div>
+</div></div>
+
+<div class="agent-card">
+<div class="agent-head"><span class="agent-name">L1-construction-ui-code-generator</span><span class="agent-desc">Generates frontend/UI implementation from wireframes, journeys, and API spec.</span></div>
+<div class="g2">
+<div class="fr-col"><h4>Functional Requirements</h4><ol>
+<li>Accept <code>wireframes.md</code> + <code>user-journeys.md</code> + <code>openapi.yaml</code> + repo scaffold.</li>
+<li>Generate frontend source implementing every screen in the wireframes, wired to the API spec's endpoints.</li>
+<li>Generated code must build (0 build errors) and pass lint before being returned.</li>
+</ol></div>
+<div class="nfr-col"><h4>NFR Deltas</h4><ul class="nfr-delta">
+<li>Latency: P95 ≤ 120s per screen/module.</li>
+<li>Same <code>gr-L1-secret-scanner</code>/<code>gr-L1-license-compliance-check</code> blockers as the API generator.</li>
+</ul></div>
+</div></div>
+
+<div class="agent-card">
+<div class="agent-head"><span class="agent-name">L1-construction-unit-test-generator</span><span class="agent-desc">Generates unit tests for both API and UI code.</span></div>
+<div class="g2">
+<div class="fr-col"><h4>Functional Requirements</h4><ol>
+<li>Accept API + UI source code.</li>
+<li>Generate unit tests achieving a minimum stated coverage target (e.g. ≥80% line coverage) per module.</li>
+<li>Tests must actually execute against the generated code, not just be schema-valid — a failing/erroring suite is a build-blocking failure.</li>
+</ol></div>
+<div class="nfr-col"><h4>NFR Deltas</h4><ul class="nfr-delta">
+<li>Coverage threshold enforcement is part of the quality gate, not advisory.</li>
+</ul></div>
+</div></div>
+
+<div class="agent-card">
+<div class="agent-head"><span class="agent-name">L1-construction-code-reviewer</span><span class="agent-desc">Reviews generated code for standards compliance, vulnerabilities, and refactor opportunities.</span></div>
+<div class="g2">
+<div class="fr-col"><h4>Functional Requirements</h4><ol>
+<li>Accept API + UI source code + unit tests.</li>
+<li>Flag standards violations, security vulnerabilities (OWASP Top 10 patterns), and refactor opportunities.</li>
+<li>Every flagged issue cites the specific file/line and the violated standard/rule.</li>
+<li>Classify findings by severity (blocker/major/minor); blockers halt the PR from being marked ready.</li>
+</ol></div>
+<div class="nfr-col"><h4>NFR Deltas</h4><p class="none">None beyond baseline.</p></div>
+</div></div>
+
+<div class="agent-card">
+<div class="agent-head"><span class="agent-name">L1-construction-doc-generator</span><span class="agent-desc">Generates API/code documentation and changelog.</span></div>
+<div class="g2">
+<div class="fr-col"><h4>Functional Requirements</h4><ol>
+<li>Accept API + UI source code + <code>openapi.yaml</code>.</li>
+<li>Generate README, API usage docs, and a changelog entry.</li>
+<li>Validate doc claims against the actual source/spec before returning — no generic boilerplate that doesn't match the code.</li>
+</ol></div>
+<div class="nfr-col"><h4>NFR Deltas</h4><p class="none">None beyond baseline.</p></div>
+</div></div>
+
+<div class="agent-card">
+<div class="agent-head"><span class="agent-name">L1-github-orchestrator <span style="color:var(--gray-txt);font-weight:400;">(impl-commit invocation)</span></span><span class="agent-desc">Commits API code, UI code, unit tests, and docs to the implementation branch.</span></div>
+<div class="g2">
+<div class="fr-col"><h4>Functional Requirements</h4><ol>
+<li>Accept all Phase 6 outputs.</li>
+<li>Create/update branch <code>aava/impl-{feature-id}</code> with each artifact committed.</li>
+</ol></div>
+<div class="nfr-col"><h4>NFR Deltas</h4><ul class="nfr-delta">
+<li>Must not overwrite an existing branch without an explicit "update" flag.</li>
+</ul></div>
+</div></div>
+
+<!-- PHASE 7 -->
+<h2><span class="phase-tag" style="background:var(--navy);">PHASE 7</span> PR Creation</h2>
+
+<div class="agent-card">
+<div class="agent-head"><span class="agent-name">L1-github-orchestrator <span style="color:var(--gray-txt);font-weight:400;">(PR invocation)</span></span><span class="agent-desc">Creates the pull request bundling Jira, design, code, and test references.</span></div>
+<div class="g2">
+<div class="fr-col"><h4>Functional Requirements</h4><ol>
+<li>Accept impl branch, design branch, Jira issue keys, XRay test keys.</li>
+<li>Compose a PR description bundling all references (per the diagram's PR template).</li>
+<li>Check-before-create — never open a duplicate PR for the same branch pair.</li>
+</ol></div>
+<div class="nfr-col"><h4>NFR Deltas</h4><ul class="nfr-delta">
+<li>The PR description must be human-readable without needing to open every linked system — include enough summary inline.</li>
+</ul></div>
+</div></div>
+
+<!-- CROSS-CUTTING -->
+<h2><span class="phase-tag" style="background:var(--purple);">CROSS-CUTTING</span> Quality Verification</h2>
+
+<div class="agent-card">
+<div class="agent-head"><span class="agent-name">L1-quality-verifier</span><span class="agent-desc">Independent rubric-based scoring, invoked at all 18 quality gates across the lifecycle.</span></div>
+<div class="g2">
+<div class="fr-col"><h4>Functional Requirements</h4><ol>
+<li>Accept a draft artifact + its rubric ID.</li>
+<li>Score 0–10 against the rubric's dimensions; return per-dimension sub-scores, overall score, and rationale.</li>
+<li>Must be independent — never restate the generating agent's own self-assessment as the score.</li>
+</ol></div>
+<div class="nfr-col"><h4>NFR Deltas</h4><ul class="nfr-delta">
+<li>Score stability: repeated scoring of the same artifact must vary by ≤1 point — deterministic enough to be trusted as a gate.</li>
+</ul></div>
+</div></div>
+
+<div class="callout" style="background:var(--gray);border-color:var(--gray-mid);color:var(--charcoal);margin-top:20px;"><strong>How to use this doc:</strong> each agent card's Functional Requirements are the acceptance criteria for a first working version. NFR deltas marked <span class="chip chip-blocker">BLOCKER</span> are non-negotiable release gates — implement the corresponding guardrail check before the agent goes anywhere near a live workflow, not as a follow-up.</div>
+
+</div>
+</body></html>

@@ -1,0 +1,60 @@
+spec_version: "1.0"
+artifact_type: knowledge_base
+metadata:
+  name: kb-L1-enterprise-security
+  version: "1.0.0"
+  layer: L1
+  owner: agentic-ai-coe
+  content_hash: "sha256:6a2d07f2092c396f79ebb2a58020f8c9d642eb4fb9db3daa98534f8ccb495452"
+  last_reviewed: "2026-08-07"
+  review_cadence: quarterly
+
+purpose:
+  description: >
+    Thornbury Foods Group's established security standards — identity/access
+    boundaries, data classification, GDPR retention/erasure, audit-logging
+    tiering, secure-SDLC pre-launch requirements, incident response, and
+    third-party/external-user risk — which HarvestLink, as a new digital
+    product built within an already-established enterprise, must satisfy.
+    Grounds L1-requirements-nfr-classifier's Security/Compliance/
+    Availability boundary conditions with real, citable standards instead
+    of "TBD" where a group policy already answers the question (e.g. a
+    6-year compliance-record retention period, or a minimum uptime tier for
+    a legally-relevant audit log). Cross-references
+    kb-L1-enterprise-architecture for system landscape rather than
+    duplicating it.
+
+content:
+  format: markdown
+  documents:
+    - path: content/enterprise-security.md
+      sections: [identity-access, data-classification, retention-erasure, audit-logging-availability, secure-sdlc, incident-response, third-party-risk, glossary]
+  total_tokens_estimate: 1350
+  chunking: by-section
+  embedding_model: text-embedding-3-small
+
+consumers:
+  agents:
+    - L1-requirements-nfr-classifier
+    - L1-planning-impact-assessor
+  usage: >
+    nfr-classifier checks ES3/ES4 before marking a Compliance or
+    Availability boundary condition "TBD" — if this KB already states a
+    group-wide retention period or SLA tier for that record TYPE, that is a
+    grounded value (per nfr-spec.template.md's own rule: a KB-stated policy
+    is a real source, not a guess), not an invented number. impact-assessor
+    checks ES1 when assessing any new external-identity integration.
+
+grounding_rules:
+  accessed_by: [L1-requirements-nfr-classifier, L1-planning-impact-assessor]
+  visibility: "L1 — visible to all layers (L1/L2/L3/L4); enterprise-wide and cross-phase, not owned by any single phase directory"
+
+freshness:
+  trigger_for_update: "a group security policy changes, a new regulatory notification requirement applies, or a new external-user category is introduced"
+  note: >
+    Illustrative content for this reference scenario, not a real
+    organisation's actual security posture. If this framework is deployed
+    against a real enterprise, this file is replaced with that
+    organisation's real policies — the shape (identity boundary, data
+    classification, retention rule, tiering rule, pre-launch checklist) is
+    the reusable part, not this specific company's numbers.

@@ -1,0 +1,23 @@
+# gr-L1-pii-detection — LLM-Driven Colang Implementation
+# Layer: L1 — PII Detection
+# Validation: LLM self_check (pure Colang)
+# Python actions preserved in actions.py for reference/hybrid mode
+
+define flow check input pii
+  """LLM validates pii detection rules on input."""
+  $result = execute self_check_input
+
+  if not $result
+    bot block L1 pii detection
+    stop
+
+define flow check output pii
+  """LLM validates pii detection rules on output."""
+  $result = execute self_check_output
+
+  if not $result
+    bot block L1 pii detection
+    stop
+
+define bot block L1 pii detection
+  "Content blocked: personally identifiable information detected. PII must be removed or masked before processing."

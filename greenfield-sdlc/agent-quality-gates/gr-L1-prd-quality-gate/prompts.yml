@@ -1,0 +1,55 @@
+prompts:
+  - task: self_check_output
+    content: |
+      L1-requirements-prd-composer's original output (items): {{ generator_output }}
+      L1-requirements-prd-composer-evaluator's verdict (fixes_applied, final_decision): {{ bot_response }}
+      Original input received by L1-requirements-prd-composer (includes requirements_output and nfr_spec_output): {{ original_input }}
+
+      Reconstruct the RESULTANT output: L1-requirements-prd-composer's items
+      with every fixes_applied[].before → after substitution resolved in.
+      Check that resultant content — not the evaluator's own scoring
+      bookkeeping — against L1-requirements-prd-composer/output_schema.json
+      and its evaluation.md rubric:
+
+      1. Schema compliance: does executive_summary have summary (<=150
+         chars), confidence, reasoning? Does every requirements[] entry
+         have id, title, statement, traces_to, nfrs[] (category,
+         boundary_condition, source), confidence, reasoning? Does every
+         assumptions[]/constraints[]/risks[] entry have short_title,
+         summary (<=150 chars), underlies_or_affects, confidence,
+         reasoning? Does every open_questions[] entry have type and
+         summary (<=200 chars), with fr_id+category present when type is
+         "tbd"? Does every compound_splits[] entry have a
+         source_clause_summary (<=150 chars) and split_into naming >=2
+         real FR ids?
+      2. Zero-drop requirements: does the SET of FR ids in requirements[]
+         exactly equal the set of FR ids in original_input's
+         requirements_output.content.items.functional_requirements — no
+         drop, no invented id — with each statement carried verbatim?
+      3. Zero-drop NFRs: for each FR, does the SET of (category,
+         boundary_condition) pairs in requirements[].nfrs[] exactly match
+         original_input's nfr_spec_output for that FR — carried verbatim,
+         or both genuinely empty?
+      4. Compound-split carry-forward: is compound_splits[] carried
+         forward verbatim from original_input's requirements_output —
+         not re-derived, not dropped, nothing altered?
+      5. Tagged: does every assumptions[]/constraints[]/risks[] entry's
+         underlies_or_affects name real FR ids or the literal
+         "program-level" — never left untagged?
+      6. No success metrics: does any key anywhere in the resultant items
+         look like a smuggled metrics field (contains "metric", "kpi", or
+         "target")?
+      7. Open-questions completeness: does every TBD boundary condition in
+         original_input's nfr_spec_output (source == "—") have a matching
+         open_questions[] entry with type "tbd" and the same fr_id/category?
+      8. Traceability: is every assumption/constraint/risk genuinely
+         traceable to vision.md's Regulatory Posture / Open Risks Carried
+         Forward, or to a specific FR that reveals a premise vision.md
+         couldn't have known — not an invented product-level claim?
+      9. Executive-summary integrity: does executive_summary introduce any
+         claim absent from requirements/assumptions/constraints/risks/
+         open_questions below it?
+
+      Answer "yes" if ALL checks pass on the RESULTANT content. Answer "no"
+      if ANY check fails — this gates what actually flows to
+      L1-planning-impact-assessor and L1-planning-dependency-mapper.

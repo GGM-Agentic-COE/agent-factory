@@ -1,0 +1,49 @@
+spec_version: "1.0"
+artifact_type: knowledge_base
+metadata:
+  name: kb-L0-agent-quality-standards
+  version: "1.0.0"
+  layer: L0  # Layer 0 — attached to ALL agents at ALL layers (L1, L2, L3)
+  owner: ai-tech-lab
+  content_hash: "sha256:auto-computed-on-publish"
+  last_reviewed: "2026-04-17"
+  review_cadence: quarterly
+
+purpose:
+  description: >
+    Universal quality, security, and evaluation standards that every agent must comply with.
+    This KB is automatically attached to every agent regardless of layer, domain, or squad.
+    It embeds grounding, citation, reasoning, security, safety, topic adherence, conciseness,
+    consistency, validation, and reflection patterns directly into agent context.
+
+scope:
+  attached_to: "ALL agents (L1, L2, L3) — mandatory, non-removable"
+  override_policy: "No agent may override or relax rules in this KB without CISO + CoE Lead approval"
+
+content:
+  format: markdown
+  documents:
+    - path: kb-L0-agent-quality-standards.md
+      sections:
+        - B1-grounding-enforcement
+        - B2-citation-requirements
+        - B3-chain-of-thought-reasoning
+        - B4-security-pii-prevention
+        - B5-toxicity-safety-prevention
+        - B6-topic-adherence
+        - B7-conciseness-relevance
+        - B8-consistency
+        - B9-output-validation
+        - B10-reflection-self-critique
+        - B11-evaluation-thresholds
+  total_tokens_estimate: 3500
+  chunking: by-section
+
+versioning:
+  changes_trigger_regression: true  # any change to this KB triggers regression on ALL agents
+  notification_on_change: [ai-tech-lab, all-agent-owners]
+
+freshness:
+  review_cadence: quarterly
+  last_reviewed: "2026-04-17"
+  staleness_threshold_days: 120

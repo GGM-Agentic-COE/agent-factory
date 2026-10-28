@@ -1,0 +1,66 @@
+spec_version: "1.0"
+artifact_type: knowledge_base
+metadata:
+  name: kb-L2-payments-domain
+  version: "1.0.0"
+  layer: L2
+  owner: lending-domain-champion
+  content_hash: "sha256:auto-computed-on-publish"
+  last_reviewed: "2026-04-19"
+  review_cadence: quarterly
+
+purpose:
+  description: >
+    Domain knowledge base for payments and lending in a UK fintech context.
+    Covers the full lending lifecycle (origination to closure), payment flows,
+    regulatory obligations (FCA, PSD2, GDPR, Consumer Credit Act), affordability,
+    pricing, collections, and domain terminology. Designed to give product managers
+    and AI agents the domain depth needed to create accurate, regulation-aware
+    epics, stories, and acceptance criteria without inventing or hallucinating
+    domain rules.
+
+scope:
+  attached_to: "Inception and design agents (A1, A2, A3, A5, A7, A10)"
+  override_policy: "Domain rules in this KB reflect UK regulatory requirements. No agent may contradict them."
+
+content:
+  format: markdown
+  documents:
+    - path: kb-L2-payments-domain.md
+      sections:
+        - PD1-lending-lifecycle
+        - PD2-loan-origination
+        - PD3-affordability-and-creditworthiness
+        - PD4-pricing-fees-and-apr
+        - PD5-loan-offers-and-agreements
+        - PD6-disbursement
+        - PD7-repayment-and-collections
+        - PD8-early-repayment-and-settlement
+        - PD9-payment-processing
+        - PD10-psd2-and-sca
+        - PD11-kyc-and-identity-verification
+        - PD12-fca-consumer-duty
+        - PD13-consumer-credit-act
+        - PD14-gdpr-in-lending
+        - PD15-vulnerable-customers
+        - PD16-complaints-and-dispute-resolution
+        - PD17-domain-glossary
+        - PD18-product-configuration-and-eligibility
+        - PD19-loan-servicing-and-account-management
+        - PD20-fraud-prevention
+        - PD21-open-banking
+        - PD22-financial-promotions
+        - PD23-refunds-and-adjustments
+        - PD24-credit-reporting-obligations
+        - PD25-loan-restructuring
+  total_tokens_estimate: 48000
+  chunking: by-section
+
+versioning:
+  changes_trigger_regression: true
+  notification_on_change: [lending-domain-champion, product-managers, all-agent-owners]
+
+freshness:
+  review_cadence: quarterly
+  last_reviewed: "2026-04-19"
+  staleness_threshold_days: 90

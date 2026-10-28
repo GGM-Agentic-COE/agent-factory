@@ -1,0 +1,198 @@
+{
+  "test_id": "golden-01-auth-hld",
+  "description": "HLD for Authentication epic — backend service, APIs, data model, and mobile UI screens",
+  "agent_id": "L1-design-hld-generator-agent",
+  "agent_version": "1.0.0",
+  "execution_id": "exec-golden-hld-001",
+  "input_summary": {"source": "agent_output", "source_agent_id": "L1-inception-epics-generator-agent", "parameters": {"epic_count": 1, "feature_count": 2}},
+  "output": {
+    "type": "hld",
+    "schema_version": "1.0",
+    "items": {
+      "system_overview": {
+        "description": "Authentication microservice providing email/password registration, login, and biometric authentication for a mobile expense tracker",
+        "architecture_style": "microservices",
+        "technology_stack": {"backend": "Go (chi router)", "frontend": "React Native", "database": "PostgreSQL", "cache": "Redis", "messaging": "N/A for auth"}
+      },
+      "components": [
+        {
+          "component_id": "CMP-01",
+          "name": "Auth Service",
+          "type": "service",
+          "responsibility": "Handles registration, login, token management, password reset, and session validation",
+          "implements_features": ["F-05.1", "F-05.2"],
+          "technology": "Go 1.22 + chi v5",
+          "apis_exposed": ["API-01", "API-02", "API-03", "API-04"],
+          "apis_consumed": [],
+          "data_stores": ["DS-01", "DS-02"]
+        },
+        {
+          "component_id": "CMP-02",
+          "name": "Mobile App (Auth Module)",
+          "type": "client-app",
+          "responsibility": "Registration, login, and biometric enrolment UI flows",
+          "implements_features": ["F-05.1", "F-05.2"],
+          "technology": "React Native",
+          "apis_exposed": [],
+          "apis_consumed": ["API-01", "API-02", "API-03", "API-04"],
+          "data_stores": []
+        }
+      ],
+      "apis": [
+        {
+          "api_id": "API-01",
+          "service": "CMP-01",
+          "method": "POST",
+          "path": "/api/v1/auth/register",
+          "description": "Register new user with email and password",
+          "request_schema": {"email": "string (RFC 5322)", "password": "string (min 8, 1 upper, 1 number)"},
+          "response_schema": {"user_id": "UUID", "token": "JWT"},
+          "auth": "none",
+          "implements_features": ["F-05.1"]
+        },
+        {
+          "api_id": "API-02",
+          "service": "CMP-01",
+          "method": "POST",
+          "path": "/api/v1/auth/login",
+          "description": "Login with email/password, returns JWT",
+          "request_schema": {"email": "string", "password": "string"},
+          "response_schema": {"token": "JWT", "refresh_token": "string", "expires_in": "integer (seconds)"},
+          "auth": "none",
+          "implements_features": ["F-05.1"]
+        },
+        {
+          "api_id": "API-03",
+          "service": "CMP-01",
+          "method": "POST",
+          "path": "/api/v1/auth/biometric/enrol",
+          "description": "Enrol biometric credential (device public key) after successful password login",
+          "request_schema": {"device_id": "string", "public_key": "string (base64)", "biometric_type": "face_id | fingerprint"},
+          "response_schema": {"enrolled": "boolean", "device_id": "string"},
+          "auth": "JWT",
+          "implements_features": ["F-05.2"]
+        },
+        {
+          "api_id": "API-04",
+          "service": "CMP-01",
+          "method": "POST",
+          "path": "/api/v1/auth/biometric/verify",
+          "description": "Verify biometric challenge-response for returning user login",
+          "request_schema": {"device_id": "string", "signed_challenge": "string (base64)"},
+          "response_schema": {"token": "JWT", "refresh_token": "string"},
+          "auth": "none (device attestation replaces password)",
+          "implements_features": ["F-05.2"]
+        }
+      ],
+      "data_model": {
+        "entities": [
+          {
+            "entity_id": "DS-01",
+            "name": "users",
+            "store_type": "relational",
+            "technology": "PostgreSQL",
+            "fields": [
+              {"name": "id", "type": "UUID", "constraints": "PK, DEFAULT uuid_generate_v4()"},
+              {"name": "email", "type": "VARCHAR(255)", "constraints": "UNIQUE, NOT NULL"},
+              {"name": "password_hash", "type": "VARCHAR(255)", "constraints": "NOT NULL (bcrypt)"},
+              {"name": "failed_login_attempts", "type": "INTEGER", "constraints": "DEFAULT 0"},
+              {"name": "locked_until", "type": "TIMESTAMP", "constraints": "NULLABLE"},
+              {"name": "created_at", "type": "TIMESTAMP", "constraints": "DEFAULT NOW()"}
+            ],
+            "relationships": [{"target": "DS-03", "type": "one-to-many", "field": "user_id"}]
+          },
+          {
+            "entity_id": "DS-02",
+            "name": "sessions",
+            "store_type": "cache",
+            "technology": "Redis",
+            "fields": [
+              {"name": "key", "type": "STRING", "constraints": "session:{user_id}"},
+              {"name": "value", "type": "JSON", "constraints": "{token, device_id, expires_at}"},
+              {"name": "ttl", "type": "INTEGER", "constraints": "3600 seconds"}
+            ],
+            "relationships": []
+          },
+          {
+            "entity_id": "DS-03",
+            "name": "biometric_credentials",
+            "store_type": "relational",
+            "technology": "PostgreSQL",
+            "fields": [
+              {"name": "id", "type": "UUID", "constraints": "PK"},
+              {"name": "user_id", "type": "UUID", "constraints": "FK → users.id, NOT NULL"},
+              {"name": "device_id", "type": "VARCHAR(255)", "constraints": "NOT NULL"},
+              {"name": "public_key", "type": "TEXT", "constraints": "NOT NULL"},
+              {"name": "biometric_type", "type": "VARCHAR(20)", "constraints": "face_id | fingerprint"},
+              {"name": "enrolled_at", "type": "TIMESTAMP", "constraints": "DEFAULT NOW()"},
+              {"name": "last_used_at", "type": "TIMESTAMP", "constraints": "NULLABLE"}
+            ],
+            "relationships": [{"target": "DS-01", "type": "many-to-one", "field": "user_id"}]
+          }
+        ]
+      },
+      "integrations": [],
+      "deployment": {
+        "topology": "kubernetes",
+        "services": [{"name": "auth-service", "replicas": 2, "resources": "256Mi/0.25CPU"}],
+        "infrastructure": ["load-balancer", "redis-cluster", "postgresql-ha"]
+      },
+      "architecture_decisions": [
+        {
+          "adr_id": "ADR-01",
+          "title": "Biometric auth via device-bound keys (not server-stored biometrics)",
+          "context": "Need biometric login without storing fingerprint/face data on server",
+          "decision": "Use FIDO2/WebAuthn-style challenge-response: device stores private key in secure enclave, server stores public key only",
+          "rationale": "Biometric data never leaves device (privacy/GDPR compliant). Server only verifies signed challenge. Industry standard (FIDO Alliance).",
+          "alternatives_considered": ["Store biometric templates on server (rejected: privacy risk)", "Third-party biometric service (rejected: dependency, cost)"]
+        }
+      ],
+      "cross_cutting": {
+        "authentication": "JWT with RS256 signing. Access token 1h, refresh token 7d. Token rotation on refresh.",
+        "logging": "slog structured JSON. Log auth events (login, register, failed attempts) with user_id. Never log passwords or tokens.",
+        "monitoring": "OpenTelemetry traces on all auth endpoints. Alert on: >5 failed logins/min per user, >100 registrations/min (bot detection).",
+        "error_handling": "Standardised APIError responses. Never reveal whether email exists (prevent enumeration). Rate limit: 5 attempts per 15min per IP."
+      },
+      "ui_architecture": {
+        "platform": {"type": "mobile-cross-platform", "technology": "React Native", "targets": ["iOS", "Android"]},
+        "screens": [
+          {"screen_id": "SCR-01", "name": "Registration", "purpose": "New user sign-up with email/password", "implements_features": ["F-05.1"], "components": ["TextInput", "PasswordInput", "Button", "ValidationMessage"], "apis_consumed": ["API-01"], "state": "authStore.registration"},
+          {"screen_id": "SCR-02", "name": "Login", "purpose": "Returning user email/password login", "implements_features": ["F-05.1"], "components": ["TextInput", "PasswordInput", "Button", "Link"], "apis_consumed": ["API-02"], "state": "authStore.session"},
+          {"screen_id": "SCR-03", "name": "Biometric Enrolment Prompt", "purpose": "Post-login prompt to enable Face ID/fingerprint", "implements_features": ["F-05.2"], "components": ["Modal", "BiometricIcon", "Button"], "apis_consumed": ["API-03"], "state": "authStore.biometric"},
+          {"screen_id": "SCR-04", "name": "Biometric Login", "purpose": "Returning user biometric authentication", "implements_features": ["F-05.2"], "components": ["BiometricPrompt", "FallbackLink"], "apis_consumed": ["API-04"], "state": "authStore.session"}
+        ],
+        "navigation": {
+          "pattern": "stack",
+          "flows": [
+            {"name": "Registration Flow", "screens": ["SCR-01", "Home"]},
+            {"name": "Login Flow", "screens": ["SCR-02", "SCR-03", "Home"]},
+            {"name": "Returning User", "screens": ["SCR-04", "Home"]}
+          ]
+        },
+        "state_management": {
+          "approach": "Zustand",
+          "stores": [
+            {"name": "authStore", "scope": "global", "persisted": true},
+            {"name": "biometricStore", "scope": "feature", "persisted": true}
+          ]
+        },
+        "design_system": {
+          "source": "Custom (NFC design system)",
+          "components": ["TextInput", "PasswordInput", "Button", "Modal", "BiometricIcon", "ValidationMessage", "Link", "Toast"]
+        }
+      }
+    },
+    "execution_summary": "• Produced 2 components, 4 APIs, 3 data entities, 1 ADR, 4 UI screens\n• Coverage: F-05.1 (registration/login) and F-05.2 (biometric) fully covered in both backend and frontend\n• Key decisions: ADR-01 chose FIDO2 device-bound keys over server-stored biometrics for privacy\n• Reflection: added Redis for sessions (initially missed), added rate limiting to cross-cutting (security requirement). Verified Go + PostgreSQL + React Native align with EA KB.\n• No external integrations needed for auth epic."
+  },
+  "evaluation_criteria": {
+    "components_trace_to_features": true,
+    "apis_have_schemas": true,
+    "data_model_has_fields": true,
+    "technology_matches_ea_kb": true,
+    "ui_screens_trace_to_features": true,
+    "adr_present": true,
+    "has_execution_summary": true,
+    "faithfulness": ">= 0.90",
+    "hallucination": "<= 0.10"
+  }
+}

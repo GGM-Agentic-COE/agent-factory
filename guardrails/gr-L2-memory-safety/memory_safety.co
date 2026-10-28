@@ -1,0 +1,20 @@
+# gr-L2-memory-safety — Colang Implementation
+# Layer: L2 Domain — applies to agents with memory access
+# Triggers: runtime (before memory operations)
+
+define flow check memory safety
+  """Prevent memory poisoning and cross-agent leakage."""
+  $safe = execute validate_memory_operation(agent_id=$agent_id, operation=$user_message)
+
+  if not $safe
+    bot block memory violation
+    stop
+
+  $result = execute self_check_input
+
+  if not $result
+    bot block memory violation
+    stop
+
+define bot block memory violation
+  "Memory operation blocked: agent lacks write permission, is attempting cross-agent memory access, or content appears adversarial."

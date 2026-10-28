@@ -1,0 +1,36 @@
+spec_version: "1.0"
+artifact_type: guardrail
+metadata:
+  name: gr-L2-memory-safety
+  version: "1.0.0"
+  layer: L2
+  owner: agentic-ai-coe
+  implementation: colang
+
+purpose:
+  description: "Prevent memory poisoning, cross-agent leakage, and unauthorised memory writes"
+
+triggers_on:
+  - runtime
+
+on_fail: block_and_alert
+applies_to: agents_with_memory_access
+
+rules:
+  - name: write-permission
+    description: "Only agents with memory_write permission can store to long-term memory"
+    action: block
+    severity: critical
+
+  - name: cross-agent-isolation
+    description: "Agent cannot read another agent's episodic memory without explicit share"
+    action: block
+    severity: high
+
+  - name: poisoning-detection
+    description: "Detect and block adversarial content injection into memory stores"
+    action: flag
+    severity: high
+
+evaluation:
+  false_positive_threshold: 0.05

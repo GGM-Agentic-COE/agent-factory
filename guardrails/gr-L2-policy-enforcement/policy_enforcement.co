@@ -1,0 +1,25 @@
+# gr-L2-policy-enforcement — Colang Implementation
+# Layer: L2 Domain — applies to domain agents
+# Triggers: pre_execution + post_execution
+
+define flow check topic adherence
+  """Enforce domain scope on incoming requests."""
+  $result = execute self_check_input
+
+  if not $result
+    bot block out of scope
+    stop
+
+define flow check policy compliance
+  """Enforce domain policies on output."""
+  $result = execute self_check_output
+
+  if not $result
+    bot block policy violation
+    stop
+
+define bot block out of scope
+  "Request blocked: this is outside the agent's declared domain scope. Returning OUT_OF_SCOPE."
+
+define bot block policy violation
+  "Output blocked: violates domain-specific business policies. The agent must stay within its declared authority."

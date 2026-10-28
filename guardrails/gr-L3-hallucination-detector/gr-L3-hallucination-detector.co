@@ -1,0 +1,15 @@
+# gr-L3-hallucination-detector — LLM-Driven Colang Implementation
+# Layer: L3 — Hallucination Detector
+# Validation: LLM self_check (pure Colang)
+# Python actions preserved in actions.py for reference/hybrid mode
+
+define flow check output hallucination
+  """LLM validates hallucination detector rules on output."""
+  $result = execute self_check_output
+
+  if not $result
+    bot block L3 hallucination detector
+    stop
+
+define bot block L3 hallucination detector
+  "Output blocked: ungrounded claims detected. Output contains fabricated information not traceable to input or knowledge base."

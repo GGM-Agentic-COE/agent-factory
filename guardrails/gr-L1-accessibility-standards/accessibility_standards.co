@@ -1,0 +1,20 @@
+# gr-L1-accessibility-standards — Python-Hybrid Colang Implementation
+# Layer: L1 Enterprise — applies to ALL agents
+# Deterministic checks via actions.py + LLM for semantic checks
+
+define flow check output accessibility
+  """Deterministic + LLM accessibility check on output."""
+  $has_issues = execute check_accessibility(output=$bot_message)
+
+  if $has_issues
+    bot block accessibility violation
+    stop
+
+  $result = execute self_check_output
+
+  if not $result
+    bot block accessibility violation
+    stop
+
+define bot block accessibility violation
+  "Output flagged: accessibility standards violation detected. Output must use plain language, include alt text for visuals, maintain proper structure, avoid colour-only meaning, provide clear instructions, use inclusive language, and target accessible reading level. Regenerating."

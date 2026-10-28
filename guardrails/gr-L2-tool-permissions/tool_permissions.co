@@ -1,0 +1,14 @@
+# gr-L2-tool-permissions — Colang Implementation
+# Layer: L2 Domain — applies to ALL agents
+# Triggers: runtime (input rail, before tool execution)
+
+define flow check tool permissions
+  """Enforce least-privilege tool access."""
+  $permitted = execute check_tool_allowed(tool_name=$tool_name, agent_id=$agent_id)
+
+  if not $permitted
+    bot block tool denied
+    stop
+
+define bot block tool denied
+  "Tool call blocked: agent does not have permission to invoke this tool. Only tools in the agent's tools_allowed list within its org_scope are permitted."

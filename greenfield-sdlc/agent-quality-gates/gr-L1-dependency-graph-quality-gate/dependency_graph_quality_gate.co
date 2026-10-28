@@ -1,0 +1,23 @@
+# gr-L1-dependency-graph-quality-gate — Python-Hybrid Colang Implementation
+# Layer: L1 — fires at L1-planning-dependency-mapper-evaluator's post_execution
+# Validates L1-planning-dependency-mapper's RESULTANT output (not the evaluator's own bookkeeping)
+# Deterministic checks (schema, edge endpoints, independent DFS cycle recheck,
+# independent longest-path recheck, cycle-status escalation, FR coverage) via
+# actions.py; LLM handles only the genuinely semantic rationale-quality check.
+
+define flow check output dependency graph quality gate
+  """Deterministic independent recomputation of cycle_check/critical_path on the resultant content, then LLM semantic check on rationale quality."""
+  $has_issues = execute check_dependency_graph_quality_gate(output=$bot_message, generator_output=$generator_output, original_input=$original_input)
+
+  if $has_issues
+    bot block dependency graph quality gate violation
+    stop
+
+  $result = execute self_check_output
+
+  if not $result
+    bot block dependency graph quality gate violation
+    stop
+
+define bot block dependency graph quality gate violation
+  "L1-planning-dependency-mapper's resultant output (post-evaluation) failed its quality gate: a schema violation, a dangling edge, an independently re-derived cycle_check or critical_path that disagrees with what the resultant content claims, a cyclic graph not escalated to status failed, or an FR coverage mismatch. The workflow cannot proceed to backlog-prioritizer/design-hld with an unverified dependency graph. Retrying."

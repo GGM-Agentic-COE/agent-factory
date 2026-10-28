@@ -1,0 +1,36 @@
+{
+  "agent_id": "L1-inception-workflow-summariser",
+  "input": {
+    "workflow_name": "Inception Pipeline — Vague Idea",
+    "agent_outputs": [
+      {
+        "agent_id": "L1-inception-vision-generator",
+        "execution_id": "exec-g02-aaa",
+        "workflow_execution_id": "wf-golden-002",
+        "status": "success",
+        "content": {
+          "type": "vision_document",
+          "schema_version": "1.0",
+          "items": {
+            "product_name": "QuickPay",
+            "document_summary": {"section_count": 5, "feature_area_count": 3, "mvp_feature_count": 4, "risk_count": 3, "open_question_count": 5},
+            "artifact": {"location": "https://storage.blob.core.windows.net/artifacts/exec-g02-aaa/vision-doc/vision-quickpay.md"}
+          },
+          "execution_summary": "• Generated vision document for QuickPay\n• 5 sections but several areas thin due to limited input detail\n• Knowledge bases consulted: kb-L2-payments-domain\n• Guardrails evaluated: gr-L1-output-schema-validator (PASS), gr-L3-hallucination-detector (PASS)\n• Tools invoked: tool-L1-azure-blob-upload (success)"
+        }
+      },
+      {
+        "agent_id": "L1-inception-requirements-extractor",
+        "execution_id": "exec-g02-bbb",
+        "workflow_execution_id": "wf-golden-002",
+        "status": "failed",
+        "content": {
+          "type": "requirements",
+          "schema_version": "1.0",
+          "items": {"functional_requirements": [], "non_functional_requirements": [], "constraints": [], "assumptions": [], "gaps": [{"id": "GAP-01", "description": "Vision document lacks sufficient detail for requirements extraction"}]},
+          "execution_summary": "• INSUFFICIENT_CONTEXT: Vision document too vague for structured requirements extraction\n• Produced 0 FRs, 0 NFRs, 1 gap flagged\n• Knowledge bases consulted: kb-L1-enterprise-architecture (no relevant content found)\n• Guardrails evaluated: gr-L1-output-schema-validator (PASS)\n• Tools invoked: none"
+        }
+      }
+    ]
+  }
+}

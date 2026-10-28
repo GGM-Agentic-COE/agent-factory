@@ -1,0 +1,57 @@
+{
+  "agent_id": "L1-inception-vision-generator",
+  "execution_id": "exec-a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+  "workflow_execution_id": "wf-a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+  "status": "success",
+  "_evaluation": {
+    "_note": "This block is golden-file-only metadata for evaluation purposes. It is NOT part of the agent's actual output and is not validated against output_schema.json.",
+    "expected_scores": {
+      "hallucination": 0.05,
+      "consistency": 0.95,
+      "relevance": 0.9,
+      "domain_grounding": 0.85,
+      "specificity": 0.88
+    },
+    "key_checks": [
+      "Executive Summary \u2264 5 sentences: PASS (3 sentences)",
+      "All 5 sections present: PASS",
+      "Feature areas domain-specific: PASS (ECDA reporting, enrolment lifecycle, child milestones from KB)",
+      "Target Users include domain roles: PASS (Parents, Centre Principals, Educators, ECDA Officers, Finance)",
+      "Success Metrics numeric: PASS (70% reduction, 95% engagement, 100% ECDA compliance)",
+      "MVP \u2282 Full Vision: PASS (all MVP features appear in Feature Areas)",
+      "No technology decisions: PASS (no specific tech stack mentioned)",
+      "No vague language: PASS",
+      "Bilingual requirement addressed: PASS (mentioned in constraints and MVP features)",
+      "PDPA compliance addressed: PASS (in constraints, risks, and feature areas)"
+    ]
+  },
+  "content": {
+    "type": "vision_document",
+    "schema_version": "1.0",
+    "items": {
+      "product_name": "ParentConnect",
+      "document_summary": {
+        "executive_summary": "ParentConnect is a bilingual digital platform that enables parents of 3,200 enrolled children across 12 childcare centres to manage enrolments, track daily activities and learning milestones, communicate with educators, and pay fees online. It addresses the operational inefficiency of paper-based workflows, verbal handoffs, and manual invoicing that currently consume 35% of centre administrators' time. The expected outcome is a 70% reduction in administrative processing time, 95% parent engagement rate, and full compliance with ECDA quarterly milestone reporting requirements within 12 months of launch.",
+        "section_count": 5,
+        "feature_area_count": 6,
+        "mvp_feature_count": 10,
+        "risk_count": 6,
+        "open_question_count": 5
+      },
+      "artifact": {
+        "type": "vision_document",
+        "format": "markdown",
+        "location": "https://agentfactory.blob.core.windows.net/artifacts/exec-a1b2c3d4-e5f6-7890-abcd-ef1234567890/vision-doc/vision-parentconnect.md",
+        "filename": "vision-parentconnect.md",
+        "container": "artifacts",
+        "blob_path": "/exec-a1b2c3d4-e5f6-7890-abcd-ef1234567890/vision-doc/vision-parentconnect.md"
+      },
+      "metadata": {
+        "domain_kb_used": "kb-L2-early-childhood-education-domain",
+        "confidence": 0.92,
+        "grounding_coverage": 0.85
+      }
+    },
+    "execution_summary": "\u2022 Generated vision document for ParentConnect\n\u2022 5 sections: Executive Summary, Business Context, Full Scope Vision, MVP Scope, Risks & Dependencies\n\u2022 6 feature areas: Parent Portal, Enrolment Management, Daily Activity & Learning, Fee Management, Educator Tools, ECDA Compliance Reporting\n\u2022 10 MVP features (Must Have: 7, Should Have: 3)\n\u2022 6 risks identified (PDPA compliance: critical, ECDA integration complexity: high)\n\u2022 5 open questions flagged for requirements analysis\n\u2022 Grounded in kb-L2-early-childhood-education-domain (85% coverage \u2014 enrolment lifecycle, fee structures, ECDA reporting, parent personas all sourced from KB)\n\u2022 Reflection: fixed 2 metrics that said 'improve' without targets, added missing PDPA constraint to Business Constraints, strengthened ECDA integration points with specific API references from KB\n\u2022 Uploaded to /a1b2c3d4-e5f6-7890-abcd-ef1234567890/vision-doc/vision-parentconnect.md"
+  }
+}

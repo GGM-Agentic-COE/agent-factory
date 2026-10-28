@@ -1,0 +1,77 @@
+spec_version: "1.0"
+artifact_type: tool
+metadata:
+  name: tool-L0-s3-files-reader
+  version: "2.0.0"
+  layer: L0
+  owner: agentic-ai-coe
+
+purpose:
+  description: "Reads and returns the contents of one or more named files inside a given folder (prefix) of a fixed S3 bucket."
+  platform: s3
+  operation: read
+
+interface:
+  parameters:
+    folder_name:
+      type: string
+      required: true
+      description: "Name of the folder (prefix) in the S3 bucket, e.g. the workflow execution id"
+    file_names:
+      type: array
+      items: string
+      required: true
+      description: "List of file names to read from that folder, e.g. ['summary.md', 'findings.md']; each reduced to its basename before use"
+
+  returns:
+    type: string
+    description: >
+      On success: formatted string with header (FILE_SOURCE, BUCKET, FOLDER, FILE_COUNT = number of names requested)
+      followed by one "===== FILE: <key> =====" section per requested name, in request order. Readable files carry
+      LAST_MODIFIED, SIZE_BYTES and the decoded UTF-8 content, or [SKIPPED: file exceeds size limit] (> 1 MB),
+      [READ_FAILED: <error>], [BINARY OR NON-UTF8 CONTENT: <n> bytes]. Files that could not be located show
+      [NOT_FOUND], [READ_FAILED: <code>] or (for an empty name) [INVALID_FILE_NAME] with no metadata.
+      On failure: a single "S3_RETRIEVE_FAILED: No file names provided", "S3_CLIENT_INIT_FAILED: <detail>" or
+      "S3_RETRIEVE_FAILED: None of the requested files could be read under '<prefix>'" string.
+
+credentials:
+  source: pod-identity
+  access_method: boto3-default-credential-chain
+  secret_name: null
+  fields_used: []
+  iam_actions_required: ["s3:GetObject", "s3:ListBucket"]
+
+configuration:
+  setup_required: [BUCKET_NAME, AWS_REGION]
+  defaults:
+    BUCKET_NAME: "<your-s3-bucket-name>"
+    AWS_REGION: "us-east-1"
+    MAX_FILE_BYTES: 1000000
+
+identity:
+  tool_id: "tool-L0-s3-files-reader-001"
+  role: tool-executor
+
+  invocable_by:
+    roles: [content-generator, orchestrator]
+    agents: [any-agent-with-read-permission]
+
+  permissions:
+    operation: read
+    platform: s3
+    scope: "org-level"
+
+  credential_scoping:
+    method: org-from-context
+    vault_path_template: "/secrets/{org_id}/s3"
+
+resilience:
+  timeout_seconds: 30
+  retry: {max: 2, backoff: exponential, retry_on: [timeout, 429, 502, 503]}
+  circuit_breaker: {failure_threshold: 5, reset_seconds: 60}
+
+security:
+  input_validation: "Empty file_names list rejected; folder_name prefix normalised (leading/trailing slashes stripped, trailing slash re-appended); each file name reduced to its basename, empty result marked [INVALID_FILE_NAME]"
+  output_sanitization: "boto3 exceptions caught per-stage (client init, per-file head/read) and returned as a labelled string or per-file marker; ClientError codes or raw exception text may appear in the message"
+  logging: "No dedicated log file; errors are returned directly to the caller rather than logged separately"
+  credential_handling: "No credentials in code; the pod's IAM role is resolved by boto3 via Pod Identity"

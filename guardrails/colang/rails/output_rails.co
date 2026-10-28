@@ -1,0 +1,121 @@
+# Output Rails (L1 Enterprise + L3 Project)
+# Validate agent output before delivering to user/downstream agent
+
+define flow check output schema
+  """L1: Ensure output conforms to AgentOutput contract."""
+  $bot_response = $bot_message
+  $schema_valid = execute validate_output_schema(output=$bot_response)
+
+  if not $schema_valid
+    bot retry schema
+    stop
+
+define bot retry schema
+  "Output schema validation failed. Regenerating with correct structure."
+
+define flow check output pii
+  """L1: Detect and block PII leakage in output."""
+  $bot_response = $bot_message
+  $pii_found = execute detect_pii(text=$bot_response)
+
+  if $pii_found
+    bot mask pii output
+    stop
+
+define bot mask pii output
+  "Output contained PII and has been blocked. Regenerating without sensitive data."
+
+define flow check output secrets
+  """L1: Block credentials, API keys, tokens in output."""
+  $bot_response = $bot_message
+  $secrets_found = execute detect_secrets(text=$bot_response)
+
+  if $secrets_found
+    bot block secrets
+    stop
+
+define bot block secrets
+  "Output contained potential credentials or secrets and has been blocked."
+
+define flow check output content safety
+  """L1: Block toxic or harmful content in output."""
+  $bot_response = $bot_message
+  $is_unsafe = execute check_content_safety(text=$bot_response)
+
+  if $is_unsafe
+    bot block unsafe output
+    stop
+
+define bot block unsafe output
+  "Output contained unsafe content and has been blocked."
+
+define flow check output hallucination
+  """L3: Check output is grounded in input and KB — no fabricated claims."""
+  $bot_response = $bot_message
+  $is_grounded = execute check_groundedness(output=$bot_response)
+
+  if not $is_grounded
+    bot retry grounding
+    stop
+
+define bot retry grounding
+  "Output contained ungrounded claims. Regenerating with stricter grounding."
+
+define flow check output citations
+  """L3: Every output item must have at least one resolvable citation."""
+  $bot_response = $bot_message
+  $citations_valid = execute validate_citations(output=$bot_response)
+
+  if not $citations_valid
+    bot retry citations
+    stop
+
+define bot retry citations
+  "Output is missing required citations. Regenerating with source references."
+
+define flow check output confidence
+  """L3: Escalate to HITL when confidence below threshold."""
+  $bot_response = $bot_message
+  $confidence_ok = execute check_confidence_threshold(output=$bot_response, min_confidence=0.7, block_below=0.5)
+
+  if not $confidence_ok
+    bot escalate low confidence
+    stop
+
+define bot escalate low confidence
+  "Output confidence is below acceptable threshold. Escalating to human review."
+
+define flow check output consistency
+  """L3: Detect contradictions in multi-item output."""
+  $bot_response = $bot_message
+  $is_consistent = execute check_cross_item_consistency(output=$bot_response)
+
+  if not $is_consistent
+    bot flag inconsistency
+    stop
+
+define bot flag inconsistency
+  "Output contains contradictions between items. Escalating to human review."
+
+define flow check output reasoning
+  """L4: Validate reasoning field is present and non-empty."""
+  $bot_response = $bot_message
+  $reasoning_valid = execute validate_reasoning_field(output=$bot_response)
+
+  if not $reasoning_valid
+    bot retry reasoning
+    stop
+
+define bot retry reasoning
+  "Output is missing required reasoning. Regenerating with decision rationale."
+
+define flow check output audit trail
+  """L1: Ensure execution produces audit record."""
+  $bot_response = $bot_message
+  $audit_logged = execute log_audit_record(output=$bot_response)
+
+  if not $audit_logged
+    bot warn audit failure
+
+define bot warn audit failure
+  "Warning: Audit trail logging failed. Output delivered but compliance record incomplete."

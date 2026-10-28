@@ -1,0 +1,9 @@
+{
+  "agent_id": "L1-inception-vision-generator",
+  "input": {
+    "idea": "make something cool with AI"
+  },
+  "context": {
+    "domain_kb": null
+  }
+}

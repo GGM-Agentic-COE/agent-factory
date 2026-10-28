@@ -1,0 +1,37 @@
+spec_version: "1.0"
+artifact_type: guardrail
+metadata:
+  name: gr-L2-policy-enforcement
+  version: "1.0.0"
+  layer: L2
+  owner: domain-ai-champion
+  implementation: colang
+
+purpose:
+  description: "Enforce domain-specific topic adherence and policy rules — block out-of-scope requests"
+
+triggers_on:
+  - pre_execution
+  - post_execution
+
+on_fail: block_with_out_of_scope
+applies_to: domain_agents
+
+rules:
+  - name: topic-adherence
+    description: "Agent must stay within its declared domain scope"
+    action: block
+    severity: high
+
+  - name: off-topic-refusal
+    description: "Return OUT_OF_SCOPE for requests outside domain"
+    action: block
+    severity: high
+
+  - name: policy-compliance
+    description: "Output must comply with domain-specific business policies"
+    action: flag
+    severity: medium
+
+evaluation:
+  false_positive_threshold: 0.05

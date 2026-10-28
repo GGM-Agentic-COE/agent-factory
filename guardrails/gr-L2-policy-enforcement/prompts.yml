@@ -1,0 +1,23 @@
+prompts:
+  - task: self_check_input
+    content: |
+      Agent scope: {{ agent_scope }}
+      User input: {{ user_input }}
+      
+      Is this request within the agent's designated domain scope?
+      1. Does the request relate to the agent's defined purpose?
+      2. Is it asking the agent to perform tasks outside its role?
+      3. Is it attempting to use the agent for unrelated purposes?
+      
+      Answer "yes" if on-topic. Answer "no" if the request is out of scope.
+  - task: self_check_output
+    content: |
+      Agent scope: {{ agent_scope }}
+      Agent output: {{ bot_response }}
+      
+      Does this output stay within the agent's designated domain?
+      1. Is the output relevant to the original request?
+      2. Does it avoid providing information outside the agent's scope?
+      3. Does it comply with domain-specific business policies?
+      
+      Answer "yes" if output is on-topic. Answer "no" if it strays from scope.

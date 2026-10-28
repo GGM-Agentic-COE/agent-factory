@@ -1,0 +1,20 @@
+# gr-L2-payments-compliance — Colang Implementation
+# Layer: L2 Domain — applies to payments domain agents
+# Triggers: post_execution (output rail)
+
+define flow check payments compliance
+  """Validate PSD2/SCA and payments domain compliance."""
+  $valid = execute validate_payments_references(output=$bot_message)
+
+  if not $valid
+    bot block payments non compliant
+    stop
+
+  $result = execute self_check_output
+
+  if not $result
+    bot block payments non compliant
+    stop
+
+define bot block payments non compliant
+  "Output blocked: payments compliance violation. All regulatory references must be accurate, SCA requirements must be included where applicable, and domain terminology must match KB definitions."

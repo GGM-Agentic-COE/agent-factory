@@ -1,0 +1,178 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "L1-inception-stories-generator-output-v1.0",
+  "title": "Stories Generator Output",
+  "description": "Output schema for the stories generator agent. Decomposes epics and features into implementable user stories ordered for incremental delivery.",
+  "type": "object",
+  "required": ["agent_id", "agent_version", "execution_id", "input_summary", "output"],
+  "properties": {
+    "agent_id": {"type": "string", "const": "L1-inception-stories-generator-agent"},
+    "agent_version": {"type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$"},
+    "execution_id": {"type": "string", "pattern": "^exec-.+$"},
+    "input_summary": {
+      "type": "object",
+      "required": ["source", "parameters"],
+      "properties": {
+        "source": {"type": "string", "enum": ["agent_output", "direct_input", "file_upload"]},
+        "source_agent_id": {"type": ["string", "null"]},
+        "parameters": {"type": "object"}
+      }
+    },
+    "content": {
+      "type": "object",
+      "required": ["type", "schema_version", "items", "execution_summary"],
+      "properties": {
+        "type": {"type": "string", "const": "stories"},
+        "schema_version": {"type": "string", "const": "1.0"},
+        "items": {"$ref": "#/$defs/Items"},
+        "execution_summary": {
+          "type": "string",
+          "minLength": 50,
+          "description": "Plain-text summary: story count, points total, sprint sequence, reflection findings"
+        }
+      }
+    }
+  },
+  "$defs": {
+    "Items": {
+      "type": "object",
+      "required": ["total_stories", "total_story_points", "epics"],
+      "properties": {
+        "total_stories": {"type": "integer", "description": "Total number of stories generated across all epics"},
+        "total_story_points": {"type": "integer", "description": "Sum of all story points"},
+        "epics": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"$ref": "#/$defs/EpicStories"},
+          "description": "Stories grouped by parent epic"
+        }
+      }
+    },
+    "EpicStories": {
+      "type": "object",
+      "required": ["epic_id", "epic_title", "stories", "coverage_matrix"],
+      "description": "All stories for a single epic, with coverage traceability",
+      "properties": {
+        "epic_id": {"type": "string", "pattern": "^EP-\\d{2}$"},
+        "epic_title": {"type": "string"},
+        "stories": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"$ref": "#/$defs/Story"}
+        },
+        "coverage_matrix": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/CoverageEntry"},
+          "description": "Maps each feature to its stories and total points"
+        }
+      }
+    },
+    "Story": {
+      "type": "object",
+      "required": ["story_id", "feature_id", "title", "user_story", "acceptance_criteria", "story_points", "data_sensitivity", "depends_on", "metadata"],
+      "description": "A single implementable user story",
+      "properties": {
+        "story_id": {
+          "type": "string",
+          "pattern": "^US-\\d{3}$",
+          "description": "Unique story ID (US-001, US-002, ...)"
+        },
+        "feature_id": {
+          "type": "string",
+          "pattern": "^F-\\d{2}\\.\\d+$",
+          "description": "Parent feature this story implements"
+        },
+        "title": {
+          "type": "string",
+          "description": "Short descriptive title of the story"
+        },
+        "user_story": {
+          "type": "string",
+          "pattern": "^As a ",
+          "description": "Full story in 'As a <role>, I want <capability>, so that <benefit>' format"
+        },
+        "acceptance_criteria": {
+          "type": "array",
+          "items": {"type": "string"},
+          "minItems": 3,
+          "maxItems": 5,
+          "description": "Testable AC in 'Given <context>, When <action>, Then <outcome>' format"
+        },
+        "story_points": {
+          "type": "integer",
+          "enum": [1, 2, 3, 5, 8],
+          "description": "Complexity estimate. 1=trivial, 2=simple, 3=moderate, 5=complex, 8=very complex (consider splitting)"
+        },
+        "data_sensitivity": {
+          "type": "string",
+          "enum": ["Public", "Internal", "Confidential", "Restricted"],
+          "description": "Public=catalog/rates. Internal=status/config. Confidential=name/email. Restricted=ID/income/biometric."
+        },
+        "change_type": {
+          "type": "string",
+          "enum": ["new", "modified", "unchanged"],
+          "description": "Whether this is new functionality, modification of existing, or wrapping unchanged behaviour"
+        },
+        "regulatory_linkage": {
+          "type": ["string", "null"],
+          "description": "Regulatory requirement this story addresses (e.g., 'GDPR Art. 17', 'FCA CONC 5'). Null if none."
+        },
+        "depends_on": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "Story IDs this story depends on (must be completed first)"
+        },
+        "metadata": {"$ref": "#/$defs/StoryMetadata"}
+      }
+    },
+    "StoryMetadata": {
+      "type": "object",
+      "required": ["confidence", "reasoning", "citation", "trajectory"],
+      "properties": {
+        "confidence": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "0.9+ for stories from explicit feature descriptions. 0.7-0.9 for inferred decompositions."
+        },
+        "reasoning": {
+          "type": "string",
+          "minLength": 20,
+          "description": "Why this story exists, why these points, sequencing rationale"
+        },
+        "citation": {
+          "type": "object",
+          "required": ["source_reference", "source_location"],
+          "properties": {
+            "source_reference": {"type": "string", "description": "Feature ID or FR ID this story traces to"},
+            "source_location": {"type": "string", "description": "Location in input (e.g., 'EP-01 > F-01.1')"}
+          }
+        },
+        "trajectory": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["step", "action", "tool", "detail"],
+            "properties": {
+              "step": {"type": "integer"},
+              "action": {"type": "string", "enum": ["retrieve", "reason", "generate", "validate"]},
+              "tool": {"type": ["string", "null"]},
+              "detail": {"type": "string"}
+            }
+          }
+        }
+      }
+    },
+    "CoverageEntry": {
+      "type": "object",
+      "required": ["feature_id", "stories", "total_points"],
+      "description": "Traceability: which stories cover a feature and their total effort",
+      "properties": {
+        "feature_id": {"type": "string", "pattern": "^F-\\d{2}\\.\\d+$"},
+        "stories": {"type": "array", "items": {"type": "string"}, "description": "Story IDs covering this feature"},
+        "total_points": {"type": "integer", "description": "Sum of story points for this feature"}
+      }
+    }
+  }
+}

@@ -1,0 +1,23 @@
+# gr-L1-injection-defence — Colang Implementation
+# Layer: L1 Enterprise — applies to ALL agents
+# Triggers: pre_execution (input rail)
+
+define flow check injection defence
+  """Detect and block prompt injection patterns."""
+  $safe = execute detect_injection_patterns(input=$user_message)
+
+  if not $safe
+    bot block injection detected
+    stop
+
+  $result = execute self_check_input
+
+  if not $result
+    bot block injection detected
+    stop
+
+define bot block injection detected
+  "Input blocked: potential prompt injection detected. All external content is treated as untrusted data. The system prompt is the sole instruction source."
+
+define bot warn external content
+  "Warning: External content flagged as potentially containing embedded instructions. Content treated as data only."

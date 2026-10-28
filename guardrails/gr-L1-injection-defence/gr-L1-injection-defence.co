@@ -1,0 +1,15 @@
+# gr-L1-injection-defence — LLM-Driven Colang Implementation
+# Layer: L1 — Injection Defence
+# Validation: LLM self_check (pure Colang)
+# Python actions preserved in actions.py for reference/hybrid mode
+
+define flow check input injection defence
+  """LLM validates injection defence rules on input."""
+  $result = execute self_check_input
+
+  if not $result
+    bot block L1 injection defence
+    stop
+
+define bot block L1 injection defence
+  "Input blocked: prompt injection or jailbreak attempt detected. This request cannot be processed."

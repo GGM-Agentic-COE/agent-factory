@@ -1,0 +1,31 @@
+spec_version: "1.0"
+artifact_type: knowledge_base
+metadata:
+  name: kb-L1-golang-api-scaffold
+  version: "1.0.0"
+  layer: L1
+  owner: agentic-ai-coe
+  last_reviewed: "2026-06-16"
+  review_cadence: quarterly
+
+purpose:
+  description: "Go API project scaffold — starter template with Makefile, Dockerfile, main.go, config, error helpers, linter config, and migration templates"
+
+content:
+  format: markdown
+  documents:
+    - path: content/kb-L1-golang-api-scaffold.md
+      sections: [makefile, dockerfile, main-entry, configuration, http-errors, go-module, linter, migrations]
+
+  total_tokens_estimate: 8000
+  chunking: by-section
+  embedding_model: text-embedding-3-small
+
+consumers:
+  agents:
+    - L1-construction-code-generator-agent
+    - L2-*-construction-code-generator-agent
+  usage: "Agents use this scaffold as the base template when creating new Go API services"
+
+visibility:
+  accessible_by: [L1, L2, L3, L4]

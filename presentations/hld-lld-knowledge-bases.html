@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HLD & LLD Agent — Knowledge Base Requirements</title>
+<style>
+:root {
+  --dark-bg: #0D1B2A;
+  --light-bg: #E0E1DD;
+  --accent: #4DA8DA;
+  --card-dark: #1B2838;
+  --muted: #778DA9;
+  --body-light: #415A77;
+  --green: #81B29A;
+  --coral: #E07A5F;
+  --white: #FFFFFF;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: Calibri, sans-serif; background: var(--light-bg); color: var(--body-light); line-height: 1.6; }
+.container { max-width: 100%; margin: 0 auto; padding: 48px 60px; }
+.header {
+  background: var(--dark-bg); padding: 48px 40px; border-top: 5px solid var(--accent);
+  margin-bottom: 40px; border-radius: 0 0 4px 4px;
+}
+.header h1 { font-family: 'Trebuchet MS', sans-serif; color: var(--white); font-size: 28pt; font-weight: normal; margin-bottom: 8px; }
+.header p { color: var(--muted); font-size: 13pt; }
+h2 {
+  font-family: 'Trebuchet MS', sans-serif; color: var(--dark-bg); font-size: 20pt;
+  font-weight: normal; margin: 40px 0 6px; padding-bottom: 6px;
+  border-bottom: 3px solid var(--accent);
+}
+h3 { font-family: 'Trebuchet MS', sans-serif; color: var(--dark-bg); font-size: 14pt; margin: 20px 0 8px; }
+h4 { font-size: 12pt; color: var(--accent); margin: 14px 0 6px; }
+p { margin-bottom: 10px; font-size: 11pt; }
+ul, ol { padding-left: 20px; margin-bottom: 12px; }
+li { margin-bottom: 4px; font-size: 11pt; }
+.card {
+  background: var(--white); border-left: 4px solid var(--accent); border-radius: 3px;
+  padding: 16px 20px; margin: 12px 0;
+}
+.card-dark {
+  background: var(--dark-bg); border-left: 4px solid var(--accent); border-radius: 3px;
+  padding: 16px 20px; margin: 12px 0; color: var(--muted);
+}
+.card-dark h3, .card-dark h4 { color: var(--white); }
+.card-green { border-left-color: var(--green); }
+.card-coral { border-left-color: var(--coral); }
+.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 14px 0; }
+.flow { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin: 10px 0; }
+.flow-step {
+  background: var(--card-dark); color: var(--white); padding: 6px 12px;
+  border-radius: 3px; font-size: 10pt; border-left: 3px solid var(--accent);
+}
+.flow-step.hl { border-left-color: var(--green); }
+.flow-arrow { color: var(--accent); font-size: 13pt; }
+pre {
+  background: var(--dark-bg); color: var(--muted); padding: 14px 18px;
+  border-radius: 3px; font-family: 'Courier New', monospace; font-size: 9.5pt;
+  line-height: 1.5; overflow-x: auto; margin: 10px 0;
+}
+code { font-family: 'Courier New', monospace; font-size: 9.5pt; color: var(--accent); }
+.callout {
+  background: var(--dark-bg); border-left: 4px solid var(--accent); border-radius: 3px;
+  padding: 12px 18px; margin: 16px 0; color: var(--white); font-size: 11pt;
+}
+.toc { background: var(--white); padding: 20px 24px; border-radius: 3px; margin-bottom: 32px; }
+.toc a { color: var(--accent); text-decoration: none; font-size: 11pt; }
+.toc li { margin-bottom: 6px; }
+table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 10.5pt; }
+th { background: var(--dark-bg); color: var(--white); padding: 8px 12px; text-align: left; }
+td { padding: 8px 12px; border-bottom: 1px solid var(--light-bg); }
+tr:nth-child(even) td { background: var(--white); }
+.legend { font-size: 10pt; color: var(--muted); margin: 8px 0; }
+</style>
+</head>
+<body>
+<div class="container">
+
+<div class="header">
+  <h1>HLD & LLD Agent — Knowledge Base Requirements</h1>
+  <p>Defining what knowledge each design agent needs to produce informed, comprehensive output</p>
+</div>
+
+<div class="toc">
+  <h3 style="margin-top:0;">Contents</h3>
+  <ol>
+    <li><a href="#hld-vs-lld">HLD vs LLD — Scope Distinction</a></li>
+    <li><a href="#hld-kbs">HLD Generator — Knowledge Bases</a></li>
+    <li><a href="#lld-kbs">LLD Generator — Knowledge Bases</a></li>
+    <li><a href="#greenfield-brownfield">Greenfield vs Brownfield Matrix</a></li>
+    <li><a href="#relationship">Agent Relationship & Data Flow</a></li>
+  </ol>
+</div>
+
+<!-- SECTION 1 -->
+<h2 id="hld-vs-lld">1. HLD vs LLD — Scope Distinction</h2>
+
+<div class="grid">
+  <div class="card">
+    <h3>HLD (High-Level Design)</h3>
+    <p><strong>Answers:</strong> "What components, how they interact, where they live"</p>
+    <p><strong>Audience:</strong> Architects, tech leads, stakeholders</p>
+    <p><strong>Granularity:</strong> System/service level</p>
+    <ul>
+      <li>Solution overview & scope boundaries</li>
+      <li>Component architecture & responsibilities</li>
+      <li>Integration design (sync/async flows, protocols)</li>
+      <li>Data architecture (stores, ownership, flows)</li>
+      <li>Infrastructure topology</li>
+      <li>Security architecture & trust boundaries</li>
+      <li>NFR strategy (scalability, DR, performance)</li>
+      <li>Technology decisions with rationale</li>
+      <li>C4 Context & Container diagrams</li>
+    </ul>
+  </div>
+  <div class="card card-green">
+    <h3>LLD (Low-Level Design)</h3>
+    <p><strong>Answers:</strong> "How each component is built internally"</p>
+    <p><strong>Audience:</strong> Developers, squad engineers</p>
+    <p><strong>Granularity:</strong> Class/function/table level</p>
+    <ul>
+      <li>Class/module design & patterns applied</li>
+      <li>API specification (endpoints, schemas, errors)</li>
+      <li>Database schema (tables, columns, indexes)</li>
+      <li>Sequence diagrams (method-level flows)</li>
+      <li>State machines & entity lifecycle</li>
+      <li>Algorithm detail & business logic</li>
+      <li>Error handling & retry configuration</li>
+      <li>Configuration & feature flags</li>
+      <li>C4 Component diagrams</li>
+    </ul>
+  </div>
+</div>
+
+<h3>Relationship</h3>
+
+<pre>HLD                                    LLD
+┌─────────────────────┐               ┌─────────────────────────────┐
+│ "Payment Service"   │               │ PaymentService              │
+│  - processes txns   │  ──expands──► │  ├── PaymentController      │
+│  - talks to Ledger  │               │  ├── PaymentProcessor       │
+│  - uses PostgreSQL  │               │  │   ├── validate()         │
+│  - emits events     │               │  │   ├── authorise()        │
+└─────────────────────┘               │  │   └── settle()           │
+                                      │  ├── PaymentRepository      │
+                                      │  │   └── payments (table)   │
+                                      │  │       ├── id: UUID PK    │
+                                      │  │       ├── amount: DECIMAL │
+                                      │  │       └── status: ENUM   │
+                                      │  └── PaymentEventPublisher  │
+                                      │      └── topic: payment.txn │
+                                      └─────────────────────────────┘</pre>
+
+<div class="callout">The HLD agent's output is the LLD agent's most critical input — LLD implements what HLD prescribes.</div>
+
+<!-- SECTION 2 -->
+<h2 id="hld-kbs">2. HLD Generator — Knowledge Bases</h2>
+
+<h3>L1 — Enterprise Standards</h3>
+<table>
+  <tr><th>Knowledge Base</th><th>What it provides to HLD</th></tr>
+  <tr><td><code>kb-L1-enterprise-architecture</code></td><td>System landscape, integration patterns, approved tech stack, platform capabilities, shared services catalog</td></tr>
+  <tr><td><code>kb-L1-security-standards</code></td><td>Auth patterns (OAuth2, mTLS), encryption standards, data classification, network segmentation rules</td></tr>
+  <tr><td><code>kb-L1-nfr-baselines</code></td><td>Performance benchmarks, availability targets, scalability thresholds, DR/RTO/RPO standards</td></tr>
+  <tr><td><code>kb-L1-architecture-patterns</code></td><td>Microservices, event-driven, CQRS, saga, BFF — when to use which, trade-offs, decision criteria</td></tr>
+  <tr><td><code>kb-L1-hld-document-template</code></td><td>Standard HLD structure, mandatory sections, notation conventions (C4, sequence diagrams)</td></tr>
+  <tr><td><code>kb-L1-cloud-infrastructure-patterns</code></td><td>Compute, storage, messaging, caching patterns per cloud provider (AWS/Azure/GCP)</td></tr>
+  <tr><td><code>kb-L1-api-design-standards</code></td><td>REST/gRPC/GraphQL conventions, versioning strategy, contract-first principles</td></tr>
+  <tr><td><code>kb-L1-observability-standards</code></td><td>Logging, metrics, tracing, alerting patterns and tooling standards</td></tr>
+</table>
+
+<h3>L2 — Domain-Specific</h3>
+<table>
+  <tr><th>Knowledge Base</th><th>What it provides to HLD</th></tr>
+  <tr><td><code>kb-L2-{domain}-domain-model</code></td><td>Bounded contexts, aggregates, domain events, entity relationships for the domain</td></tr>
+  <tr><td><code>kb-L2-{domain}-regulatory-constraints</code></td><td>Compliance requirements that shape architecture (PCI-DSS, PSD2, GDPR, SOX)</td></tr>
+  <tr><td><code>kb-L2-{domain}-integration-landscape</code></td><td>Existing upstream/downstream systems, APIs, message brokers, data flows within the domain</td></tr>
+</table>
+
+<h3>L3 — Project-Specific</h3>
+<table>
+  <tr><th>Knowledge Base</th><th>What it provides to HLD</th></tr>
+  <tr><td><code>kb-L3-{project}-adr-registry</code></td><td>Architecture Decision Records — decisions already made, constraints locked in</td></tr>
+  <tr><td><code>kb-L3-{project}-api-contracts</code></td><td>Existing OpenAPI specs, event schemas, interface contracts the HLD must conform to</td></tr>
+  <tr><td><code>kb-L3-{project}-application-baseline</code></td><td>Current state — what's already deployed, tech debt, migration constraints</td></tr>
+  <tr><td><code>kb-L3-{project}-sprint-scope</code></td><td>Feature scope, epics, stories to be addressed — so the HLD is bounded correctly</td></tr>
+</table>
+
+<!-- SECTION 3 -->
+<h2 id="lld-kbs">3. LLD Generator — Knowledge Bases</h2>
+
+<h3>L1 — Enterprise Standards</h3>
+<table>
+  <tr><th>Knowledge Base</th><th>What it provides to LLD</th></tr>
+  <tr><td><code>kb-L1-lld-document-template</code></td><td>Standard LLD structure, mandatory sections (class diagrams, sequence diagrams, schema DDL, API specs)</td></tr>
+  <tr><td><code>kb-L1-coding-standards</code></td><td>Naming conventions, package structure, error handling patterns, logging standards</td></tr>
+  <tr><td><code>kb-L1-api-design-standards</code></td><td>Endpoint naming, request/response schemas, pagination, error codes, versioning</td></tr>
+  <tr><td><code>kb-L1-database-design-standards</code></td><td>Naming conventions, indexing strategy, migration patterns, normalization rules</td></tr>
+  <tr><td><code>kb-L1-testing-standards</code></td><td>Unit/integration test patterns, coverage thresholds, mocking strategy</td></tr>
+  <tr><td><code>kb-L1-security-implementation-patterns</code></td><td>Input validation, auth middleware, secrets injection, OWASP top-10 mitigations</td></tr>
+  <tr><td><code>kb-L1-nfr-implementation-patterns</code></td><td>Connection pool sizing, cache TTLs, timeout configs, circuit breaker settings, rate limiting — translating NFR targets into code-level configuration</td></tr>
+</table>
+
+<h3>L2 — Domain-Specific</h3>
+<table>
+  <tr><th>Knowledge Base</th><th>What it provides to LLD</th></tr>
+  <tr><td><code>kb-L2-{domain}-domain-model</code></td><td>Entity attributes, validation rules, invariants, domain events, value objects</td></tr>
+  <tr><td><code>kb-L2-{domain}-regulatory-constraints</code></td><td>Field-level compliance (masking rules, retention, audit logging requirements)</td></tr>
+  <tr><td><code>kb-L2-{domain}-integration-contracts</code></td><td>External API specs (bank APIs, payment gateways), message schemas, SLAs</td></tr>
+</table>
+
+<h3>L3 — Project-Specific</h3>
+<table>
+  <tr><th>Knowledge Base</th><th>What it provides to LLD</th></tr>
+  <tr><td><code>kb-L3-{project}-hld</code></td><td><strong>Primary input</strong> — the approved HLD dictating components, tech choices, integration flows</td></tr>
+  <tr><td><code>kb-L3-{project}-application-baseline</code></td><td>Existing codebase structure, current schemas, classes to extend (not duplicate)</td></tr>
+  <tr><td><code>kb-L3-{project}-api-contracts</code></td><td>Existing OpenAPI specs, event schemas the new code must conform to</td></tr>
+  <tr><td><code>kb-L3-{project}-adr-registry</code></td><td>Locked-in decisions (e.g., "we use CQRS for reads", "PostgreSQL not Mongo")</td></tr>
+  <tr><td><code>kb-L3-{project}-tech-stack-scaffold</code></td><td>Framework boilerplate, project layout, DI configuration, build tool setup</td></tr>
+</table>
+
+<!-- SECTION 4 -->
+<h2 id="greenfield-brownfield">4. Greenfield vs Brownfield Matrix</h2>
+
+<h3>HLD Generator</h3>
+<table>
+  <tr><th>Knowledge Base</th><th>Greenfield</th><th>Brownfield</th><th>Rationale</th></tr>
+  <tr><td><code>kb-L1-enterprise-architecture</code></td><td>✓</td><td>✓</td><td>Both must align to org landscape and approved tech stack</td></tr>
+  <tr><td><code>kb-L1-security-standards</code></td><td>✓</td><td>✓</td><td>Non-negotiable regardless of scenario</td></tr>
+  <tr><td><code>kb-L1-nfr-baselines</code></td><td>✓</td><td>✓</td><td>Performance/availability targets apply universally</td></tr>
+  <tr><td><code>kb-L1-architecture-patterns</code></td><td>✓</td><td>✓</td><td>Greenfield picks fresh; brownfield must stay consistent</td></tr>
+  <tr><td><code>kb-L1-hld-document-template</code></td><td>✓</td><td>✓</td><td>Output structure is standard</td></tr>
+  <tr><td><code>kb-L1-cloud-infrastructure-patterns</code></td><td>✓</td><td>○</td><td>Greenfield defines infra from scratch; brownfield extends existing</td></tr>
+  <tr><td><code>kb-L1-api-design-standards</code></td><td>✓</td><td>✓</td><td>Both expose APIs</td></tr>
+  <tr><td><code>kb-L1-observability-standards</code></td><td>✓</td><td>○</td><td>Greenfield sets up observability; brownfield already has it</td></tr>
+  <tr><td><code>kb-L2-{domain}-domain-model</code></td><td>✓</td><td>✓</td><td>Both need domain understanding</td></tr>
+  <tr><td><code>kb-L2-{domain}-regulatory-constraints</code></td><td>✓</td><td>✓</td><td>Compliance is universal</td></tr>
+  <tr><td><code>kb-L2-{domain}-integration-landscape</code></td><td>○</td><td>✓</td><td>Brownfield must map into existing flows</td></tr>
+  <tr><td><code>kb-L3-{project}-adr-registry</code></td><td>—</td><td>✓</td><td>No prior decisions in greenfield</td></tr>
+  <tr><td><code>kb-L3-{project}-api-contracts</code></td><td>—</td><td>✓</td><td>Brownfield must conform to existing contracts</td></tr>
+  <tr><td><code>kb-L3-{project}-application-baseline</code></td><td>—</td><td>✓</td><td>Most critical KB for brownfield — no existing system in greenfield</td></tr>
+  <tr><td><code>kb-L3-{project}-sprint-scope</code></td><td>✓</td><td>✓</td><td>Both need to know what to design for</td></tr>
+</table>
+
+<h3>LLD Generator</h3>
+<table>
+  <tr><th>Knowledge Base</th><th>Greenfield</th><th>Brownfield</th><th>Rationale</th></tr>
+  <tr><td><code>kb-L1-lld-document-template</code></td><td>✓</td><td>✓</td><td>Output structure is standard</td></tr>
+  <tr><td><code>kb-L1-coding-standards</code></td><td>✓</td><td>✓</td><td>Code quality is universal</td></tr>
+  <tr><td><code>kb-L1-api-design-standards</code></td><td>✓</td><td>✓</td><td>Both implement APIs</td></tr>
+  <tr><td><code>kb-L1-database-design-standards</code></td><td>✓</td><td>✓</td><td>Schema design applies to both</td></tr>
+  <tr><td><code>kb-L1-testing-standards</code></td><td>✓</td><td>✓</td><td>Tests are always required</td></tr>
+  <tr><td><code>kb-L1-security-implementation-patterns</code></td><td>✓</td><td>✓</td><td>Security at code level is universal</td></tr>
+  <tr><td><code>kb-L1-nfr-implementation-patterns</code></td><td>✓</td><td>✓</td><td>Translating NFR targets into config (pool sizes, TTLs, timeouts)</td></tr>
+  <tr><td><code>kb-L2-{domain}-domain-model</code></td><td>✓</td><td>✓</td><td>Entity details needed for both</td></tr>
+  <tr><td><code>kb-L2-{domain}-regulatory-constraints</code></td><td>✓</td><td>✓</td><td>Field-level compliance applies always</td></tr>
+  <tr><td><code>kb-L2-{domain}-integration-contracts</code></td><td>○</td><td>✓</td><td>Brownfield has existing external APIs to conform to</td></tr>
+  <tr><td><code>kb-L3-{project}-hld</code></td><td>✓</td><td>✓</td><td>Primary input for both — the approved HLD</td></tr>
+  <tr><td><code>kb-L3-{project}-application-baseline</code></td><td>—</td><td>✓</td><td>Must extend existing code, not duplicate</td></tr>
+  <tr><td><code>kb-L3-{project}-api-contracts</code></td><td>—</td><td>✓</td><td>Brownfield must conform to existing specs</td></tr>
+  <tr><td><code>kb-L3-{project}-adr-registry</code></td><td>—</td><td>✓</td><td>Locked-in implementation decisions</td></tr>
+  <tr><td><code>kb-L3-{project}-tech-stack-scaffold</code></td><td>✓</td><td>○</td><td>Greenfield needs scaffolding; brownfield already has structure</td></tr>
+</table>
+
+<p class="legend"><strong>Legend:</strong> ✓ Required &nbsp;|&nbsp; ○ Useful but not critical &nbsp;|&nbsp; — Not applicable</p>
+
+<h3>Summary Comparison</h3>
+<div class="grid">
+  <div class="card">
+    <h4>Greenfield</h4>
+    <ul>
+      <li><strong>Primary concern:</strong> Making the right choices from a blank slate</li>
+      <li><strong>Critical KBs:</strong> L1 (standards + patterns + infra) + L2 (domain)</li>
+      <li><strong>L3 dependency:</strong> Minimal — no prior state exists</li>
+      <li><strong>Risk without KBs:</strong> Over-engineering or non-standard choices</li>
+    </ul>
+  </div>
+  <div class="card card-green">
+    <h4>Brownfield</h4>
+    <ul>
+      <li><strong>Primary concern:</strong> Fitting new capability into existing constraints</li>
+      <li><strong>Critical KBs:</strong> L3 (baseline + ADRs + contracts) + L2 (integrations)</li>
+      <li><strong>L3 dependency:</strong> Heavy — prior state dictates every decision</li>
+      <li><strong>Risk without KBs:</strong> Breaking existing systems or duplicating services</li>
+    </ul>
+  </div>
+</div>
+
+<h3>Shared vs Exclusive KBs</h3>
+<table>
+  <tr><th>Shared (both agents use)</th><th>HLD-exclusive</th><th>LLD-exclusive</th></tr>
+  <tr>
+    <td>
+      <code>kb-L1-api-design-standards</code><br>
+      <code>kb-L2-{domain}-domain-model</code><br>
+      <code>kb-L2-{domain}-regulatory-constraints</code><br>
+      <code>kb-L3-{project}-adr-registry</code><br>
+      <code>kb-L3-{project}-api-contracts</code><br>
+      <code>kb-L3-{project}-application-baseline</code>
+    </td>
+    <td>
+      <code>kb-L1-enterprise-architecture</code><br>
+      <code>kb-L1-security-standards</code><br>
+      <code>kb-L1-nfr-baselines</code><br>
+      <code>kb-L1-architecture-patterns</code><br>
+      <code>kb-L1-hld-document-template</code><br>
+      <code>kb-L1-cloud-infrastructure-patterns</code><br>
+      <code>kb-L1-observability-standards</code><br>
+      <code>kb-L2-{domain}-integration-landscape</code><br>
+      <code>kb-L3-{project}-sprint-scope</code>
+    </td>
+    <td>
+      <code>kb-L1-lld-document-template</code><br>
+      <code>kb-L1-coding-standards</code><br>
+      <code>kb-L1-database-design-standards</code><br>
+      <code>kb-L1-testing-standards</code><br>
+      <code>kb-L1-security-implementation-patterns</code><br>
+      <code>kb-L1-nfr-implementation-patterns</code><br>
+      <code>kb-L2-{domain}-integration-contracts</code><br>
+      <code>kb-L3-{project}-hld</code><br>
+      <code>kb-L3-{project}-tech-stack-scaffold</code>
+    </td>
+  </tr>
+</table>
+
+<!-- SECTION 5 -->
+<h2 id="relationship">5. Agent Relationship & Data Flow</h2>
+
+<h3>Pipeline Position</h3>
+<div class="flow">
+  <div class="flow-step">Requirements Extractor</div>
+  <span class="flow-arrow">▶</span>
+  <div class="flow-step">Epics Generator</div>
+  <span class="flow-arrow">▶</span>
+  <div class="flow-step hl">HLD Generator</div>
+  <span class="flow-arrow">▶</span>
+  <div class="flow-step hl">LLD Generator</div>
+  <span class="flow-arrow">▶</span>
+  <div class="flow-step">Code Generator</div>
+</div>
+
+<h3>KB Focus Difference</h3>
+<table>
+  <tr><th>Dimension</th><th>HLD Agent</th><th>LLD Agent</th></tr>
+  <tr><td><strong>Thinks in</strong></td><td>Services, boundaries, flows</td><td>Classes, tables, methods</td></tr>
+  <tr><td><strong>Primary input</strong></td><td>Epics/stories from upstream agent + sprint scope</td><td>Approved HLD from HLD agent</td></tr>
+  <tr><td><strong>L1 focus</strong></td><td>Architecture patterns, infra, NFRs</td><td>Coding standards, DB design, testing, NFR implementation</td></tr>
+  <tr><td><strong>L3 critical input</strong></td><td>Application baseline (system level)</td><td>HLD output + baseline (code level)</td></tr>
+  <tr><td><strong>Doesn't need</strong></td><td>Coding standards, DB schema rules, test patterns</td><td>Infra topology, cloud patterns, NFR strategy (only NFR implementation)</td></tr>
+  <tr><td><strong>Output becomes</strong></td><td>LLD agent's primary KB input</td><td>Code generator's primary KB input</td></tr>
+</table>
+
+<div class="callout">Each agent's output feeds the next agent's knowledge. HLD → LLD → Code forms a design refinement pipeline where each step adds implementation detail.</div>
+
+<h3>Detection Logic</h3>
+<div class="card-dark">
+  <p>Both agents should detect <strong>greenfield vs brownfield</strong> from input context:</p>
+  <ul style="color:var(--muted);">
+    <li>Presence of <code>kb-L3-{project}-application-baseline</code> → Brownfield mode</li>
+    <li>Absence of L3 baseline KBs or explicit <code>scenario: greenfield</code> parameter → Greenfield mode</li>
+    <li>Brownfield: constrain to existing baseline first, then reference L1 patterns only where baseline doesn't prescribe</li>
+    <li>Greenfield: lean on L1 patterns to make fresh architectural/implementation decisions</li>
+  </ul>
+</div>
+
+</div>
+</body>
+</html>

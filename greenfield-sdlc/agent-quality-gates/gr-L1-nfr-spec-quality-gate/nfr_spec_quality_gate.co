@@ -1,0 +1,21 @@
+# gr-L1-nfr-spec-quality-gate — Python-Hybrid Colang Implementation
+# Layer: L1 — fires at L1-requirements-nfr-classifier-evaluator's post_execution
+# Validates L1-requirements-nfr-classifier's RESULTANT output (not the evaluator's own bookkeeping)
+# Deterministic checks via actions.py + LLM for semantic checks
+
+define flow check output nfr spec quality gate
+  """Deterministic schema/id/tbd-source/citation-form check on the resultant content, then LLM semantic check."""
+  $has_issues = execute check_nfr_spec_quality_gate(output=$bot_message, generator_output=$generator_output)
+
+  if $has_issues
+    bot block nfr spec quality gate violation
+    stop
+
+  $result = execute self_check_output
+
+  if not $result
+    bot block nfr spec quality gate violation
+    stop
+
+define bot block nfr spec quality gate violation
+  "L1-requirements-nfr-classifier's resultant output (post-evaluation) failed its quality gate: schema violation, an ID gap, a TBD/source mismatch, an invalid citation form, a silently-skipped category, or a fabricated/premature-TBD boundary condition detected. The workflow cannot proceed to prd-composer with non-conformant NFR classifications. Retrying."

@@ -1,0 +1,15 @@
+# gr-L3-confidence-gate — LLM-Driven Colang Implementation
+# Layer: L3 — Confidence Gate
+# Validation: LLM self_check (pure Colang)
+# Python actions preserved in actions.py for reference/hybrid mode
+
+define flow check output confidence
+  """LLM validates confidence gate rules on output."""
+  $result = execute self_check_output
+
+  if not $result
+    bot block L3 confidence gate
+    stop
+
+define bot block L3 confidence gate
+  "Output blocked: confidence score below acceptable threshold. Items with confidence < 0.5 cannot be delivered. Items 0.5-0.7 escalated to human review."

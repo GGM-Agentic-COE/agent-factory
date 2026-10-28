@@ -1,0 +1,9 @@
+spec_version: "1.0"
+metadata:
+  name: kb-L1-openapi-standards
+  version: "1.0.0"
+  layer: L1
+purpose: "OpenAPI 3.0 specification standards for API design agents"
+freshness:
+  review_cadence: quarterly
+  last_reviewed: "2026-04-20"

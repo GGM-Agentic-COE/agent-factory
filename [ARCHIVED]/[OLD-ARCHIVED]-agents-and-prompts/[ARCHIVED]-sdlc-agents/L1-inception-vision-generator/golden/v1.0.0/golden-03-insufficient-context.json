@@ -1,0 +1,30 @@
+{
+  "agent_id": "L1-inception-vision-generator",
+  "execution_id": "exec-00000000-0000-0000-0000-000000000000",
+  "workflow_execution_id": "wf-00000000-0000-0000-0000-000000000000",
+  "status": "failed",
+  "_evaluation": {
+    "_note": "This block is golden-file-only metadata for evaluation purposes. It is NOT part of the agent's actual output and is not validated against output_schema.json.",
+    "expected_scores": {
+      "hallucination": 0.0
+    },
+    "key_checks": [
+      "Status is 'failed': PASS",
+      "No hallucinated output: PASS (items are null, not invented content)",
+      "Reason clearly stated: PASS (too vague, no KB)",
+      "Actionable guidance provided: PASS (questions to ask, minimum requirements stated)",
+      "No artifact uploaded: PASS"
+    ]
+  },
+  "content": {
+    "type": "vision_document",
+    "schema_version": "1.0",
+    "items": {
+      "product_name": null,
+      "document_summary": null,
+      "artifact": null,
+      "metadata": null
+    },
+    "execution_summary": "\u2022 INSUFFICIENT_CONTEXT: idea is too vague (5 words, no discernible product concept, target users, or domain)\n\u2022 No domain knowledge base provided\n\u2022 Required: a product idea with at least 10 words describing what is being built, for whom, and what problem it solves\n\u2022 Required: a domain knowledge base to ground the vision in industry context\n\u2022 Suggested questions to ask:\n  - What specific problem are you trying to solve?\n  - Who are the target users?\n  - What domain/industry is this for?\n  - Are there any known constraints (budget, timeline, regulatory)?"
+  }
+}

@@ -1,0 +1,41 @@
+{
+  "source": "agent_output",
+  "source_agent_id": "L1-inception-requirements-extractor-agent",
+  "parameters": {
+    "requirements": {
+      "functional_requirements": [
+        {"id": "FR-01", "title": "Receipt Photo Capture", "description": "The system shall allow users to photograph receipts using the device camera with auto-crop and image quality validation", "user_facing": true, "priority": "Must-Have"},
+        {"id": "FR-02", "title": "Automatic OCR Data Extraction", "description": "The system shall automatically extract amount, date, vendor name, and payment method from receipt images using OCR with ≥90% accuracy", "user_facing": true, "priority": "Must-Have"},
+        {"id": "FR-03", "title": "Expense Categorisation", "description": "The system shall categorise expenses into predefined categories with automatic suggestion and manual override", "user_facing": true, "priority": "Must-Have"},
+        {"id": "FR-04", "title": "Custom Category Creation", "description": "The system shall allow users to create, edit, and delete custom expense categories", "user_facing": true, "priority": "Should-Have"},
+        {"id": "FR-05", "title": "Monthly and Quarterly Report Generation", "description": "The system shall generate monthly and quarterly expense reports with category breakdowns, totals, and trend comparisons", "user_facing": true, "priority": "Should-Have"},
+        {"id": "FR-06", "title": "Report Export (PDF and CSV)", "description": "The system shall export expense reports as PDF and CSV formats", "user_facing": true, "priority": "Should-Have"},
+        {"id": "FR-07", "title": "Year-End Tax Summary", "description": "The system shall generate a year-end tax summary matching HMRC self-assessment categories", "user_facing": true, "priority": "Should-Have"},
+        {"id": "FR-08", "title": "Budget Setting Per Category", "description": "The system shall allow users to set monthly spending budget limits per expense category", "user_facing": true, "priority": "Must-Have"},
+        {"id": "FR-09", "title": "Budget Threshold Push Notifications", "description": "The system shall send push notifications when spending reaches 80% and 100% of budget", "user_facing": true, "priority": "Must-Have"},
+        {"id": "FR-10", "title": "Weekly Spending Summary Notification", "description": "The system shall send a weekly spending summary push notification every Sunday evening", "user_facing": true, "priority": "Could-Have"},
+        {"id": "FR-11", "title": "Email/Password Authentication", "description": "The system shall support user registration and login via email and password", "user_facing": true, "priority": "Must-Have"},
+        {"id": "FR-12", "title": "Biometric Authentication", "description": "The system shall support optional biometric login for returning users", "user_facing": true, "priority": "Should-Have"}
+      ],
+      "non_functional_requirements": [
+        {"id": "NFR-01", "category": "Reliability", "title": "Offline Operation with Auto-Sync", "priority": "Must-Have"},
+        {"id": "NFR-02", "category": "Reliability", "title": "Multi-Device Conflict Resolution", "priority": "Should-Have"},
+        {"id": "NFR-03", "category": "Scalability", "title": "10,000 Users, 500K Receipts/Month", "priority": "Must-Have"},
+        {"id": "NFR-04", "category": "Security", "title": "GDPR Compliance", "priority": "Must-Have"},
+        {"id": "NFR-05", "category": "Performance", "title": "12-Week MVP Timeline", "priority": "Must-Have"}
+      ],
+      "constraints": [
+        {"id": "CON-01", "type": "Technology", "description": "Backend: AWS"},
+        {"id": "CON-02", "type": "Technology", "description": "Mobile: React Native (iOS + Android)"},
+        {"id": "CON-03", "type": "Regulatory", "description": "GDPR compliant (UK/EU users)"},
+        {"id": "CON-04", "type": "Timeline", "description": "MVP in 12 weeks"},
+        {"id": "CON-05", "type": "Business", "description": "Target: UK/EU small business owners"}
+      ],
+      "assumptions": [
+        {"id": "ASM-01", "description": "OCR via third-party service (AWS Textract)", "needs_confirmation": true},
+        {"id": "ASM-02", "description": "Predefined categories align with HMRC self-assessment", "needs_confirmation": true}
+      ]
+    },
+    "grouping_strategy": "capability"
+  }
+}

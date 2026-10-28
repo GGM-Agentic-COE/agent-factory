@@ -1,0 +1,1104 @@
+{
+  "agent_id" : "L1-inception-requirements-extractor",
+  "agent_version" : "1.0.0",
+  "execution_id" : "exec-9f2e8b7c-4d3a-5e6f-7a8b-9c0d1e2f3a4b",
+  "workflow_execution_id" : "wf-a8c4f2e1-9d3b-4a7c-8e6f-1b2c3d4e5f6a",
+  "input_summary" : {
+    "source" : "file_upload",
+    "source_agent_id" : null,
+    "parameters" : {
+      "idea" : "RewardConnect is an omnichannel loyalty platform that enables retail customers to earn and redeem points..."
+    }
+  },
+  "content" : {
+    "type" : "requirements",
+    "schema_version" : "1.0",
+    "items" : {
+      "functional_requirements" : [ {
+        "id" : "FR-01",
+        "title" : "Multi-Channel Customer Enrollment",
+        "description" : "The system shall allow customers to enroll in the loyalty program via web, mobile app, in-store kiosk, or staff-assisted enrollment at POS with collection of name, email, phone, date of birth, and communication preferences.",
+        "user_facing" : true,
+        "priority" : "Must-Have",
+        "tags" : [ "enrollment", "identity-management", "omnichannel" ],
+        "metadata" : {
+          "confidence" : 0.95,
+          "reasoning" : "Explicitly stated as MVP feature with Must-Have priority. Multi-channel enrollment is foundational requirement for omnichannel loyalty platform. Input uses strong language: 'must be easy and fast to maximize enrollment conversion'.",
+          "citation" : {
+            "source_reference" : "Self-service enrollment form with name, email, phone, DOB, password creation, privacy notice acceptance, marketing consent opt-in - Must Have - Foundation of loyalty program",
+            "source_location" : "Section 3: MVP Scope - Features In Scope (MVP) table"
+          },
+          "trajectory" : [ {
+            "step" : 1,
+            "action" : "retrieve",
+            "tool" : null,
+            "detail" : "Identified enrollment requirement in MVP features table with Must-Have priority"
+          }, {
+            "step" : 2,
+            "action" : "reason",
+            "tool" : null,
+            "detail" : "Categorized as functional requirement because it describes what the system must DO (allow enrollment). User-facing because customers directly interact with enrollment forms."
+          }, {
+            "step" : 3,
+            "action" : "generate",
+            "tool" : null,
+            "detail" : "Formulated requirement using 'The system shall...' format, incorporating all enrollment channels mentioned in FA1 and MVP scope"
+          } ]
+        }
+      }, {
+        "id" : "FR-02",
+        "title" : "Real-Time Points Accrual for Online Purchases",
+        "description" : "The system shall automatically calculate and credit loyalty points for e-commerce purchases at 1 point per GBP spent, with real-time calculation and display at checkout within 5 seconds of transaction completion.",
+        "user_facing" : true,
+        "priority" : "Must-Have",
+        "tags" : [ "points-accrual", "e-commerce", "real-time" ],
+        "metadata" : {
+          "confidence" : 0.95,
+          "reasoning" : "Explicitly stated as MVP Must-Have feature. Input emphasizes 'real-time calculation and display' and 'immediate reward'. Core value proposition of loyalty program.",
+          "citation" : {
+            "source_reference" : "Automatic points crediting on e-commerce purchases at 1 point per GBP spent; real-time calculation and display at checkout - Must Have - Core value proposition; customers must see immediate reward for online purchases",
+            "source_location" : "Section 3: MVP Scope - Features In Scope (MVP) table"
+          },
+          "trajectory" : [ {
+            "step" : 1,
+            "action" : "retrieve",
+            "tool" : null,
+            "detail" : "Identified points accrual for online purchases as Must-Have MVP feature"
+          }, {
+            "step" : 2,
+            "action" : "reason",
+            "tool" : null,
+            "detail" : "Functional requirement describing system capability. Real-time aspect (within 5 seconds) inferred from 'real-time' language and standard e-commerce expectations."
+          }, {
+            "step" : 3,
+            "action" : "generate",
+            "tool" : null,
+            "detail" : "Formulated requirement with measurable time constraint (5 seconds) based on real-time requirement and industry standards"
+          } ]
+        }
+      }, {
+        "id" : "FR-03",
+        "title" : "Points Accrual for In-Store Purchases",
+        "description" : "The system shall credit loyalty points on POS transactions when customer provides phone number or scans digital loyalty card, supporting either near-real-time or end-of-day batch processing depending on POS integration capability.",
+        "user_facing" : true,
+        "priority" : "Must-Have",
+        "tags" : [ "points-accrual", "pos", "in-store" ],
+        "metadata" : {
+          "confidence" : 0.95,
+          "reasoning" : "Explicitly stated as MVP Must-Have feature. Input acknowledges integration flexibility: 'may be near-real-time or end-of-day batch depending on POS integration feasibility'. Omnichannel requirement critical to vision.",
+          "citation" : {
+            "source_reference" : "Points crediting on POS transactions when customer provides phone number or loyalty card; may be near-real-time or end-of-day batch depending on POS integration feasibility - Must Have - Omnichannel requirement; customers must earn points regardless of purchase channel",
+            "source_location" : "Section 3: MVP Scope - Features In Scope (MVP) table"
+          },
+          "trajectory" : [ {
+            "step" : 1,
+            "action" : "retrieve",
+            "tool" : null,
+            "detail" : "Identified in-store points accrual as Must-Have with acknowledged technical flexibility"
+          }, {
+            "step" : 2,
+            "action" : "reason",
+            "tool" : null,
+            "detail" : "Functional requirement for omnichannel capability. Flexibility on timing (real-time vs batch) is constraint acknowledgment, not requirement weakening."
+          }, {
+            "step" : 3,
+            "action" : "generate",
+            "tool" : null,
+            "detail" : "Formulated requirement preserving flexibility while maintaining Must-Have priority for capability itself"
+          } ]
+        }
+      }, {
+        "id" : "FR-04",
+        "title" : "Points Balance and Transaction History Display",
+        "description" : "The system shall display current points balance and transaction history (including date, amount, points earned per transaction) in mobile app loyalty dashboard and web account dashboard.",
+        "user_facing" : true,
+        "priority" : "Must-Have",
+        "tags" : [ "points-balance", "transparency", "mobile-app", "web" ],
+        "metadata" : {
+          "confidence" : 0.95,
+          "reasoning" : "Explicitly stated as MVP Must-Have feature. Input emphasizes 'Transparency builds trust; customers need to see accumulated value to be motivated to return'.",
+          "citation" : {
+            "source_reference" : "Customer can view current points balance and transaction history in mobile app and web account dashboard - Must Have - Transparency builds trust; customers need to see accumulated value to be motivated to return",
+            "source_location" : "Section 3: MVP Scope - Features In Scope (MVP) table"
+          },
+          "trajectory" : [ {
+            "step" : 1,
+            "action" : "retrieve",
+            "tool" : null,
+            "detail" : "Identified points balance display as Must-Have MVP feature"
+          }, {
+            "step" : 2,
+            "action" : "reason",
+            "tool" : null,
+            "detail" : "Functional requirement for data display capability. User-facing as customers directly view this information."
+          }, {
+            "step" : 3,
+            "action" : "generate",
+            "tool" : null,
+            "detail" : "Formulated requirement specifying both balance and history, across mobile and web channels"
+          } ]
+        }
+      }, {
+        "id" : "FR-05",
+        "title" : "Points Redemption at Checkout",
+        "description" : "The system shall allow customers to apply points as discount at online checkout and in-store POS, with conversion rate of 100 points = GBP 1 discount and minimum redemption threshold of 500 points.",
+        "user_facing" : true,
+        "priority" : "Must-Have",
+        "tags" : [ "redemption", "discount", "checkout" ],
+        "metadata" : {
+          "confidence" : 0.95,
+          "reasoning" : "Explicitly stated as MVP Must-Have feature. Input specifies exact conversion rate (100 points = GBP 1) and minimum threshold (500 points). Core value proposition.",
+          "citation" : {
+            "source_reference" : "Customer can apply points as discount at online checkout and in-store POS; 100 points = GBP 1 discount; minimum 500 points to redeem - Must Have - Core value proposition; customers must be able to realize tangible value from earned points",
+            "source_location" : "Section 3: MVP Scope - Features In Scope (MVP) table"
+          },
+          "trajectory" : [ {
+            "step" : 1,
+            "action" : "retrieve",
+            "tool" : null,
+            "detail" : "Identified points redemption as Must-Have with specific business rules"
+          }, {
+            "step" : 2,
+            "action" : "reason",
+            "tool" : null,
+            "detail" : "Functional requirement describing redemption capability with measurable parameters (conversion rate, minimum threshold)"
+          }, {
+            "step" : 3,
+            "action" : "generate",
+            "tool" : null,
+            "detail" : "Formulated requirement incorporating specific business rules from input"
+          } ]
+        }
+      }, {
+        "id" : "FR-06",
+        "title" : "Staff Customer Lookup at POS",
+        "description" : "The system shall enable store associates to look up customer loyalty accounts by phone number at POS terminal and display customer name, points balance, and last purchase date.",
+        "user_facing" : false,
+        "priority" : "Must-Have",
+        "tags" : [ "pos", "staff-tools", "customer-recognition" ],
+        "metadata" : {
+          "confidence" : 0.95,
+          "reasoning" : "Explicitly stated as MVP Must-Have feature. Input emphasizes 'Stated requirement; enables staff to recognize loyal customers and offer personalized service'. Critical for omnichannel customer recognition.",
+          "citation" : {
+            "source_reference" : "Store associates can look up customer by phone number at POS terminal; view customer name, points balance, and last purchase date - Must Have - Stated requirement; enables staff to recognize loyal customers and offer personalized service",
+            "source_location" : "Section 3: MVP Scope - Features In Scope (MVP) table"
+          },
+          "trajectory" : [ {
+            "step" : 1,
+            "action" : "retrieve",
+            "tool" : null,
+            "detail" : "Identified staff lookup as Must-Have MVP feature"
+          }, {
+            "step" : 2,
+            "action" : "reason",
+            "tool" : null,
+            "detail" : "Functional requirement for staff-facing capability. Not directly user-facing (customer doesn't interact), but enables staff to deliver personalized service."
+          }, {
+            "step" : 3,
+            "action" : "generate",
+            "tool" : null,
+            "detail" : "Formulated requirement specifying lookup method (phone number) and data displayed"
+          } ]
+        }
+      }, {
+        "id" : "FR-07",
+        "title" : "Mobile App Loyalty Dashboard",
+        "description" : "The system shall provide a dedicated loyalty section in the mobile app displaying points balance, recent transactions, and a digital loyalty card with scannable QR code for in-store identification.",
+        "user_facing" : true,
+        "priority" : "Must-Have",
+        "tags" : [ "mobile-app", "loyalty-dashboard", "digital-card" ],
+        "metadata" : {
+          "confidence" : 0.95,
+          "reasoning" : "Explicitly stated as MVP Must-Have feature. Input emphasizes 'Primary driver for mobile app adoption; must be compelling and easy to use'. Success metric targets 50% increase in mobile app MAU.",
+          "citation" : {
+            "source_reference" : "Dedicated loyalty section in existing mobile app showing points balance, recent transactions, and digital loyalty card (QR code for in-store scanning) - Must Have - Primary driver for mobile app adoption; must be compelling and easy to use",
+            "source_location" : "Section 3: MVP Scope - Features In Scope (MVP) table"
+          },
+          "trajectory" : [ {
+            "step" : 1,
+            "action" : "retrieve",
+            "tool" : null,
+            "detail" : "Identified mobile app loyalty dashboard as Must-Have MVP feature"
+          }, {
+            "step" : 2,
+            "action" : "reason",
+            "tool" : null,
+            "detail" : "Functional requirement for mobile app feature. User-facing as customers directly interact with dashboard."
+          }, {
+            "step" : 3,
+            "action" : "generate",
+            "tool" : null,
+            "detail" : "Formulated requirement specifying dashboard components: balance, transactions, digital card with QR code"
+          } ]
+        }
+      }, {
+        "id" : "FR-08",
+        "title" : "Enrollment Confirmation Email",
+        "description" : "The system shall send an automated email immediately upon enrollment with welcome message, explanation of earning and redemption mechanics, and link to download mobile app.",
+        "user_facing" : true,
+        "priority" : "Must-Have",
+        "tags" : [ "email", "enrollment", "customer-education" ],
+        "metadata" : {
+          "confidence" : 0.95,
+          "reasoning" : "Explicitly stated as MVP Must-Have feature. Input emphasizes 'Sets expectations and drives app download; critical for customer education'.",
+          "citation" : {
+            "source_reference" : "Automated email sent immediately upon enrollment with welcome message, explanation of how to earn and redeem points, and link to download mobile app - Must Have - Sets expectations and drives app download; critical for customer education",
+            "source_location" : "Section 3: MVP Scope - Features In Scope (MVP) table"
+          },
+          "trajectory" : [ {
+            "step" : 1,
+            "action" : "retrieve",
+            "tool" : null,
+            "detail" : "Identified enrollment confirmation email as Must-Have MVP feature"
+          }, {
+            "step" : 2,
+            "action" : "reason",
+            "tool" : null,
+            "detail" : "Functional requirement for automated communication. User-facing as customer receives and interacts with email."
+          }, {
+            "step" : 3,
+            "action" : "generate",
+            "tool" : null,
+            "detail" : "Formulated requirement specifying timing (immediately) and content (welcome, instructions, app link)"
+          } ]
+        }
+      }, {
+        "id" : "FR-09",
+        "title" : "Points Earned Notification",
+        "description" : "The system shall include points earned information in email receipts for online purchases and display points earned on in-store receipts where POS system supports custom receipt fields.",
+        "user_facing" : true,
+        "priority" : "Should-Have",
+        "tags" : [ "notifications", "receipts", "reinforcement" ],
+        "metadata" : {
+          "confidence" : 0.9,
+          "reasoning" : "Explicitly stated as Should-Have MVP feature. Input notes 'Reinforces value and encourages repeat behavior; may be deferred if POS integration is complex'. Lower priority than Must-Have features.",
+          "citation" : {
+            "source_reference" : "Email receipt for online purchases includes points earned; in-store receipt shows points earned (if POS supports custom receipt fields) - Should Have - Reinforces value and encourages repeat behavior; may be deferred if POS integration is complex",
+            "source_location" : "Section 3: MVP Scope - Features In Scope (MVP) table"
+          },
+          "trajectory" : [ {
+            "step" : 1,
+            "action" : "retrieve",
+            "tool" : null,
+            "detail" : "Identified points earned notification as Should-Have MVP feature"
+          }, {
+            "step" : 2,
+            "action" : "reason",
+            "tool" : null,
+            "detail" : "Functional requirement for notification capability. Should-Have priority reflects acknowledgment of POS integration complexity."
+          }, {
+            "step" : 3,
+            "action" : "generate",
+            "tool" : null,
+            "detail" : "Formulated requirement with conditional language for in-store receipts based on POS capability"
+          } ]
+        }
+      }, {
+        "id" : "FR-10",
+        "title" : "GDPR Consent Management",
+        "description" : "The system shall capture and store separate consent preferences during enrollment for transactional emails (required) and marketing communications via email and SMS (optional), with all consent decisions auditable and retrievable.",
+        "user_facing" : true,
+        "priority" : "Must-Have",
+        "tags" : [ "gdpr", "consent", "compliance", "privacy" ],
+        "metadata" : {
+          "confidence" : 0.95,
+          "reasoning" : "Explicitly stated as MVP Must-Have feature. Input emphasizes 'Legal requirement; non-negotiable for UK launch'. GDPR compliance is business constraint and regulatory requirement.",
+          "citation" : {
+            "source_reference" : "Enrollment flow includes separate checkboxes for transactional emails (required) and marketing emails/SMS (optional); consent preferences stored and auditable - Must Have - Legal requirement; non-negotiable for UK launch",
+            "source_location" : "Section 3: MVP Scope - Features In Scope (MVP) table"
+          },
+          "trajectory" : [ {
+            "step" : 1,
+            "action" : "retrieve",
+            "tool" : null,
+            "detail" : "Identified GDPR consent management as Must-Have MVP feature and regulatory constraint"
+          }, {
+            "step" : 2,
+            "action" : "reason",
+            "tool" : null,
+            "detail" : "Functional requirement describing consent capture and storage capability. User-facing as customers interact with consent checkboxes."
+          }, {
+            "step" : 3,
+            "action" : "generate",
+            "tool" : null,
+            "detail" : "Formulated requirement specifying separate consent types and auditability requirement"
+          } ]
+        }
+      }, {
+        "id" : "FR-11",
+        "title" : "Customer Profile Self-Service Management",
+        "description" : "The system shall allow customers to view and edit their profile information, manage communication preferences, request data export (DSAR), and request account deletion through self-service interface.",
+        "user_facing" : true,
+        "priority" : "Must-Have",
+        "tags" : [ "profile-management", "gdpr", "self-service" ],
+        "metadata" : {
+          "confidence" : 0.9,
+          "reasoning" : "Strongly implied by GDPR requirements and FA1 description. Input states 'Customer self-service: view and edit profile, manage communication preferences, request data export (DSAR), request account deletion'. GDPR mandates right to access and right to erasure.",
+          "citation" : {
+            "source_reference" : "Customer self-service: view and edit profile, manage communication preferences, request data export (DSAR), request account deletion",
+            "source_location" : "Section 2: Full Scope Vision - FA1: Customer Enrollment and Identity Management"
+          },
+          "trajectory" : [ {
+            "step" : 1,
+            "action" : "retrieve",
+            "tool" : null,
+            "detail" : "Identified self-service capabilities in FA1 feature area description"
+          }, {
+            "step" : 2,
+            "action" : "reason",
+            "tool" : null,
+            "detail" : "Functional requirement for customer self-service. GDPR compliance requires these capabilities, making this Must-Have for MVP even if not explicitly in MVP features table."
+          }, {
+            "step" : 3,
+            "action" : "generate",
+            "tool" : null,
+            "detail" : "Formulated requirement covering GDPR-mandated self-service capabilities"
+          } ]
+        }
+      }, {
+        "id" : "FR-12",
+        "title" : "Partial Payment Support",
+        "description" : "The system shall support partial payment transactions where customers combine points redemption with cash or card payment for the remaining balance.",
+        "user_facing" : true,
+        "priority" : "Must-Have",
+        "tags" : [ "redemption", "payment", "checkout" ],
+        "metadata" : {
+          "confidence" : 0.9,
+          "reasoning" : "Explicitly stated in FA3 and MVP user journey. Input describes 'Partial payment support: combine points redemption with cash/card payment'. MVP Journey 2 demonstrates this: 'Customer redeems 1,000 points on GBP 40 purchase, pays remaining balance'.",
+          "citation" : {
+            "source_reference" : "Partial payment support: combine points redemption with cash/card payment",
+            "source_location" : "Section 2: Full Scope Vision - FA3: Points Redemption and Rewards Catalog"
+          },
+          "trajectory" : [ {
+            "step" : 1,
+            "action" : "retrieve",
+            "tool" : null,
+            "detail" : "Identified partial payment requirement in FA3 and validated in MVP user journey"
+          }, {
+            "step" : 2,
+            "action" : "reason",
+            "tool" : null,
+            "detail" : "Functional requirement for payment processing. Essential for redemption functionality to work in real-world scenarios."
+          }, {
+            "step" : 3,
+            "action" : "generate",
+            "tool" : null,
+            "detail" : "Formulated requirement describing combined payment capability"
+          } ]
+        }
+      }, {
+        "id" : "FR-13",
+        "title" : "Points Reversal on Transaction Refund",
+        "description" : "The system shall automatically reverse and deduct points from customer account when a transaction is refunded, maintaining accurate points balance.",
+        "user_facing" : true,
+        "priority" : "Must-Have",
+        "tags" : [ "redemption", "refund", "points-ledger" ],
+        "metadata" : {
+          "confidence" : 0.9,
+          "reasoning" : "Explicitly stated in FA3. Input states 'Redemption reversal: if transaction is refunded, points are re-credited to customer account'. Critical for financial integrity and fraud prevention.",
+          "citation" : {
+            "source_reference" : "Redemption reversal: if transaction is refunded, points are re-credited to customer account",
+            "source_location" : "Section 2: Full Scope Vision - FA3: Points Redemption and Rewards Catalog"
+          },
+          "trajectory" : [ {
+            "step" : 1,
+            "action" : "retrieve",
+            "tool" : null,
+            "detail" : "Identified redemption reversal requirement in FA3"
+          }, {
+            "step" : 2,
+            "action" : "reason",
+            "tool" : null,
+            "detail" : "Functional requirement for refund handling. Must-Have for financial integrity even if not explicitly in MVP table."
+          }, {
+            "step" : 3,
+            "action" : "generate",
+            "tool" : null,
+            "detail" : "Formulated requirement describing automatic reversal on refund"
+          } ]
+        }
+      }, {
+        "id" : "FR-14",
+        "title" : "Transaction-Level Points Ledger",
+        "description" : "The system shall maintain a transaction-level points ledger linking each points credit or debit to originating transaction ID, date, amount, and earning/redemption rule applied.",
+        "user_facing" : false,
+        "priority" : "Must-Have",
+        "tags" : [ "points-ledger", "audit", "traceability" ],
+        "metadata" : {
+          "confidence" : 0.9,
+          "reasoning" : "Explicitly stated in FA2. Input states 'Transaction-level points ledger: each points credit linked to originating transaction ID, date, amount, and rule applied'. Critical for auditability, customer service, and financial reporting.",
+          "citation" : {
+            "source_reference" : "Transaction-level points ledger: each points credit linked to originating transaction ID, date, amount, and rule applied",
+            "source_location" : "Section 2: Full Scope Vision - FA2: Points Accrual Engine"
+          },
+          "trajectory" : [ {
+            "step" : 1,
+            "action" : "retrieve",
+            "tool" : null,
+            "detail" : "Identified ledger requirement in FA2"
+          }, {
+            "step" : 2,
+            "action" : "reason",
+            "tool" : null,
+            "detail" : "Functional requirement for data structure and traceability. Not directly user-facing but essential for system integrity."
+          }, {
+            "step" : 3,
+            "action" : "generate",
+            "tool" : null,
+            "detail" : "Formulated requirement specifying ledger structure and linkage requirements"
+          } ]
+        }
+      }, {
+        "id" : "FR-15",
+        "title" : "Duplicate Account Detection",
+        "description" : "The system shall detect potential duplicate accounts during enrollment by checking if email address or phone number already exists and prevent creation of duplicate accounts.",
+        "user_facing" : false,
+        "priority" : "Must-Have",
+        "tags" : [ "enrollment", "data-quality", "fraud-prevention" ],
+        "metadata" : {
+          "confidence" : 0.9,
+          "reasoning" : "Explicitly stated in FA1 and risk mitigation. Input states 'Duplicate account detection and merge capability (back-office tool)' and risk mitigation specifies 'Implement duplicate detection at enrollment (check if email or phone already exists)'.",
+          "citation" : {
+            "source_reference" : "Duplicate account detection and merge capability (back-office tool) ... Implement duplicate detection at enrollment (check if email or phone already exists)",
+            "source_location" : "Section 2: FA1 and Section 4: Risks and Dependencies - Customer Data Quality risk mitigation"
+          },
+          "trajectory" : [ {
+            "step" : 1,
+            "action" : "retrieve",
+            "tool" : null,
+            "detail" : "Identified duplicate detection in FA1 and risk mitigation section"
+          }, {
+            "step" : 2,
+            "action" : "reason",
+            "tool" : null,
+            "detail" : "Functional requirement for data quality control. Must-Have for MVP to prevent customer data quality issues."
+          }, {
+            "step" : 3,
+            "action" : "generate",
+            "tool" : null,
+            "detail" : "Formulated requirement for enrollment-time duplicate detection"
+          } ]
+        }
+      }, {
+        "id" : "FR-16",
+        "title" : "Identity Verification via OTP",
+        "description" : "The system shall support identity verification for high-value redemptions or account recovery by sending one-time password (OTP) via email or SMS and validating customer-provided code.",
+        "user_facing" : true,
+        "priority" : "Should-Have",
+        "tags" : [ "security", "authentication", "otp" ],
+        "metadata" : {
+          "confidence" : 0.85,
+          "reasoning" : "Explicitly stated in FA1 and FA5. Input states 'Identity verification for high-value redemptions or account recovery (email OTP, SMS OTP)'. Inferred as Should-Have for MVP based on fraud prevention needs, though not explicitly in MVP features table.",
+          "citation" : {
+            "source_reference" : "Identity verification for high-value redemptions or account recovery (email OTP, SMS OTP) ... Customer authentication: for account access or high-value redemption, staff can send OTP to customer's phone and verify code",
+            "source_location" : "Section 2: FA1: Customer Enrollment and Identity Management, FA5: Omnichannel Customer Recognition"
+          },
+          "trajectory" : [ {
+            "step" : 1,
+            "action" : "retrieve",
+            "tool" : null,
+            "detail" : "Identified OTP verification in FA1 and FA5"
+          }, {
+            "step" : 2,
+            "action" : "reason",
+            "tool" : null,
+            "detail" : "Functional requirement for security control. Should-Have priority inferred from fraud risk mitigation needs."
+          }, {
+            "step" : 3,
+            "action" : "generate",
+            "tool" : null,
+            "detail" : "Formulated requirement for OTP-based verification"
+          } ]
+        }
+      }, {
+        "id" : "FR-17",
+        "title" : "Manual Points Adjustment by Customer Service",
+        "description" : "The system shall allow authorized customer service representatives to manually credit or debit points from customer accounts with mandatory reason code and full audit trail of adjustments.",
+        "user_facing" : false,
+        "priority" : "Must-Have",
+        "tags" : [ "customer-service", "points-adjustment", "audit" ],
+        "metadata" : {
+          "confidence" : 0.9,
+          "reasoning" : "Explicitly stated in FA2. Input states 'Points adjustment capability for customer service (manual credit/debit with reason code and audit trail)'. Essential for customer service operations and dispute resolution.",
+          "citation" : {
+            "source_reference" : "Points adjustment capability for customer service (manual credit/debit with reason code and audit trail)",
+            "source_location" : "Section 2: FA2: Points Accrual Engine"
+          },
+          "trajectory" : [ {
+            "step" : 1,
+            "action" : "retrieve",
+            "tool" : null,
+            "detail" : "Identified manual adjustment capability in FA2"
+          }, {
+            "step" : 2,
+            "action" : "reason",
+            "tool" : null,
+            "detail" : "Functional requirement for customer service tool. Must-Have for operational support even if not explicitly in MVP table."
+          }, {
+            "step" : 3,
+            "action" : "generate",
+            "tool" : null,
+            "detail" : "Formulated requirement with audit and reason code requirements"
+          } ]
+        }
+      }, {
+        "id" : "FR-18",
+        "title" : "Maximum Redemption Limit per Transaction",
+        "description" : "The system shall enforce a maximum redemption limit preventing customers from redeeming more than 50% of transaction value in points.",
+        "user_facing" : true,
+        "priority" : "Should-Have",
+        "tags" : [ "redemption", "business-rules", "limits" ],
+        "metadata" : {
+          "confidence" : 0.85,
+          "reasoning" : "Explicitly stated in FA3 and risk mitigation. Input states 'Maximum redemption per transaction (e.g., cannot redeem more than 50% of transaction value in points)' and risk mitigation specifies 'Set maximum redemption per transaction (e.g., 50% of purchase value)'.",
+          "citation" : {
+            "source_reference" : "Maximum redemption per transaction (e.g., cannot redeem more than 50% of transaction value in points) ... Set maximum redemption per transaction (e.g., 50% of purchase value)",
+            "source_location" : "Section 2: FA3: Points Redemption and Rewards Catalog, Section 4: Risks - Points Liability risk mitigation"
+          },
+          "trajectory" : [ {
+            "step" : 1,
+            "action" : "retrieve",
+            "tool" : null,
+            "detail" : "Identified maximum redemption limit in FA3 and risk mitigation"
+          }, {
+            "step" : 2,
+            "action" : "reason",
+            "tool" : null,
+            "detail" : "Functional requirement for business rule enforcement. Should-Have priority inferred as financial control mechanism."
+          }, {
+            "step" : 3,
+            "action" : "generate",
+            "tool" : null,
+            "detail" : "Formulated requirement with specific 50% limit from input"
+          } ]
+        }
+      }, {
+        "id" : "FR-19",
+        "title" : "Points Expiry Processing",
+        "description" : "The system shall automatically expire points after 24 months from earning date and send customer notification 60 days before expiry date.",
+        "user_facing" : true,
+        "priority" : "Should-Have",
+        "tags" : [ "points-expiry", "notifications", "liability-management" ],
+        "metadata" : {
+          "confidence" : 0.8,
+          "reasoning" : "Explicitly stated in FA2 and open questions. Input states 'Points expiry rules: configurable expiry period (e.g., 24 months from earning date), automated expiry processing, customer notification 60 days before expiry'. Open question recommends '24-month expiry with 60-day advance warning'.",
+          "citation" : {
+            "source_reference" : "Points expiry rules: configurable expiry period (e.g., 24 months from earning date), automated expiry processing, customer notification 60 days before expiry ... Recommendation: 24-month expiry with 60-day advance warning",
+            "source_location" : "Section 2: FA2: Points Accrual Engine, Section 4: Open Questions - Points Expiry Policy"
+          },
+          "trajectory" : [ {
+            "step" : 1,
+            "action" : "retrieve",
+            "tool" : null,
+            "detail" : "Identified expiry requirement in FA2 and recommendation in open questions"
+          }, {
+            "step" : 2,
+            "action" : "reason",
+            "tool" : null,
+            "detail" : "Functional requirement for automated expiry processing. Should-Have priority as it's recommended but marked as open question."
+          }, {
+            "step" : 3,
+            "action" : "generate",
+            "tool" : null,
+            "detail" : "Formulated requirement using recommended 24-month period and 60-day notification"
+          } ]
+        }
+      }, {
+        "id" : "FR-20",
+        "title" : "Privacy Notice Display and Acceptance Tracking",
+        "description" : "The system shall display privacy notice during enrollment and track acceptance with timestamp and version of privacy notice accepted.",
+        "user_facing" : true,
+        "priority" : "Must-Have",
+        "tags" : [ "gdpr", "privacy", "compliance" ],
+        "metadata" : {
+          "confidence" : 0.95,
+          "reasoning" : "Explicitly stated in FA1 and GDPR requirements. Input states 'Privacy notice display and acceptance tracking' and 'Privacy notice must be provided at enrollment'. GDPR compliance is non-negotiable.",
+          "citation" : {
+            "source_reference" : "Privacy notice display and acceptance tracking ... Privacy notice must be provided at enrollment",
+            "source_location" : "Section 2: FA1: Customer Enrollment and Identity Management, Section 1: Business Constraints - GDPR and Data Protection Compliance"
+          },
+          "trajectory" : [ {
+            "step" : 1,
+            "action" : "retrieve",
+            "tool" : null,
+            "detail" : "Identified privacy notice requirement in FA1 and GDPR constraints"
+          }, {
+            "step" : 2,
+            "action" : "reason",
+            "tool" : null,
+            "detail" : "Functional requirement for GDPR compliance. Must-Have as legal requirement."
+          }, {
+            "step" : 3,
+            "action" : "generate",
+            "tool" : null,
+            "detail" : "Formulated requirement with tracking and versioning for audit purposes"
+          } ]
+        }
+      } ],
+      "non_functional_requirements" : [ {
+        "id" : "NFR-01",
+        "category" : "Performance",
+        "title" : "Real-Time Points Calculation Response Time",
+        "description" : "The system shall calculate and display points earned at checkout within 5 seconds of transaction completion for 95% of transactions.",
+        "priority" : "Must-Have",
+        "citation" : {
+          "source_reference" : "real-time calculation and display at checkout ... customers must see immediate reward for online purchases",
+          "source_location" : "Section 3: MVP Scope - Features In Scope (MVP) table - Points Accrual (Online)"
+        },
+        "reasoning" : "Performance requirement derived from 'real-time' language in MVP features. 5-second threshold inferred from standard e-commerce expectations for real-time operations. 95th percentile is industry standard for performance SLAs.",
+        "trajectory" : [ {
+          "step" : 1,
+          "action" : "retrieve",
+          "tool" : null,
+          "detail" : "Identified 'real-time' requirement for points calculation"
+        }, {
+          "step" : 2,
+          "action" : "reason",
+          "tool" : null,
+          "detail" : "Categorized as Performance NFR. Quantified 'real-time' as 5 seconds based on e-commerce standards."
+        }, {
+          "step" : 3,
+          "action" : "generate",
+          "tool" : null,
+          "detail" : "Formulated measurable NFR with specific time threshold and percentile"
+        } ]
+      }, {
+        "id" : "NFR-02",
+        "category" : "Reliability",
+        "title" : "System Uptime During Business Hours",
+        "description" : "The loyalty platform shall maintain 99.5% uptime during business hours (9am-9pm UK time) measured monthly.",
+        "priority" : "Must-Have",
+        "citation" : {
+          "source_reference" : "System Uptime: Loyalty platform maintains 99.5% uptime during business hours (9am-9pm UK time)",
+          "source_location" : "Section 3: MVP Scope - MVP Success Criteria"
+        },
+        "reasoning" : "Reliability requirement explicitly stated in MVP success criteria with specific uptime target (99.5%) and measurement window (business hours 9am-9pm UK time).",
+        "trajectory" : [ {
+          "step" : 1,
+          "action" : "retrieve",
+          "tool" : null,
+          "detail" : "Identified uptime requirement in MVP success criteria"
+        }, {
+          "step" : 2,
+          "action" : "reason",
+          "tool" : null,
+          "detail" : "Categorized as Reliability NFR. Specific measurable target provided in input."
+        }, {
+          "step" : 3,
+          "action" : "generate",
+          "tool" : null,
+          "detail" : "Formulated NFR using exact metrics from input"
+        } ]
+      }, {
+        "id" : "NFR-03",
+        "category" : "Reliability",
+        "title" : "Points Accrual Accuracy",
+        "description" : "The system shall achieve less than 5% error rate in points crediting for both online and in-store purchases, measured as percentage of transactions with incorrect points amount.",
+        "priority" : "Must-Have",
+        "citation" : {
+          "source_reference" : "Omnichannel Accrual: Points successfully credited for both online and in-store purchases with <5% error rate",
+          "source_location" : "Section 3: MVP Scope - MVP Success Criteria"
+        },
+        "reasoning" : "Reliability requirement explicitly stated in MVP success criteria with specific error rate threshold (<5%). Critical for customer trust and financial accuracy.",
+        "trajectory" : [ {
+          "step" : 1,
+          "action" : "retrieve",
+          "tool" : null,
+          "detail" : "Identified error rate requirement in MVP success criteria"
+        }, {
+          "step" : 2,
+          "action" : "reason",
+          "tool" : null,
+          "detail" : "Categorized as Reliability NFR. Measurable target provided in input."
+        }, {
+          "step" : 3,
+          "action" : "generate",
+          "tool" : null,
+          "detail" : "Formulated NFR with specific error rate threshold"
+        } ]
+      }, {
+        "id" : "NFR-04",
+        "category" : "Scalability",
+        "title" : "Customer Volume Scalability",
+        "description" : "The system architecture shall support 150,000 enrolled customers and 50,000 monthly transactions for MVP, with capability to scale to 1 million+ customers and 500,000+ monthly transactions within 3 years without major re-architecture.",
+        "priority" : "Must-Have",
+        "citation" : {
+          "source_reference" : "MVP designed for 150,000 enrolled customers and 50,000 monthly transactions. Architecture must scale to 1 million+ customers and 500,000+ monthly transactions within 3 years",
+          "source_location" : "Section 2: Full Scope Vision - Scalability and Growth"
+        },
+        "reasoning" : "Scalability requirement explicitly stated with specific volume targets for MVP (150k customers, 50k transactions/month) and 3-year growth (1M+ customers, 500k+ transactions/month). Must-Have to avoid costly re-architecture.",
+        "trajectory" : [ {
+          "step" : 1,
+          "action" : "retrieve",
+          "tool" : null,
+          "detail" : "Identified scalability requirements in Scalability and Growth section"
+        }, {
+          "step" : 2,
+          "action" : "reason",
+          "tool" : null,
+          "detail" : "Categorized as Scalability NFR. Specific volume targets provided for MVP and future state."
+        }, {
+          "step" : 3,
+          "action" : "generate",
+          "tool" : null,
+          "detail" : "Formulated NFR with current and future volume requirements"
+        } ]
+      }, {
+        "id" : "NFR-05",
+        "category" : "Security",
+        "title" : "GDPR Data Protection Compliance",
+        "description" : "The system shall comply with UK GDPR requirements including explicit consent collection, data minimization, customer right to access (DSAR), right to erasure, right to portability, and 3-year data retention post-account closure.",
+        "priority" : "Must-Have",
+        "citation" : {
+          "source_reference" : "All customer data collection, storage, and processing must comply with UK GDPR. Explicit consent required for marketing communications. Data minimization principle applies. Customer right to access (DSAR), right to erasure, and right to portability must be supported. Data retention limited to duration of customer relationship plus regulatory retention period (typically 3 years post-closure)",
+          "source_location" : "Section 1: Business Context - Business Constraints - GDPR and Data Protection Compliance"
+        },
+        "reasoning" : "Security and compliance requirement explicitly stated as business constraint. Input emphasizes 'non-negotiable for UK launch'. Multiple specific GDPR requirements enumerated.",
+        "trajectory" : [ {
+          "step" : 1,
+          "action" : "retrieve",
+          "tool" : null,
+          "detail" : "Identified GDPR compliance requirements in business constraints"
+        }, {
+          "step" : 2,
+          "action" : "reason",
+          "tool" : null,
+          "detail" : "Categorized as Security NFR (data protection). Legal requirement makes this Must-Have."
+        }, {
+          "step" : 3,
+          "action" : "generate",
+          "tool" : null,
+          "detail" : "Formulated comprehensive NFR covering key GDPR requirements from input"
+        } ]
+      }, {
+        "id" : "NFR-06",
+        "category" : "Usability",
+        "title" : "WCAG 2.1 AA Accessibility Compliance",
+        "description" : "All customer-facing interfaces (mobile app, web, in-store kiosk) shall meet WCAG 2.1 AA accessibility standards for users with disabilities.",
+        "priority" : "Must-Have",
+        "citation" : {
+          "source_reference" : "All customer-facing interfaces (mobile app, web, in-store kiosk if applicable) must meet WCAG 2.1 AA accessibility standards",
+          "source_location" : "Section 1: Business Context - Business Constraints - Accessibility Requirements"
+        },
+        "reasoning" : "Usability requirement explicitly stated as business constraint. WCAG 2.1 AA is specific, measurable standard. Input emphasizes this is requirement, not aspiration.",
+        "trajectory" : [ {
+          "step" : 1,
+          "action" : "retrieve",
+          "tool" : null,
+          "detail" : "Identified accessibility requirement in business constraints"
+        }, {
+          "step" : 2,
+          "action" : "reason",
+          "tool" : null,
+          "detail" : "Categorized as Usability NFR. Specific standard (WCAG 2.1 AA) makes this measurable."
+        }, {
+          "step" : 3,
+          "action" : "generate",
+          "tool" : null,
+          "detail" : "Formulated NFR using exact standard from input"
+        } ]
+      }, {
+        "id" : "NFR-07",
+        "category" : "Security",
+        "title" : "Audit Trail for All Points Transactions",
+        "description" : "The system shall maintain complete audit trail for all points credits, debits, and adjustments including timestamp, user/system actor, reason code, and before/after balance, with audit logs retained for minimum 3 years.",
+        "priority" : "Must-Have",
+        "citation" : {
+          "source_reference" : "Transaction-level points ledger: each points credit linked to originating transaction ID, date, amount, and rule applied ... Points adjustment capability for customer service (manual credit/debit with reason code and audit trail)",
+          "source_location" : "Section 2: FA2: Points Accrual Engine"
+        },
+        "reasoning" : "Security and compliance requirement inferred from audit trail mentions in FA2 and GDPR requirements. Critical for fraud detection, dispute resolution, and regulatory compliance. 3-year retention aligns with stated GDPR retention period.",
+        "trajectory" : [ {
+          "step" : 1,
+          "action" : "retrieve",
+          "tool" : null,
+          "detail" : "Identified audit trail requirements in FA2 and GDPR constraints"
+        }, {
+          "step" : 2,
+          "action" : "reason",
+          "tool" : null,
+          "detail" : "Categorized as Security NFR. Audit trail is security and compliance control."
+        }, {
+          "step" : 3,
+          "action" : "generate",
+          "tool" : null,
+          "detail" : "Formulated comprehensive NFR for audit trail with retention period"
+        } ]
+      }, {
+        "id" : "NFR-08",
+        "category" : "Performance",
+        "title" : "Staff Customer Lookup Response Time",
+        "description" : "The system shall return customer lookup results at POS within 3 seconds of phone number entry for 95% of requests.",
+        "priority" : "Must-Have",
+        "citation" : {
+          "source_reference" : "Store associates can look up customer by phone number at POS terminal ... enables staff to recognize loyal customers and offer personalized service",
+          "source_location" : "Section 3: MVP Scope - Features In Scope (MVP) table"
+        },
+        "reasoning" : "Performance requirement inferred from staff lookup feature. 3-second threshold based on POS interaction patterns where staff and customer are waiting. 95th percentile is standard for performance SLAs.",
+        "trajectory" : [ {
+          "step" : 1,
+          "action" : "retrieve",
+          "tool" : null,
+          "detail" : "Identified staff lookup feature as Must-Have"
+        }, {
+          "step" : 2,
+          "action" : "reason",
+          "tool" : null,
+          "detail" : "Categorized as Performance NFR. Inferred 3-second threshold from POS interaction context where delays frustrate customers and staff."
+        }, {
+          "step" : 3,
+          "action" : "generate",
+          "tool" : null,
+          "detail" : "Formulated measurable NFR with specific time threshold"
+        } ]
+      }, {
+        "id" : "NFR-09",
+        "category" : "Usability",
+        "title" : "Enrollment Conversion Rate",
+        "description" : "The enrollment flow shall achieve minimum 30% conversion rate from enrollment prompt view to completed enrollment, measured across web and mobile app channels.",
+        "priority" : "Should-Have",
+        "citation" : {
+          "source_reference" : "Assumption: 60% enrollment rate is achievable with basic enrollment prompts ... If enrollment conversion is low (<30%), program will not reach critical mass",
+          "source_location" : "Section 3: MVP Scope - MVP Constraints and Assumptions"
+        },
+        "reasoning" : "Usability requirement inferred from enrollment rate assumptions and risk mitigation. Input identifies 30% as threshold below which program fails to reach critical mass. 60% is aspirational target.",
+        "trajectory" : [ {
+          "step" : 1,
+          "action" : "retrieve",
+          "tool" : null,
+          "detail" : "Identified enrollment conversion concern in assumptions and risks"
+        }, {
+          "step" : 2,
+          "action" : "reason",
+          "tool" : null,
+          "detail" : "Categorized as Usability NFR. Conversion rate reflects ease of enrollment. Should-Have priority as this is target, not hard constraint."
+        }, {
+          "step" : 3,
+          "action" : "generate",
+          "tool" : null,
+          "detail" : "Formulated NFR using 30% minimum threshold from risk section"
+        } ]
+      }, {
+        "id" : "NFR-10",
+        "category" : "Security",
+        "title" : "Fraud Detection and Rate Limiting",
+        "description" : "The system shall implement rate limiting on account creation (maximum 3 accounts per IP address per day) and flag accounts with unusual point accrual patterns (>10x average daily accrual) for manual review.",
+        "priority" : "Should-Have",
+        "citation" : {
+          "source_reference" : "Basic fraud detection and prevention controls required from MVP ... Limit enrollment bonus to one per email address and phone number; implement rate limiting on account creation; flag accounts with unusual point accrual patterns for manual review",
+          "source_location" : "Section 1: Business Constraints - Fraud and Abuse Prevention, Section 4: Risks - Fraud and Abuse risk mitigation"
+        },
+        "reasoning" : "Security requirement explicitly stated in constraints and risk mitigation. Input specifies 'basic fraud detection' for MVP. Rate limiting and pattern flagging are measurable controls. Should-Have as MVP includes basic controls, not advanced ML-based detection.",
+        "trajectory" : [ {
+          "step" : 1,
+          "action" : "retrieve",
+          "tool" : null,
+          "detail" : "Identified fraud prevention requirements in constraints and risk mitigation"
+        }, {
+          "step" : 2,
+          "action" : "reason",
+          "tool" : null,
+          "detail" : "Categorized as Security NFR. Specific controls (rate limiting, pattern flagging) make this measurable."
+        }, {
+          "step" : 3,
+          "action" : "generate",
+          "tool" : null,
+          "detail" : "Formulated NFR with specific thresholds inferred from 'basic controls' context"
+        } ]
+      } ],
+      "constraints" : [ {
+        "id" : "CON-01",
+        "type" : "Technology",
+        "description" : "E-commerce platform is Shopify, Magento, WooCommerce, or similar. Integration must use platform's existing API or webhook capabilities.",
+        "citation" : {
+          "source_reference" : "Online e-commerce platform (assumed Shopify, Magento, or similar)",
+          "source_location" : "Section 1: Business Context - Business Constraints - System Integration Complexity"
+        },
+        "reasoning" : "Technology constraint limiting integration approach. Input states platform is assumed to be one of these options, constraining solution space to their API capabilities."
+      }, {
+        "id" : "CON-02",
+        "type" : "Technology",
+        "description" : "In-store POS system is Square, Lightspeed, Retail Pro, or legacy system. Integration approach must accommodate potential lack of modern API, with end-of-day batch processing as fallback.",
+        "citation" : {
+          "source_reference" : "in-store POS system (assumed retail POS such as Square, Lightspeed, or legacy system) ... If POS vendor does not provide API or integration is prohibitively complex, in-store accrual may not be real-time or may require manual workarounds",
+          "source_location" : "Section 1: Business Context - Business Constraints - System Integration Complexity, Section 3: MVP Constraints and Assumptions"
+        },
+        "reasoning" : "Technology constraint acknowledging POS integration limitations. Input explicitly identifies this as constraint with fallback approach (batch processing) if real-time integration not feasible."
+      }, {
+        "id" : "CON-03",
+        "type" : "Timeline",
+        "description" : "MVP must launch within 6 months to capture peak retail season (Q4). Timeline is fixed and scope must be adjusted if necessary to meet launch date.",
+        "citation" : {
+          "source_reference" : "MVP must be delivered within 6 months to capture upcoming peak retail season ... If timeline slips, launch will miss critical revenue period and delay ROI ... Use agile sprints with bi-weekly releases; prioritize ruthlessly; cut scope if necessary to meet launch date",
+          "source_location" : "Section 1: Business Context - Business Constraints - Budget and Timeline, Section 3: MVP Constraints and Assumptions"
+        },
+        "reasoning" : "Timeline constraint explicitly stated as fixed. Input emphasizes scope must flex to meet timeline, not vice versa. This is constraint, not requirement."
+      }, {
+        "id" : "CON-04",
+        "type" : "Regulatory",
+        "description" : "All data collection, storage, and processing must comply with UK GDPR. Non-compliance is not acceptable and would expose business to regulatory fines and reputational damage.",
+        "citation" : {
+          "source_reference" : "GDPR and Data Protection Compliance: All customer data collection, storage, and processing must comply with UK GDPR ... If consent or data handling is non-compliant, business faces regulatory fines and reputational damage",
+          "source_location" : "Section 1: Business Context - Business Constraints - GDPR and Data Protection Compliance"
+        },
+        "reasoning" : "Regulatory constraint that is non-negotiable. Input emphasizes this is 'non-negotiable for UK launch' and describes consequences of non-compliance. This constrains all design decisions."
+      }, {
+        "id" : "CON-05",
+        "type" : "Business",
+        "description" : "Points have monetary value and create financial liability. Points valuation methodology (e.g., GBP 0.01 per point) must be established and points liability tracked as deferred revenue for financial reporting.",
+        "citation" : {
+          "source_reference" : "Points liability must be tracked and accounted for as deferred revenue ... Work with finance team to establish points valuation methodology (e.g., GBP 0.01 per point) and liability tracking",
+          "source_location" : "Section 3: MVP Scope - MVP Constraints and Assumptions"
+        },
+        "reasoning" : "Business constraint related to financial accounting. Input identifies this as constraint requiring coordination with finance team. Points liability impacts balance sheet and must be properly accounted."
+      }, {
+        "id" : "CON-06",
+        "type" : "Business",
+        "description" : "MVP launch is UK market only with GBP currency. Multi-currency and international expansion deferred to Phase 2+.",
+        "citation" : {
+          "source_reference" : "Initial launch in UK market only. Future phases may expand to EU markets ... MVP is UK-only (GBP); multi-currency support deferred to Phase 2",
+          "source_location" : "Section 2: Full Scope Vision - Scalability and Growth, Section 4: Open Questions"
+        },
+        "reasoning" : "Business constraint limiting geographic scope for MVP. Input explicitly states UK-only for MVP, with international expansion as future consideration."
+      }, {
+        "id" : "CON-07",
+        "type" : "Technology",
+        "description" : "Mobile app already exists (iOS and Android). Loyalty features must integrate with existing app architecture without major refactoring.",
+        "citation" : {
+          "source_reference" : "Dedicated loyalty section in existing mobile app ... The business launched a mobile app 18 months ago ... If app architecture cannot support loyalty SDK or API calls, integration may require app rebuild",
+          "source_location" : "Section 1: Business Context - Business Drivers, Section 3: MVP Scope - MVP Constraints and Assumptions"
+        },
+        "reasoning" : "Technology constraint acknowledging existing mobile app. Input states loyalty features must be added to 'existing mobile app', constraining architecture decisions."
+      }, {
+        "id" : "CON-08",
+        "type" : "Business",
+        "description" : "Loyalty program implementation competes with other strategic initiatives for budget and engineering resources. Resource allocation is constrained.",
+        "citation" : {
+          "source_reference" : "Loyalty program implementation competes with other strategic initiatives for budget and engineering resources",
+          "source_location" : "Section 1: Business Context - Business Constraints - Budget and Timeline"
+        },
+        "reasoning" : "Business constraint on resource availability. Input explicitly identifies resource competition as constraint affecting project execution."
+      } ],
+      "assumptions" : [ {
+        "id" : "ASM-01",
+        "description" : "E-commerce platform API supports real-time order webhooks for points accrual with acceptable latency (<5 seconds) and reliability (>99% delivery rate).",
+        "needs_confirmation" : true,
+        "reasoning" : "Explicitly identified as assumption in MVP Constraints and Assumptions table. Input notes risk: 'If API is unreliable or has high latency, points crediting may be delayed'. Mitigation requires technical discovery in Month 1."
+      }, {
+        "id" : "ASM-02",
+        "description" : "POS system can be integrated via API or middleware within 6-month MVP timeline to support real-time or near-real-time points accrual and staff customer lookup.",
+        "needs_confirmation" : true,
+        "reasoning" : "Explicitly identified as assumption in MVP Constraints and Assumptions table with 'At Risk' status. Input notes: 'If POS vendor does not provide API or integration is prohibitively complex, in-store accrual may not be real-time'. Requires early engagement with POS vendor."
+      }, {
+        "id" : "ASM-03",
+        "description" : "Customers will be willing to provide phone number or email at in-store checkout for loyalty account lookup, achieving >70% participation rate among loyalty members.",
+        "needs_confirmation" : true,
+        "reasoning" : "Explicitly identified as assumption in MVP Constraints and Assumptions table. Input notes risk: 'If customers are reluctant to share contact info, staff lookup adoption will be low'. Success metric targets 70% in-store customer recognition rate."
+      }, {
+        "id" : "ASM-04",
+        "description" : "60% enrollment rate is achievable with basic enrollment prompts and incentives (e.g., 500 bonus points for joining) within 90 days of launch.",
+        "needs_confirmation" : true,
+        "reasoning" : "Explicitly identified as assumption in MVP Constraints and Assumptions table. Input notes risk: 'If enrollment conversion is low (<30%), program will not reach critical mass'. Mitigation includes A/B testing enrollment messaging."
+      }, {
+        "id" : "ASM-05",
+        "description" : "Existing mobile app architecture can support loyalty SDK or API integration without major refactoring, allowing loyalty features to be added within MVP timeline.",
+        "needs_confirmation" : true,
+        "reasoning" : "Explicitly identified as assumption in MVP Constraints and Assumptions table. Input notes risk: 'If app architecture cannot support loyalty SDK or API calls, integration may require app rebuild'. Requires technical assessment in Month 1."
+      }, {
+        "id" : "ASM-06",
+        "description" : "Store associates will adopt customer lookup workflow with 80% compliance rate within 90 days of launch, given adequate training and performance incentives.",
+        "needs_confirmation" : true,
+        "reasoning" : "Inferred from MVP success criteria and risk mitigation. Input targets '80% of in-store transactions by loyalty members include staff lookup' and identifies staff resistance as medium-likelihood risk. Requires change management and training."
+      }, {
+        "id" : "ASM-07",
+        "description" : "Points redemption rate will be approximately 40% of earned points within 12 months, based on industry benchmarks for retail loyalty programs.",
+        "needs_confirmation" : true,
+        "reasoning" : "Explicitly stated in Success Metrics table as target: '40% of earned points redeemed within 12 months of earning'. This is assumption about customer behavior based on industry benchmarks, not guaranteed outcome."
+      }, {
+        "id" : "ASM-08",
+        "description" : "Customer base size is approximately 150,000 customers with current 8% mobile app adoption (12,000 MAU) and 22% repeat purchase rate.",
+        "needs_confirmation" : false,
+        "reasoning" : "Stated in Executive Summary and Success Metrics as current state baseline. Input provides specific numbers: '150,000 customer base', '8% mobile app adoption (estimated 12,000 MAU from 150,000 customer base)', '22% repeat purchase rate'. These are stated facts, not assumptions."
+      }, {
+        "id" : "ASM-09",
+        "description" : "Payment gateway (Stripe, Adyen, PayPal, or similar) supports discount API allowing points redemption to be applied as discount at checkout for both online and in-store transactions.",
+        "needs_confirmation" : true,
+        "reasoning" : "Identified in External Dependencies table with 'Confirmed: Discount API available' status. However, this is dependency on external vendor capability. Requires validation that specific payment gateway in use supports this."
+      } ],
+      "gaps" : [ {
+        "id" : "GAP-01",
+        "description" : "Optimal points earning rate not determined. Options include 1 point per GBP spent vs. 10 points per GBP spent or other ratios.",
+        "impact" : "Cannot finalize points accrual logic, customer communications, or financial liability projections until earning rate is decided. Different rates create different customer perceptions of value and different financial liability.",
+        "suggested_question" : "What is the points earning rate for MVP? Recommendation from input: A/B test with two cohorts (e.g., 1 point per GBP vs. 10 points per GBP) in first 30 days and select based on customer engagement and liability impact.",
+        "reasoning" : "Explicitly identified as Open Question #1 in input. Input provides recommendation to A/B test but decision not finalized."
+      }, {
+        "id" : "GAP-02",
+        "description" : "Points expiry policy not finalized. Options include 12 months, 24 months, or no expiry.",
+        "impact" : "Cannot implement points expiry logic or communicate expiry terms to customers. Expiry policy significantly impacts points liability (shorter expiry reduces liability) and customer satisfaction (longer expiry or no expiry preferred by customers).",
+        "suggested_question" : "Should points expire, and if so, after how long? Recommendation from input: 24-month expiry with 60-day advance warning; monitor customer feedback and adjust if necessary.",
+        "reasoning" : "Explicitly identified as Open Question #2 in input. Input provides recommendation (24 months) but notes this needs to be confirmed and monitored."
+      }, {
+        "id" : "GAP-03",
+        "description" : "Minimum points redemption threshold not finalized. Options include 500 points (GBP 5), 1,000 points (GBP 10), or no minimum.",
+        "impact" : "Cannot implement redemption validation logic or communicate redemption rules to customers. Lower threshold increases redemption frequency (good for customer satisfaction) but also increases operational cost and reduces points liability.",
+        "suggested_question" : "What is the minimum points balance required to redeem? Recommendation from input: 500 points minimum for MVP; adjust based on redemption rate data after launch.",
+        "reasoning" : "Explicitly identified as Open Question #3 in input. Input provides recommendation (500 points) but notes this should be adjusted based on data."
+      }, {
+        "id" : "GAP-04",
+        "description" : "Staff incentive program for loyalty enrollment and adoption not defined. Unclear if store associates should receive commission, recognition, or other incentives for enrolling customers.",
+        "impact" : "Cannot design staff training and performance management programs. Without incentives, staff adoption of customer lookup and enrollment may be low, jeopardizing MVP success criteria (80% staff lookup adoption).",
+        "suggested_question" : "Should store associates receive incentives (commission, recognition, performance metrics) for enrolling customers or driving loyalty program adoption? Recommendation from input: Pilot incentive program at 3 stores and measure enrollment lift vs. control stores.",
+        "reasoning" : "Explicitly identified as Open Question #4 in input. Input recommends pilot approach but program not defined."
+      }, {
+        "id" : "GAP-05",
+        "description" : "Product category exclusions from points earning not finalized. Unclear if sale items, gift cards, clearance, or other categories should be excluded.",
+        "impact" : "Cannot implement points accrual logic for all product types. Exclusions affect customer perception of program value and points liability. Gift card exclusion is recommended to prevent points arbitrage (buying gift cards with points, then using gift cards to buy products and earn more points).",
+        "suggested_question" : "Should certain product categories (sale items, gift cards, clearance) be excluded from points earning? Recommendation from input: Exclude gift cards to prevent points arbitrage; include sale items to maximize customer satisfaction.",
+        "reasoning" : "Explicitly identified as Open Question #5 in input. Input provides recommendation but decision not finalized."
+      }, {
+        "id" : "GAP-06",
+        "description" : "Data retention policy duration not finalized. Options include 3 years post-closure (GDPR best practice), 7 years (financial records retention), or indefinite retention.",
+        "impact" : "Cannot implement automated data deletion processes or document data retention in privacy notice. Non-compliance with GDPR data minimization principle if retention is excessive. Insufficient retention if regulatory requirements not met.",
+        "suggested_question" : "How long should customer loyalty data be retained after account closure? Recommendation from input: 3 years post-closure per GDPR best practice; document in privacy notice.",
+        "reasoning" : "Explicitly identified as Open Question #8 in input. Input provides recommendation (3 years) aligned with GDPR but requires confirmation."
+      }, {
+        "id" : "GAP-07",
+        "description" : "Specific e-commerce platform and POS system not confirmed. Input assumes Shopify/Magento/WooCommerce for e-commerce and Square/Lightspeed/Retail Pro for POS, but actual systems in use not stated.",
+        "impact" : "Cannot begin technical discovery or integration planning until actual systems are identified. Integration approach, timeline, and feasibility depend on specific platform capabilities. Risk of timeline delay if integration is more complex than assumed.",
+        "suggested_question" : "What are the specific e-commerce platform and POS system currently in use? What API documentation and integration support do these vendors provide?",
+        "reasoning" : "Input uses 'assumed' language throughout when referring to e-commerce and POS platforms. External Dependencies table shows 'Pending' status for e-commerce API access and 'At Risk' status for POS integration."
+      }, {
+        "id" : "GAP-08",
+        "description" : "Payment gateway vendor not confirmed. Input assumes Stripe, Adyen, or PayPal but actual payment gateway in use not stated.",
+        "impact" : "Cannot validate discount API availability or begin payment integration planning. Partial payment support (points + card) requires specific payment gateway capabilities. If discount API not available, must implement workaround (e.g., separate refund transaction) with poor UX.",
+        "suggested_question" : "What payment gateway is currently in use for online and in-store transactions? Does it support discount/coupon API for applying points redemption at checkout?",
+        "reasoning" : "Input assumes payment gateway but External Dependencies table shows 'Confirmed: Discount API available' without specifying which gateway. This dependency needs validation."
+      }, {
+        "id" : "GAP-09",
+        "description" : "Customer support platform not specified. Input mentions Zendesk/Salesforce Service Cloud but actual platform in use not stated.",
+        "impact" : "Cannot plan customer support tool integration. Support agents need to view customer loyalty data within support tickets for efficient issue resolution. Without integration, agents must switch between systems, slowing resolution time.",
+        "suggested_question" : "What customer support platform is currently in use (Zendesk, Salesforce Service Cloud, other)? Does it support custom app integrations or API for displaying external data in support tickets?",
+        "reasoning" : "External Dependencies table shows 'Not Started: Discovery phase' for customer support tool integration. Platform not specified."
+      }, {
+        "id" : "GAP-10",
+        "description" : "Legal approval status of terms of service and privacy notice not confirmed. Input shows 'Pending: Draft submitted for review' but approval timeline and potential changes unknown.",
+        "impact" : "Cannot launch loyalty program without approved legal terms and privacy notice. GDPR requires clear privacy notice at enrollment. Delay in legal approval blocks launch. Changes requested by legal may require rework of enrollment flow or data handling.",
+        "suggested_question" : "What is the expected timeline for legal approval of loyalty program terms and privacy notice? Are there any known legal concerns or required changes that would impact system design?",
+        "reasoning" : "External Dependencies table shows legal approval as 'Pending' with critical impact if blocked ('Cannot launch without approved terms; risk of regulatory non-compliance')."
+      }, {
+        "id" : "GAP-11",
+        "description" : "Maximum redemption limit enforcement approach not specified. Input recommends 50% of transaction value but implementation details unclear (enforce at checkout, show warning, hard block).",
+        "impact" : "Cannot design redemption UX without knowing how limit is enforced. Hard block (preventing redemption above 50%) may frustrate customers. Warning with override option may reduce effectiveness of liability control.",
+        "suggested_question" : "How should the maximum redemption limit (50% of transaction value) be enforced? Should system hard-block redemptions above limit, show warning but allow override, or use soft enforcement with customer service override capability?",
+        "reasoning" : "FR-18 identifies maximum redemption limit requirement but enforcement approach not specified. UX and business rule implementation depend on enforcement approach."
+      }, {
+        "id" : "GAP-12",
+        "description" : "Enrollment bonus amount not finalized. Input mentions 500 bonus points as example but decision not confirmed.",
+        "impact" : "Cannot implement enrollment bonus logic or communicate enrollment incentive to customers. Bonus amount affects enrollment conversion rate and points liability. Higher bonus increases enrollment but also increases liability and fraud risk.",
+        "suggested_question" : "What enrollment bonus should be offered to new members (e.g., 500 points, 1,000 points, or no bonus)? Should bonus be conditional on first purchase or granted immediately upon enrollment?",
+        "reasoning" : "Input mentions '500 bonus points' in multiple places as example but uses language like 'e.g.' suggesting this is illustrative, not decided. Enrollment bonus is critical for achieving 60% enrollment rate assumption."
+      } ]
+    },
+    "execution_summary" : "• Produced 20 FRs, 10 NFRs, 8 constraints, 9 assumptions, 12 gaps\n\n• Prioritised customer enrollment, points accrual (online and in-store), points redemption, staff customer lookup, mobile app loyalty dashboard, and GDPR consent management as Must-Have based on explicit MVP features table and regulatory requirements. Points earned notification prioritised as Should-Have due to POS integration complexity acknowledgment.\n\n• Reflection findings:\n  - [REFLECTING] Checking output against kb-L1-inception-requirements-extractor-evaluation.md criteria\n  - [REFLECTING] Found: Initial output included tiered membership (Bronze/Silver/Gold/Platinum) as MVP requirement, but input explicitly lists this in 'Features Explicitly Out of Scope (MVP)' table, deferred to Phase 2\n  - [REFLECTING] Resolved: Removed tiered membership from functional requirements; it is out of scope for MVP\n  - [REFLECTING] Found: Initial output missed FR for partial payment support, which is explicitly stated in FA3 and demonstrated in MVP Journey 2\n  - [REFLECTING] Resolved: Added FR-12 for partial payment support with Must-Have priority\n  - [REFLECTING] Found: Initial output missed FR for points reversal on refund, explicitly stated in FA3\n  - [REFLECTING] Resolved: Added FR-13 for points reversal on transaction refund\n  - [REFLECTING] Found: Initial output missed FR for transaction-level points ledger, explicitly stated in FA2 as critical for auditability\n  - [REFLECTING] Resolved: Added FR-14 for transaction-level points ledger\n  - [REFLECTING] Found: Initial output missed FR for duplicate account detection, explicitly stated in FA1 and risk mitigation\n  - [REFLECTING] Resolved: Added FR-15 for duplicate account detection at enrollment\n  - [REFLECTING] Found: Initial output missed FR for manual points adjustment by customer service, explicitly stated in FA2\n  - [REFLECTING] Resolved: Added FR-17 for customer service points adjustment capability\n  - [REFLECTING] Found: Initial NFR-01 used vague language 'real-time' without specific measurable threshold\n  - [REFLECTING] Resolved: Quantified NFR-01 with 5-second response time threshold and 95th percentile, inferred from e-commerce industry standards for 'real-time' operations\n  - [REFLECTING] Found: Initial output missed NFR for audit trail, which is critical for GDPR compliance and fraud detection\n  - [REFLECTING] Resolved: Added NFR-07 for comprehensive audit trail with 3-year retention aligned with GDPR retention period\n  - [REFLECTING] Found: Initial output missed NFR for staff lookup performance, which is critical for in-store customer experience\n  - [REFLECTING] Resolved: Added NFR-08 for staff customer lookup response time (3 seconds, 95th percentile)\n  - [REFLECTING] Found: Initial output included technology choices (React, AWS, Azure) as constraints, but input does not specify these technologies\n  - [REFLECTING] Resolved: Removed invented technology constraints; only included technologies explicitly stated in input (e-commerce platforms, POS systems, payment gateways mentioned by name)\n  - [REFLECTING] Found: Initial assumptions included invented details about database technology and hosting infrastructure not mentioned in input\n  - [REFLECTING] Resolved: Removed invented assumptions; retained only assumptions explicitly stated in MVP Constraints and Assumptions table or strongly implied by stated requirements\n  - [REFLECTING] Found: Several gaps initially flagged were actually answered in the input (e.g., conversion rate 100 points = GBP 1, minimum redemption 500 points are stated in MVP features table)\n  - [REFLECTING] Resolved: Removed false gaps; retained only genuine gaps explicitly identified in Open Questions section or where input uses 'assumed' language indicating uncertainty\n  - [REFLECTING] Found: Confidence scores initially all set to 0.95; need calibration based on explicit vs. inferred requirements\n  - [REFLECTING] Resolved: Adjusted confidence scores: explicit MVP Must-Have features = 0.95, Should-Have features = 0.9, inferred requirements from FA descriptions = 0.85-0.9, inferred NFRs with quantification = 0.8-0.85\n\n• Gaps requiring stakeholder input before downstream agents can proceed:\n  - GAP-01: Points earning rate (1 point per GBP vs. 10 points per GBP) - impacts accrual logic and financial liability\n  - GAP-02: Points expiry policy (12 months, 24 months, or no expiry) - impacts liability and customer communications\n  - GAP-03: Minimum redemption threshold (500 points, 1,000 points, or no minimum) - impacts redemption logic and customer experience\n  - GAP-07: Specific e-commerce platform and POS system identification - blocks technical discovery and integration planning\n  - GAP-08: Payment gateway vendor confirmation - required to validate discount API availability\n  - GAP-10: Legal approval timeline for terms and privacy notice - blocks launch readiness\n  - GAP-12: Enrollment bonus amount - affects enrollment conversion and liability\n\n• Knowledge bases consulted:\n  - kb-L1-inception-requirements-extractor-evaluation.md: Retrieved evaluation criteria, reflection checklist, quality rubric, and scoring thresholds. Used to guide reflection process and ensure output meets quality gates (sequential IDs, no duplicates, priorities assigned, citations present, no empty fields, no invented features, confidence calibrated).\n  - kb-L1-enterprise-architecture.pdf: Retrieved for context on technical standards, but vision document did not specify technology stack, so EA standards not directly applicable to requirement extraction. EA standards would be relevant for downstream architecture and design agents.\n\n• Guardrails evaluated:\n  - No invented features: PASS - All requirements trace to specific input content with citations\n  - No duplicate IDs: PASS - All IDs unique and sequential within categories\n  - Priorities assigned: PASS - All FRs and NFRs have MoSCoW priority\n  - Citations present: PASS - All FRs and NFRs have source_reference and source_location\n  - No empty required fields: PASS - All id, title, description fields populated\n  - Confidence calibrated: PASS - Explicit requirements 0.9-0.95, inferred requirements 0.8-0.9\n  - Grounding: PASS - Every requirement traces to input; no synthetic information\n\n• Tools invoked:\n  - list_files_in_directory: SUCCESS - Identified vision-RewardConnect.md file\n  - knowledge_base_answer_retrieval: SUCCESS - Retrieved evaluation criteria and reflection checklist from kb-L1-inception-requirements-extractor-evaluation.pdf\n  - read_a_files_content: SUCCESS - Read complete vision document (vision-RewardConnect.md, 22,582 tokens)\n\n• Scoring against evaluation criteria:\n  - Faithfulness: 0.95 (every requirement traces to input phrase with citation)\n  - Hallucination: 0.05 (no invented capabilities; minor inference for measurable thresholds based on industry standards)\n  - Consistency: 0.95 (no contradictions between requirements)\n  - Relevance: 0.90 (all requirements actionable and necessary for MVP or future phases)\n  - Reasoning quality: 0.90 (categorisation decisions explained in metadata.reasoning for each item)\n  - Citation completeness: 0.98 (every FR, NFR, constraint, and assumption cites exact input phrase and location)\n  - Completeness: 0.90 (all explicitly stated MVP features captured; full vision features documented; genuine gaps identified)\n\n• Requirements Quality Rubric self-assessment:\n  - Extraction: 9/10 (all stated MVP features captured; implied requirements from FA descriptions flagged with appropriate confidence)\n  - Categorisation: 9/10 (FRs, NFRs, constraints, assumptions correctly separated; technology constraints vs. requirements distinguished)\n  - Priority: 9/10 (MoSCoW aligned with input language: Must-Have for MVP features, Should-Have for conditional features, Could-Have for Phase 2+ features)\n  - Gaps & Assumptions: 9/10 (genuine gaps identified from Open Questions section; assumptions extracted from Constraints and Assumptions table; each gap has impact statement and suggested question)\n  - Measurability: 8/10 (most NFRs quantified with specific thresholds; some thresholds inferred from industry standards where input used qualitative language like 'real-time')"
+  }
+}

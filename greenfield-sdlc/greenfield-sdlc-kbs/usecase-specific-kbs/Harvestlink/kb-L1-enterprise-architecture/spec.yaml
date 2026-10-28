@@ -1,0 +1,62 @@
+spec_version: "1.0"
+artifact_type: knowledge_base
+metadata:
+  name: kb-L1-enterprise-architecture
+  version: "1.0.0"
+  layer: L1
+  owner: agentic-ai-coe
+  content_hash: "sha256:f2b43fb7a6b175e670c53cdd060167c0cbb0b282ca5f603773e88578d092fabb"
+  last_reviewed: "2026-08-07"
+  review_cadence: quarterly
+
+purpose:
+  description: >
+    Thornbury Foods Group's technology landscape, existing systems, and
+    integration boundaries — for the reference scenario where HarvestLink
+    is built as a new digital product WITHIN an already-established
+    enterprise, not from a blank slate. Grounds L1-planning-impact-assessor
+    and L1-planning-dependency-mapper's existing-system impact checks, and
+    any later-phase design agent (HLD/LLD) that needs to know what a new
+    HarvestLink component might touch, integrate with, or must deliberately
+    avoid touching. Enterprise-wide and cross-phase by nature — not scoped
+    to Phase 1, unlike the domain-specific KBs under phase-0/phase-1. Cross
+    references kb-L1-enterprise-security for security/compliance standards
+    rather than duplicating them.
+
+content:
+  format: markdown
+  documents:
+    - path: content/enterprise-architecture.md
+      sections: [organisation-overview, technology-stack, core-applications, architecture-patterns, service-domains, support-model-slas, infrastructure-scale, challenges-tech-debt, roadmap, operating-model]
+  total_tokens_estimate: 1798
+  chunking: by-section
+  embedding_model: text-embedding-3-small
+
+consumers:
+  agents:
+    - L1-planning-impact-assessor
+    - L1-planning-dependency-mapper
+    - L1-requirements-nfr-classifier
+  usage: >
+    impact-assessor checks each proposed component against EA3's
+    integration-relevance table before declaring existing-system impact;
+    dependency-mapper uses EA4/EA5 to distinguish a genuine new dependency
+    from a pattern the group already standardises; nfr-classifier may
+    reference EA6's SLA tiers as a starting point for Availability boundary
+    conditions, but a tier assignment must still be confirmed for
+    HarvestLink specifically, not assumed from the group default (EA6's own
+    note: "new digital products define their own SLA tier").
+
+grounding_rules:
+  accessed_by: [L1-planning-impact-assessor, L1-planning-dependency-mapper, L1-requirements-nfr-classifier]
+  visibility: "L1 — visible to all layers (L1/L2/L3/L4); enterprise-wide and cross-phase, not owned by any single phase directory"
+
+freshness:
+  trigger_for_update: "a system is decommissioned/replaced, an integration boundary changes, or a new Tier-1 system is added"
+  note: >
+    Illustrative content for this reference scenario, not a real
+    organisation's actual architecture. If this framework is deployed
+    against a real enterprise, this file is replaced with that
+    organisation's real system landscape — the shape (organisation
+    overview, stack, integration-relevance table, SLA tiers, governance
+    model) is the reusable part, not this specific company's facts.

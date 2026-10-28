@@ -1,0 +1,36 @@
+spec_version: "1.0"
+artifact_type: guardrail
+metadata:
+  name: gr-L4-reasoning-validator
+  version: "1.0.0"
+  layer: L4
+  owner: squad
+  implementation: colang
+
+purpose:
+  description: "Validate that the reasoning field is non-empty, structured, and contains decision rationale"
+
+triggers_on:
+  - post_execution
+
+on_fail: retry_once
+applies_to: configured_agents
+
+rules:
+  - name: reasoning-present
+    description: "metadata.reasoning must not be null or empty"
+    action: block
+    severity: high
+
+  - name: min-length
+    description: "Reasoning must be at least 20 characters"
+    action: flag
+    severity: medium
+
+  - name: contains-rationale
+    description: "Reasoning should reference input data or KB sources"
+    action: flag
+    severity: medium
+
+evaluation:
+  false_positive_threshold: 0.05

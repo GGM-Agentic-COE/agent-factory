@@ -1,0 +1,29 @@
+prompts:
+  - task: self_check_input
+    content: |
+      User input: {{ user_input }}
+      
+      Does this input contain personally identifiable information (PII)? Check for:
+      1. Email addresses (user@domain.com patterns)
+      2. Phone numbers (with or without country codes)
+      3. Social security numbers / national insurance numbers
+      4. Credit card or debit card numbers
+      5. Passport or ID document numbers
+      6. Physical addresses (street + city/postcode)
+      7. Dates of birth combined with names
+      
+      Note: Generic examples (user@example.com, 555-0100) are acceptable. Real, specific PII is not.
+      
+      Answer "yes" if the input is clean (no real PII). Answer "no" if real PII is detected.
+  - task: self_check_output
+    content: |
+      Agent output: {{ bot_response }}
+      
+      Does this output contain personally identifiable information (PII)? Check for:
+      1. Real email addresses, phone numbers, SSNs, credit card numbers
+      2. Real physical addresses or passport numbers
+      3. Any data that could identify a specific real individual
+      
+      Note: Placeholder/example data is acceptable. Real PII that could identify someone is not.
+      
+      Answer "yes" if the output is clean. Answer "no" if real PII is found.

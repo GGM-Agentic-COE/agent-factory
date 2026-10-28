@@ -1,0 +1,15 @@
+# gr-L3-loop-detection — LLM-Driven Colang Implementation
+# Layer: L3 — Loop Detection
+# Validation: LLM self_check (pure Colang)
+# Python actions preserved in actions.py for reference/hybrid mode
+
+define flow check loop detection
+  """LLM validates loop detection rules on input."""
+  $result = execute self_check_input
+
+  if not $result
+    bot block L3 loop detection
+    stop
+
+define bot block L3 loop detection
+  "Execution killed: runaway execution detected. Exceeded maximum iterations, timeout, or recursion depth."

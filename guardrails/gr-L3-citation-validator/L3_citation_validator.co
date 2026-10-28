@@ -1,0 +1,20 @@
+# gr-L3-citation-validator — Colang Implementation
+# Layer: L3 Project — applies to content generator agents
+# Triggers: post_execution (output rail)
+
+define flow check citation validity
+  """Ensure every output item has resolvable citations."""
+  $valid = execute validate_citations(output=$bot_message)
+
+  if not $valid
+    bot block missing citations
+    stop
+
+  $result = execute self_check_output
+
+  if not $result
+    bot block missing citations
+    stop
+
+define bot block missing citations
+  "Output blocked: one or more items lack valid citations. Every item must have at least one resolvable citation with a source_reference pointing to an attached KB or valid source."

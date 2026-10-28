@@ -1,0 +1,57 @@
+prompts:
+  - task: self_check_output
+    content: |
+      L1-planning-impact-assessor's original input (prd_output, service_catalog,
+      cmdb_export): {{ original_input }}
+      L1-planning-impact-assessor's original output (items): {{ generator_output }}
+      L1-planning-impact-assessor-evaluator's verdict (fixes_applied, final_decision): {{ bot_response }}
+
+      Reconstruct the RESULTANT output: L1-planning-impact-assessor's items
+      with every fixes_applied[].before → after substitution resolved in.
+      Check that resultant content — not the evaluator's own scoring
+      bookkeeping — against L1-planning-impact-assessor/output_schema.json
+      and its evaluation.md rubric:
+
+      1. Schema compliance: does capability_check have summary (>=20 chars),
+         matched_service_id (SVC- pattern or null), is_duplicate, and
+         rationale (>=20 chars)? Does every existing_system_impact[] entry
+         have ci_id (CI- pattern), system_name, touched, how_or_why_not
+         (>=10 chars), related_components? Does every components[] entry
+         have requirement_id (FR- pattern), component_name, is_new,
+         blast_radius, rationale (>=10 chars)? Does every
+         external_dependencies[] entry have name, description (>=20 chars),
+         related_components, newly_surfaced?
+      2. Blast-radius validity: is every components[].blast_radius exactly
+         Low, Medium, or High?
+      3. Capability check not vacuous: if service_catalog has real
+         entries, does matched_service_id name a real SVC- id actually
+         present in that catalog (never null, never invented) unless the
+         catalog is genuinely empty?
+      4. Technical-touch check not skipped: if service_catalog and
+         cmdb_export both have real entries, is existing_system_impact[]
+         non-empty (something was actually checked)?
+      5. CI id validity: does every existing_system_impact[].ci_id actually
+         exist in cmdb_export's configuration_items (no invented CI id),
+         unless cmdb_export is genuinely empty?
+      6. Full FR coverage: does the set of components[].requirement_id
+         values exactly equal the set of FR ids in
+         prd_output.content.items.requirements[].id — no FR unmapped, no
+         invented FR id?
+      7. CMDB/KB mismatch flagged: where a plausible mismatch exists
+         between what the CMDB shows and what kb-L1-enterprise-architecture
+         would claim for a CI, is it stated as a finding in that
+         how_or_why_not, not silently reconciled?
+      8. Reasoning quality: does every how_or_why_not/rationale field
+         genuinely explain the decision, not just restate the finding?
+      9. Newly-surfaced dependency completeness: is anything newly
+         surfaced by the capability/technical-touch checks (e.g. an
+         identity-provider gap) reflected in external_dependencies with
+         newly_surfaced=true?
+      10. Empty-source explicit statement: when service_catalog/cmdb_export
+          are genuinely empty, does capability_check/existing_system_impact
+          say so explicitly, rather than reading as an unchecked or
+          skipped catalog/CMDB?
+
+      Answer "yes" if ALL checks pass on the RESULTANT content. Answer "no"
+      if ANY check fails — this gates what actually flows to
+      L1-planning-dependency-mapper and L1-planning-backlog-prioritizer.

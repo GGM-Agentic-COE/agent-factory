@@ -1,0 +1,25 @@
+id: kb-L1-react-scaffold
+name: React Project Scaffold
+layer: L1
+version: "1.0.0"
+status: active
+description: >
+  Production-ready React 18 + TypeScript project scaffold with Vite build tooling,
+  comprehensive testing, accessibility compliance, design system integration,
+  containerization, Kubernetes deployment, and CI/CD pipeline.
+dependencies:
+  - kb-L1-react-standards
+  - kb-L0-ui-coding-standards
+  - kb-L1-enterprise-architecture
+content:
+  - content/kb-L1-react-scaffold.md
+tags:
+  - react
+  - typescript
+  - scaffold
+  - vite
+  - docker
+  - kubernetes
+  - ci-cd
+  - accessibility
+  - design-system

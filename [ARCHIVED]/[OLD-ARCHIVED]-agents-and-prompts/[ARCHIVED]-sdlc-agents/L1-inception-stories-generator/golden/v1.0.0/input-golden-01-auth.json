@@ -1,0 +1,28 @@
+{
+  "source": "agent_output",
+  "source_agent_id": "L1-inception-epics-generator-agent",
+  "parameters": {
+    "epics": [
+      {
+        "epic_id": "EP-05",
+        "title": "Authentication & Security",
+        "features": [
+          {
+            "feature_id": "F-05.1",
+            "title": "Email/Password Registration & Login",
+            "description": "User registration with email/password. Fields: email (validated), password (min 8 chars, 1 uppercase, 1 number). Success: account created, welcome email sent. Failure: duplicate email shows 'account exists' with login link. Edge case: network timeout during registration retries silently.",
+            "requirements_covered": ["FR-11"],
+            "data_sensitivity": "Confidential"
+          },
+          {
+            "feature_id": "F-05.2",
+            "title": "Biometric Login (Face ID / Fingerprint)",
+            "description": "Optional biometric authentication for returning users. Enrolment after first successful password login. Face ID (iOS) and fingerprint (Android). Fallback to password if biometric fails 3 times. Edge case: device without biometric hardware shows password-only flow.",
+            "requirements_covered": ["FR-12"],
+            "data_sensitivity": "Restricted"
+          }
+        ]
+      }
+    ]
+  }
+}

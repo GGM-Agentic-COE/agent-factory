@@ -1,0 +1,16 @@
+{
+  "source": "agent_output",
+  "source_agent_id": "L1-inception-epics-generator-agent",
+  "parameters": {
+    "epics": [
+      {
+        "epic_id": "EP-05",
+        "title": "Authentication & Security",
+        "features": [
+          {"feature_id": "F-05.1", "title": "Email/Password Registration & Login", "requirements_covered": ["FR-11"], "data_sensitivity": "Confidential"},
+          {"feature_id": "F-05.2", "title": "Biometric Login", "requirements_covered": ["FR-12"], "data_sensitivity": "Restricted"}
+        ]
+      }
+    ]
+  }
+}

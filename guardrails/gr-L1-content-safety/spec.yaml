@@ -1,0 +1,64 @@
+spec_version: "1.0"
+artifact_type: guardrail
+metadata:
+  name: gr-L1-content-safety
+  version: "1.1.0"
+  layer: L1
+  owner: agentic-ai-coe
+  created: "2026-06-13"
+  implementation: colang
+
+purpose:
+  description: "Blocks toxic, harmful, offensive, or unsafe content in both agent input and output."
+
+triggers_on:
+  - pre_execution
+  - post_execution
+
+on_fail: block
+applies_to: all_agents
+
+rules:
+  - name: violence-and-harm
+    description: "Blocks content promoting violence, self-harm, or harm to others"
+    action: block
+    severity: critical
+    detection: regex + llm
+
+  - name: hate-speech
+    description: "Blocks hate speech or discrimination based on protected characteristics"
+    action: block
+    severity: critical
+    detection: regex + llm
+
+  - name: illegal-activity
+    description: "Blocks instructions for illegal activities (fraud, hacking, drug manufacturing, weapons)"
+    action: block
+    severity: critical
+    detection: regex + llm
+
+  - name: explicit-content
+    description: "Blocks sexually explicit or gratuitously violent content"
+    action: block
+    severity: critical
+    detection: llm
+
+  - name: minor-exploitation
+    description: "Blocks content targeting or exploiting minors"
+    action: block
+    severity: critical
+    detection: llm
+
+  - name: profanity-filter
+    description: "Flags excessive profanity in professional context (3+ instances)"
+    action: flag
+    severity: medium
+    detection: regex
+
+evaluation:
+  false_positive_threshold: 0.05
+  tuning_notes: |
+    - Profanity filter uses threshold (3+) to avoid flagging casual professional language
+    - "bitch" excluded from profanity list — handled by gr-L1-misogyny-detection
+    - Violence patterns require instructional framing ("how to") to avoid flagging news discussion
+    - Hate speech regex targets slurs only; contextual bias handled by domain-specific guardrails

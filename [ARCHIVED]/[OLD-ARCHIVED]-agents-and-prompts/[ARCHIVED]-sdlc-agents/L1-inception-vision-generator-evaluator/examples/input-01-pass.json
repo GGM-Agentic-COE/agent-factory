@@ -1,0 +1,22 @@
+{
+  "vision_document": "# Vision Document: LendSmart\n## Executive Summary\nLendSmart is a digital lending platform...\n## Business Context\n### Problem Statement\nManual loan processing takes 5 days...\n### Business Drivers\nFCA Consumer Duty 2023 requires...\n### Target Users and Stakeholders\n| User Type | Description | Primary Need |\n|---|---|---|\n| Borrower | Individual seeking personal loan | Fast, transparent application |\n| Underwriter | Credit risk assessor | Automated decisioning support |\n| Compliance Officer | Regulatory oversight | Audit trail and reporting |\n### Business Constraints\n- Must comply with CCA 1974...\n### Success Metrics\n| Metric | Current | Target | Method |\n|---|---|---|---|\n| Application time | 5 days | < 1 day | Timestamp delta |\n| Approval rate | 45% | 60% | Approved/submitted ratio |\n| Cost per loan | £120 | £40 | Operational cost / volume |\n| Customer NPS | 32 | 55 | Quarterly survey |\n| Default rate | 4.2% | < 3.5% | 90-day arrears / portfolio |\n## Full Scope Vision\n### Product Vision Statement\nA fully digital lending experience...\n### Feature Areas\n1. Digital Origination...\n2. Automated Decisioning...\n3. Smart Servicing...\n4. Open Banking Integration...\n### Integration Points\n- CRA (Experian, Equifax)...\n### User Journeys\nJourney 1: Borrower Application (8 steps)...\nJourney 2: Underwriter Review (6 steps)...\n### Scalability\n- 100K → 1M applications/year...\n### Long-Term Roadmap\n| Phase | Focus | Timeframe |\n|---|---|---|\n| MVP | Core origination | Q1 2026 |\n| Phase 2 | Servicing | Q2 2026 |\n| Phase 3 | Analytics | Q3 2026 |\n## MVP Scope\n### MVP Objective\nProve digital origination reduces time-to-decision to < 1 day.\n### MVP Success Criteria\n- [ ] 80% of applications completed digitally...\n### Features In Scope\n| Feature | Description | Priority | Rationale |\n|---|---|---|---|\n| Online application | Digital form | Must-Have | Core flow |\n| ID verification | KYC check | Must-Have | Regulatory |\n| Credit check | CRA integration | Must-Have | Decisioning |\n| Affordability | Income vs expenditure | Must-Have | FCA CONC 5.2A |\n| Offer generation | Automated terms | Must-Have | Speed |\n### Features Out of Scope\n| Feature | Reason | Phase |\n|---|---|---|\n| AI chatbot | Not MVP critical | Phase 3 |\n| Broker portal | B2B channel | Phase 2 |\n| Restructuring | Post-default | Phase 3 |\n### MVP User Journeys\nSimplified borrower flow (5 steps)...\n### MVP Constraints and Assumptions\n- Assume Faster Payments available — Risk: batch fallback needed\n### MVP Definition of Done\n- [ ] End-to-end application in < 15 mins...\n## Risks and Dependencies\n### Key Risks\n| Risk | Likelihood | Impact | Mitigation |\n|---|---|---|---|\n| CRA API downtime | Medium | High | Cache + retry |\n| FCA regulation change | Low | High | Modular rules engine |\n| Open Banking adoption | Medium | Medium | Fallback to manual upload |\n| Fraud at scale | Medium | High | ML fraud detection |\n### External Dependencies\n- Experian API — Owner: Experian — Status: Contract signed\n### Open Questions\n- Which CRA as primary?\n- SCA exemptions for repeat customers?\n- Settlement figure API provider?",
+  "generator_output": {
+    "agent_id": "L1-inception-vision-generator",
+    "agent_version": "1.0.0",
+    "execution_id": "exec-lend-001",
+    "workflow_execution_id": "wf-lend-001",
+    "status": "success",
+    "content": {
+      "type": "vision_document",
+      "schema_version": "1.0",
+      "items": {
+        "product_name": "LendSmart",
+        "artifact": {
+          "type": "vision_document",
+          "format": "markdown",
+          "location": "https://agentfactory.blob.core.windows.net/artifacts/wf-lend-001/vision-doc/vision-lendsmart.md"
+        }
+      }
+    }
+  }
+}

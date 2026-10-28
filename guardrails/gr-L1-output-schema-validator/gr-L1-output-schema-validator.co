@@ -1,0 +1,15 @@
+# gr-L1-output-schema-validator — LLM-Driven Colang Implementation
+# Layer: L1 — Output Schema Validator
+# Validation: LLM self_check (pure Colang)
+# Python actions preserved in actions.py for reference/hybrid mode
+
+define flow check output schema
+  """LLM validates output schema validator rules on output."""
+  $result = execute self_check_output
+
+  if not $result
+    bot block L1 output schema validator
+    stop
+
+define bot block L1 output schema validator
+  "Output blocked: does not conform to AgentOutput schema. Missing or malformed required fields detected."

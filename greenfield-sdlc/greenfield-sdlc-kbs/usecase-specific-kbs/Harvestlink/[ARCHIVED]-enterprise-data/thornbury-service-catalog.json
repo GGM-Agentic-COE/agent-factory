@@ -1,0 +1,18 @@
+{
+  "export_metadata": {
+    "source_system": "ServiceNow Service Catalog (illustrative)",
+    "org": "Thornbury Foods Group",
+    "exported_at": "2026-08-05T09:00:00Z",
+    "record_count": 7,
+    "note": "HarvestLink's own proposed services are deliberately NOT included — this export represents the estate BEFORE assessment, which is exactly what L1-planning-impact-assessor checks new requirements against. A service-level check here answers 'does something like this already exist' (avoid duplicate build, find the right owner) — a different question from the CMDB's CI-level 'what technical integration touchpoint exists' (see thornbury-cmdb-export.json)."
+  },
+  "services": [
+    { "service_id": "SVC-FIN-001", "name": "Finance & Ledger", "description": "Core financial ledger, invoicing, accounts payable/receivable", "owner_team": "Group Finance / Core IT", "tier": 1, "status": "active", "technical_components": ["CI-APP-001"] },
+    { "service_id": "SVC-SCM-001", "name": "Supply Chain & Warehouse", "description": "Warehouse operations and supplier/distributor master data for the wholesale business", "owner_team": "Core IT", "tier": 1, "status": "active", "technical_components": ["CI-APP-002", "CI-APP-003"] },
+    { "service_id": "SVC-CUST-001", "name": "Customer & Sales", "description": "Legacy wholesale CRM for foodservice buyer accounts, used by the traditional direct-sales team — account-managed, not self-service discovery", "owner_team": "Core IT", "tier": 2, "status": "active", "technical_components": ["CI-APP-009"] },
+    { "service_id": "SVC-COMP-001", "name": "Compliance & Documentation", "description": "Manual-upload store for wholesale supplier compliance certificates (HACCP etc.)", "owner_team": "Core IT (legacy)", "tier": 3, "status": "active — flagged for replacement, not yet funded", "technical_components": ["CI-APP-004"] },
+    { "service_id": "SVC-ID-001", "name": "Employee Identity", "description": "Group SSO for employees only — no external-party tier", "owner_team": "Core IT", "tier": 2, "status": "active", "technical_components": ["CI-APP-005"] },
+    { "service_id": "SVC-BI-001", "name": "Group Data Warehouse & BI", "description": "Group-wide aggregate reporting and analytics", "owner_team": "Core IT", "tier": 2, "status": "active", "technical_components": ["CI-APP-006"] },
+    { "service_id": "SVC-INT-001", "name": "Integration Platform", "description": "Group ESB (legacy point-to-point/mediated integration) and API Gateway (new digital-product integration pattern, mandatory from 2026)", "owner_team": "Core IT", "tier": 1, "status": "active — API Gateway rollout in progress", "technical_components": ["CI-APP-007", "CI-APP-008"] }
+  ]
+}

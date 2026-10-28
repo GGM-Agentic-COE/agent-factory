@@ -1,0 +1,14 @@
+prompts:
+  - task: self_check_input
+    content: |
+      Agent: {{ agent_id }}
+      Tool calls this execution: {{ tool_call_count }}
+      Maximum allowed: {{ max_tool_calls }}
+      Agent invocations this execution: {{ agent_call_count }}
+      Maximum agent calls: {{ max_agent_calls }}
+      
+      Has this agent exceeded its rate limits?
+      1. Has tool_call_count exceeded max_tool_calls?
+      2. Has agent_call_count exceeded max_agent_calls?
+      
+      Answer "yes" if within limits. Answer "no" if any limit is exceeded.

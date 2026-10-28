@@ -1,0 +1,54 @@
+{
+  "test_id": "golden-02",
+  "description": "Perfect response for a technology topic from prior agent",
+  "input": {"source": "agent_output", "source_agent_id": "L1-topic-selector-agent", "parameters": {"topic": "internet infrastructure"}},
+  "expected_output": {
+    "agent_id": "L1-inception-template-agent",
+    "agent_version": "1.0.0",
+    "execution_id": "exec-golden-002",
+    "input_summary": {
+      "source": "agent_output",
+      "source_agent_id": "L1-topic-selector-agent",
+      "parameters": {"topic": "internet infrastructure"}
+    },
+    "output": {
+      "type": "fact",
+      "schema_version": "1.0",
+      "items": [
+        {
+          "id": "item-001",
+          "title": "Undersea Cable Dependency",
+          "content": {
+            "description": "A unique fact is: Over 95% of intercontinental internet traffic travels through undersea fibre optic cables — not satellites — with more than 550 active cable systems spanning over 1.4 million kilometres across ocean floors."
+          },
+          "tags": ["internet", "infrastructure", "telecommunications"],
+          "metadata": {
+            "confidence": 0.90,
+            "reasoning": "Data from TeleGeography's submarine cable map (2024). The 95% figure is widely cited by networking authorities. Cable count approximate and growing.",
+            "citation": [
+              {
+                "source_reference": "general-knowledge",
+                "source_location": "telecommunications/submarine-cables",
+                "start_index": 0,
+                "end_index": 0
+              }
+            ],
+            "trajectory": [
+              {"step": 1, "action": "reason", "tool": null, "detail": "Considered multiple aspects — DNS, BGP, CDNs, physical layer. Physical layer least known."},
+              {"step": 2, "action": "generate", "tool": null, "detail": "Selected undersea cables as most people assume satellite-based internet"},
+              {"step": 3, "action": "validate", "tool": null, "detail": "Verified percentage claim and approximate cable statistics"}
+            ]
+          }
+        }
+      ]
+    }
+  },
+  "evaluation_criteria": {
+    "faithfulness": ">= 0.90",
+    "hallucination": "<= 0.10",
+    "relevance": ">= 0.90",
+    "schema_valid": true,
+    "single_item": true,
+    "confidence_range": [0.80, 1.0]
+  }
+}

@@ -1,0 +1,22 @@
+# gr-L3-consistency-checker — Colang Implementation
+# Layer: L3 Project — applies to multi-item output agents
+# Triggers: post_execution (output rail)
+
+define flow check output consistency
+  """Detect contradictions and duplicates in multi-item output."""
+  $consistent = execute check_internal_consistency(output=$bot_message)
+
+  if not $consistent
+    bot block inconsistency detected
+    stop
+
+  $result = execute self_check_output
+
+  if not $result
+    bot warn inconsistency detected
+
+define bot block inconsistency detected
+  "Output blocked: internal inconsistency detected. Duplicate IDs or conflicting values found across items."
+
+define bot warn inconsistency detected
+  "Warning: potential entity inconsistency detected across output items. Escalating to HITL review."

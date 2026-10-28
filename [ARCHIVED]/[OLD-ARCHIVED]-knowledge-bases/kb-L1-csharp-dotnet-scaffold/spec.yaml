@@ -1,0 +1,13 @@
+spec_version: "1.0"
+metadata:
+  name: kb-L1-csharp-dotnet-scaffold
+  version: "1.0.0"
+  layer: L1
+purpose: "Production-ready project scaffold for greenfield .NET 8 microservice APIs"
+depends_on:
+  - kb-L1-csharp-dotnet-standards
+  - kb-L1-microservices-architecture
+  - kb-L1-enterprise-architecture
+freshness:
+  review_cadence: quarterly
+  last_reviewed: "2026-04-21"

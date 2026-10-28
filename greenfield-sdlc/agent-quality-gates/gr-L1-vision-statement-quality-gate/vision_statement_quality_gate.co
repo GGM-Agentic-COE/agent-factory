@@ -1,0 +1,22 @@
+# gr-L1-vision-statement-quality-gate — Python-Hybrid Colang Implementation
+# Layer: L1 — fires at L1-vision-statement-generator-evaluator's post_execution
+# Validates L1-vision-statement-generator's RESULTANT output (not the evaluator's own bookkeeping)
+# Deterministic checks via actions.py + LLM for semantic checks
+# Last automated checkpoint before the Product Lead approval gate.
+
+define flow check output vision statement quality gate
+  """Deterministic schema/coverage/viability-score check on the resultant content, then LLM semantic check."""
+  $has_issues = execute check_vision_statement_quality_gate(output=$bot_message, generator_output=$generator_output, original_input=$original_input)
+
+  if $has_issues
+    bot block vision statement quality gate violation
+    stop
+
+  $result = execute self_check_output
+
+  if not $result
+    bot block vision statement quality gate violation
+    stop
+
+define bot block vision statement quality gate violation
+  "L1-vision-statement-generator's resultant output (post-evaluation) failed its quality gate: schema violation, an uncovered regulatory constraint, or a silently-misreported viability_score detected. This is the last automated checkpoint before a human reads vision.md — the workflow cannot open the Product Lead approval gate until this is resolved. Retrying."

@@ -1,0 +1,15 @@
+prompts:
+  - task: self_check_input
+    content: |
+      Agent: {{ agent_id }}
+      Tokens used (input + output): {{ total_tokens }}
+      Token budget: {{ max_token_budget }}
+      Invocations this window: {{ invocation_count }}
+      Max invocations: {{ max_invocations }}
+      
+      Has this execution exceeded its budget?
+      1. Has total_tokens exceeded max_token_budget?
+      2. Has invocation_count exceeded max_invocations?
+      3. Is the execution at >80% of budget (flag warning)?
+      
+      Answer "yes" if within budget. Answer "no" if budget exceeded. Answer "warn" if >80%.

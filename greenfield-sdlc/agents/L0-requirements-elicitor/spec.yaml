@@ -1,0 +1,66 @@
+# Agent Specification Document
+spec_version: "1.0"
+artifact_type: agent
+metadata:
+  name: L0-requirements-elicitor
+  version: "1.0.0"
+  layer: L0
+  phase: requirements
+  owner: agentic-ai-coe
+  created: "2026-10-26"
+
+purpose:
+  description: "Converts an approved vision document into a set of atomic, traceable functional requirements, splitting every compound clause into separate FRs."
+  input: "The approved vision document (read from Confluence by page_id), including its Product Lead approval comment."
+  output: "functional_requirements[] (FR-NNN, verbatim statement, citation, acceptance criteria, dependency, priority) and compound_splits[], emitted as JSON only."
+  business_value: "A vision is not buildable until it is broken into singular, testable, traceable requirements. This agent opens Phase 1 and refuses to run without a recorded human approval of the vision, so nothing downstream is built on an unapproved direction."
+
+prompt:
+  ref: "agents/L0-requirements-elicitor/L0-requirements-elicitor-prompt.md"
+  version: "1.0.0"
+  description: "Reads vision.md section by section, extracts one atomic FR per testable capability, splits compound clauses, cites every FR to its vision.md section, and runs a mechanical self-check against kb-L0-requirements-quality-standard."
+
+contract:
+  input_schema: "$ref: schemas/agent-input-contract-schema.json"
+  output_schema: "$ref: schemas/agent-output-schema.json"
+
+  input:
+    accepts_from_agents: []   # first agent in Phase 1 — runs after the Phase 0 human approval gate, reads the vision from Confluence
+    accepts_direct_input: true
+    accepts_file_upload:
+      enabled: false
+    required_parameters:
+      confluence_vision_page_id: { type: string, description: "Confluence page_id of the approved vision document, passed to tool-L0-confluence-reader" }
+      github-requirements-elicitor-kb-folder-location: { type: string, description: "GitHub folder holding kb-L0-requirements-quality-standard" }
+      github-requirements-elicitor-kb-repo-name: { type: string, description: "GitHub repository holding kb-L0-requirements-quality-standard" }
+      github-requirements-elicitor-kb-branch: { type: string, description: "GitHub branch holding kb-L0-requirements-quality-standard" }
+
+  output:
+    $ref: "output_schema.json"   # content.type: "requirements" — schema file not yet created
+
+context:
+  knowledge_bases:
+    - kb-L0-requirements-quality-standard   # ISO/IEC/IEEE 29148 + RFC 2119; used for mechanical checks only (vague-term and compound-clause scans), retrieved from GitHub at runtime
+  guardrails:
+    - gr-L1-output-schema-validator
+    - gr-L1-pii-detection
+    - gr-L3-hallucination-detector
+    - gr-L3-citation-validator
+    - gr-L3-consistency-checker
+    - gr-L2-tool-permissions
+    - gr-L3-agent-rate-limit
+  tools:
+    - tool-L0-confluence-reader          # reads the approved vision document
+    - tool-L0-github-reader-using-PAT    # reads kb-L0-requirements-quality-standard; tool-L0-github-reader-using-app takes the same folder_location/repo/branch parameters if that variant is deployed instead
+    # read-only — this agent writes nothing to any store; the JSON output is the artifact of record
+
+quality:
+  evaluation_ref: "evaluation.md"   # generator rubric loaded by L0-requirements-elicitor-evaluator (S6) — not yet present in this folder
+  min_score: 7.0
+  hallucination_check: true
+  consistency_check: true
+
+versioning:
+  input_version: "1.0"
+  output_version: "1.0"
+  instruction_hash: "sha256:pending"

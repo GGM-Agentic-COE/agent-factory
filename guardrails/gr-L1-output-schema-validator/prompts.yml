@@ -1,0 +1,14 @@
+prompts:
+  - task: self_check_output
+    content: |
+      Agent output: {{ bot_response }}
+      
+      Validate this output against the AgentOutput schema:
+      1. Has root fields: agent_id, agent_version, execution_id, input_summary, output
+      2. input_summary has: source (enum: agent_output|direct_input|file_upload), parameters (object)
+      3. output has: type (valid enum), schema_version (non-empty string)
+      4. If output.items exists: each item has id, title, content, metadata
+      5. If metadata exists: has confidence (0-1), reasoning (non-empty, 20+ chars), citation (array), trajectory (array)
+      6. No null or empty required fields
+      
+      Answer "yes" if schema is valid. Answer "no" if any required field is missing or malformed.

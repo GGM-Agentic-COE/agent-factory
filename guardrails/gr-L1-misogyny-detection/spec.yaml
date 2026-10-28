@@ -1,0 +1,76 @@
+spec_version: "1.0"
+artifact_type: guardrail
+metadata:
+  name: gr-L1-misogyny-detection
+  version: "1.1.0"
+  layer: L1
+  owner: agentic-ai-coe
+  created: "2026-06-19"
+  implementation: colang
+
+purpose:
+  description: "Detects and blocks misogynistic, sexist, or gender-discriminatory content in agent output before delivery. Also screens input for attempts to elicit such content."
+
+triggers_on:
+  - pre_execution
+  - post_execution
+
+on_fail: block
+applies_to: all_agents
+
+rules:
+  - name: sexist-language-check
+    description: "Detects derogatory, demeaning, or objectifying language targeting women or gender minorities"
+    action: block
+    severity: critical
+    detection: regex + llm
+
+  - name: gender-stereotype-check
+    description: "Detects content reinforcing harmful gender stereotypes or roles as prescriptive fact"
+    action: block
+    severity: critical
+    detection: llm
+
+  - name: gendered-competence-check
+    description: "Detects assumptions of incompetence or unsuitability based on gender"
+    action: block
+    severity: high
+    detection: regex + llm
+
+  - name: gender-dismissal-check
+    description: "Detects content that dismisses, belittles, or undermines based on gender"
+    action: block
+    severity: high
+    detection: llm
+
+  - name: benevolent-sexism-check
+    description: "Detects positive-sounding statements that reinforce gender inequality"
+    action: block
+    severity: high
+    detection: llm
+
+  - name: elicitation-attempt-check
+    description: "Detects input attempts to make the agent produce misogynistic content"
+    action: block
+    severity: high
+    detection: llm
+    rail: input
+
+notes:
+  scope: |
+    This guardrail focuses on misogyny (hatred/prejudice against women). For comprehensive
+    gender-bias coverage, deploy alongside:
+    - gr-L1-content-safety (covers hate speech broadly including misandry, transphobia)
+    - gr-L1-pii-detection (prevents gender-based profiling via PII)
+  intersectionality: |
+    Misogyny often intersects with racism (misogynoir), ableism, classism, and transphobia.
+    The LLM prompt (check 10) accounts for intersectional patterns. Regex patterns focus on
+    gender-specific language; intersectional detection relies on the LLM semantic layer.
+
+evaluation:
+  false_positive_threshold: 0.05
+  tuning_notes: |
+    - "hoe" excluded from bare-word regex due to gardening homonym; requires derogatory context
+    - "all women are" narrowed to require negative predicate (avoids "all women are welcome")
+    - Medium-severity patterns (man up, like a girl) may appear in legitimate quotes;
+      LLM layer provides context-aware override in such cases

@@ -1,0 +1,26 @@
+# gr-L3-confidence-gate — Colang Implementation
+# Layer: L3 Project — applies to ALL agents
+# Triggers: post_execution (output rail)
+
+define flow check confidence gate
+  """Escalate to HITL when confidence is below threshold."""
+  $result = execute check_confidence_scores(output=$bot_message)
+
+  if $result == "block"
+    bot block low confidence
+    stop
+
+  if $result == "escalate"
+    bot warn low confidence escalation
+
+  $llm_result = execute self_check_output
+
+  if not $llm_result
+    bot block low confidence
+    stop
+
+define bot block low confidence
+  "Output blocked: one or more items have confidence below 0.5 threshold. Items cannot be delivered without human review."
+
+define bot warn low confidence escalation
+  "Warning: items with confidence 0.5-0.7 detected. Escalating to human-in-the-loop review before delivery."

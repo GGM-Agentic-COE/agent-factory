@@ -1,0 +1,36 @@
+spec_version: "1.0"
+artifact_type: guardrail
+metadata:
+  name: gr-L3-citation-validator
+  version: "1.0.0"
+  layer: L3
+  owner: project-lead
+  implementation: colang
+
+purpose:
+  description: "Ensure every output item has at least one resolvable citation to a source"
+
+triggers_on:
+  - post_execution
+
+on_fail: block_and_retry
+applies_to: content_generator_agents
+
+rules:
+  - name: citation-present
+    description: "Every item in output.items must have non-empty citation array"
+    action: block
+    severity: high
+
+  - name: source-resolvable
+    description: "citation.source_reference must resolve to an attached KB or valid source"
+    action: block
+    severity: high
+
+  - name: min-citations
+    description: "At least 1 citation per item"
+    action: block
+    severity: high
+
+evaluation:
+  false_positive_threshold: 0.05

@@ -1,0 +1,33 @@
+{
+  "agent_id": "L1-inception-vision-generator-evaluator",
+  "agent_version": "1.0.0",
+  "execution_id": "exec-eval-001",
+  "workflow_execution_id": "wf-lend-001",
+  "status": "success",
+  "content": {
+    "type": "vision_document_evaluation",
+    "schema_version": "1.0",
+    "items": {
+      "verdict": "pass",
+      "scores": {
+        "faithfulness": 0.93,
+        "hallucination": 0.04,
+        "domain_grounding": 0.91,
+        "specificity": 0.88,
+        "consistency": 0.95,
+        "completeness": 0.90
+      },
+      "findings": [
+        {"category": "completeness", "description": "MVP Constraints and Assumptions section has only 1 item — should have ≥2 with 'Risk if wrong'", "fix_applied": "Added assumption: 'Assume single-applicant only for MVP — Risk: joint applications require separate data model and consent flow'"},
+        {"category": "specificity", "description": "Scalability states '100K → 1M' without timeframe", "fix_applied": "Amended to '100K applications/year at launch, scaling to 1M within 24 months'"}
+      ],
+      "artifact": {
+        "type": "vision_document",
+        "format": "markdown",
+        "location": "https://agentfactory.blob.core.windows.net/artifacts/wf-lend-001/vision-doc/vision-lendsmart.md",
+        "status": "corrected_and_reuploaded"
+      }
+    },
+    "execution_summary": "• Verdict: pass (all scores ≥ threshold)\n• 2 findings, 2 fixes applied\n• Artifact re-uploaded to /wf-lend-001/vision-doc/vision-lendsmart.md\n• KBs consulted: kb-L1-inception-vision-generator-evaluation (used for scoring thresholds and quality gates)\n• Guardrails: gr-L1-output-schema-validator (pass), gr-L3-consistency-checker (pass)\n• Tools: tool-L1-azure-blob-writer (success — corrected document uploaded)"
+  }
+}

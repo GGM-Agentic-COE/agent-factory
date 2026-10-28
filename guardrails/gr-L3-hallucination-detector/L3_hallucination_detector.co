@@ -1,0 +1,20 @@
+# gr-L3-hallucination-detector — Colang Implementation
+# Layer: L3 Project — applies to content generator agents
+# Triggers: post_execution (output rail)
+
+define flow check hallucination
+  """Check output is grounded in input and KB content."""
+  $has_fabrication = execute detect_fabrication_patterns(output=$bot_message)
+
+  if $has_fabrication
+    bot block hallucination detected
+    stop
+
+  $result = execute self_check_output
+
+  if not $result
+    bot block hallucination detected
+    stop
+
+define bot block hallucination detected
+  "Output blocked: ungrounded or fabricated content detected. Every claim must trace to input data or attached knowledge base. Retry with stricter grounding."

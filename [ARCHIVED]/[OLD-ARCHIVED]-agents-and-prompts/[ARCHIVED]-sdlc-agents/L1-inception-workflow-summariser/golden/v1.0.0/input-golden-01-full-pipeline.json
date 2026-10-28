@@ -1,0 +1,48 @@
+{
+  "agent_id": "L1-inception-workflow-summariser",
+  "input": {
+    "workflow_name": "Inception Pipeline — ExpenseTrack",
+    "agent_outputs": [
+      {
+        "agent_id": "L1-inception-vision-generator",
+        "execution_id": "exec-g01-aaa",
+        "workflow_execution_id": "wf-golden-001",
+        "status": "success",
+        "content": {
+          "type": "vision_document",
+          "schema_version": "1.0",
+          "items": {
+            "product_name": "ExpenseTrack",
+            "document_summary": {"section_count": 5, "feature_area_count": 5, "mvp_feature_count": 7, "risk_count": 4, "open_question_count": 3},
+            "artifact": {"location": "https://storage.blob.core.windows.net/artifacts/exec-g01-aaa/vision-doc/vision-expensetrack.md"}
+          },
+          "execution_summary": "• Generated vision document for ExpenseTrack\n• 5 sections, 5 feature areas, 7 MVP features, 4 risks\n• Knowledge bases consulted: kb-L2-fintech-domain, kb-L1-vision-document-template\n• Guardrails evaluated: gr-L1-output-schema-validator (PASS), gr-L1-pii-detection (PASS), gr-L3-hallucination-detector (PASS)\n• Tools invoked: tool-L1-azure-blob-upload (success)"
+        }
+      },
+      {
+        "agent_id": "L1-inception-requirements-extractor",
+        "execution_id": "exec-g01-bbb",
+        "workflow_execution_id": "wf-golden-001",
+        "status": "success",
+        "content": {
+          "type": "requirements",
+          "schema_version": "1.0",
+          "items": {"functional_requirements": [{}, {}, {}, {}, {}, {}, {}, {}], "non_functional_requirements": [{}, {}, {}, {}], "constraints": [{}, {}], "assumptions": [{}, {}, {}], "gaps": [{}, {}]},
+          "execution_summary": "• Produced 8 FRs, 4 NFRs, 2 constraints, 3 assumptions, 2 gaps\n• Knowledge bases consulted: kb-L1-enterprise-architecture\n• Guardrails evaluated: gr-L1-output-schema-validator (PASS), gr-L3-citation-validator (PASS)\n• Tools invoked: none"
+        }
+      },
+      {
+        "agent_id": "L1-inception-epics-generator",
+        "execution_id": "exec-g01-ccc",
+        "workflow_execution_id": "wf-golden-001",
+        "status": "success",
+        "content": {
+          "type": "epics",
+          "schema_version": "1.0",
+          "items": {"epics": [{}, {}, {}, {}], "coverage_matrix": {"covered": 8, "total": 8, "percentage": 100}},
+          "execution_summary": "• Generated 4 epics with 12 features across 3 sprints\n• 100% requirements coverage\n• Knowledge bases consulted: kb-L1-ntuc-enterprise-architecture, kb-L1-epics-best-practices\n• Guardrails evaluated: gr-L1-output-schema-validator (PASS), gr-L3-consistency-checker (PASS)\n• Tools invoked: none"
+        }
+      }
+    ]
+  }
+}

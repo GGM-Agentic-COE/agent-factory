@@ -1,0 +1,58 @@
+spec_version: "1.0"
+artifact_type: guardrail
+metadata:
+  name: gr-L1-vision-statement-quality-gate
+  version: "1.0.0"
+  layer: L1
+  owner: agentic-ai-coe
+  implementation: colang
+
+purpose:
+  description: "Fires when L1-vision-statement-generator-evaluator concludes — the last automated checkpoint before a human reads vision.md. Validates the RESULTANT output — L1-vision-statement-generator's own items, with the evaluator's fixes_applied resolved in — against L1-vision-statement-generator/output_schema.json and its evaluation.md rubric, above all the reconciliation-coverage BLOCKER."
+
+triggers_on:
+  - post_execution   # fires when the evaluator (not the generator) finishes
+
+on_fail: retry_once_then_escalate
+applies_to: configured_agents   # wired into L1-vision-statement-generator-evaluator/spec.yaml context.guardrails — not global
+
+rules:
+  # --- Output schema validation (of L1-vision-statement-generator's own output_schema.json) ---
+  - name: schema-compliance
+    description: "The resultant items must validate against L1-vision-statement-generator/output_schema.json: executive_summary/problem_statement/target_users/value_proposition/market_context (summary <=150 chars, confidence, reasoning), regulatory_posture (overall_status, constraint_summaries[]), north_star_metrics[] (id NSM-NN, metric, target, confidence, reasoning), roadmap[] (phase_number, title, description_summary <=150), open_risks[] (id OR-NN, description_summary <=150, source regulatory|market, related_ids[] non-empty)"
+    action: block
+    severity: critical
+
+  - name: ids-sequential-no-gaps
+    description: "NSM-NN and OR-NN ids are each sequential, no gaps or duplicates; roadmap phase_number values start at 1 and are sequential"
+    action: block
+    severity: high
+
+  # --- Rubric adherence (evaluation.md, checked against the RESULTANT content — self-contained, no original_input needed for this one) ---
+  - name: reconciliation-coverage-complete
+    description: "BLOCKER (evaluation.md Quality Gate #2): every constraint_id in regulatory_posture.constraint_summaries (which are Amber/Red by construction — see that field's own schema) must appear in the union of open_risks[].related_ids, checked by set membership on the RESULTANT content itself — this field is self-contained in the same output, no upstream lookup needed. A constraint_id in NO open_risks entry, even after the evaluator's fixes, is the single most important thing this gate exists to catch"
+    action: block
+    severity: critical
+
+  - name: roadmap-phase1-addresses-worst-risk
+    description: "If any open_risks entry traces (via related_ids) to a Red-status constraint in regulatory_posture, the roadmap entry with phase_number=1 must have resolves_risk equal to that open_risks entry's id (evaluation.md Quality Gate #4, Reflection Checklist rule)"
+    action: flag
+    severity: high
+
+  - name: executive-summary-no-new-claims
+    description: "executive_summary.summary introduces no claim absent from problem_statement/target_users/value_proposition/market_context/regulatory_posture/roadmap/open_risks — it condenses, it never introduces (evaluation.md Quality Gate #5)"
+    action: flag
+    severity: high
+
+  - name: no-publishing-tool-invoked
+    description: "This agent must not have invoked a Confluence/publishing tool itself — that's L1-confluence-publisher's job (evaluation.md Quality Gate #6)"
+    action: flag
+    severity: medium
+
+  - name: viability-score-honest
+    description: "The viability_score this agent received (a required input parameter, not part of its own output items) must be reported honestly in execution_summary — not omitted or silently softened when below threshold (evaluation.md Reflection Checklist #3). Requires cross-checking against original_input.viability_score"
+    action: block
+    severity: critical
+
+evaluation:
+  false_positive_threshold: 0.03

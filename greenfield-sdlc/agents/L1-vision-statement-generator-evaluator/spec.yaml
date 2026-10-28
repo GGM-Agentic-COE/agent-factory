@@ -1,0 +1,62 @@
+# Agent Specification Document
+spec_version: "1.0"
+artifact_type: agent
+metadata:
+  name: L1-vision-statement-generator-evaluator
+  version: "1.0.0"
+  layer: L1
+  phase: vision
+  owner: agentic-ai-coe
+  created: "2026-08-02"
+
+purpose:
+  description: "Independently verifies that L1-vision-statement-generator's reconciliation is real — every Amber/Red regulatory constraint is covered by open_risks, executive_summary introduces no new claims, and the viability_score it received (computed upstream at qg-L1-viability-score during L1-vision-regulatory-feasibility-checker-evaluator's run) is reported honestly, not silently overridden."
+  input: "L1-vision-statement-generator's original input (all three upstream item sets) plus its draft output."
+  output: "Scores, findings, any fixes applied, and a final decision."
+  business_value: "This is the last automated checkpoint before a human (the Product Lead) reads the vision document. If a serious regulatory finding was dropped anywhere in the pipeline, this is the last place it can still be caught before it reaches a person who will reasonably assume nothing was silently lost."
+
+prompt:
+  ref: "prompts/L1-vision-statement-generator-evaluator/instructions.md"
+  version: "1.0.0"
+  description: "Scores against L1-vision-statement-generator/evaluation.md; the reconciliation coverage check is the primary gate, not one check among many."
+
+contract:
+  input_schema: "$ref: schemas/agent-input-contract-schema.json"
+  output_schema: "$ref: schemas/agent-output-schema.json"
+
+  input:
+    accepts_from_agents: [L1-vision-statement-generator]
+    accepts_direct_input: false
+    accepts_file_upload:
+      enabled: false
+    required_parameters:
+      original_input: { type: object, description: "The three upstream item sets and viability_score L1-vision-statement-generator received" }
+      generator_output: { type: object, description: "L1-vision-statement-generator's draft items output" }
+
+  output:
+    $ref: "output_schema.json"
+
+context:
+  knowledge_bases:
+    - ref: "../L1-vision-statement-generator/evaluation.md"
+  guardrails:
+    - gr-L1-output-schema-validator
+    - gr-L1-pii-detection
+    - gr-L1-consistency-check   # re-checked independently — the reconciliation coverage check
+    - gr-L1-vision-statement-quality-gate   # fires when THIS evaluator concludes; validates L1-vision-statement-generator's RESULTANT output against its own schema+evaluation.md, above all the reconciliation-coverage BLOCKER (guardrails/gr-L1-vision-statement-quality-gate)
+  tools: []
+
+quality:
+  evaluation_ref: "evaluation.md"
+  min_score: 8.5   # matches the regulatory-checker-evaluator's bar — this is also a last-line-of-defense agent
+  hallucination_check: true
+  consistency_check: true
+
+performance:
+  target_latency_seconds: 15
+  max_token_budget: 6000
+
+versioning:
+  input_version: "1.0"
+  output_version: "1.0"
+  instruction_hash: "sha256:pending"

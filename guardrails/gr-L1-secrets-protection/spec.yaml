@@ -1,0 +1,36 @@
+spec_version: "1.0"
+artifact_type: guardrail
+metadata:
+  name: gr-L1-secrets-protection
+  version: "1.0.0"
+  layer: L1
+  owner: agentic-ai-coe
+  implementation: colang
+
+purpose:
+  description: "Prevent credentials, API keys, tokens, and internal system details from appearing in output"
+
+triggers_on:
+  - post_execution
+
+on_fail: block_and_alert
+applies_to: all_agents
+
+rules:
+  - name: api-key-patterns
+    description: "Block strings matching API key formats"
+    action: block
+    severity: critical
+
+  - name: credential-patterns
+    description: "Block password, token, secret patterns"
+    action: block
+    severity: critical
+
+  - name: internal-urls
+    description: "Block internal system URLs and endpoints"
+    action: block
+    severity: high
+
+evaluation:
+  false_positive_threshold: 0.05

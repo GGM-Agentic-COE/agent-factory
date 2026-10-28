@@ -1,0 +1,59 @@
+spec_version: "1.0"
+artifact_type: knowledge_base
+metadata:
+  name: kb-L1-enterprise-architecture
+  version: "1.0.0"
+  layer: L1
+  owner: enterprise-architecture-team
+  content_hash: "sha256:auto-computed-on-publish"
+  last_reviewed: "2026-04-18"
+  review_cadence: quarterly
+
+purpose:
+  description: >
+    Enterprise-level architecture standards for a fintech loan application platform.
+    This KB provides the canonical reference for technology stack, architecture patterns,
+    API standards, data architecture, security architecture, infrastructure, and
+    non-functional requirements. All design and construction agents MUST ground their
+    decisions in this KB. Any deviation requires Architecture Review Board (ARB) approval.
+
+scope:
+  attached_to: "Design and construction agents (A5, A6, A7, A8, A9)"
+  override_policy: "No agent may deviate from standards in this KB without ARB approval documented in Jira"
+
+content:
+  format: markdown
+  documents:
+    - path: kb-L1-enterprise-architecture.md
+      sections:
+        - EA1-technology-stack
+        - EA2-architecture-patterns
+        - EA3-api-standards
+        - EA4-data-architecture
+        - EA5-security-architecture
+        - EA6-infrastructure-and-deployment
+        - EA7-non-functional-requirements
+        - EA8-integration-patterns
+        - EA9-observability-standards
+        - EA10-mobile-architecture
+        - EA11-design-system-standards
+        - EA12-compliance-architecture
+        - EA13-code-standards
+        - EA14-testing-standards
+        - EA15-feature-flag-standards
+        - EA16-dependency-management
+        - EA17-documentation-standards
+        - EA18-notification-architecture
+        - EA19-payment-card-security-pci-dss
+        - EA20-localisation-and-multi-platform
+  total_tokens_estimate: 35000
+  chunking: by-section
+
+versioning:
+  changes_trigger_regression: true
+  notification_on_change: [enterprise-architecture-team, all-agent-owners]
+
+freshness:
+  review_cadence: quarterly
+  last_reviewed: "2026-04-18"
+  staleness_threshold_days: 120

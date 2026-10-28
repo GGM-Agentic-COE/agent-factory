@@ -1,0 +1,63 @@
+# Agent Specification Document
+spec_version: "1.0"
+artifact_type: agent
+metadata:
+  name: L1-vision-statement-generator
+  version: "1.0.0"
+  layer: L1
+  phase: vision
+  owner: agentic-ai-coe
+  created: "2026-08-02"
+
+purpose:
+  description: "Synthesizes idea, market, and regulatory findings into one reconciled vision statement and roadmap outline. Produces the vision.md artifact only — publishing is a separate Utility agent's job (L1-confluence-publisher), per the Core/Utility split."
+  input: "idea_brief items, market_analysis items, regulatory_feasibility items, and a viability_score computed at the regulatory-feasibility quality gate."
+  output: "vision.md artifact plus structured items reconciling all three upstream inputs."
+  business_value: "Three separate analyses aren't a decision — the Product Lead needs one document with a north-star metric and roadmap outline to approve or reject. This agent is also the last chance to catch a dropped regulatory finding before it reaches a human."
+
+prompt:
+  ref: "prompts/L1-vision-statement-generator/instructions.md"
+  version: "1.0.0"
+  description: "Reconciles three upstream artifacts into one vision statement; every Amber/Red regulatory item must survive into open_risks with a roadmap dependency."
+
+contract:
+  input_schema: "$ref: schemas/agent-input-contract-schema.json"
+  output_schema: "$ref: schemas/agent-output-schema.json"
+
+  input:
+    accepts_from_agents: [L1-vision-idea-intake, L1-vision-market-analyzer, L1-vision-regulatory-feasibility-checker]
+    accepts_direct_input: false
+    accepts_file_upload:
+      enabled: false
+    required_parameters:
+      idea_brief_items: { type: object, description: "Full items object from L1-vision-idea-intake" }
+      market_analysis_items: { type: object, description: "Full items object from L1-vision-market-analyzer" }
+      regulatory_feasibility_items: { type: object, description: "Full items object from L1-vision-regulatory-feasibility-checker" }
+      viability_score: { type: number, description: "Computed at qg-L1-viability-score during the regulatory-feasibility-checker evaluation gate" }
+
+  output:
+    $ref: "output_schema.json"
+
+context:
+  knowledge_bases: []   # vision structure is embedded in instructions.md per S4 — this agent synthesizes purely from upstream artifacts
+  guardrails:
+    - gr-L1-output-schema-validator
+    - gr-L1-pii-detection
+    - gr-L1-hallucination-check
+    - gr-L1-consistency-check   # checks reconciliation: no upstream Amber/Red item silently dropped
+  tools: []   # no direct tool access — this agent produces an artifact only; publishing is L1-confluence-publisher's job
+
+quality:
+  evaluation_ref: "evaluation.md"
+  min_score: 7.0
+  hallucination_check: true
+  consistency_check: true
+
+performance:
+  target_latency_seconds: 15
+  max_token_budget: 8000
+
+versioning:
+  input_version: "1.0"
+  output_version: "1.0"
+  instruction_hash: "sha256:pending"

@@ -1,0 +1,33 @@
+prompts:
+  - task: self_check_output
+    content: |
+      L1-requirements-elicitor's original output (items): {{ generator_output }}
+      L1-requirements-elicitor-evaluator's verdict (fixes_applied, final_decision): {{ bot_response }}
+
+      Reconstruct the RESULTANT output: L1-requirements-elicitor's items
+      with every fixes_applied[].before → after substitution resolved in.
+      Check that resultant content — not the evaluator's own scoring
+      bookkeeping — against L1-requirements-elicitor/output_schema.json and
+      kb-L1-requirements-quality-standard's ISO/IEC/IEEE 29148 rubric:
+
+      1. Schema compliance: does every functional_requirements[] entry have
+         id, title, statement, traces_to, confidence, reasoning? Does every
+         compound_splits[] entry have a source_clause_summary (<=150 chars)
+         and a split_into array naming >=2 real FR ids?
+      2. ID sequencing: are FR-NNN ids sequential, no gaps or duplicates?
+      3. Compound-split integrity: does every split_into id actually exist
+         in functional_requirements?
+      4. Unambiguous: does any statement contain an unqualified vague term
+         (fast, user-friendly, appropriate, secure, robust, intuitive)
+         with no measurable qualifier immediately after it?
+      5. Singular: does any FR statement genuinely join two independently
+         testable capabilities that should have been split — not just
+         contain the word "and" in a compound subject or list?
+      6. Verifiable: could a tester write one pass/fail test directly from
+         each statement alone?
+      7. Consistent: do any two FRs contradict, or use two different names
+         for the same concept?
+
+      Answer "yes" if ALL checks pass on the RESULTANT content. Answer "no"
+      if ANY check fails — this gates what actually flows to
+      L1-requirements-nfr-classifier and L1-requirements-prd-composer.

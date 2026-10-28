@@ -1,0 +1,23 @@
+# gr-L2-policy-enforcement — LLM-Driven Colang Implementation
+# Layer: L2 — Policy Enforcement
+# Validation: LLM self_check (pure Colang)
+# Python actions preserved in actions.py for reference/hybrid mode
+
+define flow check input policy
+  """LLM validates policy enforcement rules on input."""
+  $result = execute self_check_input
+
+  if not $result
+    bot block L2 policy enforcement
+    stop
+
+define flow check output policy
+  """LLM validates policy enforcement rules on output."""
+  $result = execute self_check_output
+
+  if not $result
+    bot block L2 policy enforcement
+    stop
+
+define bot block L2 policy enforcement
+  "OUT_OF_SCOPE: This request is outside the agent's designated domain. The agent can only help with topics within its assigned scope."

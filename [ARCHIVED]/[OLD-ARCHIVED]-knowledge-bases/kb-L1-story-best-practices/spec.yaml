@@ -1,0 +1,35 @@
+spec_version: "1.0"
+artifact_type: knowledge_base
+metadata:
+  name: kb-L1-story-best-practices
+  version: "1.0.0"
+  layer: L1
+  owner: agentic-ai-coe
+  content_hash: "sha256:pending"
+  last_reviewed: "2026-06-15"
+  review_cadence: quarterly
+
+purpose:
+  description: "Provides best practices for writing high-quality user stories — format, acceptance criteria standards, decomposition patterns, and common anti-patterns to avoid"
+
+content:
+  format: markdown
+  documents:
+    - path: kb-L1-story-best-practices.md
+      sections: [story-format, acceptance-criteria, decomposition, sizing, anti-patterns]
+    - path: kb-L1-story-best-practices.pdf
+      sections: [reference-copy]
+
+  total_tokens_estimate: 8000
+  chunking: by-section
+  embedding_model: text-embedding-3-small
+
+consumers:
+  agents:
+    - L1-inception-stories-generator-agent
+    - L1-inception-story-generator-agent
+  usage: "Agents reference this KB during story generation to ensure format compliance, AC quality, and appropriate sizing"
+
+visibility:
+  accessible_by: [L1, L2, L3, L4]
+  rule: "All story-generating agents at any layer can access this KB"

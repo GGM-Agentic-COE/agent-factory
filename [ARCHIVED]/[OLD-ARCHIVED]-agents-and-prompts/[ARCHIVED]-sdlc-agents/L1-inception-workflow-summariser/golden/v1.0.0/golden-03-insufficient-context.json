@@ -1,0 +1,29 @@
+{
+  "agent_id": "L1-inception-workflow-summariser",
+  "execution_id": "exec-g03-aaa",
+  "workflow_execution_id": null,
+  "status": "failed",
+  "_evaluation": {
+    "_note": "Golden-file-only metadata for evaluation.",
+    "expected_scores": {"faithfulness": 1.0, "hallucination": 0.0, "completeness": 1.0},
+    "key_checks": [
+      "Status is failed: PASS",
+      "No invented workflow content: PASS",
+      "INSUFFICIENT_CONTEXT stated in outcome: PASS"
+    ]
+  },
+  "content": {
+    "type": "workflow_summary",
+    "schema_version": "1.0",
+    "items": {
+      "request_and_intent": "No workflow execution data provided.",
+      "execution_flow": [],
+      "artifacts_and_content": [],
+      "outcome": "INSUFFICIENT_CONTEXT: Received 0 agent outputs — nothing to summarise. Required: at least 1 AgentOutput object from a prior workflow agent.",
+      "metadata": {
+        "confidence": 1.0,
+        "reasoning": "Empty agent_outputs array — no data to summarise. Returning INSUFFICIENT_CONTEXT with certainty."
+      }
+    }
+  }
+}

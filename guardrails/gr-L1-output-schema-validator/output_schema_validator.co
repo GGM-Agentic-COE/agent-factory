@@ -1,0 +1,20 @@
+# gr-L1-output-schema-validator — Colang Implementation
+# Layer: L1 Enterprise — applies to ALL agents
+# Triggers: post_execution (output rail)
+
+define flow check output schema compliance
+  """Validate output matches AgentOutput v1.0 schema."""
+  $valid = execute validate_output_schema(output=$bot_message)
+
+  if not $valid
+    bot block schema violation
+    stop
+
+  $result = execute self_check_output
+
+  if not $result
+    bot block schema violation
+    stop
+
+define bot block schema violation
+  "Output blocked: does not conform to AgentOutput v1.0 schema. Required: agent_id, agent_version, execution_id, input_summary (source + parameters), output (type + schema_version + items with metadata.reasoning and metadata.citation)."

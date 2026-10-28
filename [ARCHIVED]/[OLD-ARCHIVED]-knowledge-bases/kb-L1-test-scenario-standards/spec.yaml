@@ -1,0 +1,9 @@
+spec_version: "1.0"
+metadata:
+  name: kb-L0-test-scenario-standards
+  version: "1.0.0"
+  layer: L0
+purpose: "Standards for deriving test scenarios from epics and user stories"
+freshness:
+  review_cadence: quarterly
+  last_reviewed: "2026-04-20"

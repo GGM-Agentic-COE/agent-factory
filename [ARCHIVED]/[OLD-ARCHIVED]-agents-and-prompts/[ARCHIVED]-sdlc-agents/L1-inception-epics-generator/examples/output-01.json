@@ -1,0 +1,2536 @@
+{
+  "agent_id": "L1-inception-epics-generator-agent",
+  "agent_version": "1.0.0",
+  "execution_id": "exec-epics-001",
+  "input_summary": {
+    "source": "agent_output",
+    "source_agent_id": "L1-inception-requirements-extractor-agent",
+    "parameters": {
+      "requirements_count": {
+        "FR": 6,
+        "NFR": 1,
+        "CON": 2
+      }
+    }
+  },
+  "content": {
+    "type": "epics",
+    "schema_version": "1.0",
+    "items": {
+      "delivery_plan": {
+        "total_sprints": 4,
+        "sprint_duration": "2 weeks",
+        "total_duration": "8 weeks"
+      },
+      "sprints": [
+        {
+          "sprint_id": "S1",
+          "name": "Foundation & Score Monitoring",
+          "goal": "Deliver production-ready credit score dashboard with consent, CRA integration, and score display",
+          "epics": [
+            "EP-01",
+            "EP-02"
+          ]
+        },
+        {
+          "sprint_id": "S2",
+          "name": "Credit Coaching",
+          "goal": "Deliver personalised improvement plans with action tracking and score history visualisation",
+          "epics": [
+            "EP-03",
+            "EP-04"
+          ]
+        },
+        {
+          "sprint_id": "S3",
+          "name": "Simulation & Offers",
+          "goal": "Deliver credit score simulator and pre-approved offers engine with one-tap application",
+          "epics": [
+            "EP-05",
+            "EP-06"
+          ]
+        },
+        {
+          "sprint_id": "S4",
+          "name": "Alerts, Compliance & Hardening",
+          "goal": "Deliver proactive alerts, vulnerability detection, breathing space, DSAR, and governance",
+          "epics": [
+            "EP-07",
+            "EP-08"
+          ]
+        }
+      ],
+      "epics": [
+        {
+          "epic_id": "EP-01",
+          "title": "Platform Foundation & Design System",
+          "sprint": "S1",
+          "description": "Technical foundation: Envoy agent registration, orchestrator integration, consent management, shared UI components, and data domain separation.",
+          "features": [
+            {
+              "feature_id": "F-01.1",
+              "title": "Envoy Agent Registration & Orchestrator Integration",
+              "description": "Register Credit Coach as specialist agent on Envoy platform using standardised templates. Configure orchestrator to route credit queries to this agent. Publish to internal marketplace for Lloyds/Halifax/BoS reuse. Includes: agent manifest, intent classification rules, handoff protocol to other agents, persistent memory config with privacy boundaries. Fallback: circuit breaker returns graceful error if agent unavailable.",
+              "requirements_covered": [
+                "FR-39",
+                "FR-26"
+              ],
+              "nfrs_applicable": [
+                "NFR-03",
+                "NFR-05"
+              ],
+              "user_facing": false,
+              "data_sensitivity": "Internal",
+              "change_type": "new",
+              "metadata": {
+                "confidence": 0.95,
+                "reasoning": "Foundational \u2014 without orchestrator routing no credit queries reach the agent. Combined with Envoy registration as same deployment unit.",
+                "citation": {
+                  "source_reference": "photograph receipts and the app automatically extracts",
+                  "source_location": "paragraph 1"
+                },
+                "trajectory": [
+                  {
+                    "step": 1,
+                    "action": "retrieve",
+                    "tool": null,
+                    "detail": "Identified receipt capture as primary input mechanism"
+                  },
+                  {
+                    "step": 2,
+                    "action": "reason",
+                    "tool": null,
+                    "detail": "Core user action \u2014 Must-Have priority"
+                  },
+                  {
+                    "step": 3,
+                    "action": "generate",
+                    "tool": null,
+                    "detail": "Formulated as camera-based capture requirement"
+                  }
+                ]
+              }
+            },
+            {
+              "feature_id": "F-01.2",
+              "title": "Explicit CRA Consent Capture & Management",
+              "description": "Consent flow obtaining explicit opt-in before CRA retrieval. Screen explains: what data retrieved (score+factors only), CRA name, purpose (coaching only), no marketing use without separate consent, automated processing details. Separate toggles per CRA. Confirms soft search (no footprint). Records stored indefinitely with timestamp and consent text version. Withdrawal triggers deletion workflow. No pre-ticked boxes. Re-consent required if text version changes.",
+              "requirements_covered": [
+                "FR-29",
+                "FR-40",
+                "FR-43",
+                "FR-44"
+              ],
+              "nfrs_applicable": [
+                "NFR-10",
+                "NFR-18",
+                "NFR-24"
+              ],
+              "user_facing": true,
+              "data_sensitivity": "Confidential",
+              "change_type": "new",
+              "metadata": {
+                "confidence": 0.95,
+                "reasoning": "Legal prerequisite \u2014 no CRA data without consent. Groups consent capture, transparency, purpose limitation, and data minimisation disclosures into single flow.",
+                "citation": {
+                  "source_reference": "photograph receipts and the app automatically extracts",
+                  "source_location": "paragraph 1"
+                },
+                "trajectory": [
+                  {
+                    "step": 1,
+                    "action": "retrieve",
+                    "tool": null,
+                    "detail": "Identified receipt capture as primary input mechanism"
+                  },
+                  {
+                    "step": 2,
+                    "action": "reason",
+                    "tool": null,
+                    "detail": "Core user action \u2014 Must-Have priority"
+                  },
+                  {
+                    "step": 3,
+                    "action": "generate",
+                    "tool": null,
+                    "detail": "Formulated as camera-based capture requirement"
+                  }
+                ]
+              }
+            },
+            {
+              "feature_id": "F-01.3",
+              "title": "Credit Coach Design System Components",
+              "description": "Shared brand-agnostic native UI components: score gauge, band indicator, trend chart, action card, alert card, offer card, consent toggle, loading/error states. WCAG 2.1 AA, VoiceOver/TalkBack compatible, colour-blind safe palettes, 4.5:1 text contrast, 3:1 UI contrast. Brand theming for Lloyds/Halifax/BoS. Native Swift (iOS) and Kotlin (Android).",
+              "requirements_covered": [],
+              "nfrs_applicable": [
+                "NFR-11",
+                "NFR-12",
+                "NFR-13"
+              ],
+              "user_facing": true,
+              "data_sensitivity": "Public",
+              "change_type": "new",
+              "metadata": {
+                "confidence": 0.95,
+                "reasoning": "Shared components enable consistent accessible UI across all features. NFR-11/12/13 mandate accessibility from day one.",
+                "citation": {
+                  "source_reference": "photograph receipts and the app automatically extracts",
+                  "source_location": "paragraph 1"
+                },
+                "trajectory": [
+                  {
+                    "step": 1,
+                    "action": "retrieve",
+                    "tool": null,
+                    "detail": "Identified receipt capture as primary input mechanism"
+                  },
+                  {
+                    "step": 2,
+                    "action": "reason",
+                    "tool": null,
+                    "detail": "Core user action \u2014 Must-Have priority"
+                  },
+                  {
+                    "step": 3,
+                    "action": "generate",
+                    "tool": null,
+                    "detail": "Formulated as camera-based capture requirement"
+                  }
+                ]
+              }
+            },
+            {
+              "feature_id": "F-01.4",
+              "title": "CRA Data Domain & Storage Infrastructure",
+              "description": "Separated data domains: Cloud SQL (PostgreSQL) for CRA score history (AES-256 encrypted), Pub/Sub topics for score events/alerts, BigQuery for analytics, Dataflow pipeline. Strict IAM isolation of CRA domain from bank data. Combined only in presentation layer at runtime. Retention: scores 6 years, consent indefinite, raw CRA responses purged after refresh. TLS 1.3 in transit. Classified Highly Confidential.",
+              "requirements_covered": [
+                "FR-42"
+              ],
+              "nfrs_applicable": [
+                "NFR-06",
+                "NFR-07",
+                "NFR-08",
+                "NFR-09",
+                "NFR-10"
+              ],
+              "user_facing": false,
+              "data_sensitivity": "Restricted",
+              "change_type": "new",
+              "metadata": {
+                "confidence": 0.95,
+                "reasoning": "Infrastructure must exist before CRA data storage. FR-42 mandates separation; NFRs mandate encryption and retention.",
+                "citation": {
+                  "source_reference": "photograph receipts and the app automatically extracts",
+                  "source_location": "paragraph 1"
+                },
+                "trajectory": [
+                  {
+                    "step": 1,
+                    "action": "retrieve",
+                    "tool": null,
+                    "detail": "Identified receipt capture as primary input mechanism"
+                  },
+                  {
+                    "step": 2,
+                    "action": "reason",
+                    "tool": null,
+                    "detail": "Core user action \u2014 Must-Have priority"
+                  },
+                  {
+                    "step": 3,
+                    "action": "generate",
+                    "tool": null,
+                    "detail": "Formulated as camera-based capture requirement"
+                  }
+                ]
+              },
+              "edge_cases": [
+                "CRA data arrives with missing fields \u2014 store partial data, flag for re-fetch on next cycle",
+                "Encryption key rotation during write \u2014 use envelope encryption with key versioning",
+                "Storage quota exceeded \u2014 alert ops team, graceful degradation (read-only mode)",
+                "Concurrent writes for same customer \u2014 use optimistic locking with retry"
+              ]
+            }
+          ],
+          "scope_in": [
+            "Envoy agent registration and orchestrator routing configuration",
+            "Explicit CRA consent capture flow with granular permissions",
+            "Shared UI component library (score cards, charts, alert banners, offer cards)",
+            "CRA data storage infrastructure (Cloud SQL schema, encryption, domain separation)",
+            "Privacy notice display at point of data collection",
+            "Purpose limitation enforcement (coaching only, no marketing)"
+          ],
+          "scope_out": [
+            "CRA score retrieval logic (EP-02)",
+            "Score display and interpretation (EP-02)",
+            "Marketing consent (separate from CRA consent, out of scope)",
+            "Multi-brand theming (Sprint 4, EP-08)"
+          ]
+        },
+        {
+          "epic_id": "EP-02",
+          "title": "Credit Score Dashboard & Monitoring",
+          "sprint": "S1",
+          "description": "Core credit score retrieval, display, factor explanation, score change analysis, monthly refresh, and CRA normalisation.",
+          "features": [
+            {
+              "feature_id": "F-02.1",
+              "title": "CRA Score Retrieval Service",
+              "description": "Backend service retrieving credit score from CRA API (Experian initially) upon opt-in and on scheduled refresh. Soft search only (no credit footprint). Implements circuit breaker for CRA unavailability. Validates data quality (score >= 95% quality threshold, data < 30 days old). Returns score, band, and contributing factors. Stores in CRA data domain. Triggers Pub/Sub event on score change. Error handling: cached stale data shown with timestamp if CRA unavailable.",
+              "requirements_covered": [
+                "FR-01",
+                "FR-05"
+              ],
+              "nfrs_applicable": [
+                "NFR-01",
+                "NFR-05",
+                "NFR-25"
+              ],
+              "user_facing": false,
+              "data_sensitivity": "Restricted",
+              "change_type": "new",
+              "metadata": {
+                "confidence": 0.95,
+                "reasoning": "Core data retrieval \u2014 all dashboard features depend on this. FR-01 (retrieval) and FR-05 (monthly refresh) are the same service with different triggers.",
+                "citation": {
+                  "source_reference": "photograph receipts and the app automatically extracts",
+                  "source_location": "paragraph 1"
+                },
+                "trajectory": [
+                  {
+                    "step": 1,
+                    "action": "retrieve",
+                    "tool": null,
+                    "detail": "Identified receipt capture as primary input mechanism"
+                  },
+                  {
+                    "step": 2,
+                    "action": "reason",
+                    "tool": null,
+                    "detail": "Core user action \u2014 Must-Have priority"
+                  },
+                  {
+                    "step": 3,
+                    "action": "generate",
+                    "tool": null,
+                    "detail": "Formulated as camera-based capture requirement"
+                  }
+                ]
+              }
+            },
+            {
+              "feature_id": "F-02.2",
+              "title": "Credit Score Display & Band Classification",
+              "description": "Dashboard screen showing: current score on gauge widget, score band (e.g., Poor/Fair/Good/Excellent), month-on-month change with directional indicator (+/-/unchanged), last refresh date. Score normalised or clearly labelled by bureau (Experian 0-999, Equifax 0-700, TransUnion 0-710). Handles edge cases: first-time user (no previous score for comparison), thin file (insufficient data message), CRA unavailable (stale data with warning).",
+              "requirements_covered": [
+                "FR-02",
+                "FR-25"
+              ],
+              "nfrs_applicable": [
+                "NFR-01",
+                "NFR-03",
+                "NFR-11",
+                "NFR-13"
+              ],
+              "user_facing": true,
+              "data_sensitivity": "Confidential",
+              "change_type": "new",
+              "metadata": {
+                "confidence": 0.95,
+                "reasoning": "Primary user-facing display. FR-02 (display) and FR-25 (normalisation) are the same screen \u2014 normalisation is a display concern.",
+                "citation": {
+                  "source_reference": "photograph receipts and the app automatically extracts",
+                  "source_location": "paragraph 1"
+                },
+                "trajectory": [
+                  {
+                    "step": 1,
+                    "action": "retrieve",
+                    "tool": null,
+                    "detail": "Identified receipt capture as primary input mechanism"
+                  },
+                  {
+                    "step": 2,
+                    "action": "reason",
+                    "tool": null,
+                    "detail": "Core user action \u2014 Must-Have priority"
+                  },
+                  {
+                    "step": 3,
+                    "action": "generate",
+                    "tool": null,
+                    "detail": "Formulated as camera-based capture requirement"
+                  }
+                ]
+              }
+            },
+            {
+              "feature_id": "F-02.3",
+              "title": "Score Factors in Plain English",
+              "description": "Display positive and negative credit score factors translated into plain English (Flesch reading ease >= 60). Each factor shows: category (e.g., Payment History), impact direction (helping/hurting), plain language explanation (e.g., 'You have made all payments on time for 18 months'). Factors ordered by impact magnitude. Maximum 5 positive and 5 negative shown with 'see all' expansion. Every factor includes a 'why this matters' tooltip.",
+              "requirements_covered": [
+                "FR-03"
+              ],
+              "nfrs_applicable": [
+                "NFR-20",
+                "NFR-11"
+              ],
+              "user_facing": true,
+              "data_sensitivity": "Confidential",
+              "change_type": "new",
+              "metadata": {
+                "confidence": 0.95,
+                "reasoning": "Standalone display feature. Plain English requirement aligns with Consumer Duty understanding outcome and FS2/23 explainability.",
+                "citation": {
+                  "source_reference": "photograph receipts and the app automatically extracts",
+                  "source_location": "paragraph 1"
+                },
+                "trajectory": [
+                  {
+                    "step": 1,
+                    "action": "retrieve",
+                    "tool": null,
+                    "detail": "Identified receipt capture as primary input mechanism"
+                  },
+                  {
+                    "step": 2,
+                    "action": "reason",
+                    "tool": null,
+                    "detail": "Core user action \u2014 Must-Have priority"
+                  },
+                  {
+                    "step": 3,
+                    "action": "generate",
+                    "tool": null,
+                    "detail": "Formulated as camera-based capture requirement"
+                  }
+                ]
+              },
+              "edge_cases": [
+                "CRA returns factor codes not in the plain-English mapping table \u2014 display raw factor with 'Contact us for explanation' fallback",
+                "Customer has no negative factors \u2014 display positive-only view with encouragement message",
+                "Factor data is stale (>30 days) \u2014 show 'as of [date]' disclaimer, trigger re-fetch"
+              ]
+            },
+            {
+              "feature_id": "F-02.4",
+              "title": "Score Change Explanation",
+              "description": "When score changes between refreshes, display explanation identifying specific contributing factors. Shows: previous score, new score, delta, and ranked list of factors that changed (e.g., 'Credit utilisation increased from 45% to 62%'). For score drops: empathetic tone, no alarm language, actionable next step suggested. For score increases: positive reinforcement. If no change: reassurance message. All explanations in plain English.",
+              "requirements_covered": [
+                "FR-06"
+              ],
+              "nfrs_applicable": [
+                "NFR-20",
+                "NFR-14"
+              ],
+              "user_facing": true,
+              "data_sensitivity": "Confidential",
+              "change_type": "new",
+              "metadata": {
+                "confidence": 0.95,
+                "reasoning": "Distinct from static factor display \u2014 this is delta analysis triggered by score refresh events.",
+                "citation": {
+                  "source_reference": "photograph receipts and the app automatically extracts",
+                  "source_location": "paragraph 1"
+                },
+                "trajectory": [
+                  {
+                    "step": 1,
+                    "action": "retrieve",
+                    "tool": null,
+                    "detail": "Identified receipt capture as primary input mechanism"
+                  },
+                  {
+                    "step": 2,
+                    "action": "reason",
+                    "tool": null,
+                    "detail": "Core user action \u2014 Must-Have priority"
+                  },
+                  {
+                    "step": 3,
+                    "action": "generate",
+                    "tool": null,
+                    "detail": "Formulated as camera-based capture requirement"
+                  }
+                ]
+              },
+              "edge_cases": [
+                "Score unchanged between periods \u2014 display 'No change' with reassurance message",
+                "Multiple factors changed simultaneously \u2014 rank by impact magnitude, show top 3 with 'see all' expansion",
+                "First score retrieval (no previous score to compare) \u2014 skip change explanation, show 'This is your starting point'"
+              ]
+            },
+            {
+              "feature_id": "F-02.5",
+              "title": "Score History Storage & Retrieval",
+              "description": "Store each score data point with: score value, band, date, CRA source, contributing factors snapshot. Minimum 24 months retained for trend visualisation (FR-04), extended to 6 years for FCA compliance (NFR-09). API endpoint returns time-series data for charting. Supports filtering by date range and CRA source. Data encrypted at rest (AES-256).",
+              "requirements_covered": [
+                "FR-04"
+              ],
+              "nfrs_applicable": [
+                "NFR-09",
+                "NFR-06"
+              ],
+              "user_facing": false,
+              "data_sensitivity": "Restricted",
+              "change_type": "new",
+              "metadata": {
+                "confidence": 0.95,
+                "reasoning": "Data persistence layer for trend visualisation (rendered in Sprint 2 EP-04). Storage must exist in Sprint 1 to begin accumulating history.",
+                "citation": {
+                  "source_reference": "photograph receipts and the app automatically extracts",
+                  "source_location": "paragraph 1"
+                },
+                "trajectory": [
+                  {
+                    "step": 1,
+                    "action": "retrieve",
+                    "tool": null,
+                    "detail": "Identified receipt capture as primary input mechanism"
+                  },
+                  {
+                    "step": 2,
+                    "action": "reason",
+                    "tool": null,
+                    "detail": "Core user action \u2014 Must-Have priority"
+                  },
+                  {
+                    "step": 3,
+                    "action": "generate",
+                    "tool": null,
+                    "detail": "Formulated as camera-based capture requirement"
+                  }
+                ]
+              },
+              "edge_cases": [
+                "Customer opts out then re-opts-in \u2014 history gap clearly shown in timeline, no backfill",
+                "Data migration from legacy format \u2014 handle schema versioning gracefully",
+                "24-month boundary reached \u2014 archive oldest month to cold storage, maintain query performance"
+              ]
+            },
+            {
+              "feature_id": "F-02.6",
+              "title": "Conversational Credit Queries",
+              "description": "Natural language query handling for credit-related questions via the FA conversational UI. Supported intents: 'What is my credit score?', 'Why did my score change?', 'What affects my score?', 'How is my credit health?'. Agent interprets query, retrieves relevant data, and responds conversationally. Handles ambiguous queries with clarification prompts. Maintains conversation context via Envoy persistent memory. Unsupported queries gracefully declined with suggestion of what the agent can help with.",
+              "requirements_covered": [
+                "FR-26"
+              ],
+              "nfrs_applicable": [
+                "NFR-20",
+                "NFR-03"
+              ],
+              "user_facing": true,
+              "data_sensitivity": "Confidential",
+              "change_type": "new",
+              "edge_cases": [
+                "Ambiguous query ('How am I doing?') \u2014 ask clarifying question before routing to credit coach",
+                "Query about non-credit topic \u2014 orchestrator routes to appropriate agent, not credit coach",
+                "CRA data unavailable during conversation \u2014 inform customer, offer to retry or check back later",
+                "Offensive or harmful input \u2014 standard guardrails apply, deflect gracefully"
+              ],
+              "metadata": {
+                "confidence": 0.9,
+                "reasoning": "FR-26 is the conversational interface layer over the dashboard data. Scoped here as it's the primary interaction model for Sprint 1 features.",
+                "citation": {
+                  "requirements_used": [
+                    "FR-26"
+                  ],
+                  "kb_sections_used": [
+                    "EA 2.3 Agentic Architecture"
+                  ]
+                }
+              }
+            },
+            {
+              "feature_id": "F-02.7",
+              "title": "Score Refresh Scheduling & Configuration",
+              "description": "Background scheduler triggering monthly CRA score refresh per customer. Frequency configurable per CRA agreement (monthly minimum, weekly maximum). Batch processing for 10M+ customers without degradation. Staggered execution to avoid CRA rate limits. Pub/Sub event emitted on each refresh completion. Failed refreshes retried with exponential backoff (max 3 attempts). Admin configuration UI for ops team to adjust frequency.",
+              "requirements_covered": [
+                "FR-05"
+              ],
+              "nfrs_applicable": [
+                "NFR-05",
+                "NFR-01"
+              ],
+              "user_facing": false,
+              "data_sensitivity": "Internal",
+              "change_type": "new",
+              "metadata": {
+                "confidence": 0.95,
+                "reasoning": "Operational scheduling distinct from the retrieval service itself. Handles scale (10M+ customers) and CRA rate limiting.",
+                "citation": {
+                  "source_reference": "photograph receipts and the app automatically extracts",
+                  "source_location": "paragraph 1"
+                },
+                "trajectory": [
+                  {
+                    "step": 1,
+                    "action": "retrieve",
+                    "tool": null,
+                    "detail": "Identified receipt capture as primary input mechanism"
+                  },
+                  {
+                    "step": 2,
+                    "action": "reason",
+                    "tool": null,
+                    "detail": "Core user action \u2014 Must-Have priority"
+                  },
+                  {
+                    "step": 3,
+                    "action": "generate",
+                    "tool": null,
+                    "detail": "Formulated as camera-based capture requirement"
+                  }
+                ]
+              }
+            }
+          ],
+          "scope_in": [
+            "CRA API integration (single bureau initially)",
+            "Score retrieval with circuit breaker and retry logic",
+            "Score display with band classification and month-on-month change",
+            "Score factor breakdown in plain English",
+            "Score change explanations between refresh periods",
+            "Score history persistence (24-month minimum)",
+            "Conversational interface for credit queries via orchestrator",
+            "Monthly score refresh scheduling"
+          ],
+          "scope_out": [
+            "Multi-bureau comparison (Sprint 4, EP-08)",
+            "Score trend visualisation charts (Sprint 2, EP-04)",
+            "Improvement action plans (Sprint 2, EP-03)",
+            "Cross-lender debt visibility (Sprint 2, EP-04)"
+          ]
+        },
+        {
+          "epic_id": "EP-03",
+          "title": "Personalised Credit Improvement Plans",
+          "sprint": "S2",
+          "description": "AI-generated ranked improvement actions, impact estimates, action tracking, milestone celebrations, dynamic plan updates, and spending-to-credit insights.",
+          "features": [
+            {
+              "feature_id": "F-03.1",
+              "title": "Ranked Improvement Action Generation",
+              "description": "Generate personalised ranked list of credit improvement actions based on customer's specific credit profile factors. Actions ordered by estimated impact (highest first). Each action includes: title, plain English description, category (utilisation/payments/history/mix/new credit), estimated point impact range, estimated timeframe, difficulty level. Recommendations must genuinely benefit the customer \u2014 not biased toward Lloyds lending products. Model deployed via Vertex AI endpoint. Explainability: each recommendation includes 'why this helps' explanation. Maximum 10 active actions at any time.",
+              "requirements_covered": [
+                "FR-07",
+                "FR-08",
+                "FR-38"
+              ],
+              "nfrs_applicable": [
+                "NFR-20",
+                "NFR-21",
+                "NFR-14",
+                "NFR-22"
+              ],
+              "user_facing": true,
+              "data_sensitivity": "Confidential",
+              "change_type": "new",
+              "metadata": {
+                "confidence": 0.95,
+                "reasoning": "Core coaching capability. FR-07 (ranked actions), FR-08 (impact/timeframe), FR-38 (unbiased) are inseparable \u2014 the generation engine must satisfy all three simultaneously.",
+                "citation": {
+                  "source_reference": "photograph receipts and the app automatically extracts",
+                  "source_location": "paragraph 1"
+                },
+                "trajectory": [
+                  {
+                    "step": 1,
+                    "action": "retrieve",
+                    "tool": null,
+                    "detail": "Identified receipt capture as primary input mechanism"
+                  },
+                  {
+                    "step": 2,
+                    "action": "reason",
+                    "tool": null,
+                    "detail": "Core user action \u2014 Must-Have priority"
+                  },
+                  {
+                    "step": 3,
+                    "action": "generate",
+                    "tool": null,
+                    "detail": "Formulated as camera-based capture requirement"
+                  }
+                ]
+              },
+              "edge_cases": [
+                "Customer has perfect credit (no improvement actions possible) \u2014 display congratulatory message with maintenance tips",
+                "Vertex AI model returns low-confidence recommendations \u2014 flag as 'suggestions' not 'actions', lower prominence",
+                "Customer's profile changes mid-plan \u2014 trigger dynamic plan update (FR-11), notify customer of changes"
+              ]
+            },
+            {
+              "feature_id": "F-03.2",
+              "title": "Action Completion Tracking",
+              "description": "Track progress on improvement actions. States: Not Started, In Progress, Completed, Skipped. Completion detected automatically where possible (e.g., utilisation drop detected from next score refresh) or manually confirmed by customer. Completed actions removed from active list and archived. Plan recalculates remaining actions on completion. Progress percentage shown on dashboard. History of completed actions viewable.",
+              "requirements_covered": [
+                "FR-09"
+              ],
+              "nfrs_applicable": [
+                "NFR-03"
+              ],
+              "user_facing": true,
+              "data_sensitivity": "Confidential",
+              "change_type": "new",
+              "metadata": {
+                "confidence": 0.95,
+                "reasoning": "Distinct interaction pattern from generation \u2014 this is ongoing state management and progress UI.",
+                "citation": {
+                  "source_reference": "photograph receipts and the app automatically extracts",
+                  "source_location": "paragraph 1"
+                },
+                "trajectory": [
+                  {
+                    "step": 1,
+                    "action": "retrieve",
+                    "tool": null,
+                    "detail": "Identified receipt capture as primary input mechanism"
+                  },
+                  {
+                    "step": 2,
+                    "action": "reason",
+                    "tool": null,
+                    "detail": "Core user action \u2014 Must-Have priority"
+                  },
+                  {
+                    "step": 3,
+                    "action": "generate",
+                    "tool": null,
+                    "detail": "Formulated as camera-based capture requirement"
+                  }
+                ]
+              }
+            },
+            {
+              "feature_id": "F-03.3",
+              "title": "Milestone Celebrations",
+              "description": "Positive reinforcement when milestones reached. Triggers: score crosses band threshold (e.g., Fair\u2192Good), action completed, streak of on-time payments detected, utilisation drops below key threshold (50%, 30%). Celebration UI: animated badge/confetti, congratulatory message, summary of achievement, optional share (anonymised). Tone: encouraging without being patronising. Does not trigger for trivial changes (< 5 point movement within same band).",
+              "requirements_covered": [
+                "FR-10"
+              ],
+              "nfrs_applicable": [
+                "NFR-14"
+              ],
+              "user_facing": true,
+              "data_sensitivity": "Internal",
+              "change_type": "new",
+              "metadata": {
+                "confidence": 0.95,
+                "reasoning": "Engagement feature \u2014 separate from tracking as it's a notification/UI overlay triggered by events.",
+                "citation": {
+                  "source_reference": "photograph receipts and the app automatically extracts",
+                  "source_location": "paragraph 1"
+                },
+                "trajectory": [
+                  {
+                    "step": 1,
+                    "action": "retrieve",
+                    "tool": null,
+                    "detail": "Identified receipt capture as primary input mechanism"
+                  },
+                  {
+                    "step": 2,
+                    "action": "reason",
+                    "tool": null,
+                    "detail": "Core user action \u2014 Must-Have priority"
+                  },
+                  {
+                    "step": 3,
+                    "action": "generate",
+                    "tool": null,
+                    "detail": "Formulated as camera-based capture requirement"
+                  }
+                ]
+              },
+              "edge_cases": [
+                "Customer achieves milestone but score subsequently drops \u2014 still celebrate the achievement, don't retract",
+                "Multiple milestones achieved simultaneously \u2014 celebrate highest-impact one prominently, list others",
+                "Customer has notifications disabled \u2014 show celebration on next app open instead"
+              ]
+            },
+            {
+              "feature_id": "F-03.4",
+              "title": "Dynamic Plan Updates",
+              "description": "Improvement plans automatically recalculate when customer's credit profile changes. Triggers: new score refresh, action completed, significant life event detected (new account opened, account closed). Recalculation re-ranks remaining actions, may add new actions or remove irrelevant ones. Customer notified of plan changes with explanation of why. Previous plan version archived for audit. Rate-limited to max one recalculation per score refresh to avoid churn.",
+              "requirements_covered": [
+                "FR-11"
+              ],
+              "nfrs_applicable": [
+                "NFR-22",
+                "NFR-20"
+              ],
+              "user_facing": true,
+              "data_sensitivity": "Confidential",
+              "change_type": "new",
+              "metadata": {
+                "confidence": 0.95,
+                "reasoning": "Distinct from initial generation \u2014 this is the reactive update mechanism ensuring plans stay relevant.",
+                "citation": {
+                  "source_reference": "photograph receipts and the app automatically extracts",
+                  "source_location": "paragraph 1"
+                },
+                "trajectory": [
+                  {
+                    "step": 1,
+                    "action": "retrieve",
+                    "tool": null,
+                    "detail": "Identified receipt capture as primary input mechanism"
+                  },
+                  {
+                    "step": 2,
+                    "action": "reason",
+                    "tool": null,
+                    "detail": "Core user action \u2014 Must-Have priority"
+                  },
+                  {
+                    "step": 3,
+                    "action": "generate",
+                    "tool": null,
+                    "detail": "Formulated as camera-based capture requirement"
+                  }
+                ]
+              }
+            },
+            {
+              "feature_id": "F-03.5",
+              "title": "Spending-to-Credit Impact Connection",
+              "description": "Connect existing FA spending insights to credit impact. Examples: 'Reducing dining by \u00a3150/month improves affordability by 12%', 'Your subscription spending of \u00a389/month counts as committed expenditure for lenders'. Pulls spending category data from FA Spending Agent, maps to credit/affordability impact. Displayed as contextual tips within improvement plan. Only shown when spending pattern directly relates to an active improvement action. Requires data combination in presentation layer only (not stored together).",
+              "requirements_covered": [
+                "FR-47"
+              ],
+              "nfrs_applicable": [
+                "NFR-20",
+                "NFR-14"
+              ],
+              "user_facing": true,
+              "data_sensitivity": "Confidential",
+              "change_type": "new",
+              "metadata": {
+                "confidence": 0.95,
+                "reasoning": "Cross-agent integration feature connecting spending data to credit coaching. Scoped in EP-03 as it enriches improvement actions.",
+                "citation": {
+                  "source_reference": "photograph receipts and the app automatically extracts",
+                  "source_location": "paragraph 1"
+                },
+                "trajectory": [
+                  {
+                    "step": 1,
+                    "action": "retrieve",
+                    "tool": null,
+                    "detail": "Identified receipt capture as primary input mechanism"
+                  },
+                  {
+                    "step": 2,
+                    "action": "reason",
+                    "tool": null,
+                    "detail": "Core user action \u2014 Must-Have priority"
+                  },
+                  {
+                    "step": 3,
+                    "action": "generate",
+                    "tool": null,
+                    "detail": "Formulated as camera-based capture requirement"
+                  }
+                ]
+              }
+            }
+          ],
+          "scope_in": [
+            "AI-generated ranked improvement actions based on credit profile",
+            "Estimated point impact and timeframe per action",
+            "Action completion tracking with progress indicators",
+            "Milestone celebrations (score thresholds, actions completed)",
+            "Dynamic plan updates when profile changes",
+            "Spending-to-credit impact connection (FA augmentation)",
+            "Unbiased recommendation enforcement (no protected characteristic discrimination)"
+          ],
+          "scope_out": [
+            "Score simulation (Sprint 3, EP-05)",
+            "Pre-approved offers triggered by improvement (Sprint 3, EP-06)",
+            "Proactive alerts on plan progress (Sprint 4, EP-07)"
+          ]
+        },
+        {
+          "epic_id": "EP-04",
+          "title": "Score History & Trend Visualisation",
+          "sprint": "S2",
+          "description": "Visual trend charts, cross-lender debt visibility, and historical score analysis.",
+          "features": [
+            {
+              "feature_id": "F-04.1",
+              "title": "Score Trend Chart Visualisation",
+              "description": "Interactive line chart showing credit score over time. Default view: 12 months. Selectable ranges: 3m, 6m, 12m, 24m. Data points on monthly refresh dates. Tap data point to see score value, band, and key factor at that time. Trend line with directional indicator (improving/declining/stable). Colour-blind safe palette with pattern differentiation. Accessible via screen reader with data table alternative. Annotations for significant events (e.g., 'Action completed', 'New account opened').",
+              "requirements_covered": [
+                "FR-27",
+                "FR-04"
+              ],
+              "nfrs_applicable": [
+                "NFR-11",
+                "NFR-12",
+                "NFR-13"
+              ],
+              "user_facing": true,
+              "data_sensitivity": "Confidential",
+              "change_type": "new",
+              "metadata": {
+                "confidence": 0.95,
+                "reasoning": "FR-27 (visualisation) renders the data stored by FR-04 (history storage in EP-02). Sprint 2 delivers the visual layer over Sprint 1's data accumulation.",
+                "citation": {
+                  "source_reference": "photograph receipts and the app automatically extracts",
+                  "source_location": "paragraph 1"
+                },
+                "trajectory": [
+                  {
+                    "step": 1,
+                    "action": "retrieve",
+                    "tool": null,
+                    "detail": "Identified receipt capture as primary input mechanism"
+                  },
+                  {
+                    "step": 2,
+                    "action": "reason",
+                    "tool": null,
+                    "detail": "Core user action \u2014 Must-Have priority"
+                  },
+                  {
+                    "step": 3,
+                    "action": "generate",
+                    "tool": null,
+                    "detail": "Formulated as camera-based capture requirement"
+                  }
+                ]
+              },
+              "edge_cases": [
+                "Less than 2 months of history \u2014 show available data with 'More data coming soon' message",
+                "Score gap in history (customer opted out for a period) \u2014 show gap clearly in chart, no interpolation",
+                "Extreme score change (>100 points) \u2014 highlight with annotation explaining likely cause"
+              ]
+            },
+            {
+              "feature_id": "F-04.2",
+              "title": "Cross-Lender Debt Visibility",
+              "description": "Display total indebtedness across all lenders sourced from CRA data. Shows: total outstanding debt, number of active credit accounts, breakdown by type (mortgage, personal loan, credit card, overdraft, HP/PCP). Each account shows: lender name, outstanding balance, credit limit (if revolving), monthly payment, account status. Does NOT show Lloyds-internal data here \u2014 only CRA-sourced cross-lender view. Helps customer understand total debt picture informing improvement actions. Data refreshed with score refresh cycle.",
+              "requirements_covered": [
+                "FR-28"
+              ],
+              "nfrs_applicable": [
+                "NFR-06",
+                "NFR-08",
+                "NFR-18"
+              ],
+              "user_facing": true,
+              "data_sensitivity": "Restricted",
+              "change_type": "new",
+              "metadata": {
+                "confidence": 0.95,
+                "reasoning": "Separate feature as it requires additional CRA data fields beyond score/factors. Should-Have priority but high value for coaching context.",
+                "citation": {
+                  "source_reference": "photograph receipts and the app automatically extracts",
+                  "source_location": "paragraph 1"
+                },
+                "trajectory": [
+                  {
+                    "step": 1,
+                    "action": "retrieve",
+                    "tool": null,
+                    "detail": "Identified receipt capture as primary input mechanism"
+                  },
+                  {
+                    "step": 2,
+                    "action": "reason",
+                    "tool": null,
+                    "detail": "Core user action \u2014 Must-Have priority"
+                  },
+                  {
+                    "step": 3,
+                    "action": "generate",
+                    "tool": null,
+                    "detail": "Formulated as camera-based capture requirement"
+                  }
+                ]
+              },
+              "edge_cases": [
+                "CRA returns incomplete debt data \u2014 show available data with 'Some accounts may not be shown' disclaimer",
+                "Customer disputes a debt shown \u2014 provide link to CRA dispute process, do not remove from display",
+                "Debt from closed account still showing \u2014 explain CRA retention periods (6 years)"
+              ]
+            }
+          ],
+          "scope_in": [
+            "Score trend chart visualisation (24-month history, colour-blind safe)",
+            "Cross-lender debt visibility via CRA data",
+            "Score normalisation across bureaus for consistent display"
+          ],
+          "scope_out": [
+            "Multi-bureau side-by-side comparison (Sprint 4, EP-08)",
+            "Debt consolidation recommendations (out of v1 scope)"
+          ]
+        },
+        {
+          "epic_id": "EP-05",
+          "title": "Credit Score Simulator",
+          "sprint": "S3",
+          "description": "What-if simulation engine supporting multiple scenarios with natural language input and confidence-rated estimates.",
+          "features": [
+            {
+              "feature_id": "F-05.1",
+              "title": "Simulation Scenario Engine",
+              "description": "Backend engine calculating estimated score impact for scenarios: paying down debt (specify amount/account), closing accounts (specify which), opening new credit (type/amount), missed payments (number/recency), reducing utilisation (target percentage). Model deployed via Vertex AI. Inputs: customer's current credit profile + hypothetical change. Outputs: estimated new score, point delta, confidence level (High/Medium/Low based on model certainty), timeframe for impact to materialise. Model validated per PRA SS1/23 before deployment. Performance drift monitoring (>5% triggers review).",
+              "requirements_covered": [
+                "FR-12",
+                "FR-13"
+              ],
+              "nfrs_applicable": [
+                "NFR-02",
+                "NFR-22",
+                "NFR-20",
+                "NFR-21"
+              ],
+              "user_facing": false,
+              "data_sensitivity": "Confidential",
+              "change_type": "new",
+              "metadata": {
+                "confidence": 0.95,
+                "reasoning": "Core computation engine. FR-12 (scenarios) and FR-13 (impact+confidence output) are the same model invocation \u2014 input scenarios, output estimates.",
+                "citation": {
+                  "source_reference": "photograph receipts and the app automatically extracts",
+                  "source_location": "paragraph 1"
+                },
+                "trajectory": [
+                  {
+                    "step": 1,
+                    "action": "retrieve",
+                    "tool": null,
+                    "detail": "Identified receipt capture as primary input mechanism"
+                  },
+                  {
+                    "step": 2,
+                    "action": "reason",
+                    "tool": null,
+                    "detail": "Core user action \u2014 Must-Have priority"
+                  },
+                  {
+                    "step": 3,
+                    "action": "generate",
+                    "tool": null,
+                    "detail": "Formulated as camera-based capture requirement"
+                  }
+                ]
+              }
+            },
+            {
+              "feature_id": "F-05.2",
+              "title": "Simulation Results Display with Disclaimers",
+              "description": "UI presenting simulation results. Shows: current score, simulated score, delta, confidence indicator, estimated timeframe. All results clearly labelled 'Estimate only \u2014 not a guarantee of future score changes'. Disclaimer text always visible (not hidden behind expand). Visual comparison (before/after gauge). If confidence is Low, additional caveat displayed. Results not stored permanently \u2014 session only. Does not encourage over-borrowing: if simulation shows opening new credit, includes warning about impact of hard search and additional debt.",
+              "requirements_covered": [
+                "FR-14"
+              ],
+              "nfrs_applicable": [
+                "NFR-14",
+                "NFR-20",
+                "NFR-27"
+              ],
+              "user_facing": true,
+              "data_sensitivity": "Confidential",
+              "change_type": "new",
+              "metadata": {
+                "confidence": 0.95,
+                "reasoning": "Separate from engine \u2014 this is the presentation and compliance labelling layer. FR-14 specifically about labelling as estimates.",
+                "citation": {
+                  "source_reference": "photograph receipts and the app automatically extracts",
+                  "source_location": "paragraph 1"
+                },
+                "trajectory": [
+                  {
+                    "step": 1,
+                    "action": "retrieve",
+                    "tool": null,
+                    "detail": "Identified receipt capture as primary input mechanism"
+                  },
+                  {
+                    "step": 2,
+                    "action": "reason",
+                    "tool": null,
+                    "detail": "Core user action \u2014 Must-Have priority"
+                  },
+                  {
+                    "step": 3,
+                    "action": "generate",
+                    "tool": null,
+                    "detail": "Formulated as camera-based capture requirement"
+                  }
+                ]
+              }
+            },
+            {
+              "feature_id": "F-05.3",
+              "title": "Natural Language Simulation Input",
+              "description": "Allow customers to describe scenarios in natural language via conversational UI. Examples: 'What if I pay off my overdraft?', 'What happens if I miss a payment?', 'If I close my store card what happens to my score?'. NLP parses intent and extracts: scenario type, amount (if specified), account (if specified). If ambiguous, asks clarifying questions ('Which account would you like to simulate paying off?'). Maps to structured simulation request. Handles unsupported scenarios gracefully ('I can simulate these types of changes: ...').",
+              "requirements_covered": [
+                "FR-15"
+              ],
+              "nfrs_applicable": [
+                "NFR-02",
+                "NFR-20"
+              ],
+              "user_facing": true,
+              "data_sensitivity": "Confidential",
+              "change_type": "new",
+              "metadata": {
+                "confidence": 0.95,
+                "reasoning": "Distinct NLP layer converting free text to structured simulation parameters. Separate from engine as it's a UI/UX concern.",
+                "citation": {
+                  "source_reference": "photograph receipts and the app automatically extracts",
+                  "source_location": "paragraph 1"
+                },
+                "trajectory": [
+                  {
+                    "step": 1,
+                    "action": "retrieve",
+                    "tool": null,
+                    "detail": "Identified receipt capture as primary input mechanism"
+                  },
+                  {
+                    "step": 2,
+                    "action": "reason",
+                    "tool": null,
+                    "detail": "Core user action \u2014 Must-Have priority"
+                  },
+                  {
+                    "step": 3,
+                    "action": "generate",
+                    "tool": null,
+                    "detail": "Formulated as camera-based capture requirement"
+                  }
+                ]
+              }
+            }
+          ],
+          "scope_in": [
+            "What-if simulation engine (pay down debt, close accounts, open credit, missed payments, reduce utilisation)",
+            "Simulation results with estimated score impact and confidence level",
+            "Clear labelling of results as estimates, not guarantees",
+            "Natural language scenario input via conversational UI",
+            "Vertex AI model deployment for simulation"
+          ],
+          "scope_out": [
+            "Mortgage-specific simulation (planned for FA expansion separately)",
+            "Real-time CRA recalculation (uses modelled approximation)",
+            "Simulation history persistence (Nice-to-Have, future)"
+          ]
+        },
+        {
+          "epic_id": "EP-06",
+          "title": "Pre-Approved Offers Engine",
+          "sprint": "S3",
+          "description": "Eligibility matching, guaranteed offers, contextual presentation, one-tap application, regulatory compliance (SECCI, cooling-off, financial promotions, affordability), and unified recommendation engine.",
+          "features": [
+            {
+              "feature_id": "F-06.1",
+              "title": "Eligibility Matching & Pre-Qualification Gate",
+              "description": "Match customer credit profile against Lloyds lending product eligibility criteria. Runs as background process on each score refresh. Checks: credit score thresholds per product, adverse markers, debt-to-income ratio, existing customer exposure. Acts as pre-qualification gate \u2014 FA only shows products customer actually qualifies for. Results cached until next refresh. Does NOT constitute a credit offer (soft assessment only). Integrates with existing product eligibility engine API.",
+              "requirements_covered": [
+                "FR-16",
+                "FR-45"
+              ],
+              "nfrs_applicable": [
+                "NFR-16",
+                "NFR-05"
+              ],
+              "user_facing": false,
+              "data_sensitivity": "Restricted",
+              "change_type": "new",
+              "metadata": {
+                "confidence": 0.95,
+                "reasoning": "FR-16 (matching) and FR-45 (pre-qualification gate) are the same engine \u2014 matching determines what to show/hide.",
+                "citation": {
+                  "source_reference": "photograph receipts and the app automatically extracts",
+                  "source_location": "paragraph 1"
+                },
+                "trajectory": [
+                  {
+                    "step": 1,
+                    "action": "retrieve",
+                    "tool": null,
+                    "detail": "Identified receipt capture as primary input mechanism"
+                  },
+                  {
+                    "step": 2,
+                    "action": "reason",
+                    "tool": null,
+                    "detail": "Core user action \u2014 Must-Have priority"
+                  },
+                  {
+                    "step": 3,
+                    "action": "generate",
+                    "tool": null,
+                    "detail": "Formulated as camera-based capture requirement"
+                  }
+                ]
+              }
+            },
+            {
+              "feature_id": "F-06.2",
+              "title": "Guaranteed Pre-Approved Offer Generation",
+              "description": "Generate binding pre-approved offers for products customer qualifies for. Offer includes: product name, personal APR, representative APR, total amount payable, monthly repayment, term, credit limit (if revolving). Offer is guaranteed \u2014 customer will not be declined if applying within validity period. Affordability assessment performed covering credit risk AND ability to repay without hardship (CONC 5.2A). Stress tested at +3pp. Validity period defined (configurable, typically 14-30 days). Real-time re-check at application if >7 days since generation.",
+              "requirements_covered": [
+                "FR-17",
+                "FR-35"
+              ],
+              "nfrs_applicable": [
+                "NFR-16",
+                "NFR-15",
+                "NFR-19"
+              ],
+              "user_facing": false,
+              "data_sensitivity": "Restricted",
+              "change_type": "new",
+              "metadata": {
+                "confidence": 0.95,
+                "reasoning": "FR-17 (guaranteed) and FR-35 (affordability) are inseparable \u2014 an offer cannot be guaranteed without proper affordability assessment.",
+                "citation": {
+                  "source_reference": "photograph receipts and the app automatically extracts",
+                  "source_location": "paragraph 1"
+                },
+                "trajectory": [
+                  {
+                    "step": 1,
+                    "action": "retrieve",
+                    "tool": null,
+                    "detail": "Identified receipt capture as primary input mechanism"
+                  },
+                  {
+                    "step": 2,
+                    "action": "reason",
+                    "tool": null,
+                    "detail": "Core user action \u2014 Must-Have priority"
+                  },
+                  {
+                    "step": 3,
+                    "action": "generate",
+                    "tool": null,
+                    "detail": "Formulated as camera-based capture requirement"
+                  }
+                ]
+              }
+            },
+            {
+              "feature_id": "F-06.3",
+              "title": "Contextual Offer Presentation",
+              "description": "Present pre-approved offers at contextually appropriate moments: after score improvement milestone, when simulation shows benefit of consolidation, when coaching action relates to a product. Never interrupts negative moments (score drop, missed payment). Offer card shows: product name, personal rate, monthly cost, total cost, key benefit. Equal prominence to risks and costs (CONC 3). Representative APR more prominent than other rates. Includes representative example. Financial promotion compliance: clear, fair, not misleading.",
+              "requirements_covered": [
+                "FR-18",
+                "FR-34"
+              ],
+              "nfrs_applicable": [
+                "NFR-15",
+                "NFR-14",
+                "NFR-27"
+              ],
+              "user_facing": true,
+              "data_sensitivity": "Confidential",
+              "change_type": "new",
+              "metadata": {
+                "confidence": 0.95,
+                "reasoning": "FR-18 (contextual timing) and FR-34 (promotion compliance) are the same screen \u2014 presentation must be both contextual AND compliant.",
+                "citation": {
+                  "source_reference": "photograph receipts and the app automatically extracts",
+                  "source_location": "paragraph 1"
+                },
+                "trajectory": [
+                  {
+                    "step": 1,
+                    "action": "retrieve",
+                    "tool": null,
+                    "detail": "Identified receipt capture as primary input mechanism"
+                  },
+                  {
+                    "step": 2,
+                    "action": "reason",
+                    "tool": null,
+                    "detail": "Core user action \u2014 Must-Have priority"
+                  },
+                  {
+                    "step": 3,
+                    "action": "generate",
+                    "tool": null,
+                    "detail": "Formulated as camera-based capture requirement"
+                  }
+                ]
+              }
+            },
+            {
+              "feature_id": "F-06.4",
+              "title": "One-Tap Application with Pre-Filled Data",
+              "description": "Streamlined application flow for pre-approved offers. Customer data pre-filled from existing Lloyds records (name, address, income, employment). Customer reviews pre-filled data, confirms accuracy, accepts terms. Single biometric confirmation (SCA) to submit. SECCI document displayed before acceptance. 14-day cooling-off right clearly communicated at acceptance point. Application submitted to lending platform. Confirmation screen with next steps and withdrawal instructions.",
+              "requirements_covered": [
+                "FR-19",
+                "FR-32",
+                "FR-33"
+              ],
+              "nfrs_applicable": [
+                "NFR-19",
+                "NFR-15",
+                "NFR-27"
+              ],
+              "user_facing": true,
+              "data_sensitivity": "Restricted",
+              "change_type": "new",
+              "metadata": {
+                "confidence": 0.95,
+                "reasoning": "FR-19 (one-tap), FR-32 (SECCI), FR-33 (cooling-off) are sequential steps in the same application flow.",
+                "citation": {
+                  "source_reference": "photograph receipts and the app automatically extracts",
+                  "source_location": "paragraph 1"
+                },
+                "trajectory": [
+                  {
+                    "step": 1,
+                    "action": "retrieve",
+                    "tool": null,
+                    "detail": "Identified receipt capture as primary input mechanism"
+                  },
+                  {
+                    "step": 2,
+                    "action": "reason",
+                    "tool": null,
+                    "detail": "Core user action \u2014 Must-Have priority"
+                  },
+                  {
+                    "step": 3,
+                    "action": "generate",
+                    "tool": null,
+                    "detail": "Formulated as camera-based capture requirement"
+                  }
+                ]
+              }
+            },
+            {
+              "feature_id": "F-06.5",
+              "title": "Offer Audit Trail",
+              "description": "Complete audit log of: every offer generated (with eligibility criteria met), every offer presented to customer (with context/trigger), customer actions (viewed, dismissed, saved, applied, expired). Timestamp, session ID, device, offer version all recorded. Retained 6 years (FCA SYSC 9.1.1R). Queryable for regulatory audit within 24 hours. Financial promotion records retained 3 years minimum. Supports DSAR export.",
+              "requirements_covered": [
+                "FR-20"
+              ],
+              "nfrs_applicable": [
+                "NFR-09",
+                "NFR-15",
+                "NFR-18"
+              ],
+              "user_facing": false,
+              "data_sensitivity": "Restricted",
+              "change_type": "new",
+              "metadata": {
+                "confidence": 0.95,
+                "reasoning": "Separate audit/compliance feature. Critical for regulatory defence but distinct from offer logic.",
+                "citation": {
+                  "source_reference": "photograph receipts and the app automatically extracts",
+                  "source_location": "paragraph 1"
+                },
+                "trajectory": [
+                  {
+                    "step": 1,
+                    "action": "retrieve",
+                    "tool": null,
+                    "detail": "Identified receipt capture as primary input mechanism"
+                  },
+                  {
+                    "step": 2,
+                    "action": "reason",
+                    "tool": null,
+                    "detail": "Core user action \u2014 Must-Have priority"
+                  },
+                  {
+                    "step": 3,
+                    "action": "generate",
+                    "tool": null,
+                    "detail": "Formulated as camera-based capture requirement"
+                  }
+                ]
+              }
+            },
+            {
+              "feature_id": "F-06.6",
+              "title": "Unified Recommendation Engine",
+              "description": "Weighs both spending/savings perspectives (from existing FA) and credit health perspectives (from Credit Coach) when making recommendations. Credit health takes priority when score below configurable threshold (e.g., score < 'Fair' band). Prevents conflicting recommendations (e.g., FA suggesting spending while Credit Coach suggests saving). Arbitration logic: if conflict detected, credit health recommendation wins for at-risk customers, spending recommendation wins for healthy-score customers. Configuration managed by product team.",
+              "requirements_covered": [
+                "FR-46"
+              ],
+              "nfrs_applicable": [
+                "NFR-14",
+                "NFR-20"
+              ],
+              "user_facing": false,
+              "data_sensitivity": "Internal",
+              "change_type": "new",
+              "metadata": {
+                "confidence": 0.95,
+                "reasoning": "Cross-agent coordination feature. Scoped in EP-06 as it primarily affects product recommendations and offer timing.",
+                "citation": {
+                  "source_reference": "photograph receipts and the app automatically extracts",
+                  "source_location": "paragraph 1"
+                },
+                "trajectory": [
+                  {
+                    "step": 1,
+                    "action": "retrieve",
+                    "tool": null,
+                    "detail": "Identified receipt capture as primary input mechanism"
+                  },
+                  {
+                    "step": 2,
+                    "action": "reason",
+                    "tool": null,
+                    "detail": "Core user action \u2014 Must-Have priority"
+                  },
+                  {
+                    "step": 3,
+                    "action": "generate",
+                    "tool": null,
+                    "detail": "Formulated as camera-based capture requirement"
+                  }
+                ]
+              }
+            }
+          ],
+          "scope_in": [
+            "Customer profile matching against Lloyds lending criteria",
+            "Pre-qualification gate (FA only shows qualifying products)",
+            "Guaranteed offer generation (customer will not be declined)",
+            "Contextual offer presentation at optimal moments",
+            "One-tap application with pre-filled customer data",
+            "Full offer audit trail (presented, viewed, accepted, declined)",
+            "Unified recommendation engine (spending + credit perspectives)",
+            "SECCI/pre-contract information generation",
+            "Representative APR and representative example display",
+            "Affordability assessment integration (CONC 5 compliance)",
+            "14-day cooling-off period communication",
+            "Financial promotion compliance (CONC 3)"
+          ],
+          "scope_out": [
+            "Actual loan disbursement (handled by existing lending platform)",
+            "Post-acceptance loan servicing (existing systems)",
+            "Third-party product comparison (Lloyds products only in v1)",
+            "Variable rate offers (fixed rate only in v1)"
+          ]
+        },
+        {
+          "epic_id": "EP-07",
+          "title": "Proactive Credit Health Alerts",
+          "sprint": "S4",
+          "description": "Utilisation threshold alerts, payment impact warnings, product eligibility notifications, and alert preference management.",
+          "features": [
+            {
+              "feature_id": "F-07.1",
+              "title": "Credit Utilisation Threshold Alerts",
+              "description": "Monitor credit utilisation ratio and alert when approaching configurable thresholds. Default thresholds: 50% (advisory), 75% (warning), 90% (urgent). Alert includes: current utilisation percentage, which accounts contributing, estimated score impact if utilisation increases further, suggested action (e.g., 'Consider paying down your Visa card by \u00a3200 to drop below 75%'). Delivered within 15 minutes of trigger detection. Channels: push notification + in-app inbox. Does not alert if customer is in financial distress (suppression check).",
+              "requirements_covered": [
+                "FR-21"
+              ],
+              "nfrs_applicable": [
+                "NFR-04",
+                "NFR-17",
+                "NFR-14"
+              ],
+              "user_facing": true,
+              "data_sensitivity": "Confidential",
+              "change_type": "new",
+              "metadata": {
+                "confidence": 0.95,
+                "reasoning": "Distinct alert type with specific trigger logic and threshold configuration.",
+                "citation": {
+                  "source_reference": "photograph receipts and the app automatically extracts",
+                  "source_location": "paragraph 1"
+                },
+                "trajectory": [
+                  {
+                    "step": 1,
+                    "action": "retrieve",
+                    "tool": null,
+                    "detail": "Identified receipt capture as primary input mechanism"
+                  },
+                  {
+                    "step": 2,
+                    "action": "reason",
+                    "tool": null,
+                    "detail": "Core user action \u2014 Must-Have priority"
+                  },
+                  {
+                    "step": 3,
+                    "action": "generate",
+                    "tool": null,
+                    "detail": "Formulated as camera-based capture requirement"
+                  }
+                ]
+              }
+            },
+            {
+              "feature_id": "F-07.2",
+              "title": "Payment Impact Alerts",
+              "description": "Alert customer about upcoming payments where a miss would negatively impact credit score. Triggers: Direct Debit due within 3 days AND insufficient funds detected in payment account, OR payment already 1 day overdue. Alert includes: payment amount, due date, creditor name, estimated score impact of a missed payment, suggested action. Empathetic tone \u2014 no blame language. If multiple payments at risk, prioritise by credit impact. Does not alert during Breathing Space.",
+              "requirements_covered": [
+                "FR-22"
+              ],
+              "nfrs_applicable": [
+                "NFR-04",
+                "NFR-17",
+                "NFR-14"
+              ],
+              "user_facing": true,
+              "data_sensitivity": "Confidential",
+              "change_type": "new",
+              "metadata": {
+                "confidence": 0.95,
+                "reasoning": "Preventive alert requiring integration with payment schedule data. Distinct trigger logic from utilisation alerts.",
+                "citation": {
+                  "source_reference": "photograph receipts and the app automatically extracts",
+                  "source_location": "paragraph 1"
+                },
+                "trajectory": [
+                  {
+                    "step": 1,
+                    "action": "retrieve",
+                    "tool": null,
+                    "detail": "Identified receipt capture as primary input mechanism"
+                  },
+                  {
+                    "step": 2,
+                    "action": "reason",
+                    "tool": null,
+                    "detail": "Core user action \u2014 Must-Have priority"
+                  },
+                  {
+                    "step": 3,
+                    "action": "generate",
+                    "tool": null,
+                    "detail": "Formulated as camera-based capture requirement"
+                  }
+                ]
+              }
+            },
+            {
+              "feature_id": "F-07.3",
+              "title": "Product Eligibility Notifications",
+              "description": "Notify customer when score improvement unlocks new product eligibility. Triggered by: score crossing product threshold on refresh. Notification includes: product now available, what changed (e.g., 'Your score moved to Good band'), link to view offer (if pre-approved). Celebratory tone. Maximum one eligibility notification per refresh cycle to avoid spam. Only for products with genuine pre-approval (not indicative). Suppressed during financial distress.",
+              "requirements_covered": [
+                "FR-23"
+              ],
+              "nfrs_applicable": [
+                "NFR-04",
+                "NFR-15",
+                "NFR-14"
+              ],
+              "user_facing": true,
+              "data_sensitivity": "Confidential",
+              "change_type": "new",
+              "metadata": {
+                "confidence": 0.95,
+                "reasoning": "Connects score improvement to tangible product access. Distinct from offer presentation (EP-06) \u2014 this is the notification trigger.",
+                "citation": {
+                  "source_reference": "photograph receipts and the app automatically extracts",
+                  "source_location": "paragraph 1"
+                },
+                "trajectory": [
+                  {
+                    "step": 1,
+                    "action": "retrieve",
+                    "tool": null,
+                    "detail": "Identified receipt capture as primary input mechanism"
+                  },
+                  {
+                    "step": 2,
+                    "action": "reason",
+                    "tool": null,
+                    "detail": "Core user action \u2014 Must-Have priority"
+                  },
+                  {
+                    "step": 3,
+                    "action": "generate",
+                    "tool": null,
+                    "detail": "Formulated as camera-based capture requirement"
+                  }
+                ]
+              }
+            },
+            {
+              "feature_id": "F-07.4",
+              "title": "Alert Preference Configuration & Opt-Out",
+              "description": "Settings screen allowing customer to configure: which alert types to receive (utilisation/payment/eligibility), frequency caps (e.g., max 2 alerts per week), delivery channels (push/in-app/email), quiet hours (no alerts between configured times), opt-out of individual types or all alerts. Changes take effect immediately. Defaults: all alerts on, push + in-app, no quiet hours. Opt-out does not affect consent for CRA data \u2014 only alert delivery. Preferences stored and respected across all alert features.",
+              "requirements_covered": [
+                "FR-24"
+              ],
+              "nfrs_applicable": [
+                "NFR-18",
+                "NFR-14"
+              ],
+              "user_facing": true,
+              "data_sensitivity": "Internal",
+              "change_type": "new",
+              "metadata": {
+                "confidence": 0.95,
+                "reasoning": "Customer control feature. Separate from alert logic as it's a cross-cutting preference layer.",
+                "citation": {
+                  "source_reference": "photograph receipts and the app automatically extracts",
+                  "source_location": "paragraph 1"
+                },
+                "trajectory": [
+                  {
+                    "step": 1,
+                    "action": "retrieve",
+                    "tool": null,
+                    "detail": "Identified receipt capture as primary input mechanism"
+                  },
+                  {
+                    "step": 2,
+                    "action": "reason",
+                    "tool": null,
+                    "detail": "Core user action \u2014 Must-Have priority"
+                  },
+                  {
+                    "step": 3,
+                    "action": "generate",
+                    "tool": null,
+                    "detail": "Formulated as camera-based capture requirement"
+                  }
+                ]
+              }
+            }
+          ],
+          "scope_in": [
+            "Credit utilisation threshold alerts (configurable thresholds)",
+            "Payment impact alerts (upcoming payments where miss affects score)",
+            "Product eligibility notifications (score improvement unlocks new products)",
+            "Alert preference configuration and opt-out",
+            "Pub/Sub event-driven alert generation",
+            "Push notification delivery within 15 minutes of trigger"
+          ],
+          "scope_out": [
+            "SMS/email alert delivery (push only in v1, channels extensible)",
+            "Alert-triggered offer presentation (handled by EP-06 contextual logic)",
+            "Real-time score monitoring (alerts based on monthly refresh cycle)"
+          ]
+        },
+        {
+          "epic_id": "EP-08",
+          "title": "Compliance, Governance & Cross-Cutting",
+          "sprint": "S4",
+          "description": "Right to erasure, automated decision explanation, vulnerability detection, offer suppression, breathing space, DSAR support, human escalation, multi-bureau comparison, and bias auditing.",
+          "features": [
+            {
+              "feature_id": "F-08.1",
+              "title": "Right to Erasure & Service Opt-Out",
+              "description": "Allow customer to delete stored score history and opt out of Credit Coach at any time. Flow: Settings > Credit Coach > Delete my data. Confirmation screen explains: what will be deleted (score history, action plans, simulation history, alert history), what will be retained (consent records for compliance, offer audit trail for 6 years per FCA). Deletion is irreversible \u2014 customer warned. On confirmation: CRA data purged, coaching data purged, agent deregistered for customer, consent record marked as withdrawn (retained). Customer can re-enrol later (fresh start).",
+              "requirements_covered": [
+                "FR-30"
+              ],
+              "nfrs_applicable": [
+                "NFR-18",
+                "NFR-09"
+              ],
+              "user_facing": true,
+              "data_sensitivity": "Restricted",
+              "change_type": "new",
+              "metadata": {
+                "confidence": 0.95,
+                "reasoning": "UK GDPR Art. 17 obligation. Separate feature due to complex deletion logic and retention exceptions.",
+                "citation": {
+                  "source_reference": "photograph receipts and the app automatically extracts",
+                  "source_location": "paragraph 1"
+                },
+                "trajectory": [
+                  {
+                    "step": 1,
+                    "action": "retrieve",
+                    "tool": null,
+                    "detail": "Identified receipt capture as primary input mechanism"
+                  },
+                  {
+                    "step": 2,
+                    "action": "reason",
+                    "tool": null,
+                    "detail": "Core user action \u2014 Must-Have priority"
+                  },
+                  {
+                    "step": 3,
+                    "action": "generate",
+                    "tool": null,
+                    "detail": "Formulated as camera-based capture requirement"
+                  }
+                ]
+              }
+            },
+            {
+              "feature_id": "F-08.2",
+              "title": "Automated Decision Explanation & Human Review",
+              "description": "For pre-approved offers (automated profiling with significant effect): provide meaningful explanation of logic (which factors led to this offer), significance (what it means for the customer), and consequences (what happens if they accept/decline). 'How was this decided?' link on every offer. Human review route: 'Request human review' button triggers escalation to lending team within 5 business days. Explanation in plain English (Flesch >= 60). Covers GDPR Art. 22 and DUAA 2025 high-risk ADM requirements.",
+              "requirements_covered": [
+                "FR-31"
+              ],
+              "nfrs_applicable": [
+                "NFR-18",
+                "NFR-20",
+                "NFR-26"
+              ],
+              "user_facing": true,
+              "data_sensitivity": "Confidential",
+              "change_type": "new",
+              "metadata": {
+                "confidence": 0.95,
+                "reasoning": "Legal requirement for automated decisions with significant effect. Separate from offer display as it's an on-demand explanation layer.",
+                "citation": {
+                  "source_reference": "photograph receipts and the app automatically extracts",
+                  "source_location": "paragraph 1"
+                },
+                "trajectory": [
+                  {
+                    "step": 1,
+                    "action": "retrieve",
+                    "tool": null,
+                    "detail": "Identified receipt capture as primary input mechanism"
+                  },
+                  {
+                    "step": 2,
+                    "action": "reason",
+                    "tool": null,
+                    "detail": "Core user action \u2014 Must-Have priority"
+                  },
+                  {
+                    "step": 3,
+                    "action": "generate",
+                    "tool": null,
+                    "detail": "Formulated as camera-based capture requirement"
+                  }
+                ]
+              }
+            },
+            {
+              "feature_id": "F-08.3",
+              "title": "Vulnerability Detection & Debt Advice Signposting",
+              "description": "Detect vulnerability indicators from available data: high utilisation trend (>90% sustained), multiple missed payments, gambling transaction patterns (from FA spending data), payday loan usage detected in CRA data, sudden income drop, returned Direct Debits. When detected: suppress promotional content, adjust tone to empathetic, display signposting to free debt advice (StepChange 0800 138 1111, Citizens Advice, National Debtline 0808 808 4000). 'Need help?' persistent option connecting to human support. Never pressure vulnerable customers. Detection runs on each score refresh and spending data update.",
+              "requirements_covered": [
+                "FR-36"
+              ],
+              "nfrs_applicable": [
+                "NFR-17",
+                "NFR-14",
+                "NFR-23"
+              ],
+              "user_facing": true,
+              "data_sensitivity": "Restricted",
+              "change_type": "new",
+              "metadata": {
+                "confidence": 0.95,
+                "reasoning": "Regulatory requirement under CONC 7. Complex detection logic with multiple data sources and significant UX implications.",
+                "citation": {
+                  "source_reference": "photograph receipts and the app automatically extracts",
+                  "source_location": "paragraph 1"
+                },
+                "trajectory": [
+                  {
+                    "step": 1,
+                    "action": "retrieve",
+                    "tool": null,
+                    "detail": "Identified receipt capture as primary input mechanism"
+                  },
+                  {
+                    "step": 2,
+                    "action": "reason",
+                    "tool": null,
+                    "detail": "Core user action \u2014 Must-Have priority"
+                  },
+                  {
+                    "step": 3,
+                    "action": "generate",
+                    "tool": null,
+                    "detail": "Formulated as camera-based capture requirement"
+                  }
+                ]
+              }
+            },
+            {
+              "feature_id": "F-08.4",
+              "title": "Offer Suppression During Financial Distress",
+              "description": "Suppress all pre-approved offers when financial distress indicators detected. Triggers: vulnerability flag active, Breathing Space active, customer in arrears on Lloyds products, debt-to-income ratio exceeds safe threshold. Suppression is automatic and immediate. No manual override by customer (protective measure). Offers resume automatically when distress indicators clear. Audit log records suppression reason and duration. Prevents encouraging over-borrowing per Consumer Duty.",
+              "requirements_covered": [
+                "FR-37"
+              ],
+              "nfrs_applicable": [
+                "NFR-14",
+                "NFR-17",
+                "NFR-16"
+              ],
+              "user_facing": false,
+              "data_sensitivity": "Restricted",
+              "change_type": "new",
+              "metadata": {
+                "confidence": 0.95,
+                "reasoning": "Distinct from vulnerability detection \u2014 this is the enforcement action (suppression) triggered by detection.",
+                "citation": {
+                  "source_reference": "photograph receipts and the app automatically extracts",
+                  "source_location": "paragraph 1"
+                },
+                "trajectory": [
+                  {
+                    "step": 1,
+                    "action": "retrieve",
+                    "tool": null,
+                    "detail": "Identified receipt capture as primary input mechanism"
+                  },
+                  {
+                    "step": 2,
+                    "action": "reason",
+                    "tool": null,
+                    "detail": "Core user action \u2014 Must-Have priority"
+                  },
+                  {
+                    "step": 3,
+                    "action": "generate",
+                    "tool": null,
+                    "detail": "Formulated as camera-based capture requirement"
+                  }
+                ]
+              }
+            },
+            {
+              "feature_id": "F-08.5",
+              "title": "Breathing Space Compliance",
+              "description": "Detect Breathing Space status (via Insolvency Service portal notification or internal collections system flag). On activation: freeze all credit-related alerts, suppress pre-approved offers, stop proactive communications, freeze interest/charges on Lloyds products surfaced through Credit Coach. Two types supported: Standard (60 days) and Mental Health Crisis (duration of treatment + 30 days). On expiry: normal service resumes, frozen charges NOT retrospectively applied. Audit trail of all actions taken during Breathing Space period.",
+              "requirements_covered": [
+                "FR-48"
+              ],
+              "nfrs_applicable": [
+                "NFR-17",
+                "NFR-18",
+                "NFR-14"
+              ],
+              "user_facing": false,
+              "data_sensitivity": "Restricted",
+              "change_type": "new",
+              "metadata": {
+                "confidence": 0.95,
+                "reasoning": "Legal obligation under Debt Respite Scheme Regulations 2020. Separate from general distress suppression as it has specific legal triggers and durations.",
+                "citation": {
+                  "source_reference": "photograph receipts and the app automatically extracts",
+                  "source_location": "paragraph 1"
+                },
+                "trajectory": [
+                  {
+                    "step": 1,
+                    "action": "retrieve",
+                    "tool": null,
+                    "detail": "Identified receipt capture as primary input mechanism"
+                  },
+                  {
+                    "step": 2,
+                    "action": "reason",
+                    "tool": null,
+                    "detail": "Core user action \u2014 Must-Have priority"
+                  },
+                  {
+                    "step": 3,
+                    "action": "generate",
+                    "tool": null,
+                    "detail": "Formulated as camera-based capture requirement"
+                  }
+                ]
+              }
+            },
+            {
+              "feature_id": "F-08.6",
+              "title": "Data Subject Access Request (DSAR) Support",
+              "description": "Enable export of all credit coaching data for DSAR compliance. Exportable data: score history, action plans (current and archived), simulation history, offers presented and actions taken, consent records, alert history, preference settings. Export format: machine-readable (JSON) and human-readable (PDF). Must be completable within 1 calendar month of request. Triggered via existing Lloyds DSAR process \u2014 Credit Coach provides its data subset to the central DSAR team. Automated extraction API for ops team.",
+              "requirements_covered": [
+                "FR-49"
+              ],
+              "nfrs_applicable": [
+                "NFR-18",
+                "NFR-09"
+              ],
+              "user_facing": true,
+              "data_sensitivity": "Restricted",
+              "change_type": "new",
+              "metadata": {
+                "confidence": 0.95,
+                "reasoning": "GDPR Art. 15 obligation. Separate feature due to cross-cutting data aggregation requirement across all Credit Coach data stores.",
+                "citation": {
+                  "source_reference": "photograph receipts and the app automatically extracts",
+                  "source_location": "paragraph 1"
+                },
+                "trajectory": [
+                  {
+                    "step": 1,
+                    "action": "retrieve",
+                    "tool": null,
+                    "detail": "Identified receipt capture as primary input mechanism"
+                  },
+                  {
+                    "step": 2,
+                    "action": "reason",
+                    "tool": null,
+                    "detail": "Core user action \u2014 Must-Have priority"
+                  },
+                  {
+                    "step": 3,
+                    "action": "generate",
+                    "tool": null,
+                    "detail": "Formulated as camera-based capture requirement"
+                  }
+                ]
+              }
+            },
+            {
+              "feature_id": "F-08.7",
+              "title": "Human Escalation Path",
+              "description": "Provide escalation to human adviser for: complex credit situations agent cannot handle, customer requests human review, vulnerability detected, complaint about Credit Coach advice, edge cases where confidence is low. Escalation options: live chat transfer, callback request, branch appointment booking. Context passed to human adviser (conversation history, score summary, active plan). Available from any Credit Coach screen via persistent 'Speak to someone' option. SLA: live chat within 5 minutes during hours, callback within 24 hours.",
+              "requirements_covered": [
+                "FR-41"
+              ],
+              "nfrs_applicable": [
+                "NFR-14",
+                "NFR-20"
+              ],
+              "user_facing": true,
+              "data_sensitivity": "Confidential",
+              "change_type": "new",
+              "metadata": {
+                "confidence": 0.95,
+                "reasoning": "FS2/23 regulatory expectation for human oversight. Cross-cutting feature available from all screens.",
+                "citation": {
+                  "source_reference": "photograph receipts and the app automatically extracts",
+                  "source_location": "paragraph 1"
+                },
+                "trajectory": [
+                  {
+                    "step": 1,
+                    "action": "retrieve",
+                    "tool": null,
+                    "detail": "Identified receipt capture as primary input mechanism"
+                  },
+                  {
+                    "step": 2,
+                    "action": "reason",
+                    "tool": null,
+                    "detail": "Core user action \u2014 Must-Have priority"
+                  },
+                  {
+                    "step": 3,
+                    "action": "generate",
+                    "tool": null,
+                    "detail": "Formulated as camera-based capture requirement"
+                  }
+                ]
+              }
+            },
+            {
+              "feature_id": "F-08.8",
+              "title": "Multi-Bureau Score Comparison",
+              "description": "Display scores from multiple CRAs side-by-side when available (Experian, Equifax, TransUnion). Shows: each bureau's score on its native scale, band per bureau, key differences in factors between bureaux, explanation of why scores differ. Requires consent per bureau (F-01.2 supports this). Nice-to-Have priority \u2014 only available if multiple CRA partnerships active. Graceful degradation: if only one CRA available, shows single score with note that comparison requires additional bureau access.",
+              "requirements_covered": [
+                "FR-50"
+              ],
+              "nfrs_applicable": [
+                "NFR-11",
+                "NFR-13"
+              ],
+              "user_facing": true,
+              "data_sensitivity": "Restricted",
+              "change_type": "new",
+              "metadata": {
+                "confidence": 0.95,
+                "reasoning": "Nice-to-Have feature from Phase 5 roadmap. Included in Sprint 4 as it builds on existing multi-CRA infrastructure with minimal additional effort.",
+                "citation": {
+                  "source_reference": "photograph receipts and the app automatically extracts",
+                  "source_location": "paragraph 1"
+                },
+                "trajectory": [
+                  {
+                    "step": 1,
+                    "action": "retrieve",
+                    "tool": null,
+                    "detail": "Identified receipt capture as primary input mechanism"
+                  },
+                  {
+                    "step": 2,
+                    "action": "reason",
+                    "tool": null,
+                    "detail": "Core user action \u2014 Must-Have priority"
+                  },
+                  {
+                    "step": 3,
+                    "action": "generate",
+                    "tool": null,
+                    "detail": "Formulated as camera-based capture requirement"
+                  }
+                ]
+              }
+            }
+          ],
+          "scope_in": [
+            "Right to erasure (score history deletion, service opt-out)",
+            "Automated decision explanation with human review route",
+            "Vulnerability detection and debt advice signposting (StepChange, Citizens Advice, National Debtline)",
+            "Offer suppression during financial distress indicators",
+            "Breathing Space compliance (60-day moratorium, automatic freeze)",
+            "DSAR support (export all credit coaching data within 1 month)",
+            "Human escalation path to specialist adviser",
+            "Multi-bureau score comparison (Phase 5 feature)"
+          ],
+          "scope_out": [
+            "Automated vulnerability scoring model (manual indicators in v1)",
+            "Integration with Insolvency Service portal for Breathing Space (manual notification in v1, API integration future)",
+            "Complaints handling system (uses existing Lloyds complaints infrastructure)"
+          ]
+        }
+      ],
+      "nfr_mapping": {
+        "NFR-01": {
+          "title": "Score Retrieval Response Time",
+          "applicable_epics": [
+            "EP-02"
+          ],
+          "implementation_notes": "CRA API call + response parsing + UI render must complete in <3s. Implement caching (Memorystore) for repeat views within refresh cycle. Circuit breaker timeout at 2.5s with cached fallback."
+        },
+        "NFR-02": {
+          "title": "Simulation Response Time",
+          "applicable_epics": [
+            "EP-05"
+          ],
+          "implementation_notes": "Vertex AI model inference + result formatting <5s. Pre-compute common scenarios. Show loading state with progress indicator. Timeout at 4.5s with 'try again' prompt."
+        },
+        "NFR-03": {
+          "title": "Dashboard Uptime",
+          "applicable_epics": [
+            "EP-01",
+            "EP-02"
+          ],
+          "implementation_notes": "GKE deployment with min 2 replicas, health checks, auto-scaling. Cloud CDN for static assets. Monitoring via Cloud Monitoring with 99.9% SLO alert."
+        },
+        "NFR-04": {
+          "title": "Alert Delivery Timeliness",
+          "applicable_epics": [
+            "EP-07"
+          ],
+          "implementation_notes": "Pub/Sub event triggers alert generation pipeline. Dataflow processes events. Push notification via existing mobile infrastructure. Monitor delivery latency with 15-min SLA alert."
+        },
+        "NFR-05": {
+          "title": "Enrolled Customer Capacity",
+          "applicable_epics": [
+            "EP-01",
+            "EP-02"
+          ],
+          "implementation_notes": "Horizontal scaling on GKE. Score data partitioned by customer ID in Cloud SQL. BigQuery for analytics queries. Load test at 10M concurrent enrolled customers."
+        },
+        "NFR-06": {
+          "title": "Encryption at Rest",
+          "applicable_epics": [
+            "EP-01",
+            "EP-02",
+            "EP-03",
+            "EP-04",
+            "EP-05",
+            "EP-06",
+            "EP-07",
+            "EP-08"
+          ],
+          "implementation_notes": "Cloud SQL encryption at rest (AES-256, Google-managed keys). Cloud KMS for CMEK on Restricted data. All CRA data classified Restricted."
+        },
+        "NFR-07": {
+          "title": "Encryption in Transit",
+          "applicable_epics": [
+            "EP-01",
+            "EP-02",
+            "EP-03",
+            "EP-04",
+            "EP-05",
+            "EP-06",
+            "EP-07",
+            "EP-08"
+          ],
+          "implementation_notes": "TLS 1.3 enforced on all endpoints. mTLS between internal services via Cloud Service Mesh. Certificate rotation automated."
+        },
+        "NFR-08": {
+          "title": "Data Classification",
+          "applicable_epics": [
+            "EP-01"
+          ],
+          "implementation_notes": "CRA score/factors = Restricted. Action plans = Confidential. Alert preferences = Internal. Product catalog = Public. Enforce via IAM policies and data labels."
+        },
+        "NFR-09": {
+          "title": "Score History Retention",
+          "applicable_epics": [
+            "EP-01",
+            "EP-08"
+          ],
+          "implementation_notes": "Cloud SQL retention policy: 6 years post-service-closure. Automated archival to Cloud Storage (Coldline) after 2 years active. Deletion job for expired records."
+        },
+        "NFR-10": {
+          "title": "Consent Records Retention",
+          "applicable_epics": [
+            "EP-01",
+            "EP-08"
+          ],
+          "implementation_notes": "Consent records stored in dedicated table with immutable audit trail. No TTL. Retrievable via admin API within 24 hours for regulatory audit."
+        },
+        "NFR-11": {
+          "title": "WCAG 2.1 AA",
+          "applicable_epics": [
+            "EP-01",
+            "EP-02",
+            "EP-03",
+            "EP-04",
+            "EP-05",
+            "EP-06",
+            "EP-07",
+            "EP-08"
+          ],
+          "implementation_notes": "All UI components built with ARIA attributes. Semantic HTML. Focus management. Tested with axe-core in CI pipeline. Manual audit with VoiceOver/TalkBack before each sprint release."
+        },
+        "NFR-12": {
+          "title": "Screen Reader Compatibility",
+          "applicable_epics": [
+            "EP-02",
+            "EP-04",
+            "EP-05",
+            "EP-06"
+          ],
+          "implementation_notes": "100% interactive elements with accessible labels. Score charts have text alternatives. Tested with VoiceOver (iOS) and TalkBack (Android) in QA."
+        },
+        "NFR-13": {
+          "title": "Colour-Blind Safe Visualisations",
+          "applicable_epics": [
+            "EP-02",
+            "EP-04"
+          ],
+          "implementation_notes": "Chart palette uses ColorBrewer safe schemes. All data points distinguishable by shape/pattern in addition to colour. Contrast ratio \u22654.5:1 validated in CI."
+        },
+        "NFR-14": {
+          "title": "FCA Consumer Duty",
+          "applicable_epics": [
+            "EP-01",
+            "EP-02",
+            "EP-03",
+            "EP-04",
+            "EP-05",
+            "EP-06",
+            "EP-07",
+            "EP-08"
+          ],
+          "implementation_notes": "Consumer Duty outcomes embedded in acceptance criteria for every feature. Quarterly outcome monitoring dashboard. Annual product review trigger."
+        },
+        "NFR-15": {
+          "title": "FCA CONC 3 Financial Promotions",
+          "applicable_epics": [
+            "EP-06"
+          ],
+          "implementation_notes": "All offer screens include representative APR (most prominent), representative example (6 values), total amount payable. Legal review gate before EP-06 deployment."
+        },
+        "NFR-16": {
+          "title": "FCA CONC 5 Creditworthiness",
+          "applicable_epics": [
+            "EP-06"
+          ],
+          "implementation_notes": "Affordability assessment service called before offer generation. Covers credit risk + ability to repay without hardship. Decline if unaffordable regardless of score."
+        },
+        "NFR-17": {
+          "title": "FCA CONC 7 Arrears and Default",
+          "applicable_epics": [
+            "EP-07",
+            "EP-08"
+          ],
+          "implementation_notes": "Offer suppression when distress indicators detected. Debt advice signposting in all arrears-related alerts. Breathing Space auto-freeze. No aggressive language."
+        },
+        "NFR-18": {
+          "title": "UK GDPR and DPA 2018",
+          "applicable_epics": [
+            "EP-01",
+            "EP-08"
+          ],
+          "implementation_notes": "Lawful basis: explicit consent for CRA data. Privacy notice at collection. DSAR within 1 month. Right to erasure (with CCA retention exceptions). Processing register updated."
+        },
+        "NFR-19": {
+          "title": "Consumer Credit Act 1974",
+          "applicable_epics": [
+            "EP-06"
+          ],
+          "implementation_notes": "SECCI generation for all regulated credit offers. 14-day cooling-off communicated. Settlement figure available. Pre-contract explanations adequate."
+        },
+        "NFR-20": {
+          "title": "AI/ML Explainability",
+          "applicable_epics": [
+            "EP-02",
+            "EP-03",
+            "EP-05"
+          ],
+          "implementation_notes": "Every recommendation includes 'why' explanation. Simulation shows contributing factors. Flesch reading ease \u226560 for all customer-facing explanations. No black-box outputs."
+        },
+        "NFR-21": {
+          "title": "AI Fairness and Bias Audits",
+          "applicable_epics": [
+            "EP-03",
+            "EP-05",
+            "EP-06"
+          ],
+          "implementation_notes": "Quarterly bias audit across age, gender, ethnicity, disability. Disparate impact ratio >0.8. Audit results reported to model risk committee. Remediation within 30 days if breach."
+        },
+        "NFR-22": {
+          "title": "Model Risk Management PRA SS1/23",
+          "applicable_epics": [
+            "EP-03",
+            "EP-05",
+            "EP-06"
+          ],
+          "implementation_notes": "All models inventoried in model registry. Risk classification (High for offer-matching, Medium for simulation). Independent validation before production. Annual revalidation. 5% drift threshold."
+        },
+        "NFR-23": {
+          "title": "Equality Act 2010",
+          "applicable_epics": [
+            "EP-03",
+            "EP-05",
+            "EP-06"
+          ],
+          "implementation_notes": "No proxy variables for protected characteristics in scoring/recommendations. Testing across demographic groups. Remediation if disparate impact detected."
+        },
+        "NFR-24": {
+          "title": "DPIA Completion Before Launch",
+          "applicable_epics": [
+            "EP-01"
+          ],
+          "implementation_notes": "DPIA completed before Sprint 1 build begins (CON-08). Covers: CRA data processing, automated profiling, score-based recommendations, pre-approved offers."
+        },
+        "NFR-25": {
+          "title": "CRA Data Quality Validation",
+          "applicable_epics": [
+            "EP-02",
+            "EP-05",
+            "EP-06"
+          ],
+          "implementation_notes": "CRA data freshness check: reject data >30 days old, trigger re-fetch. Data quality score \u226595% (completeness, consistency). Log quality failures for monitoring."
+        },
+        "NFR-26": {
+          "title": "DUAA 2025 ADM Compliance",
+          "applicable_epics": [
+            "EP-06",
+            "EP-08"
+          ],
+          "implementation_notes": "Monitor ICO guidance on DUAA 2025 ADM provisions. Credit decisions likely classified high-risk ADM. Implement human review route as safeguard. Track regulatory updates."
+        },
+        "NFR-27": {
+          "title": "Consumer Understanding of Offers",
+          "applicable_epics": [
+            "EP-06"
+          ],
+          "implementation_notes": "User testing with financially non-expert participants. Target \u226585% comprehension of total cost from offer screen. Iterate design until target met. Plain language review by comms team."
+        }
+      },
+      "traceability_matrix": [
+        {
+          "fr_id": "FR-01",
+          "covered_by": [
+            "F-02.1"
+          ]
+        },
+        {
+          "fr_id": "FR-02",
+          "covered_by": [
+            "F-02.2"
+          ]
+        },
+        {
+          "fr_id": "FR-03",
+          "covered_by": [
+            "F-02.3"
+          ]
+        },
+        {
+          "fr_id": "FR-04",
+          "covered_by": [
+            "F-02.5",
+            "F-04.1"
+          ]
+        },
+        {
+          "fr_id": "FR-05",
+          "covered_by": [
+            "F-02.1",
+            "F-02.7"
+          ]
+        },
+        {
+          "fr_id": "FR-06",
+          "covered_by": [
+            "F-02.4"
+          ]
+        },
+        {
+          "fr_id": "FR-07",
+          "covered_by": [
+            "F-03.1"
+          ]
+        },
+        {
+          "fr_id": "FR-08",
+          "covered_by": [
+            "F-03.1"
+          ]
+        },
+        {
+          "fr_id": "FR-09",
+          "covered_by": [
+            "F-03.2"
+          ]
+        },
+        {
+          "fr_id": "FR-10",
+          "covered_by": [
+            "F-03.3"
+          ]
+        },
+        {
+          "fr_id": "FR-11",
+          "covered_by": [
+            "F-03.4"
+          ]
+        },
+        {
+          "fr_id": "FR-12",
+          "covered_by": [
+            "F-05.1"
+          ]
+        },
+        {
+          "fr_id": "FR-13",
+          "covered_by": [
+            "F-05.1"
+          ]
+        },
+        {
+          "fr_id": "FR-14",
+          "covered_by": [
+            "F-05.2"
+          ]
+        },
+        {
+          "fr_id": "FR-15",
+          "covered_by": [
+            "F-05.3"
+          ]
+        },
+        {
+          "fr_id": "FR-16",
+          "covered_by": [
+            "F-06.1"
+          ]
+        },
+        {
+          "fr_id": "FR-17",
+          "covered_by": [
+            "F-06.2"
+          ]
+        },
+        {
+          "fr_id": "FR-18",
+          "covered_by": [
+            "F-06.3"
+          ]
+        },
+        {
+          "fr_id": "FR-19",
+          "covered_by": [
+            "F-06.4"
+          ]
+        },
+        {
+          "fr_id": "FR-20",
+          "covered_by": [
+            "F-06.5"
+          ]
+        },
+        {
+          "fr_id": "FR-21",
+          "covered_by": [
+            "F-07.1"
+          ]
+        },
+        {
+          "fr_id": "FR-22",
+          "covered_by": [
+            "F-07.2"
+          ]
+        },
+        {
+          "fr_id": "FR-23",
+          "covered_by": [
+            "F-07.3"
+          ]
+        },
+        {
+          "fr_id": "FR-24",
+          "covered_by": [
+            "F-07.4"
+          ]
+        },
+        {
+          "fr_id": "FR-25",
+          "covered_by": [
+            "F-02.2"
+          ]
+        },
+        {
+          "fr_id": "FR-26",
+          "covered_by": [
+            "F-01.1",
+            "F-02.6"
+          ]
+        },
+        {
+          "fr_id": "FR-27",
+          "covered_by": [
+            "F-04.1"
+          ]
+        },
+        {
+          "fr_id": "FR-28",
+          "covered_by": [
+            "F-04.2"
+          ]
+        },
+        {
+          "fr_id": "FR-29",
+          "covered_by": [
+            "F-01.2"
+          ]
+        },
+        {
+          "fr_id": "FR-30",
+          "covered_by": [
+            "F-08.1"
+          ]
+        },
+        {
+          "fr_id": "FR-31",
+          "covered_by": [
+            "F-08.2"
+          ]
+        },
+        {
+          "fr_id": "FR-32",
+          "covered_by": [
+            "F-06.4"
+          ]
+        },
+        {
+          "fr_id": "FR-33",
+          "covered_by": [
+            "F-06.4"
+          ]
+        },
+        {
+          "fr_id": "FR-34",
+          "covered_by": [
+            "F-06.3"
+          ]
+        },
+        {
+          "fr_id": "FR-35",
+          "covered_by": [
+            "F-06.2"
+          ]
+        },
+        {
+          "fr_id": "FR-36",
+          "covered_by": [
+            "F-08.3"
+          ]
+        },
+        {
+          "fr_id": "FR-37",
+          "covered_by": [
+            "F-08.4"
+          ]
+        },
+        {
+          "fr_id": "FR-38",
+          "covered_by": [
+            "F-03.1"
+          ]
+        },
+        {
+          "fr_id": "FR-39",
+          "covered_by": [
+            "F-01.1"
+          ]
+        },
+        {
+          "fr_id": "FR-40",
+          "covered_by": [
+            "F-01.2"
+          ]
+        },
+        {
+          "fr_id": "FR-41",
+          "covered_by": [
+            "F-08.7"
+          ]
+        },
+        {
+          "fr_id": "FR-42",
+          "covered_by": [
+            "F-01.4"
+          ]
+        },
+        {
+          "fr_id": "FR-43",
+          "covered_by": [
+            "F-01.2"
+          ]
+        },
+        {
+          "fr_id": "FR-44",
+          "covered_by": [
+            "F-01.2"
+          ]
+        },
+        {
+          "fr_id": "FR-45",
+          "covered_by": [
+            "F-06.1"
+          ]
+        },
+        {
+          "fr_id": "FR-46",
+          "covered_by": [
+            "F-06.6"
+          ]
+        },
+        {
+          "fr_id": "FR-47",
+          "covered_by": [
+            "F-03.5"
+          ]
+        },
+        {
+          "fr_id": "FR-48",
+          "covered_by": [
+            "F-08.5"
+          ]
+        },
+        {
+          "fr_id": "FR-49",
+          "covered_by": [
+            "F-08.6"
+          ]
+        },
+        {
+          "fr_id": "FR-50",
+          "covered_by": [
+            "F-08.8"
+          ]
+        }
+      ],
+      "delivery_summary": "The AI Credit Coach is delivered across 4 two-week sprints, each producing a production-deployable increment. Sprint 1 establishes the technical foundation (Envoy agent registration, consent management, data infrastructure, design system) and delivers the core credit score dashboard with CRA retrieval, score display, factor explanation, and conversational queries \u2014 giving customers immediate value from day one. Sprint 2 builds the coaching layer with personalised improvement action plans, completion tracking, milestone celebrations, dynamic updates, spending-to-credit insights, and score trend visualisation with cross-lender debt visibility. Sprint 3 introduces the credit score simulator (what-if scenarios via natural language) and the pre-approved offers engine with eligibility matching, guaranteed offers, SECCI compliance, one-tap application, and the unified recommendation engine. Sprint 4 hardens the platform with proactive credit health alerts (utilisation, payment, eligibility), and comprehensive compliance features including right to erasure, automated decision explanation, vulnerability detection, offer suppression, Breathing Space compliance, DSAR support, human escalation, and multi-bureau comparison. All 50 functional requirements and 27 non-functional requirements are fully covered across 30 features in 8 epics."
+    },
+    "execution_summary": "\u2022 Produced 8 epics with 8 features total\n\u2022 Requirements coverage: 6/6 FRs assigned to features (100%)\n\u2022 Grouping strategy: capability clusters (capture \u2192 budget \u2192 reporting)\n\u2022 Key decisions: FR-04 (reports) given its own epic despite being single FR \u2014 it's a distinct capability area. Added FEAT-03-02 (export) as inferred from small business context.\n\u2022 Reflection: initially had EPIC-02 with only 2 features \u2014 added Budget Dashboard (FEAT-02-03) as it naturally combines FR-05+FR-06 visibility. Verified all FRs covered.\n\u2022 Dependencies: EPIC-02 and EPIC-03 both depend on EPIC-01 (need categories established first). EPIC-02 and EPIC-03 can run in parallel."
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "agent_id": "L1-inception-workflow-summariser",
+  "execution_id": "exec-g01-ddd",
+  "workflow_execution_id": "wf-golden-001",
+  "status": "success",
+  "_evaluation": {
+    "_note": "Golden-file-only metadata for evaluation. Not part of agent output.",
+    "expected_scores": {"faithfulness": 0.98, "hallucination": 0.02, "completeness": 0.97, "clarity": 0.92},
+    "key_checks": [
+      "All 3 agents mentioned in execution_flow: PASS",
+      "No invented data: PASS",
+      "Outcome reflects all-success: PASS",
+      "Plain English, no JSON: PASS"
+    ]
+  },
+  "content": {
+    "type": "workflow_summary",
+    "schema_version": "1.0",
+    "items": {
+      "request_and_intent": "The workflow executed a full inception pipeline for ExpenseTrack — a mobile expense tracker app for small business owners. The goal was to produce a vision document, extract structured requirements, and decompose them into delivery epics with sprint planning.",
+      "execution_flow": [
+        "L1-inception-vision-generator: Generated a 5-section vision document for ExpenseTrack covering 5 feature areas, 7 MVP features, 4 risks, and 3 open questions. Uploaded the markdown artifact to blob storage.",
+        "L1-inception-requirements-extractor: Extracted 8 functional requirements, 4 non-functional requirements, 2 constraints, 3 assumptions, and 2 gaps from the vision document.",
+        "L1-inception-epics-generator: Decomposed the requirements into 4 epics with 12 features allocated across 3 sprints. Achieved 100% requirements coverage (8/8 FRs mapped)."
+      ],
+      "artifacts_and_content": [
+        "Vision document (markdown) uploaded to /exec-g01-aaa/vision-doc/vision-expensetrack.md",
+        "8 functional requirements with MoSCoW prioritisation",
+        "4 non-functional requirements with measurable criteria",
+        "2 constraints, 3 assumptions, 2 gaps identified",
+        "4 epics with 12 features across 3 delivery sprints"
+      ],
+      "outcome": "Workflow completed successfully. All 3 agents passed. Delivered a complete inception package: vision document, structured requirements (8 FRs, 4 NFRs), and 4 epics across 3 sprints with full requirements coverage. 2 gaps remain open for stakeholder clarification.",
+      "metadata": {
+        "confidence": 0.95,
+        "reasoning": "All 3 agent execution_summaries provided detailed counts, KB references, guardrail results, and tool outcomes. No ambiguity in source data."
+      }
+    }
+  }
+}

@@ -1,0 +1,71 @@
+# Execution Rails (L2-L3 Runtime)
+# Active during agent execution — tool calls, memory access, loops
+
+define flow check tool permissions
+  """L2: Enforce least-privilege tool access."""
+  $tool_name = $action_name
+  $is_allowed = execute verify_tool_permission(tool=$tool_name)
+
+  if not $is_allowed
+    bot block tool access
+    stop
+
+define bot block tool access
+  "Tool access denied. This agent does not have permission to invoke the requested tool."
+
+define flow check memory safety
+  """L2: Prevent memory poisoning and cross-agent leakage."""
+  $memory_op = $action_name
+  $is_safe = execute verify_memory_access(operation=$memory_op)
+
+  if not $is_safe
+    bot block memory access
+    stop
+
+define bot block memory access
+  "Memory access denied. This operation violates memory isolation rules."
+
+define flow check rate limit
+  """L3: Limit tool calls and agent invocations per execution."""
+  $call_count = $execution_context.tool_call_count
+  $max_calls = 50
+
+  if $call_count > $max_calls
+    bot block rate limit
+    stop
+
+define bot block rate limit
+  "Rate limit exceeded. Maximum tool calls per execution reached."
+
+define flow check loop detection
+  """L3: Detect and kill infinite loops and runaway execution."""
+  $iteration = $execution_context.iteration_count
+  $max_iterations = 50
+  $elapsed = $execution_context.elapsed_seconds
+  $timeout = 300
+
+  if $iteration > $max_iterations
+    bot kill loop
+    stop
+
+  if $elapsed > $timeout
+    bot kill timeout
+    stop
+
+define bot kill loop
+  "Execution killed: exceeded maximum iteration count. Possible infinite loop detected."
+
+define bot kill timeout
+  "Execution killed: exceeded maximum timeout of 300 seconds."
+
+define flow check cost control
+  """L3: Enforce token and invocation budget caps."""
+  $tokens_used = $execution_context.total_tokens
+  $max_tokens = 8000
+
+  if $tokens_used > $max_tokens
+    bot block cost
+    stop
+
+define bot block cost
+  "Token budget exceeded. Execution terminated to prevent cost overrun."

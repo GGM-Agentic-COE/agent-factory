@@ -1,0 +1,30 @@
+{
+  "agent_id": "L1-vision-statement-generator-evaluator",
+  "agent_version": "1.0.0",
+  "execution_id": "exec-c2d3e4f5",
+  "workflow_execution_id": "wf-a17c5e92",
+  "status": "success",
+  "content": {
+    "type": "evaluation_result",
+    "schema_version": "1.0",
+    "items": {
+      "scores": {
+        "faithfulness": 0.55,
+        "hallucination": 0.35,
+        "consistency": 0.6,
+        "relevance": 0.7,
+        "reasoning_quality": 0.6,
+        "citation_completeness": null
+      },
+      "overall_score": 4.5,
+      "pass": false,
+      "findings": [
+        { "id": "FND-01", "gate": "Reconciliation coverage check — grounding", "status": "fail", "detail": "OR-04 ('Currency conversion risk for cross-border producer payments') has source: 'regulatory' and related_ids: ['CON-05'], but regulatory_posture.constraint_summaries only ever contained CON-01, CON-02, and CON-03 — CON-05 does not exist anywhere upstream. This risk, and the underlying premise (cross-border payments), is not grounded in anything L1-vision-regulatory-feasibility-checker actually assessed. HarvestLink's stated scope is UK-domestic, so this also contradicts the idea brief's target geography." },
+        { "id": "FND-02", "gate": "Reconciliation coverage check — actual constraints", "status": "pass", "detail": "CON-01, CON-02, CON-03 are all still correctly covered by OR-01 and OR-02, independent of the fabricated OR-04." }
+      ],
+      "fixes_applied": [],
+      "final_decision": "escalate_to_hitl"
+    },
+    "execution_summary": "• overall_score: 4.5 (fail), final_decision: escalate_to_hitl.\n• Findings: 2 total, 1 fail (FND-01 — fabricated risk referencing a non-existent constraint and an out-of-scope premise), 1 pass.\n• Fixes applied: none. Simply deleting OR-04 was considered, but the presence of a fabricated cross-border-payments risk suggests the generator may have drawn on ungrounded context — that's a signal worth a human looking at directly, not something to quietly remove and move on from.\n• Knowledge bases consulted: L1-vision-statement-generator/evaluation.md.\n• Guardrails evaluated: gr-L1-output-schema-validator (pass — schema doesn't know CON-05 doesn't exist upstream, only cross-document checking catches this), gr-L1-pii-detection (pass), gr-L1-hallucination-check (fail), gr-L1-consistency-check (fail).\n• Gaps flagged: escalate to Product Lead and to whoever runs L1-vision-statement-generator — investigate why a constraint and scope premise with no upstream basis appeared in the output at all."
+  }
+}

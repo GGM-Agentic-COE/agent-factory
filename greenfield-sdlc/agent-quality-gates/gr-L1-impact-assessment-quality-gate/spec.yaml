@@ -1,0 +1,73 @@
+spec_version: "1.0"
+artifact_type: guardrail
+metadata:
+  name: gr-L1-impact-assessment-quality-gate
+  version: "1.0.0"
+  layer: L1
+  owner: agentic-ai-coe
+  implementation: colang
+
+purpose:
+  description: "Fires when L1-planning-impact-assessor-evaluator concludes. Validates the RESULTANT output — L1-planning-impact-assessor's own items, with the evaluator's fixes_applied resolved in — against L1-planning-impact-assessor/output_schema.json and its evaluation.md rubric. Same pattern as the Phase 0/Phase 1 quality gates: fires on the evaluator, validates the core agent's content, never the evaluator's own scoring bookkeeping. Unlike its sibling gates, several rules here also need the ORIGINAL input (prd_output.content.items.requirements[], service_catalog.services[], cmdb_export.configuration_items[]) because full-fr-coverage, capability-check-not-vacuous, and ci-id-validity are coverage/anti-hallucination checks against source data the generator's own items do not themselves carry."
+
+triggers_on:
+  - post_execution   # fires when the evaluator (not the generator) finishes
+
+on_fail: retry_once_then_escalate
+applies_to: configured_agents   # wired into L1-planning-impact-assessor-evaluator/spec.yaml context.guardrails — not global
+
+rules:
+  # --- Output schema validation (of L1-planning-impact-assessor's own output_schema.json) ---
+  - name: schema-compliance
+    description: "The resultant items must validate against L1-planning-impact-assessor/output_schema.json: capability_check (summary >=20 chars, matched_service_id pattern ^SVC-[A-Z]+-[0-9]{3}$ or null, is_duplicate bool, rationale >=20 chars), existing_system_impact[] (ci_id pattern ^CI-[A-Z]+-[0-9]{3}$, system_name, touched bool, how_or_why_not >=10 chars, related_components[]), components[] (requirement_id pattern ^FR-[0-9]{3}$, component_name, is_new bool, blast_radius, rationale >=10 chars), external_dependencies[] (name, description >=20 chars, related_components[], newly_surfaced bool)"
+    action: block
+    severity: critical
+
+  - name: blast-radius-enum-validity
+    description: "Every components[].blast_radius is exactly one of Low/Medium/High per the prompt's embedded Blast Radius Classification guide — no other value, no case variant"
+    action: block
+    severity: high
+
+  # --- Rubric adherence (L1-planning-impact-assessor/evaluation.md Quality Gates, checked against the RESULTANT content) ---
+  - name: capability-check-not-vacuous
+    description: "capability_check.matched_service_id is null ONLY IF original_input.service_catalog is genuinely empty (no services[]); if the catalog has entries, matched_service_id must name a real SVC- id actually present in that catalog, or the check is vacuous — evaluation.md Quality Gate #1: 'names the closest candidate service even when it is not a duplicate, never no similar service found with nothing checked against'"
+    action: block
+    severity: critical
+
+  - name: no-vacuous-empty-check
+    description: "If original_input.cmdb_export and original_input.service_catalog both have real entries, existing_system_impact[] must not be an empty array — an empty array here would mean nothing was checked despite there being a real estate to check against (evaluation.md Quality Gate #2, 'not skipped')"
+    action: block
+    severity: high
+
+  - name: ci-id-validity
+    description: "Every existing_system_impact[].ci_id referenced must actually exist in original_input.cmdb_export's configuration_items[] — no invented CI id — UNLESS cmdb_export is genuinely empty, in which case this check is skipped rather than flagged"
+    action: block
+    severity: high
+
+  - name: full-fr-coverage
+    description: "The SET of components[].requirement_id values must equal the full set of FR ids in original_input.prd_output.content.items.requirements[].id — every FR in prd.md has at least one component (evaluation.md Quality Gate #3, 'no FR silently unmapped'), and no component may reference an FR id absent from prd_output (anti-hallucination)"
+    action: block
+    severity: critical
+
+  - name: cmdb-kb-mismatch-flagged
+    description: "If a plausible mismatch exists between what the CMDB shows and what kb-L1-enterprise-architecture's narrative claims for a given CI, it must appear as a stated finding in that CI's how_or_why_not — never silently reconciled by picking one source (evaluation.md Quality Gate #2 and Reflection Checklist item 3). Semantic judgment call, not a regex match."
+    action: flag
+    severity: high
+
+  - name: rationale-explanation-check
+    description: "Every how_or_why_not / rationale field genuinely explains the decision (why touched/not-touched, why this blast radius, why duplicate/not) rather than restating the finding in different words — evaluation.md's Reasoning quality score (>=0.80)"
+    action: flag
+    severity: medium
+
+  - name: newly-surfaced-dependency-completeness
+    description: "Anything newly surfaced by the capability check or the technical-touch check above (e.g. an identity-provider gap implied by a not-touched CI) is reflected in external_dependencies with newly_surfaced=true — not just what vision/PRD already named (evaluation.md Quality Gate #4)"
+    action: flag
+    severity: medium
+
+  - name: empty-source-explicit-statement
+    description: "When original_input.service_catalog and/or cmdb_export are genuinely empty (no parent enterprise), capability_check.summary / existing_system_impact state that explicitly — never phrased or left ambiguous in a way that reads as an unchecked/skipped catalog or CMDB rather than a genuinely nonexistent one (evaluation.md Quality Gate #5)"
+    action: flag
+    severity: medium
+
+evaluation:
+  false_positive_threshold: 0.05

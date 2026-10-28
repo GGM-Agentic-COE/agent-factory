@@ -1,0 +1,41 @@
+{
+  "agent_id": "L1-inception-template-agent",
+  "agent_version": "1.0.0",
+  "execution_id": "exec-a1b2c3d4-0001",
+  "input_summary": {
+    "source": "direct_input",
+    "source_agent_id": null,
+    "parameters": {"topic": "honeybees"}
+  },
+  "output": {
+    "type": "fact",
+    "schema_version": "1.0",
+    "items": [
+      {
+        "id": "item-001",
+        "title": "Honeybee Communication Dance",
+        "content": {
+          "description": "A unique fact is: Honeybees communicate the location of food sources to their hive-mates through a 'waggle dance' — the angle of the dance relative to the sun indicates direction, while the duration indicates distance."
+        },
+        "tags": ["honeybees", "biology", "communication"],
+        "metadata": {
+          "confidence": 0.95,
+          "reasoning": "Well-established ethological research by Karl von Frisch (Nobel Prize 1973). The waggle dance is one of the most studied non-human communication systems.",
+          "citation": [
+            {
+              "source_reference": "general-knowledge",
+              "source_location": "entomology/bee-behaviour",
+              "start_index": 0,
+              "end_index": 0
+            }
+          ],
+          "trajectory": [
+            {"step": 1, "action": "reason", "tool": null, "detail": "Identified lesser-known aspects of honeybee behaviour beyond honey production"},
+            {"step": 2, "action": "generate", "tool": null, "detail": "Selected waggle dance as it conveys precise quantitative information, surprising for insects"},
+            {"step": 3, "action": "validate", "tool": null, "detail": "Verified Nobel Prize attribution and mechanism accuracy"}
+          ]
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,59 @@
+{
+  "agent_id": "L1-inception-vision-generator",
+  "execution_id": "exec-f7e8d9c0-b1a2-3456-7890-abcdef123456",
+  "workflow_execution_id": "wf-f7e8d9c0-b1a2-3456-7890-abcdef123456",
+  "status": "success",
+  "_evaluation": {
+    "_note": "This block is golden-file-only metadata for evaluation purposes. It is NOT part of the agent's actual output and is not validated against output_schema.json.",
+    "expected_scores": {
+      "hallucination": 0.06,
+      "consistency": 0.93,
+      "relevance": 0.92,
+      "domain_grounding": 0.88,
+      "specificity": 0.87
+    },
+    "key_checks": [
+      "Executive Summary \u2264 5 sentences: PASS (3 sentences)",
+      "All 5 sections present: PASS",
+      "API-only scope respected: PASS (no frontend components, no database ownership mentioned)",
+      "Feature areas are API capabilities: PASS (initiation, reconciliation, SCA, status, audit)",
+      "Target Users are consuming dev teams: PASS (Lending App Team, Cards Team, Mortgage Team, Ops, Compliance)",
+      "PSD2/SCA addressed: PASS (dedicated feature area + risk + constraint)",
+      "PCI-DSS addressed: PASS (audit trail feature area + compliance requirement)",
+      "No new database constraint respected: PASS (orchestrates existing systems only)",
+      "Migration safety addressed: PASS (risk + assumption + MVP constraint)",
+      "Success Metrics numeric: PASS (60% reduction, 99.95% uptime, <200ms p95, 0 duplicate payments)",
+      "No vague language: PASS",
+      "FCA/CAB constraint mentioned: PASS"
+    ]
+  },
+  "content": {
+    "type": "vision_document",
+    "schema_version": "1.0",
+    "items": {
+      "product_name": "PaymentHub API",
+      "document_summary": {
+        "executive_summary": "PaymentHub API is an internal REST API that provides a unified payment initiation and reconciliation layer for the bank's lending platform, consolidating direct debit, card payment, and bank transfer logic into a single service consumed by all product teams. It addresses duplicated validation logic across three independent microservices, inconsistent error handling causing 2.3% payment failure misclassification, and the absence of a unified payment status view across 45,000 daily transactions. The expected outcome is a 60% reduction in payment integration effort for new products, elimination of duplicate payment incidents, and a single PSD2-compliant SCA enforcement point with PCI-DSS audit trail.",
+        "section_count": 5,
+        "feature_area_count": 5,
+        "mvp_feature_count": 9,
+        "risk_count": 7,
+        "open_question_count": 6
+      },
+      "artifact": {
+        "type": "vision_document",
+        "format": "markdown",
+        "location": "https://agentfactory.blob.core.windows.net/artifacts/exec-f7e8d9c0-b1a2-3456-7890-abcdef123456/vision-doc/vision-paymenthub-api.md",
+        "filename": "vision-paymenthub-api.md",
+        "container": "artifacts",
+        "blob_path": "/exec-f7e8d9c0-b1a2-3456-7890-abcdef123456/vision-doc/vision-paymenthub-api.md"
+      },
+      "metadata": {
+        "domain_kb_used": "kb-L2-payments-domain",
+        "confidence": 0.9,
+        "grounding_coverage": 0.88
+      }
+    },
+    "execution_summary": "\u2022 Generated vision document for PaymentHub API\n\u2022 5 sections: Executive Summary, Business Context, Full Scope Vision, MVP Scope, Risks & Dependencies\n\u2022 5 feature areas: Payment Initiation, Reconciliation & Settlement, SCA Orchestration, Payment Status & Events, Audit & Compliance\n\u2022 9 MVP features (Must Have: 7, Should Have: 2)\n\u2022 7 risks identified (migration without downtime: critical, PSD2 SCA timing: high, GoCardless rate limits: medium)\n\u2022 6 open questions flagged for requirements analysis\n\u2022 Grounded in kb-L2-payments-domain (88% coverage \u2014 PSD2 rules, payment types, settlement cycles, reconciliation patterns from KB)\n\u2022 Reflection: fixed 1 feature that prescribed a message queue (removed tech decision), added FCA CAB constraint to MVP Constraints, clarified that no new database is owned\n\u2022 Uploaded to /f7e8d9c0-b1a2-3456-7890-abcdef123456/vision-doc/vision-paymenthub-api.md"
+  }
+}

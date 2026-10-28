@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "L1-inception-vision-brief-extractor Output",
+  "type": "object",
+  "required": ["agent_id", "agent_version", "execution_id", "workflow_execution_id", "status", "content"],
+  "properties": {
+    "agent_id": {"type": "string", "const": "L1-inception-requirements-brief-extractor"},
+    "agent_version": {"type": "string"},
+    "execution_id": {"type": "string", "pattern": "^exec-.+$"},
+    "workflow_execution_id": {"type": ["string", "null"], "pattern": "^wf-.+$"},
+    "status": {"type": "string", "enum": ["success", "failed"]},
+    "content": {
+      "type": "object",
+      "required": ["type", "schema_version", "items", "execution_summary"],
+      "properties": {
+        "type": {"type": "string", "const": "requirements_brief"},
+        "schema_version": {"type": "string", "const": "1.0"},
+        "items": {
+          "type": "object",
+          "required": ["product_name", "brief"],
+          "properties": {
+            "product_name": {"type": "string"},
+            "brief": {"type": "string", "description": "Structured markdown brief containing all extracted facts"}
+          }
+        },
+        "execution_summary": {"type": "string", "minLength": 30}
+      }
+    }
+  }
+}

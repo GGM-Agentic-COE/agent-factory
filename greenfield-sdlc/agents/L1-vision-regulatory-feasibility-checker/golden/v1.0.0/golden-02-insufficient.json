@@ -1,0 +1,14 @@
+{
+  "agent_id": "L1-vision-regulatory-feasibility-checker",
+  "agent_version": "1.0.0",
+  "execution_id": "exec-c6d7e8f9",
+  "workflow_execution_id": "wf-c0d1e2f3",
+  "status": "failed",
+  "content": {
+    "type": "regulatory_feasibility",
+    "schema_version": "1.0",
+    "items": {},
+    "artifacts": [],
+    "execution_summary": "• Produced 0 items — INSUFFICIENT_CONTEXT.\n• problem_statement and target_geography were both empty. No regulator category can be identified in kb-L1-regulatory-frameworks-index without knowing what activity or geography is involved — proceeding would mean guessing a regulatory profile, which is precisely the false-negative/false-positive risk this agent exists to prevent.\n• Reflection: confirmed that fabricating even a plausible-sounding constraint list here would be worse than returning nothing, given the zero-tolerance bar on this agent's output.\n• Knowledge bases consulted: none — no activity/geography to query against.\n• Guardrails evaluated: gr-L1-hallucination-check (pass — nothing invented), gr-L1-output-schema-validator (n/a — failed status), gr-L1-citation-verifier (n/a — no claims made), gr-L1-pii-detection (pass).\n• Tools invoked: none.\n• Gaps flagged: this indicates a pipeline error upstream — L1-vision-idea-intake should be checked for why it passed empty fields forward instead of failing itself."
+  }
+}

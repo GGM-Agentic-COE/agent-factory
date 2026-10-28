@@ -1,0 +1,26 @@
+id: kb-L1-react-standards
+name: React Coding Standards
+layer: L1
+version: "1.0.0"
+status: active
+purpose: "React + TypeScript standards for UI code generator agents"
+created: "2026-04-21"
+updated: "2026-04-21"
+
+content:
+  format: markdown
+  path: content/kb-L1-react-standards.md
+  sections: 17
+  section_prefix: RS
+
+dependencies:
+  - kb-L1-enterprise-architecture  # EA7 accessibility, EA11 design system
+  - kb-L1-ui-coding-standards      # UC1-UC12
+  - kb-L1-microservices-standards   # MS4 BFF pattern
+
+tags:
+  - react
+  - typescript
+  - frontend
+  - ui
+  - coding-standards

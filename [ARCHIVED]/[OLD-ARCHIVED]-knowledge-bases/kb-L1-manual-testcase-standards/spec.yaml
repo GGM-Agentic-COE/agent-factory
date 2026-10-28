@@ -1,0 +1,9 @@
+spec_version: "1.0"
+metadata:
+  name: kb-L0-manual-testcase-standards
+  version: "1.0.0"
+  layer: L0
+purpose: "Standards for creating manual test cases in XRay"
+freshness:
+  review_cadence: quarterly
+  last_reviewed: "2026-04-20"

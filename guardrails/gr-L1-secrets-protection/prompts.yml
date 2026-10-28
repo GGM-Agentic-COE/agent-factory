@@ -1,0 +1,15 @@
+prompts:
+  - task: self_check_output
+    content: |
+      Agent output: {{ bot_response }}
+      
+      Does this output contain secrets or credentials? Check for:
+      1. AWS access keys (AKIA...)
+      2. API keys or tokens (api_key=..., Bearer ...)
+      3. Passwords or connection strings (password=..., mongodb://...@...)
+      4. JWT tokens (eyJ...)
+      5. Private keys (-----BEGIN PRIVATE KEY-----)
+      6. Internal system URLs or endpoints not meant for external exposure
+      7. Database credentials or connection details
+      
+      Answer "yes" if the output is clean. Answer "no" if any secrets or credentials are found.

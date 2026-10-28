@@ -1,0 +1,887 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">
+<title>Agent Factory — Greenfield Bill of Materials</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+:root{--navy:#1B2A4A;--teal:#0A7E8C;--teal-lt:#E8F6F7;--green:#1B8C3A;--green-lt:#E8F5E9;--amber:#D4880F;--amber-lt:#FFF8E1;--red:#C62828;--purple:#5E35B1;--gray:#F4F5F7;--gray-mid:#E0E3E8;--gray-txt:#666;--charcoal:#2D3748;
+--idea:#AD1457;--idea-lt:#FCE4EC;--reqs:#3949AB;--reqs-lt:#E8EAF6;--plan:#EF6C00;--plan-lt:#FFF3E0;--incept:#0052CC;--incept-lt:#E9F2FF;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Inter',sans-serif;background:#fff;color:var(--charcoal);}
+.page{max-width:1500px;margin:0 auto;padding:24px;}
+h2{font-size:16px;font-weight:800;color:var(--navy);margin:26px 0 8px;}
+h3{font-size:12px;font-weight:700;color:var(--gray-txt);text-transform:uppercase;letter-spacing:.5px;margin:4px 0 10px;}
+.sub{font-size:12px;color:var(--gray-txt);margin-bottom:6px;}
+.phase-tag{display:inline-block;padding:3px 10px;border-radius:12px;font-size:10px;font-weight:700;color:#fff;}
+.table-wrap{overflow-x:auto;border:1px solid var(--gray-mid);border-radius:8px;margin-bottom:6px;}
+table{width:100%;border-collapse:collapse;font-size:10px;min-width:1400px;}
+th{padding:7px 8px;background:var(--navy);color:#fff;font-weight:700;font-size:9.5px;text-transform:uppercase;text-align:left;position:sticky;top:0;}
+td{padding:7px 8px;border-bottom:1px solid var(--gray-mid);vertical-align:top;line-height:1.45;}
+tbody tr:nth-child(even) td{background:#FAFBFC;}
+tbody tr:hover td{background:#F0F4F8;}
+code{background:#E5E7EB;padding:1px 4px;border-radius:3px;font-size:9.5px;white-space:nowrap;}
+.src-ext{color:#8a4400;font-weight:600;}
+.src-agent{color:var(--teal);font-weight:600;}
+.src-human{color:var(--idea);font-weight:600;}
+.src-kb{color:var(--amber);font-weight:600;}
+.col-name{min-width:150px;}
+.col-desc{min-width:180px;}
+.col-io{min-width:170px;}
+.col-src{min-width:190px;}
+.col-tools{min-width:130px;}
+.col-kb{min-width:140px;}
+.col-gr{min-width:150px;}
+.legend{display:flex;gap:16px;flex-wrap:wrap;margin:10px 0 18px;font-size:11px;}
+.legend-item{display:flex;align-items:center;gap:5px;}
+.legend-dot{width:10px;height:10px;border-radius:3px;}
+.callout{border-radius:8px;padding:10px 14px;margin:10px 0;font-size:11px;border:1px solid;}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+</style></head><body>
+<div style="background:linear-gradient(135deg,var(--navy),#2A3F6A);padding:20px 40px;color:#fff;">
+<div style="max-width:1500px;margin:0 auto;">
+<div style="font-size:9px;text-transform:uppercase;letter-spacing:1px;opacity:.5;">Agent Factory Reference — Greenfield Extension</div>
+<h1 style="font-size:22px;font-weight:800;">Agent Bill of Materials — Idea → Vision → Requirements → Code</h1>
+<p style="opacity:.7;font-size:12px;">Build spec for all 35 agents in <code style="background:rgba(255,255,255,.15);color:#fff;">Agent_Factory_E2E_SDLC_Diagram_Greenfield.html</code>: description, inputs, input provenance, outputs, tools, knowledge bases, guardrails.</p>
+</div></div>
+<div class="page">
+<h3>Input Source Legend</h3>
+<div class="legend">
+<div class="legend-item"><span class="src-human">&#9679;</span> Human-authored (submitted by a role — Product Lead, Feature Owner, QA Expert)</div>
+<div class="legend-item"><span class="src-ext">&#9679;</span> External system of record (Jira, GitHub, Confluence, web/regulatory data)</div>
+<div class="legend-item"><span class="src-agent">&#9679;</span> Prior agent output, passed as workflow context (no external fetch)</div>
+<div class="legend-item"><span class="src-kb">&#9679;</span> Knowledge base (retrieved at inference time, not passed as workflow input)</div>
+</div>
+<!-- PHASE 0 -->
+<h2><span class="phase-tag" style="background:var(--idea);">PHASE 0</span> Idea → Vision</h2>
+<div class="table-wrap"><table>
+<thead><tr><th class="col-name">Agent</th><th class="col-desc">Description</th><th class="col-io">Inputs</th><th class="col-src">Input Source</th><th class="col-io">Outputs</th><th class="col-tools">Tools</th><th class="col-kb">Knowledge Bases</th><th class="col-gr">Guardrails</th></tr></thead>
+<tbody>
+<tr>
+<td><code>L1-vision-idea-intake</code></td>
+<td>Structures a raw idea into a problem statement, target users, and success metrics.</td>
+<td>Raw idea brief (free text); sponsoring stakeholder list</td>
+<td><span class="src-human">Human:</span> Product Lead submission via intake form or Confluence "Idea Brief" page<br><span class="src-ext">External:</span> stakeholder registry (org directory / HRIS export)</td>
+<td><code>idea_brief</code> items (JSON only — no document; read once by the next few agents in this same phase)</td>
+<td><code>tool-L1-confluence-fetch-page</code></td>
+<td>— <span style="color:var(--gray-txt);font-style:italic;">(idea-brief structure folded into <code>instructions.md</code> per S4)</span></td>
+<td><code>gr-L1-hallucination-check</code>, <code>gr-L1-consistency-check</code></td>
+</tr>
+<tr>
+<td><code>L1-vision-market-analyzer</code></td>
+<td>Five-dimension market analysis for the proposed idea: competitive intelligence (competitor matrix), market sizing (TAM/SAM/SOM), industry trends, customer insights, and pricing benchmarks, plus a SWOT synthesis.</td>
+<td>Problem statement + target market (from idea brief); known competitor list (optional)</td>
+<td><span class="src-agent">Agent:</span> <code>idea_brief</code> items from <code>L1-vision-idea-intake</code><br><span class="src-ext">External:</span> live web search; <span class="src-kb">KB:</span> prior competitor profiles, market sizing, industry trends, customer insights, pricing norms</td>
+<td><code>market_analysis</code> items — <code>competitor_matrix</code>, <code>market_sizing</code> (tam/sam/som), <code>industry_trends</code>, <code>customer_insights</code>, <code>pricing_benchmarks</code>, <code>swot</code>, <code>data_sufficiency</code> (JSON only)</td>
+<td><code>tool-L1-web-search-competitor-scan</code></td>
+<td><code>kb-L2-domain-market</code></td>
+<td><code>gr-L1-hallucination-check</code>, <code>gr-L1-citation-verifier</code></td>
+</tr>
+<tr>
+<td><code>L1-vision-regulatory-feasibility-checker</code></td>
+<td>Regulatory feasibility assessment (licensing, compliance regimes) for the target market.</td>
+<td>Problem statement + target geography/product category (from idea brief)</td>
+<td><span class="src-agent">Agent:</span> <code>idea_brief</code> items from <code>L1-vision-idea-intake</code><br><span class="src-ext">External:</span> regulatory database/API lookup</td>
+<td><code>regulatory_feasibility</code> items (JSON only; its cross-phase consumer, the nfr-classifier, reads <code>vision.md</code> instead)</td>
+<td><code>tool-L1-regulatory-db-lookup</code></td>
+<td><code>kb-L1-regulatory-frameworks-index</code>, <code>kb-L2-domain-regulatory</code></td>
+<td><code>gr-L1-hallucination-check</code>, <code>gr-L1-citation-verifier</code></td>
+</tr>
+<tr>
+<td><code>L1-vision-statement-generator</code></td>
+<td>Synthesizes idea, market, and regulatory findings into a vision statement and roadmap outline.</td>
+<td>Idea brief; market analysis; regulatory feasibility; viability score</td>
+<td><span class="src-agent">Agent:</span> outputs of <code>idea-intake</code>, <code>market-analyzer</code>, <code>regulatory-feasibility-checker</code><br><span class="src-agent">Agent:</span> viability score from <code>L1-quality-verifier</code> at QG: viability-score</td>
+<td><code>vision.md</code></td>
+<td><code>tool-L1-confluence-create-page</code></td>
+<td>— <span style="color:var(--gray-txt);font-style:italic;">(vision structure folded into <code>instructions.md</code> per S4)</span></td>
+<td><code>gr-L1-consistency-check</code>, <code>gr-L1-output-schema-validator</code></td>
+</tr>
+</tbody>
+</table></div>
+<div class="callout" style="background:var(--idea-lt);border-color:var(--idea);color:#7d0e42;"><strong>Human gate before Phase 1:</strong> Product Lead reviews and comments on <code>vision.md</code> in Confluence. That approval comment becomes a required input to Phase 1's first agent.</div>
+<!-- PHASE 1 -->
+<h2><span class="phase-tag" style="background:var(--reqs);">PHASE 1</span> Requirements → Impact Assessment → Dependency Graph</h2>
+<div class="table-wrap"><table>
+<thead><tr><th class="col-name">Agent</th><th class="col-desc">Description</th><th class="col-io">Inputs</th><th class="col-src">Input Source</th><th class="col-io">Outputs</th><th class="col-tools">Tools</th><th class="col-kb">Knowledge Bases</th><th class="col-gr">Guardrails</th></tr></thead>
+<tbody>
+<tr>
+<td><code>L1-requirements-elicitor</code></td>
+<td>Converts the approved vision into structured functional requirements.</td>
+<td>Approved vision statement; Product Lead approval comment</td>
+<td><span class="src-agent">Agent:</span> <code>vision.md</code> from <code>L1-vision-statement-generator</code><br><span class="src-human">Human:</span> Product Lead approval comment (Confluence page comment / Jira initiative field)</td>
+<td><code>functional_requirements</code>/<code>compound_splits</code> items (JSON only; downstream consumers read <code>agent_output</code> directly)</td>
+<td><code>tool-L1-confluence-fetch-page</code></td>
+<td>— (requirements.template.md is &le;3K tokens and purely structural — embed in the prompt per S4; every requirement grounds in vision.md directly)</td>
+<td><code>gr-L1-hallucination-check</code>, <code>gr-L1-consistency-check</code></td>
+</tr>
+<tr>
+<td><code>L1-requirements-nfr-classifier</code></td>
+<td>Classifies non-functional requirements and boundary conditions.</td>
+<td>Functional requirements list; approved vision statement (Regulatory Posture section)</td>
+<td><span class="src-agent">Agent:</span> <code>functional_requirements</code> items from <code>L1-requirements-elicitor</code>; <code>vision.md</code> from Phase 0's <code>L1-vision-statement-generator</code> (Compliance-category boundary conditions cite its Regulatory Posture section directly, not a KB)</td>
+<td><code>nfr_classifications</code> items (JSON only; downstream consumers read <code>agent_output</code> directly)</td>
+<td>—</td>
+<td><code>kb-L1-nfr-classification-taxonomy</code>; <code>kb-L1-enterprise-architecture</code>, <code>kb-L1-enterprise-security</code> (enterprise-wide, cross-phase)</td>
+<td><code>gr-L1-output-schema-validator</code>, <code>gr-L1-consistency-check</code></td>
+</tr>
+<tr>
+<td><code>L1-requirements-prd-composer</code></td>
+<td>Composes the functional requirements and NFR spec into one authoritative PRD — every requirement together with its cross-functional constraints in one place, not split across two documents a reader must cross-reference.</td>
+<td>Functional requirements; NFR spec; approved vision statement (Assumptions/Constraints/Risks carry-forward only)</td>
+<td><span class="src-agent">Agent:</span> <code>functional_requirements</code> items from <code>requirements-elicitor</code>; <code>nfr_classifications</code> items from <code>nfr-classifier</code>; <code>vision.md</code> from Phase 0's <code>L1-vision-statement-generator</code> (read-only) plus <code>approval_comment</code> passed through directly</td>
+<td><code>prd.md</code></td>
+<td>—</td>
+<td>—</td>
+<td><code>gr-L1-output-schema-validator</code>, <code>gr-L1-consistency-check</code> (zero requirements dropped in composition)</td>
+</tr>
+<tr>
+<td><code>L1-planning-impact-assessor</code></td>
+<td>Assesses change / blast-radius impact of proposed requirements against existing systems (or proposed component map for pure greenfield).</td>
+<td>PRD; existing system/service inventory</td>
+<td><span class="src-agent">Agent:</span> <code>prd.md</code> from <code>prd-composer</code><br><span class="src-ext">External:</span> service catalog + CMDB export (e.g. Backstage, ServiceNow)</td>
+<td><code>impact-assessment.md</code></td>
+<td><code>tool-L1-confluence-fetch-page</code> (architecture registry)</td>
+<td><code>kb-L1-enterprise-architecture</code></td>
+<td><code>gr-L1-consistency-check</code>, <code>gr-L2-food-domain-compliance</code></td>
+</tr>
+<tr>
+<td><code>L1-planning-dependency-mapper</code></td>
+<td>Builds a dependency graph across proposed epics, services, and integrations.</td>
+<td>Impact assessment; PRD</td>
+<td><span class="src-agent">Agent:</span> outputs of <code>impact-assessor</code>, <code>prd-composer</code></td>
+<td><code>dependency-graph.json</code></td>
+<td>—</td>
+<td><code>kb-L1-enterprise-architecture</code></td>
+<td><code>gr-L1-output-schema-validator</code> (rejects cyclic graphs)</td>
+</tr>
+</tbody>
+</table></div>
+<!-- PHASE 2 -->
+<h2><span class="phase-tag" style="background:var(--plan);">PHASE 2</span> PI Planning — Epics, Features, Roadmap, Cycle Plan</h2>
+<div class="table-wrap"><table>
+<thead><tr><th class="col-name">Agent</th><th class="col-desc">Description</th><th class="col-io">Inputs</th><th class="col-src">Input Source</th><th class="col-io">Outputs</th><th class="col-tools">Tools</th><th class="col-kb">Knowledge Bases</th><th class="col-gr">Guardrails</th></tr></thead>
+<tbody>
+<tr>
+<td><code>L1-inception-epic-creator</code></td>
+<td>Generates epics directly from the approved PRD and vision — the plannable deliverables must exist before anything can be sequenced into a PI.</td>
+<td>PRD; vision statement; dependency graph</td>
+<td><span class="src-agent">Agent:</span> <code>prd.md</code> from <code>prd-composer</code>; <code>vision.md</code> from <code>vision-statement-generator</code>; <code>dependency-graph.json</code> from <code>dependency-mapper</code><br><span class="src-human">Human:</span> Product Lead vision/PRD approval (the Phase 1 <code>gate-requirements-validation</code> gate)</td>
+<td><code>epics.json</code></td>
+<td><code>tool-L1-jira-fetch-issue</code></td>
+<td><code>kb-L1-sdlc-templates</code>, <code>kb-L1-enterprise-security</code></td>
+<td><code>gr-L1-schema-validator</code>, <code>gr-L1-pii-detection</code>, <code>gr-L1-hallucination-check</code>, <code>gr-L2-food-domain-compliance</code></td>
+</tr>
+<tr>
+<td><code>L1-inception-feature-decomposer</code></td>
+<td>Decomposes epics into features with rough relative (T-shirt) sizing — the unit PI planning actually schedules.</td>
+<td>Epics; dependency graph</td>
+<td><span class="src-agent">Agent:</span> <code>epics.json</code> from <code>epic-creator</code>; <code>dependency-graph.json</code> from <code>dependency-mapper</code></td>
+<td><code>features.json</code> (each feature carries a coarse size + critical-path flag)</td>
+<td>—</td>
+<td><code>kb-L1-sdlc-templates</code></td>
+<td><code>gr-L1-schema-validator</code>, <code>gr-L1-hallucination-check</code>, <code>gr-L1-decomposition-rightsizing</code></td>
+</tr>
+<tr>
+<td><code>L1-planning-backlog-prioritizer</code></td>
+<td>Prioritizes <strong>features</strong> (not raw requirements) by value, effort, and dependency-unblocking risk — WSJF/RICE at feature granularity.</td>
+<td>Features; dependency graph; business value scoring inputs (RICE/WSJF fields)</td>
+<td><span class="src-agent">Agent:</span> <code>features.json</code> from <code>feature-decomposer</code>; <code>dependency-graph.json</code> from <code>dependency-mapper</code><br><span class="src-human">Human:</span> value-scoring inputs from Product Lead (Jira custom fields or a value-scoring sheet)</td>
+<td><code>prioritized-backlog.md</code> (ranked features)</td>
+<td><code>tool-L1-jira-fetch-issue</code> (adjacent backlog, if any)</td>
+<td><code>kb-L1-sdlc-templates</code></td>
+<td><code>gr-L1-consistency-check</code></td>
+</tr>
+<tr>
+<td><code>L1-planning-roadmap-creator</code> <span style="color:var(--gray-txt);">(outer loop)</span></td>
+<td>Allocates prioritized <strong>features</strong> into sprint-bands across the whole PI horizon (e.g. 4 &times; 5-day Feature Cycles), sequenced by the dependency critical path — the "what and roughly when" for the couple-of-sprints-ahead plan.</td>
+<td>Prioritized feature backlog; dependency graph; team capacity/velocity; PI cadence config (# cycles &times; length)</td>
+<td><span class="src-agent">Agent:</span> <code>prioritized-backlog.md</code> from <code>backlog-prioritizer</code>; <code>dependency-graph.json</code> from <code>dependency-mapper</code><br><span class="src-ext">External:</span> Jira velocity/capacity report; PI cadence config</td>
+<td><code>roadmap.md</code> (feature &rarr; sprint-band map across the PI)</td>
+<td><code>tool-L1-jira-update-issue</code></td>
+<td><code>kb-L1-sdlc-templates</code></td>
+<td><code>gr-L1-consistency-check</code> (every feature placed; no feature scheduled before its dependency)</td>
+</tr>
+<tr>
+<td><code>L1-planning-feature-cycle-planner</code> <span style="color:var(--gray-txt);">(inner loop)</span></td>
+<td>Takes only the <strong>near committed cycle(s)</strong> from the roadmap and fits them to team capacity at Work-Unit granularity — triggers just-in-time elaboration for those features only, then rolls forward.</td>
+<td>Roadmap (committed cycle's features); team capacity / velocity data; Definition of Ready</td>
+<td><span class="src-agent">Agent:</span> <code>roadmap.md</code> from <code>roadmap-creator</code><br><span class="src-ext">External:</span> Jira velocity/capacity report or resourcing tool export</td>
+<td><code>cycle-plan.md</code> (Work Unit &rarr; cycle, capacity-balanced)</td>
+<td><code>tool-L1-jira-create-issue</code>, <code>tool-L1-jira-update-issue</code></td>
+<td><code>kb-L1-sdlc-templates</code></td>
+<td><code>gr-L1-consistency-check</code> (committed points &le; capacity)</td>
+</tr>
+</tbody>
+</table></div>
+<div class="callout" style="background:var(--plan-lt);border-color:var(--plan);color:#8a4400;"><strong>Human gate before Phase 3:</strong> Product Lead approves <code>roadmap.md</code> (feature-level PI commitment) for dependency sequencing and capacity fit, and signs off the near-cycle <code>cycle-plan.md</code>. That approval is a required input to Phase 3's story generator.</div>
+<!-- PHASE 3 -->
+<h2><span class="phase-tag" style="background:var(--incept);">PHASE 3</span> Inception — Stories &amp; Tasks (Just-in-Time)</h2>
+<div class="callout" style="background:var(--incept-lt);border-color:var(--incept);color:#003a8c;"><strong>Scope note:</strong> Epic and feature creation now live at the front of Phase 2 (PI Planning). Phase 3 elaborates only the features the feature cycle planner has <em>committed</em> for the near cycle(s) — just-in-time story/task decomposition, not the whole PI up front.</div>
+<div class="table-wrap"><table>
+<thead><tr><th class="col-name">Agent</th><th class="col-desc">Description</th><th class="col-io">Inputs</th><th class="col-src">Input Source</th><th class="col-io">Outputs</th><th class="col-tools">Tools</th><th class="col-kb">Knowledge Bases</th><th class="col-gr">Guardrails</th></tr></thead>
+<tbody>
+<tr>
+<td><code>L1-inception-story-generator</code></td>
+<td>Generates user stories with acceptance criteria for the features committed to the near cycle(s).</td>
+<td>Committed features (from cycle plan); features; functional requirements</td>
+<td><span class="src-agent">Agent:</span> <code>cycle-plan.md</code> from <code>feature-cycle-planner</code> (which features to elaborate now); <code>features.json</code> from Phase 2's <code>feature-decomposer</code>; <code>functional_requirements</code> items from <code>requirements-elicitor</code></td>
+<td><code>stories.json</code></td>
+<td>—</td>
+<td><code>kb-L1-sdlc-templates</code>, <code>kb-L2-food-domain</code></td>
+<td><code>gr-L1-schema-validator</code>, <code>gr-L1-pii-detection</code>, <code>gr-L1-citation-verifier</code></td>
+</tr>
+<tr>
+<td><code>L1-inception-task-generator</code></td>
+<td>Decomposes stories into engineering Work Units (each carries a <code>layer</code> and a <code>verification_ref</code>; must clear right-sizing tests T1–T3 to be emitted).</td>
+<td>Stories</td>
+<td><span class="src-agent">Agent:</span> <code>stories.json</code> from <code>story-generator</code></td>
+<td><code>tasks.json</code></td>
+<td>—</td>
+<td><code>kb-L1-sdlc-templates</code>, <code>kb-L1-decomposition-standard</code></td>
+<td><code>gr-L1-schema-validator</code>, <code>gr-L1-decomposition-rightsizing</code></td>
+</tr>
+<tr>
+<td><code>L1-jira-orchestrator</code></td>
+<td>Creates epics, features, stories, and tasks as issues in Jira.</td>
+<td>Epics; features; stories; tasks (all as JSON)</td>
+<td><span class="src-agent">Agent:</span> <code>epics.json</code>/<code>features.json</code> from Phase 2's <code>epic-creator</code>/<code>feature-decomposer</code>; outputs of <code>story-generator</code>, <code>task-generator</code></td>
+<td>Jira issue keys (epics/stories/tasks)</td>
+<td><code>tool-L1-jira-create-issue</code>, <code>tool-L1-jira-fetch-issue</code>, <code>tool-L1-jira-update-issue</code></td>
+<td>—</td>
+<td><code>gr-L1-output-schema-validator</code></td>
+</tr>
+</tbody>
+</table></div>
+<!-- PHASE 4 -->
+<h2><span class="phase-tag" style="background:var(--teal);">PHASE 4</span> Design — User Journeys, Wireframes, HLD, LLD, API Spec, Data Model</h2>
+<div class="table-wrap"><table>
+<thead><tr><th class="col-name">Agent</th><th class="col-desc">Description</th><th class="col-io">Inputs</th><th class="col-src">Input Source</th><th class="col-io">Outputs</th><th class="col-tools">Tools</th><th class="col-kb">Knowledge Bases</th><th class="col-gr">Guardrails</th></tr></thead>
+<tbody>
+<tr>
+<td><code>L1-design-user-journey-mapper</code></td>
+<td>Maps end-to-end persona journeys and touchpoints ahead of wireframing.</td>
+<td>Stories; target user personas</td>
+<td><span class="src-agent">Agent:</span> <code>stories.json</code> from <code>story-generator</code>; personas from <code>vision.md</code></td>
+<td><code>user-journeys.md</code></td>
+<td>—</td>
+<td><code>kb-L1-sdlc-templates</code></td>
+<td><code>gr-L1-consistency-check</code></td>
+</tr>
+<tr>
+<td><code>L1-design-ux-wireframe</code></td>
+<td>Generates wireframes / screen layouts from stories and journeys.</td>
+<td>Stories; user journeys</td>
+<td><span class="src-agent">Agent:</span> <code>stories.json</code> from <code>story-generator</code>; <code>user-journeys.md</code> from <code>user-journey-mapper</code></td>
+<td><code>wireframes.md</code></td>
+<td><code>tool-L1-figma-create-frame</code> (optional, if pushing to Figma)</td>
+<td><code>kb-L1-sdlc-templates</code></td>
+<td><code>gr-L1-consistency-check</code></td>
+</tr>
+<tr>
+<td><code>L1-design-api-spec</code></td>
+<td>Generates the OpenAPI contract from story scope and NFRs.</td>
+<td>Stories; NFR spec</td>
+<td><span class="src-agent">Agent:</span> <code>stories.json</code> from <code>story-generator</code>; <code>nfr_classifications</code> items from <code>nfr-classifier</code></td>
+<td><code>openapi.yaml</code></td>
+<td>—</td>
+<td><code>kb-L1-enterprise-architecture</code>, <code>kb-L2-food-domain-api-patterns</code></td>
+<td><code>gr-L1-schema-validator</code> (OpenAPI schema)</td>
+</tr>
+<tr>
+<td><code>L1-design-hld</code></td>
+<td>Generates the high-level design — C4 diagrams, components, data flow, integrations.</td>
+<td>Requirements; NFR spec; dependency graph; API spec</td>
+<td><span class="src-agent">Agent:</span> outputs of <code>requirements-elicitor</code>, <code>nfr-classifier</code>, <code>dependency-mapper</code>, <code>api-spec</code></td>
+<td><code>hld.md</code></td>
+<td>—</td>
+<td><code>kb-L1-enterprise-architecture</code></td>
+<td><code>gr-L1-consistency-check</code>, <code>gr-L1-hallucination-check</code></td>
+</tr>
+<tr>
+<td><code>L1-design-lld</code></td>
+<td>Generates the low-level design — classes, sequence diagrams, error handling.</td>
+<td>HLD; API spec</td>
+<td><span class="src-agent">Agent:</span> <code>hld.md</code> from <code>design-hld</code>; <code>openapi.yaml</code> from <code>design-api-spec</code></td>
+<td><code>lld.md</code></td>
+<td>—</td>
+<td><code>kb-L1-enterprise-architecture</code></td>
+<td><code>gr-L1-consistency-check</code></td>
+</tr>
+<tr>
+<td><code>L1-design-data-architect</code></td>
+<td>Designs the data model — schema, lineage, migration plan.</td>
+<td>LLD; functional requirements</td>
+<td><span class="src-agent">Agent:</span> <code>lld.md</code> from <code>design-lld</code>; <code>functional_requirements</code> items from <code>requirements-elicitor</code></td>
+<td><code>db-schema.sql</code></td>
+<td><code>tool-L1-db-schema-diff</code> (optional, against existing prod DB)</td>
+<td><code>kb-L1-enterprise-architecture</code></td>
+<td><code>gr-L1-schema-validator</code>, <code>gr-L1-pii-detection</code></td>
+</tr>
+<tr>
+<td><code>L1-github-orchestrator</code> <span style="color:var(--gray-txt);">(design-publish invocation)</span></td>
+<td>Commits all design documents to the design branch and publishes to Confluence.</td>
+<td>Wireframes; journeys; HLD; LLD; API spec; data model</td>
+<td><span class="src-agent">Agent:</span> outputs of all Phase 4 design agents</td>
+<td>GitHub branch <code>aava/design-*</code>; Confluence pages</td>
+<td><code>tool-L1-github-upload-file</code>, <code>tool-L1-confluence-create-page</code></td>
+<td>—</td>
+<td><code>gr-L1-output-schema-validator</code></td>
+</tr>
+</tbody>
+</table></div>
+<!-- PHASE 5 -->
+<h2><span class="phase-tag" style="background:var(--amber);">PHASE 5</span> Test Strategy — Scenarios, Cases, Scripts, Synthetic Data</h2>
+<div class="table-wrap"><table>
+<thead><tr><th class="col-name">Agent</th><th class="col-desc">Description</th><th class="col-io">Inputs</th><th class="col-src">Input Source</th><th class="col-io">Outputs</th><th class="col-tools">Tools</th><th class="col-kb">Knowledge Bases</th><th class="col-gr">Guardrails</th></tr></thead>
+<tbody>
+<tr>
+<td><code>L1-testing-scenario-writer</code></td>
+<td>Generates test scenarios from stories and acceptance criteria.</td>
+<td>Stories (with AC)</td>
+<td><span class="src-agent">Agent:</span> <code>stories.json</code> from <code>story-generator</code></td>
+<td><code>test-scenarios.md</code></td>
+<td>—</td>
+<td><code>kb-L1-testing-standards</code>, <code>kb-L2-food-domain</code></td>
+<td><code>gr-L1-citation-verifier</code></td>
+</tr>
+<tr>
+<td><code>L1-testing-case-writer</code></td>
+<td>Generates Cucumber Given/When/Then cases from scenarios.</td>
+<td>Test scenarios</td>
+<td><span class="src-agent">Agent:</span> <code>test-scenarios.md</code> from <code>scenario-writer</code></td>
+<td><code>test-cases.feature</code></td>
+<td>—</td>
+<td><code>kb-L1-testing-standards</code></td>
+<td><code>gr-L1-schema-validator</code></td>
+</tr>
+<tr>
+<td><code>L1-testing-script-generator</code></td>
+<td>Generates executable automation scripts (Playwright / REST Assured) from test cases.</td>
+<td>Test cases; API spec; wireframes</td>
+<td><span class="src-agent">Agent:</span> <code>test-cases.feature</code> from <code>case-writer</code>; <code>openapi.yaml</code> from <code>design-api-spec</code>; <code>wireframes.md</code> from <code>design-ux-wireframe</code></td>
+<td>Automation scripts (Playwright / REST Assured source)</td>
+<td>—</td>
+<td><code>kb-L1-testing-standards</code></td>
+<td><code>gr-L1-schema-validator</code></td>
+</tr>
+<tr>
+<td><code>L1-testing-synthetic-data-generator</code></td>
+<td>Generates PII-safe synthetic test data and fixtures.</td>
+<td>Data schema; test cases</td>
+<td><span class="src-agent">Agent:</span> <code>db-schema.sql</code> from <code>data-architect</code>; <code>test-cases.feature</code> from <code>case-writer</code></td>
+<td><code>synthetic-data.json</code></td>
+<td>—</td>
+<td><code>kb-L1-testing-standards</code></td>
+<td><code>gr-L1-pii-detection</code> (critical — blocks real PII)</td>
+</tr>
+<tr>
+<td><code>L1-xray-orchestrator</code></td>
+<td>Creates test cases and links executable scripts in XRay.</td>
+<td>Test cases; automation scripts</td>
+<td><span class="src-agent">Agent:</span> outputs of <code>case-writer</code>, <code>script-generator</code></td>
+<td>XRay test entries linked to stories</td>
+<td><code>tool-L1-xray-create-test</code></td>
+<td>—</td>
+<td><code>gr-L1-output-schema-validator</code></td>
+</tr>
+</tbody>
+</table></div>
+<!-- PHASE 6 -->
+<h2><span class="phase-tag" style="background:var(--green);">PHASE 6</span> Construction — API Code Gen, UI Code Gen</h2>
+<div class="table-wrap"><table>
+<thead><tr><th class="col-name">Agent</th><th class="col-desc">Description</th><th class="col-io">Inputs</th><th class="col-src">Input Source</th><th class="col-io">Outputs</th><th class="col-tools">Tools</th><th class="col-kb">Knowledge Bases</th><th class="col-gr">Guardrails</th></tr></thead>
+<tbody>
+<tr>
+<td><code>L1-construction-api-code-generator</code></td>
+<td>Generates backend/API implementation (Spring Boot + PostgreSQL) from LLD, API spec, and data model.</td>
+<td>LLD; API spec; data schema; base repo scaffold</td>
+<td><span class="src-agent">Agent:</span> outputs of <code>design-lld</code>, <code>design-api-spec</code>, <code>data-architect</code><br><span class="src-ext">External:</span> repo scaffold via GitHub</td>
+<td>API source code</td>
+<td><code>tool-L1-github-fetch-file</code></td>
+<td><code>kb-L1-enterprise-architecture</code>, <code>kb-L1-enterprise-security</code></td>
+<td><code>gr-L1-schema-validator</code>, <code>gr-L1-secret-scanner</code>, <code>gr-L1-license-compliance-check</code></td>
+</tr>
+<tr>
+<td><code>L1-construction-ui-code-generator</code></td>
+<td>Generates frontend/UI implementation (React) from wireframes, journeys, and API spec.</td>
+<td>Wireframes; user journeys; API spec; base repo scaffold</td>
+<td><span class="src-agent">Agent:</span> outputs of <code>design-ux-wireframe</code>, <code>user-journey-mapper</code>, <code>design-api-spec</code><br><span class="src-ext">External:</span> repo scaffold via GitHub</td>
+<td>UI source code</td>
+<td><code>tool-L1-github-fetch-file</code></td>
+<td><code>kb-L1-enterprise-architecture</code></td>
+<td><code>gr-L1-secret-scanner</code>, <code>gr-L1-license-compliance-check</code></td>
+</tr>
+<tr>
+<td><code>L1-construction-unit-test-generator</code></td>
+<td>Generates unit tests for both API and UI code.</td>
+<td>API source code; UI source code</td>
+<td><span class="src-agent">Agent:</span> outputs of <code>api-code-generator</code>, <code>ui-code-generator</code></td>
+<td>Unit test suites</td>
+<td>—</td>
+<td><code>kb-L1-testing-standards</code></td>
+<td><code>gr-L1-schema-validator</code></td>
+</tr>
+<tr>
+<td><code>L1-construction-code-reviewer</code></td>
+<td>Reviews generated code for standards compliance, vulnerabilities, and refactor opportunities.</td>
+<td>API + UI source code; unit tests</td>
+<td><span class="src-agent">Agent:</span> outputs of <code>api-code-generator</code>, <code>ui-code-generator</code>, <code>unit-test-generator</code></td>
+<td><code>review-report.md</code>; inline PR comments</td>
+<td><code>tool-L1-github-fetch-file</code></td>
+<td><code>kb-L1-enterprise-security</code>, <code>kb-L1-enterprise-architecture</code></td>
+<td><code>gr-L1-secret-scanner</code>, <code>gr-L1-license-compliance-check</code></td>
+</tr>
+<tr>
+<td><code>L1-construction-doc-generator</code></td>
+<td>Generates API/code documentation and changelog.</td>
+<td>API + UI source code; API spec</td>
+<td><span class="src-agent">Agent:</span> outputs of <code>api-code-generator</code>, <code>ui-code-generator</code>, <code>design-api-spec</code></td>
+<td>README, changelog, API docs</td>
+<td>—</td>
+<td><code>kb-L1-sdlc-templates</code></td>
+<td><code>gr-L1-consistency-check</code></td>
+</tr>
+<tr>
+<td><code>L1-github-orchestrator</code> <span style="color:var(--gray-txt);">(impl-commit invocation)</span></td>
+<td>Commits API code, UI code, unit tests, and docs to the implementation branch.</td>
+<td>All Phase 6 outputs</td>
+<td><span class="src-agent">Agent:</span> outputs of all Phase 6 agents</td>
+<td>GitHub branch <code>aava/impl-*</code></td>
+<td><code>tool-L1-github-upload-file</code>, <code>tool-L1-github-create-branch</code></td>
+<td>—</td>
+<td><code>gr-L1-output-schema-validator</code></td>
+</tr>
+</tbody>
+</table></div>
+<!-- PHASE 7 -->
+<h2><span class="phase-tag" style="background:var(--navy);">PHASE 7</span> PR Creation</h2>
+<div class="table-wrap"><table>
+<thead><tr><th class="col-name">Agent</th><th class="col-desc">Description</th><th class="col-io">Inputs</th><th class="col-src">Input Source</th><th class="col-io">Outputs</th><th class="col-tools">Tools</th><th class="col-kb">Knowledge Bases</th><th class="col-gr">Guardrails</th></tr></thead>
+<tbody>
+<tr>
+<td><code>L1-github-orchestrator</code> <span style="color:var(--gray-txt);">(PR invocation)</span></td>
+<td>Creates the pull request bundling Jira, design, code, and test references.</td>
+<td>Impl branch; design branch; Jira issue keys; XRay test keys</td>
+<td><span class="src-agent">Agent:</span> impl/design branches from prior <code>github-orchestrator</code> invocations; issue keys from <code>jira-orchestrator</code>; test keys from <code>xray-orchestrator</code></td>
+<td>Pull Request</td>
+<td><code>tool-L1-github-create-pr</code></td>
+<td>—</td>
+<td>—</td>
+</tr>
+</tbody>
+</table></div>
+<!-- CROSS-CUTTING -->
+<h2><span class="phase-tag" style="background:var(--purple);">CROSS-CUTTING</span> Quality Verification</h2>
+<div class="table-wrap"><table>
+<thead><tr><th class="col-name">Agent</th><th class="col-desc">Description</th><th class="col-io">Inputs</th><th class="col-src">Input Source</th><th class="col-io">Outputs</th><th class="col-tools">Tools</th><th class="col-kb">Knowledge Bases</th><th class="col-gr">Guardrails</th></tr></thead>
+<tbody>
+<tr>
+<td><code>L1-quality-verifier</code></td>
+<td>Independent rubric-based scoring, invoked at all 18 quality gates across the lifecycle.</td>
+<td>Draft output of the agent being scored, plus the rubric for that gate</td>
+<td><span class="src-agent">Agent:</span> the draft artifact from whichever agent just ran (workflow context, not re-fetched)</td>
+<td>Quality score (0–10) + pass/fail + rationale</td>
+<td>—</td>
+<td><code>kb-L1-sdlc-templates</code> (rubric definitions)</td>
+<td><code>gr-L1-output-schema-validator</code></td>
+</tr>
+</tbody>
+</table></div>
+<!-- NET NEW INTEGRATIONS -->
+<h2>Net-New Integrations Required</h2>
+<p class="sub">Tools/systems referenced above that do not exist in the original 14-agent diagram's tool set (Jira, GitHub, Confluence, XRay) and must be procured or built before these agents can run live.</p>
+<div class="table-wrap"><table>
+<thead><tr><th>Tool</th><th>Used By</th><th>What It Needs</th></tr></thead>
+<tbody>
+<tr><td><code>tool-L1-web-search-competitor-scan</code></td><td>Market Analyzer</td><td>Web search API (e.g. Bing/Google Search API, or a licensed market-intel provider)</td></tr>
+<tr><td><code>tool-L1-regulatory-db-lookup</code></td><td>Regulatory Feasibility Checker</td><td>Access to a regulatory content provider (e.g. Thomson Reuters Regulatory Intelligence) or an internal compliance KB with an API front-end</td></tr>
+<tr><td><code>tool-L1-confluence-fetch-page</code> / <code>-create-page</code></td><td>Idea Intake, Requirements Elicitor, Impact Assessor, Vision Statement Generator</td><td>Confluence API token scoped to the relevant space</td></tr>
+<tr><td>Service catalog / CMDB export</td><td>Impact Assessor</td><td>Read access to Backstage, ServiceNow CMDB, or equivalent architecture registry (can be a stub/empty catalog for pure greenfield)</td></tr>
+<tr><td><code>tool-L1-figma-create-frame</code></td><td>UX Wireframe Agent (optional)</td><td>Figma API token, only if wireframes must be pushed into an actual Figma file rather than kept as markdown/mermaid</td></tr>
+<tr><td><code>tool-L1-db-schema-diff</code></td><td>Data Architect (optional)</td><td>Read access to the target environment's live schema, only needed if reconciling against an existing DB (brownfield-adjacent)</td></tr>
+<tr><td><code>gr-L1-secret-scanner</code></td><td>API/UI Code Generators, Code Reviewer</td><td>A secrets-detection engine (e.g. gitleaks/trufflehog) wired in as a guardrail check on generated code</td></tr>
+<tr><td><code>gr-L1-license-compliance-check</code></td><td>API/UI Code Generators, Code Reviewer</td><td>An OSS license scanner (e.g. FOSSA, Snyk license check) wired in as a guardrail check on generated dependencies</td></tr>
+<tr><td><code>gr-L1-citation-verifier</code></td><td>Market Analyzer, Regulatory Checker, Story Generator, Scenario Writer</td><td>A citation-checking pass that confirms referenced sources/entities exist and are attributable, not fabricated</td></tr>
+</tbody>
+</table></div>
+
+<!-- APPENDIX A: roadmap.md contract -->
+<h2><span class="phase-tag" style="background:var(--plan);">APPENDIX A</span> Output Contract — <code>roadmap.md</code> (feature → band)</h2>
+<h3>Produced by <code>L1-planning-roadmap-creator</code> · outer loop · feature granularity · whole-PI horizon</h3>
+<p class="sub">The roadmap is the multi-sprint "what and roughly when." It never descends below feature granularity — no stories, no Work Units, no per-person assignment. One row per feature; every feature in the prioritized backlog must appear exactly once.</p>
+<div class="callout" style="background:var(--plan-lt);border-color:var(--plan);color:#8a4400;"><strong>Invariant:</strong> a feature may only be banded into a cycle at or after the cycle of every feature it depends on (per <code>dependency-graph.json</code>). The <code>gr-L1-consistency-check</code> guardrail rejects any roadmap that bands a feature earlier than one of its predecessors, or that leaves a backlog feature unplaced.</div>
+
+<h3>A.1 — Document-level (front-matter) fields</h3>
+<div class="table-wrap"><table style="min-width:1100px;">
+<thead><tr><th class="col-name">Field</th><th>Type</th><th class="col-desc">Description</th><th class="col-io">Source</th><th>Required</th></tr></thead>
+<tbody>
+<tr><td><code>workflow_execution_id</code></td><td>string (uuid)</td><td>Single PI-planning run identifier; must match the epic/feature/backlog artifacts it derives from.</td><td>workflow context</td><td>Yes</td></tr>
+<tr><td><code>pi_id</code></td><td>string</td><td>Program-Increment label, e.g. <code>PI-2026-Q3</code>.</td><td>PI cadence config</td><td>Yes</td></tr>
+<tr><td><code>cadence</code></td><td>object</td><td><code>{ cycle_count:int, cycle_length_days:int }</code> — e.g. <code>{4, 5}</code> for 4 &times; 5-day Feature Cycles.</td><td>PI cadence config</td><td>Yes</td></tr>
+<tr><td><code>team_capacity</code></td><td>object[]</td><td>Per-cycle capacity in points/feature-slots: <code>[{ cycle:int, capacity:number }]</code> — the ceiling the banding respected.</td><td>Jira velocity export</td><td>Yes</td></tr>
+<tr><td><code>critical_path</code></td><td>string[]</td><td>Ordered feature IDs on the longest dependency chain, carried forward from <code>dependency-graph.json</code> for auditability.</td><td>dependency-mapper</td><td>Yes</td></tr>
+<tr><td><code>approval</code></td><td>object</td><td><code>{ approver, status, comment, timestamp }</code> — populated at the human gate before Phase 3. Empty until approved.</td><td>Human (Product Lead)</td><td>On gate</td></tr>
+</tbody>
+</table></div>
+
+<h3>A.2 — Per-feature (row) fields — the feature → band mapping</h3>
+<div class="table-wrap"><table style="min-width:1100px;">
+<thead><tr><th class="col-name">Field</th><th>Type</th><th class="col-desc">Description</th><th class="col-io">Source</th><th>Required</th></tr></thead>
+<tbody>
+<tr><td><code>feature_id</code></td><td>string</td><td>Stable ID, e.g. <code>F5.1</code>. Foreign key into <code>features.json</code> and the cycle plan.</td><td>feature-decomposer</td><td>Yes</td></tr>
+<tr><td><code>epic_id</code></td><td>string</td><td>Parent epic, e.g. <code>EPIC-5</code>.</td><td>epic-creator</td><td>Yes</td></tr>
+<tr><td><code>title</code></td><td>string</td><td>Feature name, verbatim from <code>features.json</code>.</td><td>feature-decomposer</td><td>Yes</td></tr>
+<tr><td><code>band</code></td><td>int</td><td><strong>The core output</strong> — the cycle (1..cycle_count) this feature is scheduled into. <code>0</code> / <code>null</code> = deferred beyond this PI (must be justified in <code>rationale</code>).</td><td>roadmap-creator</td><td>Yes</td></tr>
+<tr><td><code>size</code></td><td>enum</td><td>Coarse T-shirt size <code>S|M|L|XL</code> carried from the feature-decomposer — the basis for capacity fit, not a Work-Unit estimate.</td><td>feature-decomposer</td><td>Yes</td></tr>
+<tr><td><code>wsjf_rank</code></td><td>int</td><td>Position in the prioritized backlog; ties break by dependency-unblocking value.</td><td>backlog-prioritizer</td><td>Yes</td></tr>
+<tr><td><code>depends_on</code></td><td>string[]</td><td>Feature IDs that must land in an earlier-or-equal band. Drives the invariant above.</td><td>dependency-mapper</td><td>Yes</td></tr>
+<tr><td><code>on_critical_path</code></td><td>boolean</td><td>True if this feature sits on <code>critical_path</code>; flags the sequencing anchors.</td><td>dependency-mapper</td><td>Yes</td></tr>
+<tr><td><code>milestone</code></td><td>string</td><td>Optional external date/commitment this band satisfies (e.g. "Regulatory sign-off demo").</td><td>Human / vision.md</td><td>No</td></tr>
+<tr><td><code>rationale</code></td><td>string</td><td>Why this band — the dependency/value reason a reviewer can audit. Mandatory when <code>band=0</code> or when a feature is banded later than its WSJF rank alone would suggest.</td><td>roadmap-creator</td><td>Conditional</td></tr>
+<tr><td><code>status</code></td><td>enum</td><td><code>committed | planned | deferred</code> — <code>committed</code> only for band(s) the feature cycle planner has picked up.</td><td>roadmap-creator</td><td>Yes</td></tr>
+</tbody>
+</table></div>
+
+<h3>A.3 — HarvestLink worked row (illustrative)</h3>
+<div class="table-wrap"><table style="min-width:1000px;">
+<thead><tr><th>feature_id</th><th>epic_id</th><th>title</th><th>band</th><th>size</th><th>wsjf_rank</th><th>depends_on</th><th>on_critical_path</th><th>status</th></tr></thead>
+<tbody>
+<tr><td><code>F5.1</code></td><td><code>EPIC-5</code></td><td>External identity-provider integration</td><td>1</td><td>M</td><td>1</td><td><code>[]</code></td><td>true</td><td>committed</td></tr>
+<tr><td><code>F1.1</code></td><td><code>EPIC-1</code></td><td>Producer registration + FBO verification</td><td>1</td><td>M</td><td>3</td><td><code>[F5.1]</code></td><td>true</td><td>committed</td></tr>
+<tr><td><code>F3.2</code></td><td><code>EPIC-3</code></td><td>Allergen declaration service</td><td>2</td><td>L</td><td>2</td><td><code>[F1.2]</code></td><td>true</td><td>planned</td></tr>
+<tr><td><code>F2.1</code></td><td><code>EPIC-2</code></td><td>Buyer discovery &amp; search</td><td>4</td><td>M</td><td>7</td><td><code>[]</code></td><td>false</td><td>planned</td></tr>
+</tbody>
+</table></div>
+<!-- APPENDIX B: cycle-plan.md contract -->
+<h2><span class="phase-tag" style="background:var(--incept);">APPENDIX B</span> Output Contract — <code>cycle-plan.md</code> (Work Unit → cycle)</h2>
+<h3>Produced by <code>L1-planning-feature-cycle-planner</code> · inner loop · Work-Unit granularity · near cycle(s) only</h3>
+<div class="callout" style="background:#eef;border-color:#99f;color:#224;"><strong>Terminology:</strong> this contract maps <strong>Work Units</strong> (the atomic executable — the level formerly called "Task") to cycles. Where a committed feature is oversized (<code>needs_slicing=true</code>), Work Units hang under an optional <code>Story</code> slice (a sub-feature) via <code>slice_id</code>; otherwise they attach straight to the feature. The IDs use the <code>WU-</code> prefix. <code>task-generator</code>/<code>tasks.json</code> retain their names for tooling continuity — a "task" record <em>is</em> a Work Unit.</div>
+<p class="sub">The cycle plan descends to the executable level: it takes the <em>committed</em> features from <code>roadmap.md</code>, triggers just-in-time Work-Unit elaboration, and fits those Work Units to team capacity for the near cycle(s). It never re-bands features — if Work Units overflow, it flags the overflow for the roadmap-creator to reflow, keeping the outer loop authoritative.</p>
+<div class="callout" style="background:var(--incept-lt);border-color:var(--incept);color:#003a8c;"><strong>Invariant:</strong> the sum of committed <code>unit_points</code> in any cycle must be &le; that cycle's <code>capacity</code>. <code>gr-L1-consistency-check</code> rejects an over-committed cycle; overflow Work Units must carry <code>disposition=overflow</code> with a target reflow band, not be silently dropped.</div>
+<h3>B.1 — Document-level (front-matter) fields</h3>
+<div class="table-wrap"><table style="min-width:1100px;">
+<thead><tr><th class="col-name">Field</th><th>Type</th><th class="col-desc">Description</th><th class="col-io">Source</th><th>Required</th></tr></thead>
+<tbody>
+<tr><td><code>workflow_execution_id</code></td><td>string (uuid)</td><td>Must match the parent <code>roadmap.md</code>'s run ID — the plan is a projection of that roadmap.</td><td>workflow context</td><td>Yes</td></tr>
+<tr><td><code>pi_id</code></td><td>string</td><td>Same PI label as the roadmap.</td><td>roadmap.md</td><td>Yes</td></tr>
+<tr><td><code>planned_cycles</code></td><td>int[]</td><td>Which cycle(s) this plan elaborates now, e.g. <code>[1]</code> or <code>[1,2]</code> — the near horizon only, not the whole PI.</td><td>feature-cycle-planner</td><td>Yes</td></tr>
+<tr><td><code>capacity</code></td><td>object[]</td><td>Per-cycle team capacity in points: <code>[{ cycle:int, points:number, team:string }]</code>.</td><td>Jira velocity export</td><td>Yes</td></tr>
+<tr><td><code>committed_features</code></td><td>string[]</td><td>Feature IDs pulled from the roadmap for this plan — the join back to Appendix A's <code>feature_id</code>.</td><td>roadmap.md</td><td>Yes</td></tr>
+<tr><td><code>definition_of_ready</code></td><td>string[]</td><td>The DoR checklist each Work Unit was validated against before commitment.</td><td>kb-L1-sdlc-templates</td><td>Yes</td></tr>
+</tbody>
+</table></div>
+<h3>B.2 — Per-Work-Unit (row) fields — the Work Unit → cycle mapping</h3>
+<div class="table-wrap"><table style="min-width:1100px;">
+<thead><tr><th class="col-name">Field</th><th>Type</th><th class="col-desc">Description</th><th class="col-io">Source</th><th>Required</th></tr></thead>
+<tbody>
+<tr><td><code>work_unit_id</code></td><td>string</td><td>Stable ID, e.g. <code>WU-F5.1-01</code>. Foreign key into <code>tasks.json</code> once Phase 3 elaborates it.</td><td>task-generator (JIT)</td><td>Yes</td></tr>
+<tr><td><code>feature_id</code></td><td>string</td><td>Parent feature — the join to <code>roadmap.md</code>. Must be in <code>committed_features</code>.</td><td>roadmap.md</td><td>Yes</td></tr>
+<tr><td><code>slice_id</code></td><td>string</td><td>Optional parent <code>Story</code> slice (sub-feature), e.g. <code>S-F1.1-a</code> — populated only when the feature was oversized (<code>needs_slicing=true</code>). Empty when the Work Unit attaches straight to the feature.</td><td>feature-decomposer</td><td>Conditional</td></tr>
+<tr><td><code>title</code></td><td>string</td><td>One coherent objective (T1), e.g. "OIDC token validation &amp; role provisioning" — no "and"-joined second job.</td><td>task-generator</td><td>Yes</td></tr>
+<tr><td><code>layer</code></td><td>enum</td><td>Natural seam (T4): <code>data | api | business-logic | ui | integration | test | docs</code>.</td><td>task-generator</td><td>Yes</td></tr>
+<tr><td><code>cycle</code></td><td>int</td><td><strong>The core output</strong> — the specific cycle this Work Unit is committed to (must be one of <code>planned_cycles</code>).</td><td>feature-cycle-planner</td><td>Yes</td></tr>
+<tr><td><code>unit_points</code></td><td>number</td><td>Fibonacci estimate; summed per cycle against <code>capacity</code> for the fit invariant.</td><td>task-generator</td><td>Yes</td></tr>
+<tr><td><code>assignee</code></td><td>string</td><td>Owning team member, squad role, or agent. Optional at plan time; may be filled at cycle start.</td><td>feature-cycle-planner / Human</td><td>No</td></tr>
+<tr><td><code>depends_on_unit</code></td><td>string[]</td><td>Intra-plan Work-Unit dependencies (finer than feature-level) that constrain ordering within/across the near cycles. Capped at 2 per T5.</td><td>task-generator</td><td>No</td></tr>
+<tr><td><code>verification_ref</code></td><td>string</td><td>Named test/assertion/AC ID that proves this unit done (T3). No unit ships without one.</td><td>task-generator</td><td>Yes</td></tr>
+<tr><td><code>disposition</code></td><td>enum</td><td><code>committed | overflow | carried_over</code>. <code>overflow</code> units name a <code>reflow_band</code> for the roadmap-creator rather than being dropped.</td><td>feature-cycle-planner</td><td>Yes</td></tr>
+<tr><td><code>reflow_band</code></td><td>int</td><td>Target roadmap band an <code>overflow</code> unit's feature should move to; empty for <code>committed</code>.</td><td>feature-cycle-planner</td><td>Conditional</td></tr>
+</tbody>
+</table></div>
+<h3>B.3 — HarvestLink worked rows (Cycle 1, ~30-pt capacity)</h3>
+<div class="table-wrap"><table style="min-width:1000px;">
+<thead><tr><th>work_unit_id</th><th>feature_id</th><th>title</th><th>layer</th><th>cycle</th><th>unit_points</th><th>disposition</th></tr></thead>
+<tbody>
+<tr><td><code>WU-F5.1-01</code></td><td><code>F5.1</code></td><td>Producer registration via external IdP</td><td>integration</td><td>1</td><td>5</td><td>committed</td></tr>
+<tr><td><code>WU-F5.1-02</code></td><td><code>F5.1</code></td><td>OIDC token validation &amp; role provisioning</td><td>business-logic</td><td>1</td><td>5</td><td>committed</td></tr>
+<tr><td><code>WU-F5.1-03</code></td><td><code>F5.1</code></td><td>Distributor/buyer role mapping</td><td>business-logic</td><td>1</td><td>3</td><td>committed</td></tr>
+<tr><td><code>WU-F1.1-01</code></td><td><code>F1.1</code></td><td>FBO number capture endpoint + validation</td><td>api</td><td>1</td><td>8</td><td>committed</td></tr>
+<tr><td><code>WU-F1.1-02</code></td><td><code>F1.1</code></td><td>Rejected-verification state + notification</td><td>business-logic</td><td>1</td><td>5</td><td>committed</td></tr>
+</tbody>
+</table></div>
+<div class="callout" style="background:var(--incept-lt);border-color:var(--incept);color:#003a8c;"><strong>Fit check:</strong> 5+5+3+8+5 = 26 pts committed vs. ~30 capacity → fits with 4 pts headroom. If F1.1's second unit had pushed the total to 33, it would carry <code>disposition=overflow</code>, <code>reflow_band=2</code>, and the roadmap-creator would re-run to reflow downstream — the outer loop stays authoritative, the Work Unit is never silently dropped.</div>
+<div class="callout" style="background:#eef;border-color:#99f;color:#224;"><strong>Join summary — how the two contracts compose:</strong> <code>roadmap.md</code>.<code>feature_id</code> ← 1:N → <code>cycle-plan.md</code>.<code>feature_id</code> (each committed feature fans out into Work Units); where a feature was oversized, <code>cycle-plan.md</code>.<code>slice_id</code> groups Work Units under an optional <code>Story</code> slice; and <code>cycle-plan.md</code>.<code>work_unit_id</code> ← 1:1 → <code>tasks.json</code> (Phase 3 JIT elaboration). Both artifacts share one <code>workflow_execution_id</code>, so the whole PI is traceable <strong>Epic → Feature → [Story slice] → Work Unit</strong> from a single planning run.</div>
+<!-- APPENDIX C: Decomposition Standard -->
+<h2><span class="phase-tag" style="background:var(--incept);">APPENDIX C</span> Decomposition Standard — the rubric <code>feature-decomposer</code> &amp; <code>task-generator</code> decompose against</h2>
+<h3>Why this exists</h3>
+<p class="sub">The inherited Jira ladder (Epic → Feature → Story → Task) was built to solve a <em>human</em> coordination problem, not an <em>agent</em> execution problem. It conflates two things that pull in opposite directions: <strong>human governance granularity</strong> (the levels at which a human states intent, prioritizes, and approves — wants to be coarse) and <strong>agent execution granularity</strong> (the level at which an agent reliably picks up and completes work — governed by context, not effort). This standard separates the two and gives the decomposer agents a concrete, testable rubric.</p>
+<div class="callout" style="background:var(--incept-lt);border-color:var(--incept);color:#003a8c;"><strong>Governing rule:</strong> <em>decompose to the coarsest level at which each unit is still independently verifiable and context-bounded — and no finer.</em> Over-decomposition is a named failure mode: units too small create coordination overhead, lose the thread of the larger goal, and burn more orchestration/tokens than they save.</div>
+
+<h3>C.1 — The 3-level spine (+ one collapsible layer)</h3>
+<div class="table-wrap"><table style="min-width:1100px;">
+<thead><tr><th class="col-name">Level</th><th>Owner</th><th class="col-desc">Purpose</th><th class="col-io">Sizing test</th><th class="col-tools">Agent role</th></tr></thead>
+<tbody>
+<tr><td><code>Epic</code></td><td><span class="src-human">Human (Product Lead)</span></td><td>Business outcome / "the bet." Intent, not spec.</td><td>Multiple cycles</td><td>None — human-authored</td></tr>
+<tr><td><code>Feature</code></td><td><span class="src-human">Human-approved</span>, <span class="src-agent">agent-drafted</span></td><td>The <strong>shippable unit + the approval gate</strong>. Carries its own acceptance criteria (AC attach here, not to a story).</td><td><strong>1 Feature Cycle (&le;5 days)</strong></td><td>Decomposes &amp; plans</td></tr>
+<tr><td><code>Work Unit</code> <span style="color:var(--gray-txt);">(the level formerly called Task)</span></td><td><span class="src-agent">Agent-owned</span></td><td>The <strong>atomic executable</strong> — one coherent thing, one agent session, independently verifiable.</td><td>Fits one context window; passes its own test</td><td>Executes end-to-end</td></tr>
+<tr><td><code>Story</code> <span style="color:var(--gray-txt);">(OPTIONAL — collapsible)</span></td><td><span class="src-agent">Agent-drafted</span></td><td>A <strong>vertical slice</strong> of an oversized feature. Invoke <em>only</em> when a feature won't fit one cycle; then a "story" is just a sub-feature.</td><td>—</td><td>Only if needed</td></tr>
+</tbody>
+</table></div>
+
+<h3>C.2 — The collapsible-story rule</h3>
+<div class="callout" style="background:var(--incept-lt);border-color:var(--incept);color:#003a8c;">A user story was always two things wearing one hat: <strong>(a)</strong> a vertical slice of value, and <strong>(b)</strong> acceptance criteria in narrative form. In the ADLC these separate cleanly:
+<br><br>
+&bull; The <strong>acceptance criteria</strong> attach directly to the <code>Feature</code> — agents consume Given/When/Then perfectly well without the "As a… I want…" wrapper.<br>
+&bull; The <strong>vertical slice</strong> only needs its own level when a feature genuinely won't fit one cycle — at which point a "story" <em>is</em> a sub-feature.
+<br><br>
+<strong>Decision:</strong> the <code>feature-decomposer</code> emits a <code>needs_slicing</code> flag. If a feature passes the "fits one cycle" test, no story layer is created and <code>story-generator</code> elaborates Work Units straight from the feature's AC. If it fails, the decomposer emits <code>Story</code> (sub-feature) rows first, each of which independently re-runs the same fit test.</div>
+
+<h3>C.3 — The five right-sizing tests (encodable guardrails)</h3>
+<p class="sub">These are the checks a <code>Work Unit</code> must pass to be considered well-formed. They are encoded as a guardrail, <code>gr-L1-decomposition-rightsizing</code>, run by both <code>feature-decomposer</code> (on each feature/sub-feature) and <code>task-generator</code> (on each Work Unit). Each test maps to a machine-checkable rule so the guardrail can BLOCK, not just advise.</p>
+<div class="table-wrap"><table style="min-width:1300px;">
+<thead><tr><th class="col-name">#</th><th class="col-desc">Test</th><th class="col-io">What it means</th><th class="col-src">Encoded check (rule)</th><th class="col-gr">Verdict on fail</th></tr></thead>
+<tbody>
+<tr><td><strong>T1</strong></td><td>One coherent thing per session</td><td>A single, nameable objective — no hidden second job.</td><td><code>title</code> contains no coordinating conjunction ("and"/"&amp;"/","-joined verbs); exactly one primary verb + one object. Regex + POS check on the unit title/description.</td><td><span class="src-ext">BLOCK → split</span></td></tr>
+<tr><td><strong>T2</strong></td><td>Context-bounded</td><td>The agent can read what it needs without ingesting the whole codebase.</td><td><code>est_files_read &le; N</code> (default 12) AND <code>est_context_tokens &le; 0.5 &times; model_window</code>. Count files <em>read</em>, not files changed.</td><td><span class="src-ext">BLOCK → split</span></td></tr>
+<tr><td><strong>T3</strong></td><td>Independently verifiable</td><td>It has its own pass/fail check that doesn't depend on downstream interpretation.</td><td><code>verification_ref</code> is non-empty and resolves to a concrete test/assertion/acceptance-criterion ID. No unit ships without a named verifier.</td><td><span class="src-ext">BLOCK → add verifier</span></td></tr>
+<tr><td><strong>T4</strong></td><td>Layer-aligned</td><td>Cuts fall on natural seams (DB → API → UI → integration → test).</td><td><code>layer</code> &isin; {data, api, business-logic, ui, integration, test, docs}; a unit spanning &gt;1 layer is flagged as a split candidate.</td><td><span class="src-kb">WARN → prefer split</span></td></tr>
+<tr><td><strong>T5</strong></td><td>Not over-split</td><td>A unit that only makes sense alongside 5 siblings is too small.</td><td><code>hard_dependency_count</code> on sibling units &le; 2; if a unit is unverifiable in isolation (T3 fails <em>because</em> it needs siblings), merge upward.</td><td><span class="src-kb">WARN → merge</span></td></tr>
+</tbody>
+</table></div>
+<div class="callout" style="background:#eef;border-color:#99f;color:#224;"><strong>Guardrail wiring:</strong> <code>gr-L1-decomposition-rightsizing</code> is added to <code>L1-inception-feature-decomposer</code>'s <code>context.guardrails</code> (validating each feature/sub-feature against T1–T5, using T2 with the feature's rough size as the estimate) and to <code>L1-inception-task-generator</code>'s <code>context.guardrails</code> (validating each Work Unit). T1–T3 are <strong>BLOCKERS</strong> (a failing unit cannot be emitted — the agent must split or add a verifier and re-run); T4–T5 are <strong>WARN-level</strong> (surfaced in <code>reflection_notes</code> for the evaluator, split/merge preferred but not forced, since some layer-spanning or tightly-coupled units are legitimate). Supporting taxonomy lives in <code>kb-L1-decomposition-standard</code> (the 3-level spine, the collapsible-story rule, the layer enum, and the default thresholds N=12 / 0.5&times;window — all overridable per L2/L3 domain variant via <code>knowledge_bases_append</code>).</div>
+
+<h3>C.4 — Depth flexes by work type</h3>
+<p class="sub">The right <em>number</em> of levels is context-dependent. The <code>feature-decomposer</code> selects a decomposition profile from the work-type tag on the incoming epic/feature.</p>
+<div class="table-wrap"><table style="min-width:1100px;">
+<thead><tr><th class="col-name">Work type</th><th class="col-io">Levels used</th><th class="col-desc">Rationale</th><th class="col-src">What replaces the dropped level(s)</th></tr></thead>
+<tbody>
+<tr><td><strong>Greenfield</strong></td><td><code>Epic → Feature → [Story] → Work Unit</code> (3–4)</td><td>Large unknown surface, no existing structure to anchor against — hierarchy earns its keep; the story-slice layer is genuinely useful for oversized features.</td><td>Nothing dropped; story layer used when <code>needs_slicing</code>.</td></tr>
+<tr><td><strong>Brownfield enhancement</strong></td><td><code>Feature → Work Unit</code> (2)</td><td>The existing system <em>is</em> the structure; you don't need an epic to give shape — you need impact/discovery instead.</td><td>A <strong>discovery / impact-scan Work Unit</strong> replaces the epic as the context-setter.</td></tr>
+<tr><td><strong>Bugfix</strong></td><td><code>Work Unit</code> (1)</td><td>A bug needs no hierarchy — forcing it through 4 levels is pure ceremony. It needs a failing test and a bounded blast radius.</td><td>A <strong>failing reproduction test</strong> replaces the spec; a <strong>risk tag</strong> replaces the approval gate (human review only if <code>risk::high</code>).</td></tr>
+</tbody>
+</table></div>
+
+<h3>C.5 — Worked example: Greenfield (full depth)</h3>
+<p class="sub">HarvestLink — Epic: Producer Onboarding &amp; Catalog. Feature F1.1 is an "L", so the story-slice layer is invoked.</p>
+<div class="table-wrap"><table style="min-width:1200px;">
+<thead><tr><th class="col-name">Level</th><th class="col-desc">Item</th><th class="col-io">Sizing / AC</th><th class="col-src">Verifier (T3)</th><th class="col-tools">Resources pulled (in order)</th></tr></thead>
+<tbody>
+<tr><td><code>Epic</code></td><td>EPIC-1 Producer Onboarding &amp; Catalog</td><td>Multi-cycle; human intent</td><td>—</td><td><code>epics.json</code></td></tr>
+<tr><td><code>Feature</code></td><td>F1.1 Producer registration + FBO verification</td><td>1 cycle; AC: valid FBO verified async; rejection path handled</td><td>Feature AC block</td><td><code>features.json</code> + AC</td></tr>
+<tr><td><code>Story</code> <span style="color:var(--gray-txt);">(slice — F1.1 is L)</span></td><td>S-F1.1-a happy-path registration · S-F1.1-b async FBO verification</td><td>Each slice re-passes fit test</td><td>Slice-level AC</td><td>feature AC → sub-slice</td></tr>
+<tr><td><code>Work Unit</code></td><td>DB schema + migration for producer entity</td><td>data layer; ~½ day</td><td>schema test</td><td><code>kb-L1-enterprise-architecture</code> + entity spec only</td></tr>
+<tr><td><code>Work Unit</code></td><td><code>POST /producers</code> endpoint + validation</td><td>api layer; 1 session</td><td>contract test</td><td>OpenAPI contract + validation rules</td></tr>
+<tr><td><code>Work Unit</code></td><td>Registration UI form + client validation</td><td>ui layer; 1 session</td><td>component test</td><td>wireframe + API contract</td></tr>
+<tr><td><code>Work Unit</code></td><td>FBO lookup integration + retry/backoff</td><td>integration layer</td><td>integration test w/ stub</td><td><code>kb-L2-food-domain</code> (FBO rules) + integration spec</td></tr>
+<tr><td><code>Work Unit</code></td><td>Rejection-handling state + notification</td><td>business-logic layer</td><td>scenario test</td><td>slice AC only</td></tr>
+</tbody>
+</table></div>
+<p class="sub">Note each Work Unit reads only what <em>it</em> needs (T2) — the schema unit never loads the FBO rules KB, the endpoint unit never loads the wireframe. That is the context-boundedness the guardrail enforces.</p>
+
+<h3>C.6 — Worked example: Brownfield enhancement (2 levels)</h3>
+<p class="sub">Enhancement on an existing HarvestLink: "Add allergen filter to buyer search." No epic, no story — a discovery Work Unit replaces the epic.</p>
+<div class="table-wrap"><table style="min-width:1200px;">
+<thead><tr><th class="col-name">Level</th><th class="col-desc">Item</th><th class="col-io">Sizing / AC</th><th class="col-src">Verifier (T3)</th></tr></thead>
+<tbody>
+<tr><td><code>Feature</code></td><td>Allergen filter on buyer discovery</td><td>1 cycle; AC: buyer excludes N allergens; results exclude matching listings; existing search-perf SLA held</td><td>Feature AC block</td></tr>
+<tr><td><code>Work Unit</code> <span style="color:var(--gray-txt);">(discovery — replaces epic)</span></td><td>Impact scan of search-service + listing index</td><td>discovery; read-only</td><td>impact-assessment output reviewed</td></tr>
+<tr><td><code>Work Unit</code></td><td>Extend search query API with allergen-exclusion param</td><td>api layer</td><td>contract test + regression</td></tr>
+<tr><td><code>Work Unit</code></td><td>Add allergen facet to search index + backfill</td><td>data layer</td><td>index test</td></tr>
+<tr><td><code>Work Unit</code></td><td>Filter UI control + wire to API</td><td>ui layer</td><td>component + e2e</td></tr>
+</tbody>
+</table></div>
+
+<h3>C.7 — Worked example: Bugfix (1 level)</h3>
+<p class="sub">Bug: "FBO verification passes for expired registrations." One self-verifying Work Unit; the reproduction test is the spec, a risk tag is the only gate.</p>
+<div class="table-wrap"><table style="min-width:1200px;">
+<thead><tr><th class="col-name">Field</th><th class="col-desc">Value</th></tr></thead>
+<tbody>
+<tr><td><code>work_unit</code></td><td>Fix: expired FBO numbers incorrectly verified</td></tr>
+<tr><td><code>reproduction</code> <span style="color:var(--gray-txt);">(replaces spec)</span></td><td>Failing test asserting expired FBO → rejected</td></tr>
+<tr><td><code>scope</code> (T2)</td><td><code>fbo-verification-service.validate()</code> + its unit tests — 2 files read</td></tr>
+<tr><td><code>verifier</code> (T3)</td><td>New test passes; full FBO suite green; no regression</td></tr>
+<tr><td><code>gate</code> <span style="color:var(--gray-txt);">(replaces approval)</span></td><td><code>risk::high</code> (touches compliance) → human review; otherwise auto-merge on green</td></tr>
+</tbody>
+</table></div>
+
+<!-- APPENDIX D: Applying the standard in practice -->
+<h2><span class="phase-tag" style="background:var(--reqs);">APPENDIX D</span> Applying the Standard in Practice — from work request to Jira</h2>
+<p class="sub">This appendix shows how the rules in Appendix C are executed the moment a work request lands, and exactly how each level materialises as Jira issues. The through-line: <strong>a human states intent, the pipeline classifies and decomposes to the right depth, and <code>L1-jira-orchestrator</code> writes the resulting hierarchy into Jira with the fields and gates that let agents pick work up autonomously.</strong></p>
+
+<h3>D.1 — Step 0: intake &amp; work-type classification</h3>
+<div class="callout" style="background:var(--reqs-lt);border-color:var(--reqs);color:#283593;">Every request enters through one door — a Confluence "request" page or a Jira intake ticket — carrying a single decisive tag: <code>work_type &isin; { greenfield | brownfield | bugfix }</code>. This tag selects the <strong>decomposition profile</strong> (Appendix C.4) and therefore how many levels get created. If the requester doesn't set it, <code>L1-inception-epic-creator</code> (greenfield/brownfield) or a lightweight triage step (bugfix) infers it from the request and the impact scan, and the inferred value is confirmed at the first human gate.</div>
+<div class="table-wrap"><table style="min-width:1100px;">
+<thead><tr><th class="col-name">Signal in the request</th><th class="col-io">Inferred work_type</th><th class="col-desc">Profile applied</th></tr></thead>
+<tbody>
+<tr><td>"New product / capability, no existing system to touch"</td><td><code>greenfield</code></td><td>Full depth: Epic → Feature → [Story slice] → Work Unit</td></tr>
+<tr><td>"Add / change X on existing system Y"</td><td><code>brownfield</code></td><td>2 levels: Feature → Work Unit (discovery WU replaces the epic)</td></tr>
+<tr><td>"Z is broken / behaves wrong"</td><td><code>bugfix</code></td><td>1 level: a single Work Unit (repro test replaces the spec)</td></tr>
+</tbody>
+</table></div>
+
+<h3>D.2 — Level → Jira issue-type mapping</h3>
+<p class="sub">The spine maps cleanly onto <strong>standard Jira</strong> (3 native hierarchy levels: Epic &gt; Story/Task/Bug &gt; Sub-task). A Premium/Advanced-Roadmaps alternative is noted where it helps.</p>
+<div class="table-wrap"><table style="min-width:1300px;">
+<thead><tr><th class="col-name">Our level</th><th class="col-io">Jira issue type (standard)</th><th class="col-desc">Carries</th><th class="col-src">Created by</th><th class="col-kb">Premium alternative</th></tr></thead>
+<tbody>
+<tr><td><code>Epic</code></td><td><strong>Epic</strong></td><td>Business outcome; label <code>work_type:*</code></td><td><code>epic-creator</code> → <code>jira-orchestrator</code></td><td>Same (or an Initiative above it for very large bets)</td></tr>
+<tr><td><code>Feature</code></td><td><strong>Story</strong> · label <code>feature</code></td><td>Acceptance criteria; <code>size</code>; <code>wsjf_rank</code>; <code>roadmap_band</code></td><td><code>feature-decomposer</code> → <code>jira-orchestrator</code></td><td>Custom <strong>Feature</strong> issue type between Epic and Story</td></tr>
+<tr><td><code>Story</code> <span style="color:var(--gray-txt);">(optional slice)</span></td><td><strong>Story</strong> · label <code>slice</code> · link <em>"splits from"</em> the Feature</td><td>Slice-level AC; only when <code>needs_slicing=true</code></td><td><code>feature-decomposer</code></td><td>Story (Feature sits one level up)</td></tr>
+<tr><td><code>Work Unit</code></td><td><strong>Sub-task</strong></td><td><code>layer</code>; <code>verification_ref</code>; <code>unit_points</code>; <code>agent_assisted</code></td><td><code>task-generator</code> → <code>jira-orchestrator</code></td><td>Sub-task (or Task if slice = Story)</td></tr>
+<tr><td>Bug</td><td><strong>Bug</strong> <span style="color:var(--gray-txt);">(standalone)</span></td><td>Reproduction test; <code>risk</code>; blast-radius scope</td><td>triage → <code>jira-orchestrator</code></td><td>Same</td></tr>
+</tbody>
+</table></div>
+
+<h3>D.3 — Fields &amp; labels the agents write (so agents can pick work up)</h3>
+<div class="table-wrap"><table style="min-width:1200px;">
+<thead><tr><th class="col-name">Jira field / label</th><th class="col-desc">Meaning</th><th class="col-io">Level it lives on</th><th class="col-src">Written by</th></tr></thead>
+<tbody>
+<tr><td><code>work_type:{greenfield|brownfield|bugfix}</code></td><td>Selects the decomposition profile.</td><td>Epic / Feature / Bug</td><td>epic-creator / triage</td></tr>
+<tr><td><code>layer</code> (custom field)</td><td>data / api / business-logic / ui / integration / test / docs — lets an agent claim only units in its lane (T4).</td><td>Work Unit</td><td>task-generator</td></tr>
+<tr><td><code>verification_ref</code> (custom field)</td><td>The named test/AC that closes the unit (T3). A unit with none is rejected at creation.</td><td>Work Unit</td><td>task-generator</td></tr>
+<tr><td><code>risk:{low|high}</code></td><td>Drives the gate: <code>high</code> forces human review; <code>low</code> auto-merges on green.</td><td>Work Unit / Bug</td><td>task-generator / triage</td></tr>
+<tr><td><code>agent_assisted</code> + <code>assisted_by:&lt;agent&gt;</code></td><td>Tags which agent drafted/executed — the audit trail the Feature Cycle Model mandates.</td><td>Work Unit</td><td>construction agents</td></tr>
+<tr><td><code>roadmap_band</code> / <code>cycle</code></td><td>Which PI cycle the item is scheduled into (Appendix A/B).</td><td>Feature / Work Unit</td><td>roadmap-creator / feature-cycle-planner</td></tr>
+</tbody>
+</table></div>
+
+<h3>D.4 — Walkthrough A: a <span style="color:var(--incept);">greenfield</span> request → Jira</h3>
+<p class="sub">Request: <em>"Stand up producer onboarding for HarvestLink."</em> <code>work_type:greenfield</code> → full depth.</p>
+<div class="table-wrap"><table style="min-width:1200px;">
+<thead><tr><th class="col-name">Step</th><th class="col-desc">What happens</th><th class="col-io">Jira result</th></tr></thead>
+<tbody>
+<tr><td>1</td><td><code>epic-creator</code> reads approved <code>prd.md</code>+<code>vision.md</code>, emits EPIC-1.</td><td><strong>Epic</strong> "Producer Onboarding &amp; Catalog" · label <code>work_type:greenfield</code></td></tr>
+<tr><td>2</td><td><code>feature-decomposer</code> emits F1.1; runs T1–T5. F1.1 is size <strong>L</strong> → <code>needs_slicing=true</code>.</td><td><strong>Story</strong>(label <code>feature</code>) "Producer registration + FBO verification" under the Epic; AC attached</td></tr>
+<tr><td>3</td><td>Because it's oversized, the decomposer emits two slices S-F1.1-a / -b.</td><td>Two <strong>Story</strong>(label <code>slice</code>) issues, each linked <em>"splits from"</em> the Feature</td></tr>
+<tr><td>4</td><td><code>task-generator</code> elaborates Work Units under each slice; every unit gets <code>layer</code>+<code>verification_ref</code>; <code>gr-L1-decomposition-rightsizing</code> BLOCKS any that fail T1–T3.</td><td><strong>Sub-tasks</strong>: DB schema (data), <code>POST /producers</code> (api), registration UI (ui), FBO integration (integration), rejection handling (business-logic)</td></tr>
+<tr><td>5</td><td><code>roadmap-creator</code>/<code>feature-cycle-planner</code> stamp <code>roadmap_band</code>/<code>cycle</code>; <code>jira-orchestrator</code> writes the whole tree.</td><td>Board shows Epic ▸ Feature ▸ 2 Slices ▸ 5 Sub-tasks, all in Cycle 1</td></tr>
+</tbody>
+</table></div>
+<div class="callout" style="background:var(--incept-lt);border-color:var(--incept);color:#003a8c;"><strong>Board snapshot:</strong> <code>EPIC-1</code> → <code>Story F1.1 [feature]</code> → { <code>Story S-F1.1-a [slice]</code> → Sub-tasks WU-01/02/03 ; <code>Story S-F1.1-b [slice]</code> → Sub-tasks WU-04/05 }. Agents query <code>layer=api AND cycle=1 AND status=ready</code> to self-assign the endpoint unit; nothing starts until its <code>depends_on_unit</code> is done or stubbed.</div>
+
+<h3>D.5 — Walkthrough B: a <span style="color:var(--teal);">brownfield</span> request → Jira</h3>
+<p class="sub">Request: <em>"Add an allergen filter to buyer search."</em> <code>work_type:brownfield</code> → 2 levels; no Epic.</p>
+<div class="table-wrap"><table style="min-width:1200px;">
+<thead><tr><th class="col-name">Step</th><th class="col-desc">What happens</th><th class="col-io">Jira result</th></tr></thead>
+<tbody>
+<tr><td>1</td><td>No epic. <code>impact-assessor</code> runs a discovery scan of search-service + listing index — this <strong>replaces</strong> the epic as context-setter.</td><td><strong>Sub-task</strong> "Impact scan (search-service, listing index)" · <code>layer:discovery</code></td></tr>
+<tr><td>2</td><td><code>feature-decomposer</code> emits one Feature; it fits one cycle → <strong>no slice</strong>.</td><td><strong>Story</strong>(label <code>feature</code>) "Allergen filter on buyer discovery"; AC incl. "existing search-perf SLA held"</td></tr>
+<tr><td>3</td><td><code>task-generator</code> emits Work Units straight under the Feature (no slice layer).</td><td><strong>Sub-tasks</strong>: extend search API (api), allergen facet + backfill (data), filter UI (ui) — each with a regression <code>verification_ref</code></td></tr>
+</tbody>
+</table></div>
+<div class="callout" style="background:var(--teal-lt);border-color:var(--teal);color:#075e69;"><strong>Board snapshot:</strong> <code>Story [feature]</code> → Sub-tasks { discovery, api, data, ui }. The discovery Sub-task is a hard <code>depends_on_unit</code> for the other three — they stay <code>blocked</code> until it closes, so no agent touches the index before the blast radius is known.</div>
+
+<h3>D.6 — Walkthrough C: a <span style="color:var(--red);">bugfix</span> request → Jira</h3>
+<p class="sub">Request: <em>"FBO verification passes for expired registrations."</em> <code>work_type:bugfix</code> → 1 level.</p>
+<div class="table-wrap"><table style="min-width:1200px;">
+<thead><tr><th class="col-name">Step</th><th class="col-desc">What happens</th><th class="col-io">Jira result</th></tr></thead>
+<tbody>
+<tr><td>1</td><td>No epic, no feature, no slice. Triage writes a failing reproduction test — the test <strong>is</strong> the spec.</td><td><strong>Bug</strong> "Expired FBO numbers incorrectly verified" (standalone) · <code>verification_ref</code> = the new failing test</td></tr>
+<tr><td>2</td><td>Blast radius scoped to <code>fbo-verification-service.validate()</code> + its tests (2 files read → passes T2).</td><td><code>scope</code> field set; no sub-tasks needed — the Bug itself is the Work Unit</td></tr>
+<tr><td>3</td><td>Compliance-touching → <code>risk:high</code> → routed to a human reviewer; a cosmetic bug would carry <code>risk:low</code> and auto-merge on green.</td><td>Bug transitions <em>In Review</em> (human) then <em>Done</em> on green suite</td></tr>
+</tbody>
+</table></div>
+<div class="callout" style="background:#fdecea;border-color:var(--red);color:#8c1d18;"><strong>Board snapshot:</strong> a single <code>Bug</code> issue — no hierarchy at all. The only branch is the <code>risk</code> gate. This is the whole point of C.4: forcing a bug through Epic→Feature→Story→Sub-task would be pure ceremony.</div>
+
+<h3>D.7 — The human gates, as Jira status transitions</h3>
+<div class="table-wrap"><table style="min-width:1100px;">
+<thead><tr><th class="col-name">Gate</th><th class="col-desc">Where</th><th class="col-io">Jira mechanism</th></tr></thead>
+<tbody>
+<tr><td>Vision / PRD approval</td><td>Before decomposition (greenfield/brownfield)</td><td>Epic transitions <em>Approved</em>; the <code>gate-requirements-validation</code> HITL gate names <code>prd.md</code></td></tr>
+<tr><td>Roadmap approval</td><td>End of Phase 2 (PI commitment)</td><td>Features can't leave <em>Planned</em> until Product Lead sets the Epic/roadmap <em>Committed</em></td></tr>
+<tr><td>Risk gate</td><td>Per Work Unit / Bug</td><td><code>risk:high</code> forces a <em>In Review</em> stop; <code>risk:low</code> auto-transitions on a green pipeline</td></tr>
+</tbody>
+</table></div>
+
+<!-- APPENDIX E: Worked artifacts for two use cases -->
+<h2><span class="phase-tag" style="background:var(--plan);">APPENDIX E</span> Worked Artifacts — <code>roadmap.md</code> &amp; <code>cycle-plan.md</code> for two use cases</h2>
+<p class="sub">Concrete, rendered examples of the two Phase-2 artifacts, showing the two-horizon split in practice: the <strong><code>roadmap.md</code></strong> (outer loop — every feature banded across the whole PI, produced by <code>roadmap-creator</code>) and the <strong><code>cycle-plan.md</code></strong> (inner loop — only the near committed cycle broken into Work Units, produced by <code>feature-cycle-planner</code>). Use case 1 is <strong>HarvestLink</strong> (a greenfield producer-to-foodservice marketplace). Use case 2 is the <strong>KYC App with Biometrics</strong> (from the Feature Cycle Model example deck).</p>
+<div class="callout" style="background:#eef;border-color:#99f;color:#224;"><strong>Read the two together:</strong> the roadmap commits ~all features across N cycles at feature granularity (the plan-ahead / forecasting horizon); the cycle-plan elaborates <em>only</em> the near cycle(s) into capacity-fitted Work Units (the delivery horizon). Features in later bands stay at feature granularity until their cycle approaches — that is the just-in-time boundary.</div>
+
+<!-- ===== USE CASE 1: HARVESTLINK ===== -->
+<h3 style="color:var(--plan);font-size:13px;">Use Case 1 — HarvestLink (greenfield producer-to-foodservice marketplace)</h3>
+
+<h3>E.1 — <code>roadmap.md</code> (HarvestLink · PI-2026-Q3 · 4 × 5-day cycles)</h3>
+<div class="callout" style="background:var(--gray);border-color:var(--gray-mid);color:var(--charcoal);font-family:monospace;font-size:10px;">
+<strong>--- front matter ---</strong><br>
+workflow_execution_id: 7f3a…e21 &nbsp;|&nbsp; pi_id: PI-2026-Q3 &nbsp;|&nbsp; cadence: { cycle_count: 4, cycle_length_days: 5 }<br>
+team_capacity: [ {cycle:1, 30}, {cycle:2, 30}, {cycle:3, 28}, {cycle:4, 30} ]<br>
+critical_path: [ F5.1 → F1.1 → F3.2 ] &nbsp; (external-identity → producer-registration → allergen-declaration)<br>
+approval: { approver: "Product Lead", status: committed, timestamp: 2026-07-30T09:00Z }
+</div>
+<div class="table-wrap"><table style="min-width:1100px;">
+<thead><tr><th>feature_id</th><th>epic_id</th><th>title</th><th>band</th><th>size</th><th>wsjf_rank</th><th>depends_on</th><th>crit_path</th><th>status</th><th>rationale (why this band)</th></tr></thead>
+<tbody>
+<tr><td><code>F5.1</code></td><td>EPIC-5</td><td>External identity-provider integration</td><td>1</td><td>M</td><td>1</td><td><code>[]</code></td><td>yes</td><td>committed</td><td>Critical-path root — every other feature waits on the identity boundary.</td></tr>
+<tr><td><code>F1.1</code></td><td>EPIC-1</td><td>Producer registration + FBO verification</td><td>1</td><td>M</td><td>3</td><td><code>[F5.1]</code></td><td>yes</td><td>committed</td><td>Unblocked once IdP lands; same cycle keeps critical path moving.</td></tr>
+<tr><td><code>F1.2</code></td><td>EPIC-1</td><td>Product listing + allergen metadata</td><td>2</td><td>M</td><td>4</td><td><code>[F1.1]</code></td><td>no</td><td>planned</td><td>Needs producer identity; scaffolds the data F3.2 consumes.</td></tr>
+<tr><td><code>F3.2</code></td><td>EPIC-3</td><td>Allergen declaration service</td><td>2</td><td>L</td><td>2</td><td><code>[F1.2]</code></td><td>yes</td><td>planned</td><td>Critical path converges here; Amber regulatory constraint (allergen liability).</td></tr>
+<tr><td><code>F3.1</code></td><td>EPIC-3</td><td>Batch/lot traceability capture</td><td>3</td><td>L</td><td>5</td><td><code>[F1.2]</code></td><td>no</td><td>planned</td><td>Builds on listing scaffold; not on critical path.</td></tr>
+<tr><td><code>F3.3</code></td><td>EPIC-3</td><td>6-year traceability retention (FR-001)</td><td>3</td><td>S</td><td>6</td><td><code>[F3.1]</code></td><td>no</td><td>planned</td><td>Depends on capture existing first.</td></tr>
+<tr><td><code>F2.1</code></td><td>EPIC-2</td><td>Buyer discovery &amp; search</td><td>4</td><td>M</td><td>7</td><td><code>[F1.2]</code></td><td>no</td><td>planned</td><td>Downstream, no blockers; buffer room in final cycle.</td></tr>
+<tr><td><code>F4.1</code></td><td>EPIC-4</td><td>Payments &amp; settlement (MVP)</td><td>4</td><td>M</td><td>8</td><td><code>[F1.1]</code></td><td>no</td><td>planned</td><td>Last — needs verified producers; parallel to discovery.</td></tr>
+</tbody>
+</table></div>
+<p class="sub"><strong>What the roadmap tells a sponsor:</strong> "Identity + producer onboarding by end of cycle 1; compliance-critical allergen service by cycle 2; traceability by cycle 3; discovery + payments by cycle 4." Eight features, dependency-sequenced, one forecast — <em>not</em> eight separate micro-commitments.</p>
+
+<h3>E.2 — <code>cycle-plan.md</code> (HarvestLink · Cycle 1 only · ~30-pt capacity)</h3>
+<div class="callout" style="background:var(--gray);border-color:var(--gray-mid);color:var(--charcoal);font-family:monospace;font-size:10px;">
+<strong>--- front matter ---</strong><br>
+workflow_execution_id: 7f3a…e21 &nbsp;(same run as roadmap) &nbsp;|&nbsp; pi_id: PI-2026-Q3<br>
+planned_cycles: [1] &nbsp;|&nbsp; capacity: [ {cycle:1, points:30, team:"Cell-A"} ]<br>
+committed_features: [ F5.1, F1.1 ] &nbsp;(the two band-1 features from the roadmap)<br>
+definition_of_ready: [ AC written, dependencies stubbed, verification_ref named ]
+</div>
+<div class="table-wrap"><table style="min-width:1100px;">
+<thead><tr><th>work_unit_id</th><th>feature_id</th><th>slice_id</th><th>title</th><th>layer</th><th>cycle</th><th>unit_points</th><th>verification_ref</th><th>disposition</th></tr></thead>
+<tbody>
+<tr><td><code>WU-F5.1-01</code></td><td>F5.1</td><td>—</td><td>Producer registration via external IdP</td><td>integration</td><td>1</td><td>5</td><td>idp-e2e-01</td><td>committed</td></tr>
+<tr><td><code>WU-F5.1-02</code></td><td>F5.1</td><td>—</td><td>OIDC token validation &amp; role provisioning</td><td>business-logic</td><td>1</td><td>5</td><td>oidc-unit-07</td><td>committed</td></tr>
+<tr><td><code>WU-F5.1-03</code></td><td>F5.1</td><td>—</td><td>Distributor/buyer role mapping</td><td>business-logic</td><td>1</td><td>3</td><td>rolemap-unit-03</td><td>committed</td></tr>
+<tr><td><code>WU-F1.1-01</code></td><td>F1.1</td><td>S-F1.1-a</td><td>FBO number capture endpoint + validation</td><td>api</td><td>1</td><td>8</td><td>fbo-contract-02</td><td>committed</td></tr>
+<tr><td><code>WU-F1.1-02</code></td><td>F1.1</td><td>S-F1.1-b</td><td>Rejected-verification state + notification</td><td>business-logic</td><td>1</td><td>5</td><td>fbo-reject-scenario-04</td><td>committed</td></tr>
+</tbody>
+</table></div>
+<div class="callout" style="background:var(--incept-lt);border-color:var(--incept);color:#003a8c;"><strong>Fit check:</strong> 5+5+3+8+5 = 26 pts vs. 30 capacity → fits, 4 pts headroom. F1.1 was size L so it carries a <code>slice_id</code> (S-F1.1-a / -b); F5.1 was size M so its Work Units attach straight to the feature (<code>slice_id</code> empty). Features F1.2 / F3.2 / F3.1 / … stay at feature granularity — they are NOT elaborated here, only when their band's cycle approaches.</div>
+
+<!-- ===== USE CASE 2: KYC ===== -->
+<h3 style="color:var(--incept);font-size:13px;">Use Case 2 — KYC App with Biometrics</h3>
+
+<h3>E.3 — <code>roadmap.md</code> (KYC · PI-2026-Q4 · first 4 delivery cycles shown)</h3>
+<p class="sub">The KYC build is 18 cycles; a real roadmap bands all of them. Shown here: the first PI window covering foundation-complete through the identity-verification critical path (EP-01 → EP-02 → EP-03 → EP-04). Foundation FC-01/02 are pre-PI and already done, so band 1 starts at the first feature cycle.</p>
+<div class="callout" style="background:var(--gray);border-color:var(--gray-mid);color:var(--charcoal);font-family:monospace;font-size:10px;">
+<strong>--- front matter ---</strong><br>
+workflow_execution_id: b91c…4af &nbsp;|&nbsp; pi_id: PI-2026-Q4 &nbsp;|&nbsp; cadence: { cycle_count: 4, cycle_length_days: 5 }<br>
+team_capacity: [ {cycle:1, 28}, {cycle:2, 30}, {cycle:3, 30}, {cycle:4, 28} ]<br>
+critical_path: [ Fc03 → Fc05 → Fc06 → Fc07 → Fc09 → Fc10 → Fc11 ]<br>
+approval: { approver: "Product Lead", status: committed, timestamp: 2026-09-28T09:00Z }
+</div>
+<div class="table-wrap"><table style="min-width:1100px;">
+<thead><tr><th>feature_id</th><th>epic_id</th><th>title</th><th>band</th><th>size</th><th>wsjf_rank</th><th>depends_on</th><th>crit_path</th><th>status</th><th>rationale (why this band)</th></tr></thead>
+<tbody>
+<tr><td><code>Fc03</code></td><td>EP-01</td><td>User registration (email + phone + OTP)</td><td>1</td><td>M</td><td>1</td><td><code>[]</code></td><td>yes</td><td>committed</td><td>Critical-path root once foundation is in place.</td></tr>
+<tr><td><code>Fc04</code></td><td>EP-01</td><td>Login, session mgmt, password reset</td><td>1</td><td>M</td><td>4</td><td><code>[Fc03]</code></td><td>no</td><td>committed</td><td>Completes auth; fills band-1 capacity alongside Fc03.</td></tr>
+<tr><td><code>Fc05</code></td><td>EP-02</td><td>Document upload (camera + gallery + S3)</td><td>2</td><td>M</td><td>2</td><td><code>[Fc03]</code></td><td>yes</td><td>planned</td><td>Critical path; unblocked once registration exists.</td></tr>
+<tr><td><code>Fc08</code></td><td>EP-03</td><td>Biometric SDK + liveness detection</td><td>2</td><td>L</td><td>5</td><td><code>[Fc03]</code></td><td>no</td><td>planned</td><td>Parallel track (needs only registration); heavy, so banded early.</td></tr>
+<tr><td><code>Fc06</code></td><td>EP-02</td><td>OCR extraction + correction flow</td><td>3</td><td>L</td><td>3</td><td><code>[Fc05]</code></td><td>yes</td><td>planned</td><td>Critical path; consumes uploaded documents.</td></tr>
+<tr><td><code>Fc09</code></td><td>EP-03</td><td>Face-match against document photo</td><td>3</td><td>M</td><td>6</td><td><code>[Fc06, Fc08]</code></td><td>yes</td><td>planned</td><td>Converges document + biometric tracks; on critical path.</td></tr>
+<tr><td><code>Fc07</code></td><td>EP-02</td><td>Document validation &amp; processing pipeline</td><td>4</td><td>L</td><td>7</td><td><code>[Fc06]</code></td><td>yes</td><td>planned</td><td>Hardens the doc pipeline feeding scoring.</td></tr>
+<tr><td><code>Fc10</code></td><td>EP-04</td><td>KYC scoring algorithm + risk rules</td><td>4</td><td>M</td><td>8</td><td><code>[Fc07, Fc09]</code></td><td>yes</td><td>planned</td><td>Needs both validated docs and face-match; end of this PI.</td></tr>
+</tbody>
+</table></div>
+<p class="sub"><strong>Cross-cell note:</strong> bands 2–3 run a document track (Fc05→Fc06→Fc07) and a biometric track (Fc08) in parallel, converging at Fc09. If those are two cells, the band boundary is the shared synchronisation beat where their contracts reconcile — the planning-interval role a single 5-day cycle is too fine to serve.</p>
+
+<h3>E.4 — <code>cycle-plan.md</code> (KYC · Cycle 1 only · ~28-pt capacity)</h3>
+<div class="callout" style="background:var(--gray);border-color:var(--gray-mid);color:var(--charcoal);font-family:monospace;font-size:10px;">
+<strong>--- front matter ---</strong><br>
+workflow_execution_id: b91c…4af &nbsp;(same run as roadmap) &nbsp;|&nbsp; pi_id: PI-2026-Q4<br>
+planned_cycles: [1] &nbsp;|&nbsp; capacity: [ {cycle:1, points:28, team:"KYC-Cell"} ]<br>
+committed_features: [ Fc03, Fc04 ] &nbsp;(the two band-1 features)<br>
+definition_of_ready: [ AC written, dependencies stubbed, verification_ref named ]
+</div>
+<div class="table-wrap"><table style="min-width:1100px;">
+<thead><tr><th>work_unit_id</th><th>feature_id</th><th>slice_id</th><th>title</th><th>layer</th><th>cycle</th><th>unit_points</th><th>verification_ref</th><th>disposition</th></tr></thead>
+<tbody>
+<tr><td><code>WU-Fc03-01</code></td><td>Fc03</td><td>—</td><td>Flyway V001–V002: users + otp_tokens tables</td><td>data</td><td>1</td><td>3</td><td>mig-v002-test</td><td>committed</td></tr>
+<tr><td><code>WU-Fc03-02</code></td><td>Fc03</td><td>—</td><td>POST /users + POST /otp/send + /otp/verify</td><td>api</td><td>1</td><td>5</td><td>reg-contract-03</td><td>committed</td></tr>
+<tr><td><code>WU-Fc03-03</code></td><td>Fc03</td><td>—</td><td>Registration form + OTP input screen</td><td>ui</td><td>1</td><td>3</td><td>reg-ui-comp-02</td><td>committed</td></tr>
+<tr><td><code>WU-Fc03-04</code></td><td>Fc03</td><td>—</td><td>OTP delivery integration + rate limiting</td><td>integration</td><td>1</td><td>3</td><td>otp-rate-scenario</td><td>committed</td></tr>
+<tr><td><code>WU-Fc04-01</code></td><td>Fc04</td><td>S-Fc04-a</td><td>POST /auth/login + /auth/refresh (JWT)</td><td>api</td><td>1</td><td>5</td><td>auth-contract-05</td><td>committed</td></tr>
+<tr><td><code>WU-Fc04-02</code></td><td>Fc04</td><td>S-Fc04-a</td><td>Login screen + secure token storage</td><td>ui</td><td>1</td><td>3</td><td>login-ui-comp</td><td>committed</td></tr>
+<tr><td><code>WU-Fc04-03</code></td><td>Fc04</td><td>S-Fc04-b</td><td>Password-reset flow + brute-force lockout</td><td>business-logic</td><td>1</td><td>5</td><td>reset-scenario-04</td><td>overflow</td></tr>
+</tbody>
+</table></div>
+<div class="callout" style="background:var(--incept-lt);border-color:var(--incept);color:#003a8c;"><strong>Fit check &amp; overflow example:</strong> committed 3+5+3+3+5+3 = 22 pts; adding WU-Fc04-03 (5) would total 27 — under the 28 cap, so it <em>could</em> fit. Shown here as <code>overflow</code> with <code>reflow_band=2</code> to illustrate the mechanism: if the team judged password-reset lower priority than starting Fc05 prep, the feature-cycle-planner marks it overflow and the <code>roadmap-creator</code> re-runs to move it — the Work Unit is never silently dropped, and the roadmap stays the authoritative outer loop. Fc04 is size M but shown sliced (S-Fc04-a login / S-Fc04-b reset) to demonstrate the optional slice layer on a two-theme feature.</div>
+
+<div class="callout" style="background:#eef;border-color:#99f;color:#224;"><strong>Two-horizon takeaway across both use cases:</strong> the <code>roadmap.md</code> is the <em>planning-interval</em> artifact — it answers "what across the next several cycles, and roughly when," and is what a sponsor or a cross-cell sync reviews. The <code>cycle-plan.md</code> is the <em>delivery</em> artifact — it answers "exactly which Work Units, fitted to this team's capacity, right now." One roadmap spawns many cycle-plans (one per near cycle as the PI rolls forward), all sharing a single <code>workflow_execution_id</code> for end-to-end traceability.</div>
+
+</div>
+</body></html>

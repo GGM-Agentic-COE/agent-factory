@@ -1,0 +1,56 @@
+# Agent Specification Document
+spec_version: "1.0"
+artifact_type: agent
+metadata:
+  name: L1-inception-vision-generator-evaluator
+  version: "1.0.0"
+  layer: L1
+  phase: inception
+  owner: agentic-ai-coe
+  created: 2026-06-29
+
+purpose:
+  description: "Evaluates and fixes vision documents produced by L1-inception-vision-generator against quality rubric, then re-uploads corrected artifact"
+  input: "AgentOutput from L1-inception-vision-generator (with artifact location)"
+  output: "Evaluated output with pass/fail scores, fixes applied, corrected artifact re-uploaded"
+  business_value: "Separates generation from evaluation — reduces token load on generator while ensuring quality gate compliance"
+
+prompt:
+  ref: "prompts/L1-inception-vision-generator-evaluator/instructions-concise.md"
+  version: "1.0.0"
+  description: "Evaluates vision document quality, fixes issues, re-uploads"
+
+contract:
+  input:
+    accepts_from_agents: [L1-inception-vision-generator]
+    accepts_direct_input: false
+    accepts_file_upload:
+      enabled: true
+      formats: [".md"]
+    required_parameters:
+      vision_document: {type: string, description: "The markdown content of the vision document to evaluate"}
+      generator_output: {type: object, description: "The AgentOutput JSON from the vision generator"}
+
+  output:
+    $ref: "output_schema.json"
+
+context:
+  knowledge_bases:
+    - kb-L1-inception-vision-generator-evaluation-slim
+  guardrails:
+    - gr-L1-output-schema-validator
+    - gr-L3-hallucination-detector
+    - gr-L3-consistency-checker
+  tools:
+    - tool-L1-azure-blob-writer
+
+quality:
+  evaluation_ref: "evaluation.md"
+  min_score: 7.0
+  hallucination_check: true
+  consistency_check: true
+
+versioning:
+  input_version: "1.0"
+  output_version: "1.0"
+  instruction_hash: "sha256:pending"

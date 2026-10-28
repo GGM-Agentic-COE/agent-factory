@@ -1,0 +1,63 @@
+# Agent Specification Document
+spec_version: "1.0"
+artifact_type: agent
+metadata:
+  name: L1-vision-regulatory-feasibility-checker-evaluator
+  version: "1.0.0"
+  layer: L1
+  phase: vision
+  owner: agentic-ai-coe
+  created: "2026-08-02"
+
+purpose:
+  description: "Independently scores L1-vision-regulatory-feasibility-checker's output, with zero tolerance for a Red constraint that lacks a mitigation or legal-review flag, or that appears to have been downgraded to avoid writing one."
+  input: "L1-vision-regulatory-feasibility-checker's original input plus its draft output."
+  output: "Scores, findings, any fixes applied, and a final decision."
+  business_value: "This is the highest-stakes evaluator in Phase 0 — a false negative here (a Red constraint that slips through unmitigated, or gets quietly relabeled Amber) is a compliance risk that reaches a human decision-maker as if it were already handled."
+
+prompt:
+  ref: "prompts/L1-vision-regulatory-feasibility-checker-evaluator/instructions.md"
+  version: "1.0.0"
+  description: "Scores against L1-vision-regulatory-feasibility-checker/evaluation.md; re-derives severity independently rather than trusting the generator's own classification at face value."
+
+contract:
+  input_schema: "$ref: schemas/agent-input-contract-schema.json"
+  output_schema: "$ref: schemas/agent-output-schema.json"
+
+  input:
+    accepts_from_agents: [L1-vision-regulatory-feasibility-checker]
+    accepts_direct_input: false
+    accepts_file_upload:
+      enabled: false
+    required_parameters:
+      original_input: { type: object, description: "The input L1-vision-regulatory-feasibility-checker received" }
+      generator_output: { type: object, description: "L1-vision-regulatory-feasibility-checker's draft items output" }
+
+  output:
+    $ref: "output_schema.json"
+
+context:
+  knowledge_bases:
+    - ref: "../L1-vision-regulatory-feasibility-checker/evaluation.md"
+    - kb-L1-regulatory-frameworks-index   # to independently sanity-check that a constraint's citation is a real, applicable regulation
+  guardrails:
+    - gr-L1-output-schema-validator
+    - gr-L1-pii-detection
+    - gr-L1-citation-verifier
+    - gr-L1-regulatory-feasibility-quality-gate   # fires when THIS evaluator concludes; validates L1-vision-regulatory-feasibility-checker's RESULTANT output against its own schema+evaluation.md, zero-tolerance mitigation rule re-checked directly (guardrails/gr-L1-regulatory-feasibility-quality-gate)
+  tools: []
+
+quality:
+  evaluation_ref: "evaluation.md"
+  min_score: 8.5   # highest bar of any Phase 0 evaluator, matching the generator's own zero-tolerance requirement
+  hallucination_check: true
+  consistency_check: true
+
+performance:
+  target_latency_seconds: 20
+  max_token_budget: 6000
+
+versioning:
+  input_version: "1.0"
+  output_version: "1.0"
+  instruction_hash: "sha256:pending"

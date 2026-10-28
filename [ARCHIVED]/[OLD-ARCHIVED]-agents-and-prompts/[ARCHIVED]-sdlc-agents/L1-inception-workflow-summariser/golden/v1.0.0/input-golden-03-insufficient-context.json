@@ -1,0 +1,7 @@
+{
+  "agent_id": "L1-inception-workflow-summariser",
+  "input": {
+    "workflow_name": "",
+    "agent_outputs": []
+  }
+}

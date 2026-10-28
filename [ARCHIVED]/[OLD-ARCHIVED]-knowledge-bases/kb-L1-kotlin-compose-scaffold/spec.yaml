@@ -1,0 +1,24 @@
+id: kb-L1-kotlin-compose-scaffold
+name: Kotlin/Compose Project Scaffold
+layer: L1
+version: "1.0.0"
+description: >
+  Production-ready Kotlin/Compose Android project scaffold with MVVM architecture,
+  Hilt DI, Room persistence, Retrofit networking, Material 3 design system,
+  accessibility compliance, and GitHub Actions CI pipeline.
+depends_on:
+  - kb-L1-kotlin-compose-standards
+  - kb-L0-mobile-coding-standards
+  - kb-L1-enterprise-architecture
+content:
+  - content/kb-L1-kotlin-compose-scaffold.md
+tags:
+  - kotlin
+  - jetpack-compose
+  - android
+  - scaffold
+  - mvvm
+  - hilt
+  - room
+  - retrofit
+  - ci-cd

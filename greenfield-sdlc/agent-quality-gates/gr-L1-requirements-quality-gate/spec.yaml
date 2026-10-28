@@ -1,0 +1,58 @@
+spec_version: "1.0"
+artifact_type: guardrail
+metadata:
+  name: gr-L1-requirements-quality-gate
+  version: "1.0.0"
+  layer: L1
+  owner: agentic-ai-coe
+  implementation: colang
+
+purpose:
+  description: "Fires when L1-requirements-elicitor-evaluator concludes. Validates the RESULTANT output — L1-requirements-elicitor's own items, with the evaluator's fixes_applied resolved in — against L1-requirements-elicitor/output_schema.json and kb-L1-requirements-quality-standard's ISO/IEC/IEEE 29148 rubric. Same pattern as the Phase 0 quality gates: fires on the evaluator, validates the core agent's content, never the evaluator's own scoring bookkeeping."
+
+triggers_on:
+  - post_execution   # fires when the evaluator (not the generator) finishes
+
+on_fail: retry_once_then_escalate
+applies_to: configured_agents   # wired into L1-requirements-elicitor-evaluator/spec.yaml context.guardrails — not global
+
+rules:
+  # --- Output schema validation (of L1-requirements-elicitor's own output_schema.json) ---
+  - name: schema-compliance
+    description: "The resultant items must validate against L1-requirements-elicitor/output_schema.json: functional_requirements[] (id FR-NNN, title, statement, traces_to, confidence, reasoning) and compound_splits[] (source_clause_summary <=150 chars, split_into with >=2 real FR ids)"
+    action: block
+    severity: critical
+
+  - name: ids-sequential-no-gaps
+    description: "FR-NNN ids are sequential, no gaps or duplicates (kb-L1-requirements-quality-standard's Traceable characteristic — a gap suggests a dropped requirement, not just a cosmetic issue)"
+    action: block
+    severity: high
+
+  - name: compound-split-integrity
+    description: "Every compound_splits[].split_into id must reference a real, present functional_requirements[].id, and every split must list >=2 ids — a split recorded but not reflected in the actual FR list is a bookkeeping defect"
+    action: block
+    severity: high
+
+  # --- Rubric adherence (kb-L1-requirements-quality-standard, checked against the RESULTANT content) ---
+  - name: unambiguous-vague-term-scan
+    description: "No statement contains an unqualified vague term (fast, user-friendly, appropriate, secure, robust, intuitive) without an immediately following measurable qualifier — kb-L1-requirements-quality-standard's Unambiguous rule"
+    action: block
+    severity: critical
+
+  - name: singular-compound-clause-check
+    description: "No FR statement joins two independently-testable capabilities that should have been split — a genuine judgment call (heuristic 'and'/'or' presence is not by itself proof; a compound SUBJECT like 'producer and distributor sign-off' on ONE testable outcome is not the same defect as two independently testable behaviours joined together)"
+    action: flag
+    severity: high
+
+  - name: verifiable-testability-check
+    description: "Every FR statement must be phrasable as a pass/fail test — a statement describing an internal implementation choice rather than an observable behaviour fails this"
+    action: flag
+    severity: high
+
+  - name: consistent-no-contradiction
+    description: "No two FRs contradict, and the same concept is not given two different names across FRs"
+    action: flag
+    severity: medium
+
+evaluation:
+  false_positive_threshold: 0.05

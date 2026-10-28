@@ -1,0 +1,58 @@
+spec_version: "1.0"
+artifact_type: guardrail
+metadata:
+  name: gr-L1-dependency-graph-quality-gate
+  version: "1.0.0"
+  layer: L1
+  owner: agentic-ai-coe
+  implementation: colang
+
+purpose:
+  description: "Fires when L1-planning-dependency-mapper-evaluator concludes. Validates the RESULTANT output — L1-planning-dependency-mapper's own items, with the evaluator's fixes_applied resolved in — against L1-planning-dependency-mapper/output_schema.json and its evaluation.md rubric. Same pattern as the other Phase 0/Phase 1 quality gates: fires on the evaluator, validates the core agent's content, never the evaluator's own scoring bookkeeping. Unlike its sibling gates, most rules here are NOT schema/regex checks — the single most important thing this guardrail does is INDEPENDENTLY RE-COMPUTE the DFS cycle check and the longest-path critical_path from the resultant nodes/edges in Python and compare the recomputed result against what the resultant content claims. Neither the generator's cycle_check/critical_path fields nor the evaluator's own re-derivation (scored, self-reported) are trusted at face value — a reversed edge or an unverified cycle claim is schema-valid and still wrong (see L1-planning-dependency-mapper-evaluator/golden/v1.0.0/golden-02-edge-direction-bug.json, and phase-1/README.md's own worked-example bug of the same class)."
+
+triggers_on:
+  - post_execution   # fires when the evaluator (not the generator) finishes
+
+on_fail: retry_once_then_escalate
+applies_to: configured_agents   # wired into L1-planning-dependency-mapper-evaluator/spec.yaml context.guardrails — not global
+
+rules:
+  # --- Output schema validation (of L1-planning-dependency-mapper's own output_schema.json) ---
+  - name: schema-compliance
+    description: "The resultant items has every required top-level field (product_name, source_artifacts, nodes, edges, cycle_check, critical_path, generated, execution_id, workflow_execution_id); every node has id/type/label (type in component|external-dependency); every edge has from/to/type (type in depends-on|blocks|integrates-with); node ids are kebab-case (^[a-z0-9-]+$) and unique — no duplicates"
+    action: block
+    severity: critical
+
+  - name: edge-endpoints-valid
+    description: "Every edge's from/to references a node id that actually exists in nodes[] — no dangling edge. A dangling edge invalidates every downstream traversal claim (cycle_check, critical_path), so this must be checked before either independent recomputation runs"
+    action: block
+    severity: critical
+
+  # --- Rubric adherence (L1-planning-dependency-mapper/evaluation.md Quality Gates, checked against the RESULTANT content via independent re-derivation) ---
+  - name: independent-cycle-recheck
+    description: "THE SINGLE MOST IMPORTANT CHECK IN THIS GUARDRAIL. Implements an actual DFS over the resultant nodes/edges (recursion-stack back-edge detection, exactly mirroring L1-planning-dependency-mapper's own prompt Processing Rule 4) and compares the computed status/cycles against the resultant cycle_check.status/cycles_found. Flags a violation if they disagree in either direction — a claimed PASS hiding a real cycle, a claimed FAIL that isn't real, or a claimed cycle whose node set doesn't match what a real traversal finds — never trusts either the generator's or the evaluator's cycle_check claim at face value (evaluation.md Quality Gate #1)"
+    action: block
+    severity: critical
+
+  - name: cycle-status-escalation-check
+    description: "If independent-cycle-recheck's own recomputation finds a real cycle, the overall resultant AgentOutput status must be 'failed' (escalate) — a cyclic graph silently shipped with status 'success' is a critical violation, zero tolerance, never resolved by dropping an edge (evaluation.md Quality Gate #8)"
+    action: block
+    severity: critical
+
+  - name: independent-longest-path-recheck
+    description: "Only runs when independent-cycle-recheck's own recomputation is PASS (a cyclic graph has no valid longest path to compute). Implements an actual longest-path walk over depends-on/blocks edges only (integrates-with excluded, mirroring Processing Rule 6) from every root with no incoming blocking edge, collecting EVERY chain tied at the maximum length. Flags a violation if the resultant critical_path.nodes is shorter than the true longest path, claims a from->to hop that isn't a real blocking edge, or — when a genuine tie exists — the rationale never mentions the node ids of every other tied chain (evaluation.md Quality Gates #2 and #3)"
+    action: block
+    severity: critical
+
+  - name: fr-coverage-recheck
+    description: "The SET of FR ids appearing across every resultant node's source_requirement[] must equal the full FR id set from original_input.prd_output.content.items.requirements[].id — checked by set equality, not by counting nodes and assuming coverage. Catches both a silently dropped FR and an invented FR id not present in prd.md (evaluation.md Quality Gate #5)"
+    action: block
+    severity: high
+
+  - name: critical-path-rationale-quality
+    description: "critical_path.rationale genuinely states the computed path length (edge count) and, if a tie exists, names it as a tie in readable prose — not just a bare list of node ids restating critical_path.nodes. Semantic judgment call left to the LLM because 'genuinely explains' is not a regex match; the mechanical part (does the rationale text actually contain every tied chain's node ids) is already covered deterministically by independent-longest-path-recheck"
+    action: flag
+    severity: medium
+
+evaluation:
+  false_positive_threshold: 0.03   # tightest of the four Phase-1 quality gates — this is the most safety-critical: a wrong build order silently shipped is a build-blocking defect two phases later, not a cosmetic one

@@ -1,0 +1,26 @@
+prompts:
+  - task: self_check_output
+    content: |
+      Agent output: {{ bot_response }}
+
+      Evaluate this output for accessibility and inclusive access compliance (WCAG 2.1 AA + inclusive design):
+
+      **Text Content (all output):**
+      1. Plain language (WCAG 3.1.5): Is the text clear and plain? Are technical terms explained? Are sentences concise?
+      2. Alt text for visuals (WCAG 1.1.1): If visuals are present (images, diagrams, charts, ASCII art), is there a text description?
+      3. Structured content (WCAG 1.3.1, 2.4.6): Is output well-structured with logical hierarchy, headings, lists — not unstructured walls of text?
+      4. Colour independence (WCAG 1.4.1): Does it avoid relying solely on colour to convey meaning? Are labels/text used alongside colour?
+      5. Actionable instructions (WCAG 1.3.3, 2.4.4): Are instructions clear? No vague "click here", "see above", or direction-only references?
+      6. Inclusive language (EN 301 549): Is language non-discriminatory? No ableist (blind spot, lame, crazy), gendered, or exclusionary terms?
+      7. Reading level (WCAG 3.1.5): Is content accessible to a broad audience without unnecessarily complex phrasing?
+
+      **HTML/Code Output (only if output contains HTML, CSS, or UI code):**
+      8. Contrast (WCAG 1.4.3): Do colour combinations meet 4.5:1 ratio for normal text, 3:1 for large text? Check any inline styles or CSS.
+      9. Language attribute (WCAG 3.1.1): Does generated HTML include a lang attribute on the html element?
+      10. Page title (WCAG 2.4.2): Does generated HTML have a meaningful <title> element?
+      11. Form labels (WCAG 3.3.2): Do form inputs have associated <label> elements or aria-label attributes?
+      12. Link purpose (WCAG 2.4.4): Do links have descriptive text? No bare URLs or generic "click here" as link text?
+
+      Note: Rules 8-12 only apply if the output contains HTML markup. For plain text output, only rules 1-7 apply.
+
+      Answer "yes" if ALL applicable criteria are met. Answer "no" if ANY criterion is violated.

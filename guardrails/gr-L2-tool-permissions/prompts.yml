@@ -1,0 +1,14 @@
+prompts:
+  - task: self_check_input
+    content: |
+      Agent: {{ agent_id }}
+      Allowed tools: {{ tools_allowed }}
+      Denied tools: {{ tools_denied }}
+      Requested tool: {{ requested_tool }}
+      
+      Is this agent permitted to invoke the requested tool?
+      1. Is the tool in the agent's allowed tools list?
+      2. Is the tool NOT in the denied tools list?
+      3. Is the tool call within the agent's organisational scope?
+      
+      Answer "yes" if permitted. Answer "no" if denied.

@@ -1,0 +1,36 @@
+spec_version: "1.0"
+artifact_type: guardrail
+metadata:
+  name: gr-L1-input-validator
+  version: "1.0.0"
+  layer: L1
+  owner: agentic-ai-coe
+  implementation: colang
+
+purpose:
+  description: "Validate incoming requests match expected structure — required fields, types, length limits"
+
+triggers_on:
+  - pre_execution
+
+on_fail: reject_with_error
+applies_to: all_agents
+
+rules:
+  - name: required-fields
+    description: "All required parameters must be present"
+    action: block
+    severity: critical
+
+  - name: type-validation
+    description: "All parameters must match declared types"
+    action: block
+    severity: high
+
+  - name: length-limits
+    description: "String fields must not exceed max_length"
+    action: block
+    severity: medium
+
+evaluation:
+  false_positive_threshold: 0.05

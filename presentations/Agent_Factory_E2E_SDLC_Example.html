@@ -1,0 +1,618 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">
+<title>E2E SDLC Example — Agent Architecture</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+:root{--navy:#1B2A4A;--teal:#0A7E8C;--teal-lt:#E8F6F7;--green:#1B8C3A;--amber:#D4880F;--red:#C62828;--purple:#5E35B1;--gray:#F4F5F7;--gray-mid:#E0E3E8;--gray-txt:#666;--charcoal:#2D3748;}
+*{margin:0;padding:0;box-sizing:border-box;}body{font-family:'Inter',sans-serif;background:#fff;color:var(--charcoal);line-height:1.6;}
+.content{max-width:1100px;margin:0 auto;padding:32px 40px;}
+h1{font-size:24px;font-weight:800;color:var(--navy);margin:0 0 8px;}
+h2{font-size:19px;font-weight:800;color:var(--navy);margin:28px 0 8px;padding-top:14px;border-top:2px solid var(--gray-mid);}
+h3{font-size:14px;font-weight:700;color:var(--teal);margin:18px 0 6px;}
+h4{font-size:12px;font-weight:700;color:var(--purple);margin:14px 0 4px;}
+p{font-size:11px;margin:3px 0;}hr{border:none;border-top:3px solid var(--navy);margin:20px 0;}
+table{width:100%;border-collapse:collapse;font-size:10px;margin:6px 0;}
+th{padding:5px 7px;background:var(--navy);color:#fff;font-weight:700;font-size:9px;text-transform:uppercase;text-align:left;}
+td{padding:4px 7px;border-bottom:1px solid var(--gray-mid);vertical-align:top;}
+code{background:#E5E7EB;padding:1px 3px;border-radius:3px;font-size:9px;font-family:monospace;}
+strong{color:var(--navy);}
+.code-block{background:#1e1e1e;color:#d4d4d4;border-radius:8px;padding:12px;font-family:monospace;font-size:9px;overflow-x:auto;margin:6px 0;line-height:1.5;white-space:pre;}
+.nav{position:sticky;top:0;background:var(--navy);padding:8px 40px;z-index:100;display:flex;gap:12px;align-items:center;flex-wrap:wrap;}
+.nav a{color:rgba(255,255,255,.7);text-decoration:none;font-size:10px;font-weight:600;}.nav a:hover{color:#fff;}
+.nav .brand{color:#fff;font-weight:800;font-size:11px;margin-right:auto;}
+</style></head><body>
+<div class="nav"><span class="brand">E2E SDLC Example</span>
+<a href="#1--knowledge-bases">KBs</a><a href="#2--guardrails">Guardrails</a><a href="#3--agents">Agents</a><a href="#4--tools">Tools</a><a href="#5--workflow----end-to-end">Workflow</a><a href="#6--execution-flow-diagram">Flow</a><a href="#7--version-manifest--per-execution-">Versioning</a></div>
+<div style="background:linear-gradient(135deg,var(--navy),#2A3F6A);padding:24px 40px;color:#fff;">
+<div style="max-width:1100px;margin:0 auto;">
+<div style="font-size:9px;text-transform:uppercase;letter-spacing:1px;opacity:.5;">Agent Factory Reference</div>
+<h1 style="color:#fff;border:none;margin:0;">End-to-End SDLC Example — Ideal Agent Architecture</h1>
+<p style="opacity:.7;font-size:12px;">Initiative → Epics → Stories → Design → Code → Tests → PR</p>
+</div></div>
+<div class="content"><h1>End-to-End SDLC Example — Ideal Agent Architecture</h1>
+<h3>From Requirements to PR: A Complete Reference Implementation</h3>
+
+<hr>
+
+<h2 id="the-use-case">The Use Case</h2>
+
+<p><strong>Input:</strong> A business initiative — "Add domestic fund transfer capability to mobile banking"</p>
+
+<p><strong>Output:</strong> Jira epics/stories/tasks + UX wireframes + API specs + HLD/LLD + generated code + test cases + GitHub PR</p>
+
+<p><strong>Flow:</strong></p>
+<div class="code-block"><pre>
+Initiative → Epics → Features → Stories → UX Design → API Design → HLD/LLD → Code → Tests → PR
+</pre></div>
+
+<hr>
+
+<h2 id="1-knowledge-bases">1. Knowledge Bases</h2>
+
+<h3>KB Catalog for This Use Case</h3>
+
+<table><thead><tr><th>KB</th><th>Layer</th><th>Content</th><th>Used By</th></tr></thead><tbody>
+<tr><td>`kb-L1-enterprise-architecture`</td><td>L1</td><td>Architecture patterns, API standards, tech stack (Spring Boot, React, PostgreSQL)</td><td>HLD/LLD agents</td></tr>
+<tr><td>`kb-L1-enterprise-security`</td><td>L1</td><td>Auth standards (OAuth2, MFA), encryption (AES-256, TLS 1.2+), PCI-DSS, GDPR</td><td>All agents</td></tr>
+<tr><td>`kb-L1-sdlc-templates`</td><td>L1</td><td>Story template, AC format (Given/When/Then), task template, design doc template</td><td>Story/task/design agents</td></tr>
+<tr><td>`kb-L1-testing-standards`</td><td>L1</td><td>Test case template, coverage requirements, security test patterns</td><td>Test generation agent</td></tr>
+<tr><td>`kb-L2-payments-domain`</td><td>L2</td><td>Payment flows, PSD2/SCA requirements, transfer limits, beneficiary management</td><td>Story/design agents</td></tr>
+<tr><td>`kb-L2-payments-api-patterns`</td><td>L2</td><td>REST API patterns for payments (endpoints, schemas, error codes)</td><td>API design agent</td></tr>
+</tbody></table>
+
+<hr>
+
+<h2 id="2-guardrails">2. Guardrails</h2>
+
+<h3>Guardrail Catalog</h3>
+
+<table><thead><tr><th>Guardrail</th><th>Layer</th><th>Type</th><th>Applied To</th></tr></thead><tbody>
+<tr><td>`gr-L1-output-schema-validator`</td><td>L1</td><td>Schema</td><td>All agents — validates output matches JSON schema</td></tr>
+<tr><td>`gr-L1-pii-detection`</td><td>L1</td><td>Security</td><td>All agents — blocks output containing real PII</td></tr>
+<tr><td>`gr-L1-hallucination-check`</td><td>L1</td><td>Quality</td><td>All agents — flags claims not grounded in input/KB</td></tr>
+<tr><td>`gr-L1-consistency-check`</td><td>L1</td><td>Quality</td><td>All agents — flags contradictions within output</td></tr>
+<tr><td>`gr-L2-payments-compliance`</td><td>L2</td><td>Compliance</td><td>Payment agents — validates PSD2/SCA references are correct</td></tr>
+<tr><td>`gr-L2-payments-terminology`</td><td>L2</td><td>Domain</td><td>Payment agents — validates domain terms match KB</td></tr>
+</tbody></table>
+
+<hr>
+
+<h2 id="3-agents">3. Agents</h2>
+
+<h3>Agent Catalog (14 agents for this use case)</h3>
+
+<table><thead><tr><th>#</th><th>Agent</th><th>Layer</th><th>Phase</th><th>Input</th><th>Output</th><th>Quality Patterns</th></tr></thead><tbody>
+<tr><td>A1</td><td>`L1-inception-epic-creator-agent`</td><td>L1</td><td>Inception</td><td>Initiative description</td><td>Epics with scope and goals</td><td>Reflection + Grounding</td></tr>
+<tr><td>A2</td><td>`L1-inception-feature-decomposer-agent`</td><td>L1</td><td>Inception</td><td>Epic</td><td>Features with business justification</td><td>Reflection + Grounding + CoT</td></tr>
+<tr><td>A3</td><td>`L1-inception-story-generator-agent`</td><td>L1</td><td>Inception</td><td>Feature</td><td>Stories with AC (Given/When/Then)</td><td>Reflection + Grounding + Citation</td></tr>
+<tr><td>A4</td><td>`L1-inception-task-generator-agent`</td><td>L1</td><td>Inception</td><td>Story</td><td>Dev/test/security/compliance tasks</td><td>Reflection + Grounding</td></tr>
+<tr><td>A5</td><td>`L1-design-ux-wireframe-agent`</td><td>L1</td><td>Design</td><td>Stories</td><td>Component hierarchy, screen layouts, interaction flows</td><td>Reflection + Verification</td></tr>
+<tr><td>A6</td><td>`L1-design-api-spec-agent`</td><td>L1</td><td>Design</td><td>Stories + HLD</td><td>OpenAPI 3.0 spec (endpoints, schemas, errors)</td><td>Reflection + Grounding + Schema validation</td></tr>
+<tr><td>A7</td><td>`L1-design-hld-agent`</td><td>L1</td><td>Design</td><td>Stories + features</td><td>HLD: C4 diagrams, component design, data flow</td><td>Reflection + CoT + Verification</td></tr>
+<tr><td>A8</td><td>`L1-design-lld-agent`</td><td>L1</td><td>Design</td><td>HLD + API spec</td><td>LLD: class design, DB schema, sequence diagrams</td><td>Reflection + CoT + Verification</td></tr>
+<tr><td>A9</td><td>`L1-construction-code-generator-agent`</td><td>L1</td><td>Construction</td><td>LLD + API spec</td><td>Spring Boot service code + React components</td><td>Verification + Grounding</td></tr>
+<tr><td>A10</td><td>`L1-testing-scenario-writer-agent`</td><td>L1</td><td>Testing</td><td>Stories + AC</td><td>Test scenarios (functional, security, edge cases)</td><td>Reflection + Grounding + Citation</td></tr>
+<tr><td>A11</td><td>`L1-testing-case-writer-agent`</td><td>L1</td><td>Testing</td><td>Test scenarios</td><td>Cucumber test cases (Given/When/Then steps)</td><td>Reflection + Grounding</td></tr>
+<tr><td>A12</td><td>`L1-quality-verifier-agent`</td><td>L1</td><td>Cross-cutting</td><td>Any agent output + rubric</td><td>Quality score + findings</td><td>Independent (verifier)</td></tr>
+<tr><td>A13</td><td>`L1-jira-orchestrator-agent`</td><td>L1</td><td>Cross-cutting</td><td>Structured data</td><td>Jira issues created/updated</td><td>N/A (tool orchestrator)</td></tr>
+<tr><td>A14</td><td>`L1-github-orchestrator-agent`</td><td>L1</td><td>Cross-cutting</td><td>Files + metadata</td><td>GitHub commits/PRs</td><td>N/A (tool orchestrator)</td></tr>
+</tbody></table>
+
+<h3>Agent Spec Example — A3: Story Generator</h3>
+
+<div class="code-block"><pre>
+spec_version: "1.0"
+artifact_type: agent
+metadata:
+  name: L1-inception-story-generator-agent
+  version: "1.2.0"
+  layer: L1
+  phase: inception
+  owner: ai-tech-lab
+
+purpose:
+  description: "Generates user stories with acceptance criteria from a feature description"
+  business_value: "Reduces story creation from ~2 hours to ~8 minutes per feature"
+
+behavior:
+  model: claude-sonnet-4.5
+  temperature: 0.2
+  max_tokens: 4096
+  
+  instructions: |
+    You are a senior business analyst. Given a feature description and context from
+    the knowledge base, generate user stories.
+    
+    FORMAT (mandatory):
+    ## Story: {title}
+    **As a** {specific role}, **I want** {capability}, **so that** {benefit}
+    
+    ### Acceptance Criteria
+    - Given {context}, When {action}, Then {outcome}
+    
+    RULES:
+    - One story per distinct user capability
+    - 3-5 acceptance criteria per story in Given/When/Then
+    - Tag data sensitivity: Public/Internal/Confidential/Restricted
+    - Include regulatory linkage (cite KB section) if applicable
+    - If insufficient context for a field, write INSUFFICIENT_CONTEXT:[what's missing]
+    
+    GROUNDING (mandatory):
+    - Only use information from the provided input and knowledge base
+    - Never invent system names, API endpoints, or regulatory references
+    - Cite which KB section informed each story
+    
+    REFLECTION (mandatory):
+    After generating all stories, self-review:
+    1. Does every story trace to the input feature?
+    2. Are all AC specific, measurable, testable?
+    3. Are all domain terms from the KB?
+    4. Revise any issues before returning.
+
+  input_schema:
+    type: object
+    required: [feature_description, epic_key, epic_context]
+    properties:
+      feature_description: {type: string, max_length: 5000}
+      epic_key: {type: string, pattern: "^[A-Z]+-\\d+$"}
+      epic_context: {type: string}
+
+  output_schema:
+    type: array
+    min_items: 1
+    max_items: 15
+    items:
+      type: object
+      required: [title, user_story, acceptance_criteria, data_sensitivity, citations]
+      properties:
+        title: {type: string, max_length: 200}
+        user_story: {type: string}
+        acceptance_criteria:
+          type: array
+          min_items: 3
+          max_items: 5
+          items: {type: string}
+        data_sensitivity: {type: string, enum: [Public, Internal, Confidential, Restricted]}
+        regulatory_linkage: {type: string, nullable: true}
+        citations:
+          type: array
+          items:
+            type: object
+            properties:
+              kb_name: {type: string}
+              section: {type: string}
+        reasoning:  # CoT — logged for audit, stripped from downstream
+          type: object
+          properties:
+            capability_addressed: {type: string}
+            kb_sections_used: {type: array, items: {type: string}}
+            sensitivity_rationale: {type: string}
+
+context:
+  knowledge_bases:
+    - kb-L1-enterprise-security
+    - kb-L1-sdlc-templates
+    - kb-L2-payments-domain
+  guardrails:
+    - gr-L1-output-schema-validator
+    - gr-L1-pii-detection
+    - gr-L1-hallucination-check
+    - gr-L2-payments-compliance
+    - gr-L2-payments-terminology
+  tools:
+    - L1-jira-fetch-issue
+
+quality:
+  patterns:
+    reflection: {enabled: true}
+    grounding: {enabled: true, mode: strict, citation_required: true}
+    chain_of_thought: {enabled: true, audit_logged: true}
+    verification: {enabled: true, verifier: L1-quality-verifier-agent, min_score: 7.0}
+  evaluation_rubric: story-quality-rubric-v1
+  min_score: 7.0
+
+performance:
+  target_latency_seconds: 30
+  max_token_budget: 8000
+  estimated_cost: "$0.04/invocation"
+
+error_handling:
+  on_invalid_input: "Return ToolResult(success=false, error=field-level details)"
+  on_model_error: "Retry once with same input; if fails, return error with correlation_id"
+  on_quality_gate_fail: "Return output with score; flag for HITL"
+
+versioning:
+  instruction_hash: "sha256:def456..."
+  input_schema_version: "1.0"
+  output_schema_version: "1.2"
+  kb_versions:
+    kb-L1-enterprise-security: "2.1.0"
+    kb-L1-sdlc-templates: "1.0.0"
+    kb-L2-payments-domain: "2.1.0"
+</pre></div>
+
+<hr>
+
+<h2 id="4-tools">4. Tools</h2>
+
+<h3>Tool Catalog</h3>
+
+<table><thead><tr><th>Tool</th><th>Layer</th><th>Platform</th><th>Operation</th><th>Used By</th></tr></thead><tbody>
+<tr><td>`L1-jira-fetch-issue`</td><td>L1</td><td>Jira</td><td>GET issue by key</td><td>A1, A2, A3, A13</td></tr>
+<tr><td>`L1-jira-create-issue`</td><td>L1</td><td>Jira</td><td>POST create issue</td><td>A13</td></tr>
+<tr><td>`L1-jira-update-issue`</td><td>L1</td><td>Jira</td><td>PUT update issue fields</td><td>A13</td></tr>
+<tr><td>`L1-jira-transition-issue`</td><td>L1</td><td>Jira</td><td>POST transition status</td><td>A13</td></tr>
+<tr><td>`L1-github-upload-file`</td><td>L1</td><td>GitHub</td><td>PUT create/update file</td><td>A14</td></tr>
+<tr><td>`L1-github-create-pr`</td><td>L1</td><td>GitHub</td><td>POST create pull request</td><td>A14</td></tr>
+<tr><td>`L1-github-fetch-file`</td><td>L1</td><td>GitHub</td><td>GET file content</td><td>A9</td></tr>
+<tr><td>`L1-xray-create-test`</td><td>L1</td><td>XRay</td><td>POST create test case</td><td>A11</td></tr>
+<tr><td>`L1-confluence-create-page`</td><td>L1</td><td>Confluence</td><td>POST create page</td><td>A7, A8</td></tr>
+</tbody></table>
+
+<p>All tools use <code>SecretsSDK</code> for credentials. All return <code>ToolResult(success, data, error)</code>.</p>
+
+<hr>
+
+<h2 id="5-workflow-end-to-end">5. Workflow — End-to-End</h2>
+
+<h3>Workflow Spec</h3>
+
+<div class="code-block"><pre>
+spec_version: "1.0"
+artifact_type: workflow
+metadata:
+  name: L1-WF-sdlc-initiative-to-pr
+  version: "1.0.0"
+  layer: L1
+  owner: ai-tech-lab
+  description: "End-to-end: initiative → epics → stories → design → code → tests → PR"
+
+trigger:
+  type: manual  # or jira-label
+  input:
+    initiative_description: {type: string, required: true}
+    jira_project: {type: string, required: true}
+    github_repo: {type: string, required: true}
+
+steps:
+
+  # ── PHASE 1: INCEPTION ──
+  
+  - name: create-epics
+    agent: L1-inception-epic-creator-agent
+    input:
+      initiative: "${input.initiative_description}"
+    output: epics
+    quality_gate: {rubric: epic-quality, min_score: 7.0, on_fail: hitl-review}
+    guardrail_chain: [gr-L1-output-schema-validator, gr-L1-hallucination-check]
+    timeout_seconds: 60
+
+  - name: decompose-features
+    agent: L1-inception-feature-decomposer-agent
+    input:
+      epics: "${steps.create-epics.output}"
+    output: features
+    quality_gate: {rubric: feature-completeness, min_score: 7.0, on_fail: hitl-review}
+    guardrail_chain: [gr-L1-output-schema-validator, gr-L1-hallucination-check, gr-L2-payments-terminology]
+    timeout_seconds: 90
+
+  - name: generate-stories
+    agent: L1-inception-story-generator-agent
+    input:
+      features: "${steps.decompose-features.output}"
+    output: stories
+    quality_gate: {rubric: story-quality, min_score: 7.0, on_fail: hitl-review}
+    verification: {agent: L1-quality-verifier-agent, min_score: 7.0}
+    guardrail_chain: [gr-L1-output-schema-validator, gr-L1-pii-detection, gr-L1-hallucination-check, gr-L2-payments-compliance]
+    timeout_seconds: 120
+
+  - name: generate-tasks
+    agent: L1-inception-task-generator-agent
+    input:
+      stories: "${steps.generate-stories.output}"
+    output: tasks
+    quality_gate: {rubric: task-completeness, min_score: 6.0, on_fail: hitl-review}
+    timeout_seconds: 90
+
+  - name: write-inception-to-jira
+    agent: L1-jira-orchestrator-agent
+    tools: [L1-jira-create-issue]
+    input:
+      project: "${input.jira_project}"
+      epics: "${steps.create-epics.output}"
+      stories: "${steps.generate-stories.output}"
+      tasks: "${steps.generate-tasks.output}"
+      labels: ["aava-generated"]
+    output: jira_issues
+    idempotency: check-before-create
+    on_error: retry(max=2)
+
+  # ── PHASE 2: DESIGN ──
+
+  - name: generate-ux-wireframes
+    agent: L1-design-ux-wireframe-agent
+    input:
+      stories: "${steps.generate-stories.output}"
+    output: ux_design
+    quality_gate: {rubric: ux-completeness, min_score: 7.0, on_fail: hitl-review}
+    timeout_seconds: 120
+
+  - name: generate-hld
+    agent: L1-design-hld-agent
+    input:
+      stories: "${steps.generate-stories.output}"
+      features: "${steps.decompose-features.output}"
+    output: hld
+    quality_gate: {rubric: hld-quality, min_score: 7.0, on_fail: hitl-review}
+    verification: {agent: L1-quality-verifier-agent, min_score: 7.0}
+    timeout_seconds: 120
+
+  - name: generate-api-spec
+    agent: L1-design-api-spec-agent
+    input:
+      stories: "${steps.generate-stories.output}"
+      hld: "${steps.generate-hld.output}"
+    output: api_spec  # OpenAPI 3.0 YAML
+    guardrail_chain: [gr-L1-output-schema-validator]  # validates OpenAPI schema
+    timeout_seconds: 90
+
+  - name: generate-lld
+    agent: L1-design-lld-agent
+    input:
+      hld: "${steps.generate-hld.output}"
+      api_spec: "${steps.generate-api-spec.output}"
+    output: lld
+    quality_gate: {rubric: lld-quality, min_score: 7.0, on_fail: hitl-review}
+    timeout_seconds: 120
+
+  - name: upload-designs-to-github
+    agent: L1-github-orchestrator-agent
+    tools: [L1-github-upload-file]
+    input:
+      repo: "${input.github_repo}"
+      files:
+        - {path: "designs/ux-wireframes.md", content: "${steps.generate-ux-wireframes.output}"}
+        - {path: "designs/hld.md", content: "${steps.generate-hld.output}"}
+        - {path: "designs/lld.md", content: "${steps.generate-lld.output}"}
+        - {path: "designs/openapi.yaml", content: "${steps.generate-api-spec.output}"}
+      branch: "aava/design-${input.jira_project}"
+      message: "feat: add designs [aava-generated]"
+    output: design_commit
+
+  # ── PHASE 3: CONSTRUCTION ──
+
+  - name: generate-code
+    agent: L1-construction-code-generator-agent
+    input:
+      lld: "${steps.generate-lld.output}"
+      api_spec: "${steps.generate-api-spec.output}"
+      stories: "${steps.generate-stories.output}"
+    output: code_files  # array of {path, content}
+    quality_gate: {rubric: code-quality, min_score: 7.0, on_fail: hitl-review}
+    verification: {agent: L1-quality-verifier-agent, min_score: 7.0}
+    timeout_seconds: 180
+
+  - name: upload-code-to-github
+    agent: L1-github-orchestrator-agent
+    tools: [L1-github-upload-file]
+    input:
+      repo: "${input.github_repo}"
+      files: "${steps.generate-code.output}"
+      branch: "aava/impl-${input.jira_project}"
+      message: "feat: implement transfer service [aava-generated]"
+    output: code_commit
+
+  # ── PHASE 4: TESTING ──
+
+  - name: generate-test-scenarios
+    agent: L1-testing-scenario-writer-agent
+    input:
+      stories: "${steps.generate-stories.output}"
+      api_spec: "${steps.generate-api-spec.output}"
+    output: test_scenarios
+    quality_gate: {rubric: test-coverage, min_score: 7.0, on_fail: hitl-review}
+    timeout_seconds: 120
+
+  - name: generate-test-cases
+    agent: L1-testing-case-writer-agent
+    input:
+      scenarios: "${steps.generate-test-scenarios.output}"
+    output: test_cases  # Cucumber format
+    guardrail_chain: [gr-L1-output-schema-validator]
+    timeout_seconds: 90
+
+  - name: push-tests-to-xray
+    agent: L1-jira-orchestrator-agent
+    tools: [L1-xray-create-test]
+    input:
+      test_cases: "${steps.generate-test-cases.output}"
+      linked_stories: "${steps.write-inception-to-jira.output}"
+    output: xray_tests
+
+  # ── PHASE 5: PR CREATION ──
+
+  - name: create-pull-request
+    agent: L1-github-orchestrator-agent
+    tools: [L1-github-create-pr]
+    input:
+      repo: "${input.github_repo}"
+      head: "aava/impl-${input.jira_project}"
+      base: "main"
+      title: "feat: domestic fund transfer [${input.jira_project}] [aava-generated]"
+      body: |
+        ## Summary
+        Implements domestic fund transfer capability.
+        
+        ## Jira Issues
+        ${steps.write-inception-to-jira.output.issue_keys}
+        
+        ## Design Docs
+        - designs/hld.md
+        - designs/lld.md
+        - designs/openapi.yaml
+        
+        ## Test Coverage
+        ${steps.push-tests-to-xray.output.test_count} test cases in XRay
+        
+        Generated by AAVA workflow L1-WF-sdlc-initiative-to-pr v1.0.0
+    output: pull_request
+
+orchestration:
+  execution_mode: sequential
+  max_total_timeout_seconds: 1800  # 30 minutes
+  correlation_id: auto-generated
+  audit_trail: every-step
+  
+  events_emitted:
+    - workflow.started
+    - step.{name}.started
+    - step.{name}.completed
+    - step.{name}.quality_gate.{pass|fail}
+    - step.{name}.verification.{pass|fail}
+    - step.{name}.guardrail.{pass|violated}
+    - workflow.completed
+    - workflow.failed
+
+hitl:
+  type: jira-subtask
+  assignee: workflow-triggerer
+  sla_hours: 24
+</pre></div>
+
+<hr>
+
+<h2 id="6-execution-flow-diagram">6. Execution Flow Diagram</h2>
+
+<div class="code-block"><pre>
+INITIATIVE: "Add domestic fund transfer to mobile banking"
+    │
+    ▼
+┌─────────────────────── INCEPTION ───────────────────────┐
+│                                                          │
+│  [A1: Epic Creator] ──QG──▶ [A2: Feature Decomposer]   │
+│       │                          │                       │
+│       │ Epics                    │ Features               │
+│       ▼                          ▼                       │
+│  [A3: Story Generator] ──QG+Verify──▶ [A4: Task Gen]   │
+│       │                                    │             │
+│       │ Stories + AC                       │ Tasks        │
+│       ▼                                    ▼             │
+│  [A13: Jira Orchestrator] ──▶ Jira Issues Created       │
+│       │                                                  │
+└───────┼──────────────────────────────────────────────────┘
+        │ Stories
+        ▼
+┌─────────────────────── DESIGN ──────────────────────────┐
+│                                                          │
+│  [A5: UX Wireframe] ──QG──▶ wireframes.md              │
+│  [A7: HLD Agent] ──QG+Verify──▶ hld.md                 │
+│  [A6: API Spec Agent] ──GR──▶ openapi.yaml             │
+│  [A8: LLD Agent] ──QG──▶ lld.md                        │
+│       │                                                  │
+│  [A14: GitHub Orchestrator] ──▶ Design branch committed │
+│       │                                                  │
+└───────┼──────────────────────────────────────────────────┘
+        │ LLD + API Spec
+        ▼
+┌─────────────────────── CONSTRUCTION ────────────────────┐
+│                                                          │
+│  [A9: Code Generator] ──QG+Verify──▶ source files      │
+│       │                                                  │
+│  [A14: GitHub Orchestrator] ──▶ Code branch committed   │
+│       │                                                  │
+└───────┼──────────────────────────────────────────────────┘
+        │ Stories + API Spec
+        ▼
+┌─────────────────────── TESTING ─────────────────────────┐
+│                                                          │
+│  [A10: Scenario Writer] ──QG──▶ [A11: Case Writer]     │
+│       │                              │                   │
+│       │ Scenarios                     │ Cucumber cases    │
+│       ▼                              ▼                   │
+│  [A13: Jira/XRay Orchestrator] ──▶ XRay tests linked   │
+│                                                          │
+└──────────────────────────────────────────────────────────┘
+        │
+        ▼
+┌─────────────────────── PR CREATION ─────────────────────┐
+│                                                          │
+│  [A14: GitHub Orchestrator] ──▶ PR #142 created         │
+│       Title: "feat: domestic fund transfer [COSMOS-100]" │
+│       Links: Jira issues, design docs, XRay tests       │
+│                                                          │
+└──────────────────────────────────────────────────────────┘
+
+Legend:
+  ──QG──▶     Quality gate (rubric score ≥ 7.0)
+  ──QG+Verify──▶  Quality gate + verification agent
+  ──GR──▶     Guardrail chain (schema + PII + hallucination)
+</pre></div>
+
+<hr>
+
+<h2 id="7-version-manifest-per-execution">7. Version Manifest (per execution)</h2>
+
+<div class="code-block"><pre>
+{
+  "execution_id": "exec-20260410-001",
+  "workflow": "L1-WF-sdlc-initiative-to-pr",
+  "workflow_version": "1.0.0",
+  "correlation_id": "corr-abc-123",
+  "timestamp": "2026-04-10T09:00:00Z",
+  "input_hash": "sha256:initiative-text-hash",
+  "agents_used": {
+    "L1-inception-epic-creator-agent": {"version": "1.0.0", "instruction_hash": "sha256:aaa"},
+    "L1-inception-story-generator-agent": {"version": "1.2.0", "instruction_hash": "sha256:bbb"},
+    "L1-design-hld-agent": {"version": "1.1.0", "instruction_hash": "sha256:ccc"},
+    "L1-construction-code-generator-agent": {"version": "1.0.0", "instruction_hash": "sha256:ddd"}
+  },
+  "kb_versions": {
+    "kb-L1-enterprise-security": "2.1.0",
+    "kb-L1-enterprise-architecture": "3.0.1",
+    "kb-L2-payments-domain": "2.1.0"
+  },
+  "guardrail_versions": {
+    "gr-L1-hallucination-check": "1.0.0",
+    "gr-L2-payments-compliance": "1.1.0"
+  },
+  "model": "claude-sonnet-4.5",
+  "total_tokens": 45200,
+  "total_cost": "$0.32",
+  "total_duration_seconds": 847,
+  "steps_completed": 16,
+  "quality_scores": {
+    "create-epics": 8.1,
+    "generate-stories": 8.5,
+    "generate-hld": 7.8,
+    "generate-code": 7.2
+  },
+  "hallucination_findings": 0,
+  "hitl_triggered": false,
+  "output": {
+    "jira_epics": 2,
+    "jira_stories": 12,
+    "jira_tasks": 36,
+    "design_docs": 4,
+    "code_files": 15,
+    "test_cases": 24,
+    "pull_request": "https://github.com/scib/cosmos/pull/142"
+  }
+}
+</pre></div>
+
+<hr>
+
+<h2 id="8-what-this-architecture-achieves">8. What This Architecture Achieves</h2>
+
+<table><thead><tr><th>Concern</th><th>How It's Addressed</th></tr></thead><tbody>
+<tr><td>**Consistency**</td><td>Every agent has a spec with output schema. Guardrails enforce schema compliance.</td></tr>
+<tr><td>**No hallucination**</td><td>Grounding enforcement + citation requirement + hallucination guardrail + verification agent</td></tr>
+<tr><td>**Traceability**</td><td>Every output item cites its KB source. Correlation ID links all steps. Version manifest records every input dimension.</td></tr>
+<tr><td>**Quality**</td><td>Quality gates (rubric ≥ 7.0) between every step. Verification agent provides independent review.</td></tr>
+<tr><td>**Security**</td><td>PII guardrail on all agents. Secrets via SDK. Data classification tagged on every story.</td></tr>
+<tr><td>**Auditability**</td><td>CoT reasoning logged. Every step emits events. Full version manifest per execution.</td></tr>
+<tr><td>**Resilience**</td><td>Retry on tool failures. HITL on quality gate failures. Timeout per step and workflow.</td></tr>
+<tr><td>**Cost control**</td><td>Token budget per agent. Temperature 0.2 for structured output. Only necessary KBs attached.</td></tr>
+<tr><td>**Regression safety**</td><td>Version manifest captures every input dimension. Any change triggers targeted regression.</td></tr>
+<tr><td>**Extensibility**</td><td>L2 domain agents extend L1 via instructions_append. L3 squad agents extend L2. No duplication.</td></tr>
+</tbody></table>
+</div></body></html>

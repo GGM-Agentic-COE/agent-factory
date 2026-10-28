@@ -1,0 +1,36 @@
+spec_version: "1.0"
+artifact_type: guardrail
+metadata:
+  name: gr-L3-agent-rate-limit
+  version: "1.0.0"
+  layer: L3
+  owner: project-lead
+  implementation: colang
+
+purpose:
+  description: "Limit the number of tool calls and downstream agent invocations per execution"
+
+triggers_on:
+  - runtime
+
+on_fail: throttle_then_block
+applies_to: all_agents
+
+rules:
+  - name: max-tool-calls
+    description: "Agent cannot exceed configured max tool calls per execution"
+    action: block
+    severity: high
+
+  - name: max-agent-calls
+    description: "Orchestrator cannot invoke more than configured downstream agents"
+    action: block
+    severity: high
+
+  - name: cooldown
+    description: "Enforce minimum interval between repeated tool calls"
+    action: flag
+    severity: medium
+
+evaluation:
+  false_positive_threshold: 0.05

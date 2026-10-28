@@ -1,0 +1,11 @@
+{
+  "agent_id": "L1-inception-vision-generator",
+  "input": {
+    "idea": "Build a new REST API that centralises all payment initiation and reconciliation logic for our lending platform. Currently three separate microservices handle direct debit collection, card payments, and bank transfers independently with duplicated validation, inconsistent error handling, and no unified view of payment status. We process 45,000 payment transactions daily across personal loans, mortgages, and credit cards. The API must enforce PSD2 Strong Customer Authentication rules and produce PCI-DSS compliant audit trails.",
+    "target_market": "Internal platform teams within a UK retail bank",
+    "constraints": "No new database \u2014 must orchestrate across existing payment gateway (Stripe Connect), direct debit processor (GoCardless), and core banking ledger (Temenos T24). Must not break existing consumer apps during migration. FCA regulated \u2014 all changes require Change Advisory Board approval."
+  },
+  "context": {
+    "domain_kb": "kb-L2-payments-domain"
+  }
+}

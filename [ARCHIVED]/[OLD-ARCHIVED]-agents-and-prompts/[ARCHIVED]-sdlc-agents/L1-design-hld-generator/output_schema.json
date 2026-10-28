@@ -1,0 +1,203 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "L1-design-hld-generator-output-v1.0",
+  "title": "HLD Generator Output",
+  "description": "High-Level Design output — system architecture, components, APIs, data model, integrations, deployment, and ADRs.",
+  "type": "object",
+  "required": ["agent_id", "agent_version", "execution_id", "input_summary", "output"],
+  "properties": {
+    "agent_id": {"type": "string", "const": "L1-design-hld-generator-agent"},
+    "agent_version": {"type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$"},
+    "execution_id": {"type": "string", "pattern": "^exec-.+$"},
+    "input_summary": {"type": "object", "required": ["source", "parameters"]},
+    "output": {
+      "type": "object",
+      "required": ["type", "schema_version", "items", "execution_summary"],
+      "properties": {
+        "type": {"const": "hld"},
+        "schema_version": {"const": "1.0"},
+        "items": {"$ref": "#/$defs/HLDItems"},
+        "execution_summary": {"type": "string", "minLength": 50}
+      }
+    }
+  },
+  "$defs": {
+    "HLDItems": {
+      "type": "object",
+      "required": ["system_overview", "components", "apis", "data_model", "integrations", "deployment", "architecture_decisions", "cross_cutting", "ui_architecture"],
+      "properties": {
+        "system_overview": {
+          "type": "object",
+          "required": ["description", "architecture_style", "technology_stack"],
+          "properties": {
+            "description": {"type": "string"},
+            "architecture_style": {"type": "string", "enum": ["microservices", "monolith", "modular-monolith", "serverless"]},
+            "technology_stack": {"type": "object"}
+          }
+        },
+        "components": {
+          "type": "array", "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["component_id", "name", "type", "responsibility", "implements_features", "technology"],
+            "properties": {
+              "component_id": {"type": "string", "pattern": "^CMP-\\d{2}$"},
+              "name": {"type": "string"},
+              "type": {"type": "string", "enum": ["service", "database", "cache", "queue", "gateway", "client-app"]},
+              "responsibility": {"type": "string"},
+              "implements_features": {"type": "array", "items": {"type": "string"}, "minItems": 1},
+              "technology": {"type": "string"},
+              "apis_exposed": {"type": "array", "items": {"type": "string"}},
+              "apis_consumed": {"type": "array", "items": {"type": "string"}},
+              "data_stores": {"type": "array", "items": {"type": "string"}}
+            }
+          }
+        },
+        "apis": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["api_id", "service", "method", "path", "description", "request_schema", "response_schema", "auth", "implements_features"],
+            "properties": {
+              "api_id": {"type": "string", "pattern": "^API-\\d{2}$"},
+              "service": {"type": "string"},
+              "method": {"type": "string", "enum": ["GET", "POST", "PUT", "PATCH", "DELETE"]},
+              "path": {"type": "string"},
+              "description": {"type": "string"},
+              "request_schema": {"type": "object"},
+              "response_schema": {"type": "object"},
+              "auth": {"type": "string"},
+              "implements_features": {"type": "array", "items": {"type": "string"}}
+            }
+          }
+        },
+        "data_model": {
+          "type": "object",
+          "required": ["entities"],
+          "properties": {
+            "entities": {
+              "type": "array", "minItems": 1,
+              "items": {
+                "type": "object",
+                "required": ["entity_id", "name", "store_type", "technology", "fields"],
+                "properties": {
+                  "entity_id": {"type": "string", "pattern": "^DS-\\d{2}$"},
+                  "name": {"type": "string"},
+                  "store_type": {"type": "string", "enum": ["relational", "document", "cache", "time-series"]},
+                  "technology": {"type": "string"},
+                  "fields": {"type": "array", "minItems": 1},
+                  "relationships": {"type": "array"}
+                }
+              }
+            }
+          }
+        },
+        "integrations": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["integration_id", "external_system", "pattern", "direction", "purpose", "implements_features"],
+            "properties": {
+              "integration_id": {"type": "string", "pattern": "^INT-\\d{2}$"},
+              "external_system": {"type": "string"},
+              "pattern": {"type": "string", "enum": ["REST", "event", "webhook", "file-transfer", "gRPC"]},
+              "direction": {"type": "string", "enum": ["inbound", "outbound", "bidirectional"]},
+              "purpose": {"type": "string"},
+              "implements_features": {"type": "array", "items": {"type": "string"}}
+            }
+          }
+        },
+        "deployment": {
+          "type": "object",
+          "required": ["topology", "services"],
+          "properties": {
+            "topology": {"type": "string"},
+            "services": {"type": "array"},
+            "infrastructure": {"type": "array", "items": {"type": "string"}}
+          }
+        },
+        "architecture_decisions": {
+          "type": "array", "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["adr_id", "title", "context", "decision", "rationale"],
+            "properties": {
+              "adr_id": {"type": "string", "pattern": "^ADR-\\d{2}$"},
+              "title": {"type": "string"},
+              "context": {"type": "string"},
+              "decision": {"type": "string"},
+              "rationale": {"type": "string"},
+              "alternatives_considered": {"type": "array", "items": {"type": "string"}}
+            }
+          }
+        },
+        "cross_cutting": {
+          "type": "object",
+          "required": ["authentication", "logging", "monitoring", "error_handling"],
+          "properties": {
+            "authentication": {"type": "string"},
+            "logging": {"type": "string"},
+            "monitoring": {"type": "string"},
+            "error_handling": {"type": "string"}
+          }
+        },
+        "ui_architecture": {
+          "type": "object",
+          "required": ["platform", "screens", "navigation", "state_management", "design_system"],
+          "description": "Frontend/UI architecture — screens, navigation, state management, and component structure",
+          "properties": {
+            "platform": {
+              "type": "object",
+              "required": ["type", "technology", "targets"],
+              "properties": {
+                "type": {"type": "string", "enum": ["web", "mobile-native", "mobile-cross-platform", "desktop"]},
+                "technology": {"type": "string", "description": "React, React Native, Swift, Kotlin, Flutter, etc."},
+                "targets": {"type": "array", "items": {"type": "string"}, "description": "iOS, Android, Web, etc."}
+              }
+            },
+            "screens": {
+              "type": "array", "minItems": 1,
+              "items": {
+                "type": "object",
+                "required": ["screen_id", "name", "purpose", "implements_features", "components"],
+                "properties": {
+                  "screen_id": {"type": "string", "pattern": "^SCR-\\d{2}$"},
+                  "name": {"type": "string"},
+                  "purpose": {"type": "string"},
+                  "implements_features": {"type": "array", "items": {"type": "string"}},
+                  "components": {"type": "array", "items": {"type": "string"}, "description": "UI components used on this screen"},
+                  "apis_consumed": {"type": "array", "items": {"type": "string"}, "description": "API-XX IDs this screen calls"},
+                  "state": {"type": "string", "description": "What state this screen reads/writes"}
+                }
+              }
+            },
+            "navigation": {
+              "type": "object",
+              "required": ["pattern", "flows"],
+              "properties": {
+                "pattern": {"type": "string", "description": "Stack, tab, drawer, or combination"},
+                "flows": {"type": "array", "items": {"type": "object", "properties": {"name": {"type": "string"}, "screens": {"type": "array", "items": {"type": "string"}}}}}
+              }
+            },
+            "state_management": {
+              "type": "object",
+              "required": ["approach", "stores"],
+              "properties": {
+                "approach": {"type": "string", "description": "Redux, Zustand, Context, ViewModel, StateFlow, etc."},
+                "stores": {"type": "array", "items": {"type": "object", "properties": {"name": {"type": "string"}, "scope": {"type": "string"}, "persisted": {"type": "boolean"}}}}
+              }
+            },
+            "design_system": {
+              "type": "object",
+              "required": ["source", "components"],
+              "properties": {
+                "source": {"type": "string", "description": "Material Design, custom, shared library, etc."},
+                "components": {"type": "array", "items": {"type": "string"}, "description": "Key reusable UI components"}
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

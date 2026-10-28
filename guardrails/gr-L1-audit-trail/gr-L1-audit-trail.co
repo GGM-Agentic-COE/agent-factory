@@ -1,0 +1,30 @@
+# gr-L1-audit-trail — Colang Implementation
+# Layer: L1 Enterprise — applies to ALL agents
+# Validation: LLM self_check_output (pure Colang)
+# Persistence: Python action (actions.py)
+#
+# To enable production persistence, uncomment the relevant
+# section in actions.py (DynamoDB, S3, CloudWatch, or PostgreSQL)
+# and ensure the appropriate IAM role/credentials are configured.
+
+define flow check audit trail completeness
+  """Validate all traceability fields are present in the output."""
+  $result = execute self_check_output
+
+  if not $result
+    bot block audit incomplete
+    stop
+
+define flow log audit record
+  """Persist structured audit record with PII masking."""
+  $output = $bot_message
+  $logged = execute persist_audit_record(output=$output)
+
+  if not $logged
+    bot warn audit log failure
+
+define bot block audit incomplete
+  "Output blocked: missing required audit trail fields. Every execution must include agent_id, execution_id, agent_version, input_summary (with source and parameters), output.type, and output.schema_version."
+
+define bot warn audit log failure
+  "Warning: Audit record could not be persisted. Output delivered but compliance record is incomplete."

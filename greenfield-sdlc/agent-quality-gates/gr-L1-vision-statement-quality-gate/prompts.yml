@@ -1,0 +1,45 @@
+prompts:
+  - task: self_check_output
+    content: |
+      L1-vision-statement-generator's original output (items): {{ generator_output }}
+      L1-vision-statement-generator-evaluator's verdict (fixes_applied, final_decision): {{ bot_response }}
+      Original input received by L1-vision-statement-generator (includes viability_score): {{ original_input }}
+
+      Reconstruct the RESULTANT output: L1-vision-statement-generator's
+      items with every fixes_applied[].before → after substitution
+      resolved in. This is the LAST automated checkpoint before a human
+      reads vision.md. Check that resultant content — not the evaluator's
+      own scoring bookkeeping — against
+      L1-vision-statement-generator/output_schema.json and its
+      evaluation.md:
+
+      1. Schema compliance: does executive_summary/problem_statement/
+         target_users/value_proposition/market_context each have summary
+         (<=150 chars), confidence, reasoning? Does regulatory_posture have
+         overall_status + constraint_summaries[]? Does every
+         north_star_metrics[] entry have id, metric, target, confidence,
+         reasoning? Does every roadmap[] entry have phase_number, title,
+         description_summary (<=150)? Does every open_risks[] entry have
+         id, description_summary (<=150), source, non-empty related_ids?
+      2. ID sequencing: are NSM-NN and OR-NN ids sequential, no gaps or
+         duplicates? Does roadmap phase_number start at 1 and run
+         sequentially?
+      3. Reconciliation coverage (BLOCKER): does EVERY constraint_id in
+         regulatory_posture.constraint_summaries appear in the union of
+         open_risks[].related_ids — set membership, not a count — checked
+         on the resultant content itself (both fields are in the same
+         output, no upstream lookup needed)?
+      4. Roadmap ordering: if any open_risks entry traces to a Red-status
+         constraint, does the phase_number=1 roadmap entry's resolves_risk
+         point to that entry?
+      5. Executive-summary integrity: does executive_summary introduce any
+         claim absent from the sections below it?
+      6. No publishing tool: does this agent's own record show it did NOT
+         invoke a Confluence/publishing tool itself?
+      7. viability_score honesty: does execution_summary report the
+         viability_score this agent actually received from original_input
+         — not omitted or silently changed, even if it's below threshold?
+
+      Answer "yes" if ALL checks pass on the RESULTANT content. Answer "no"
+      if ANY check fails — a coverage gap or a misreported viability_score
+      here reaches a human directly.

@@ -1,0 +1,28 @@
+# gr-L3-loop-detection — Colang Implementation
+# Layer: L3 Project — applies to ALL agents
+# Triggers: runtime (continuous monitoring)
+
+define flow check loop detection
+  """Detect infinite loops, excessive recursion, and timeouts."""
+  $result = execute detect_loops(agent_id=$agent_id, action_name=$tool_name)
+
+  if $result == "loop"
+    bot block loop detected
+    stop
+
+  if $result == "timeout"
+    bot block timeout
+    stop
+
+  if $result == "recursion"
+    bot block recursion depth
+    stop
+
+define bot block loop detected
+  "Execution killed: infinite loop detected. Same action repeated beyond maximum iterations."
+
+define bot block timeout
+  "Execution killed: timeout exceeded. Agent execution took longer than configured maximum."
+
+define bot block recursion depth
+  "Execution killed: recursion depth exceeded. Agent recursion deeper than configured maximum."

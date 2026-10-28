@@ -1,0 +1,35 @@
+spec_version: "1.0"
+artifact_type: knowledge_base
+metadata:
+  name: kb-L1-regulatory-frameworks-index
+  version: "1.0.0"
+  layer: L1
+  owner: agentic-ai-coe
+  content_hash: "sha256:a4dcd37d9604d075800ac8740956c149a40597b586afb8d2efac6025d9247846"
+  last_reviewed: "2026-08-02"
+  review_cadence: quarterly
+
+purpose:
+  description: >
+    Domain-agnostic index mapping regulated activity categories to the UK
+    body that governs them. Used by L1-vision-regulatory-feasibility-checker
+    as the first lookup, regardless of which vertical it's deployed into, to
+    identify which body's rules apply before a domain-specific L2 regulatory
+    KB (e.g. kb-L2-domain-regulatory) is loaded for the actual
+    detailed constraints.
+
+content:
+  format: markdown
+  documents:
+    - path: content/regulatory-bodies-index.md
+      sections: [cross-domain-index]
+  total_tokens_estimate: 346
+  chunking: whole-document   # small enough not to need chunking
+  embedding_model: text-embedding-3-small
+
+grounding_rules:
+  accessed_by: [L1-vision-regulatory-feasibility-checker]
+  visibility: "L1 — visible to all layers (L1/L2/L3/L4) per standard visibility rule"
+
+freshness:
+  trigger_for_update: "new regulated domain entered, or a listed body is renamed/merged/split"

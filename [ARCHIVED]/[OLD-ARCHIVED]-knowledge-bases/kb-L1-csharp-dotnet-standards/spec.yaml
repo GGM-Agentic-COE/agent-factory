@@ -1,0 +1,10 @@
+spec_version: "1.0"
+metadata:
+  name: kb-L1-csharp-dotnet-standards
+  version: "1.0.0"
+  layer: L1
+purpose: "C# / .NET 8 API development standards derived from Tasheel Finance codebase"
+source_codebase: "/code/loan-app-api"
+freshness:
+  review_cadence: quarterly
+  last_reviewed: "2026-04-21"

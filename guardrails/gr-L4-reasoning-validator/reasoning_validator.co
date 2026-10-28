@@ -1,0 +1,22 @@
+# gr-L4-reasoning-validator — Colang Implementation
+# Layer: L4 Squad — applies to configured agents
+# Triggers: post_execution (output rail)
+
+define flow check reasoning quality
+  """Validate reasoning field is present, substantive, and references sources."""
+  $valid = execute validate_reasoning(output=$bot_message)
+
+  if not $valid
+    bot block weak reasoning
+    stop
+
+  $result = execute self_check_output
+
+  if not $result
+    bot warn weak reasoning
+
+define bot block weak reasoning
+  "Output blocked: metadata.reasoning is missing or below minimum quality. Reasoning must be at least 20 characters and contain decision rationale referencing input data or KB sources."
+
+define bot warn weak reasoning
+  "Warning: reasoning quality is low. Consider adding specific references to input data or KB sources to strengthen rationale."

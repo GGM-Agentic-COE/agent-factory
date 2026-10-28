@@ -1,0 +1,470 @@
+{
+  "test_id": "golden-01-expense-tracker",
+  "description": "Production-grade requirements extraction from a detailed expense tracker product idea",
+  "agent_id": "L1-inception-requirements-extractor",
+  "agent_version": "1.0.0",
+  "execution_id": "exec-golden-001",
+  "workflow_execution_id": null,
+  "status": "success",
+  "input_summary": {
+    "source": "direct_input",
+    "source_agent_id": null,
+    "parameters": {"idea": "We want to build a mobile expense tracker app for small business owners..."}
+  },
+  "content": {
+    "type": "requirements",
+    "schema_version": "1.0",
+    "items": {
+      "functional_requirements": [
+        {
+          "id": "FR-01",
+          "title": "Receipt Photo Capture",
+          "description": "The system shall allow users to photograph receipts using the device camera with auto-crop and image quality validation",
+          "user_facing": true,
+          "priority": "Must-Have",
+          "tags": ["capture", "camera", "mvp"],
+          "metadata": {
+            "confidence": 0.96,
+            "reasoning": "Explicitly stated as core feature and confirmed as MVP priority by stakeholder guidance. 'photograph receipts using their phone camera'.",
+            "citation": {"source_reference": "Users should be able to photograph receipts using their phone camera", "source_location": "paragraph 2"},
+            "trajectory": [
+              {"step": 1, "action": "retrieve", "tool": null, "detail": "Identified receipt photography as primary input mechanism"},
+              {"step": 2, "action": "reason", "tool": null, "detail": "Core to value proposition — replaces paper receipts. Must-Have per stakeholder guidance."},
+              {"step": 3, "action": "generate", "tool": null, "detail": "Formulated with auto-crop implied by 'automatically extract' downstream need"}
+            ]
+          }
+        },
+        {
+          "id": "FR-02",
+          "title": "Automatic OCR Data Extraction",
+          "description": "The system shall automatically extract amount, date, vendor name, and payment method from receipt images using OCR with ≥90% accuracy",
+          "user_facing": true,
+          "priority": "Must-Have",
+          "tags": ["ocr", "extraction", "automation", "mvp"],
+          "metadata": {
+            "confidence": 0.95,
+            "reasoning": "Explicitly stated with specific fields listed. Accuracy target inferred from 'automatically' implying reliable extraction.",
+            "citation": {"source_reference": "automatically extract the amount, date, vendor name, and payment method from the receipt using OCR", "source_location": "paragraph 2"},
+            "trajectory": [
+              {"step": 1, "action": "retrieve", "tool": null, "detail": "Four fields specified: amount, date, vendor, payment method"},
+              {"step": 2, "action": "reason", "tool": null, "detail": "Core automation value prop — without this users still type manually"},
+              {"step": 3, "action": "generate", "tool": null, "detail": "Added ≥90% accuracy as measurable target for 'automatically'"}
+            ]
+          }
+        },
+        {
+          "id": "FR-03",
+          "title": "Expense Categorisation",
+          "description": "The system shall categorise expenses into predefined categories (travel, meals & entertainment, office supplies, software subscriptions, professional services, vehicle/mileage, utilities) with automatic suggestion and manual override",
+          "user_facing": true,
+          "priority": "Must-Have",
+          "tags": ["categorisation", "automation", "mvp"],
+          "metadata": {
+            "confidence": 0.94,
+            "reasoning": "Explicitly stated with 7 predefined categories listed. Auto-categorisation implied by OCR extraction feeding into category assignment.",
+            "citation": {"source_reference": "categorise expenses into standard categories (travel, meals & entertainment, office supplies, software subscriptions, professional services, vehicle/mileage, utilities)", "source_location": "paragraph 2"},
+            "trajectory": [
+              {"step": 1, "action": "retrieve", "tool": null, "detail": "7 categories explicitly listed plus 'create custom categories'"},
+              {"step": 2, "action": "reason", "tool": null, "detail": "Core feature — enables budgeting and reporting downstream"},
+              {"step": 3, "action": "generate", "tool": null, "detail": "Included auto-suggestion + manual override for user control"}
+            ]
+          }
+        },
+        {
+          "id": "FR-04",
+          "title": "Custom Category Creation",
+          "description": "The system shall allow users to create, edit, and delete custom expense categories in addition to the predefined set",
+          "user_facing": true,
+          "priority": "Should-Have",
+          "tags": ["categorisation", "customisation"],
+          "metadata": {
+            "confidence": 0.92,
+            "reasoning": "Explicitly stated — 'allow users to create custom categories'. Should-Have as predefined categories cover most use cases for MVP.",
+            "citation": {"source_reference": "allow users to create custom categories", "source_location": "paragraph 2"},
+            "trajectory": [
+              {"step": 1, "action": "retrieve", "tool": null, "detail": "Custom categories explicitly mentioned"},
+              {"step": 2, "action": "reason", "tool": null, "detail": "Enhances categorisation but not blocking for MVP — 7 predefined categories suffice initially"},
+              {"step": 3, "action": "generate", "tool": null, "detail": "Added edit/delete alongside create for complete CRUD"}
+            ]
+          }
+        },
+        {
+          "id": "FR-05",
+          "title": "Monthly and Quarterly Report Generation",
+          "description": "The system shall generate monthly and quarterly expense reports with category breakdowns, totals, and trend comparisons to prior periods",
+          "user_facing": true,
+          "priority": "Should-Have",
+          "tags": ["reporting", "analytics"],
+          "metadata": {
+            "confidence": 0.93,
+            "reasoning": "Explicitly stated with specific cadences (monthly, quarterly) and content (breakdowns, totals, trends). Should-Have per stakeholder guidance — 'Reporting can come later'.",
+            "citation": {"source_reference": "generate monthly and quarterly expense reports broken down by category, with totals and trends compared to prior periods", "source_location": "paragraph 3"},
+            "trajectory": [
+              {"step": 1, "action": "retrieve", "tool": null, "detail": "Monthly + quarterly cadence, category breakdown, trends"},
+              {"step": 2, "action": "reason", "tool": null, "detail": "Stakeholder says reporting can come later — Should-Have, not Must-Have"},
+              {"step": 3, "action": "generate", "tool": null, "detail": "Captured all specified report attributes"}
+            ]
+          }
+        },
+        {
+          "id": "FR-06",
+          "title": "Report Export (PDF and CSV)",
+          "description": "The system shall export expense reports as PDF and CSV formats suitable for submission to accountants",
+          "user_facing": true,
+          "priority": "Should-Have",
+          "tags": ["reporting", "export"],
+          "metadata": {
+            "confidence": 0.94,
+            "reasoning": "Explicitly stated — 'export reports as PDF and CSV for their accountant'. Follows reporting priority.",
+            "citation": {"source_reference": "export reports as PDF and CSV for their accountant", "source_location": "paragraph 3"},
+            "trajectory": [
+              {"step": 1, "action": "retrieve", "tool": null, "detail": "Two formats specified, accountant use case"},
+              {"step": 2, "action": "reason", "tool": null, "detail": "Paired with reporting — same priority tier"},
+              {"step": 3, "action": "generate", "tool": null, "detail": "Specified 'suitable for submission' quality bar"}
+            ]
+          }
+        },
+        {
+          "id": "FR-07",
+          "title": "Year-End Tax Summary",
+          "description": "The system shall generate a year-end tax summary report matching HMRC self-assessment expense categories",
+          "user_facing": true,
+          "priority": "Should-Have",
+          "tags": ["reporting", "tax", "compliance"],
+          "metadata": {
+            "confidence": 0.93,
+            "reasoning": "Explicitly stated with specific compliance target (HMRC self-assessment). Should-Have as it's reporting tier.",
+            "citation": {"source_reference": "generate a year-end tax summary matching HMRC self-assessment categories", "source_location": "paragraph 3"},
+            "trajectory": [
+              {"step": 1, "action": "retrieve", "tool": null, "detail": "HMRC self-assessment mapping explicitly required"},
+              {"step": 2, "action": "reason", "tool": null, "detail": "High value for target users (freelancers) but reporting tier"},
+              {"step": 3, "action": "generate", "tool": null, "detail": "Linked to regulatory compliance (HMRC)"}
+            ]
+          }
+        },
+        {
+          "id": "FR-08",
+          "title": "Budget Setting Per Category",
+          "description": "The system shall allow users to set monthly spending budget limits per expense category",
+          "user_facing": true,
+          "priority": "Must-Have",
+          "tags": ["budget", "limits", "mvp"],
+          "metadata": {
+            "confidence": 0.94,
+            "reasoning": "Explicitly stated — 'set spending budgets per category per month'. Must-Have as it enables the alert system.",
+            "citation": {"source_reference": "set spending budgets per category per month", "source_location": "paragraph 4"},
+            "trajectory": [
+              {"step": 1, "action": "retrieve", "tool": null, "detail": "Budget + per category + per month specified"},
+              {"step": 2, "action": "reason", "tool": null, "detail": "Prerequisite for alerts — Must-Have to enable downstream feature"},
+              {"step": 3, "action": "generate", "tool": null, "detail": "Scoped to monthly cadence as stated"}
+            ]
+          }
+        },
+        {
+          "id": "FR-09",
+          "title": "Budget Threshold Push Notifications",
+          "description": "The system shall send push notifications to the user when spending reaches 80% and 100% of the configured budget for any category",
+          "user_facing": true,
+          "priority": "Must-Have",
+          "tags": ["budget", "notifications", "alerts", "mvp"],
+          "metadata": {
+            "confidence": 0.95,
+            "reasoning": "Explicitly stated with specific thresholds (80%, 100%). Must-Have as the primary budgeting feedback mechanism.",
+            "citation": {"source_reference": "receive push notifications when they reach 80% and 100% of their budget", "source_location": "paragraph 4"},
+            "trajectory": [
+              {"step": 1, "action": "retrieve", "tool": null, "detail": "Two threshold levels explicitly specified"},
+              {"step": 2, "action": "reason", "tool": null, "detail": "Push notifications = proactive value, not just passive data"},
+              {"step": 3, "action": "generate", "tool": null, "detail": "Captured exact thresholds from input"}
+            ]
+          }
+        },
+        {
+          "id": "FR-10",
+          "title": "Weekly Spending Summary Notification",
+          "description": "The system shall send a weekly spending summary push notification every Sunday evening",
+          "user_facing": true,
+          "priority": "Could-Have",
+          "tags": ["notifications", "summary"],
+          "metadata": {
+            "confidence": 0.91,
+            "reasoning": "Explicitly stated — 'weekly spending summary notification every Sunday evening'. Could-Have as it's a nice-to-have engagement feature, not core functionality.",
+            "citation": {"source_reference": "get a weekly spending summary notification every Sunday evening", "source_location": "paragraph 4"},
+            "trajectory": [
+              {"step": 1, "action": "retrieve", "tool": null, "detail": "Weekly cadence, Sunday evening timing specified"},
+              {"step": 2, "action": "reason", "tool": null, "detail": "Engagement feature — app works fine without it"},
+              {"step": 3, "action": "generate", "tool": null, "detail": "Could-Have — not blocking any other feature"}
+            ]
+          }
+        },
+        {
+          "id": "FR-11",
+          "title": "Email/Password Authentication",
+          "description": "The system shall support user registration and login via email and password",
+          "user_facing": true,
+          "priority": "Must-Have",
+          "tags": ["authentication", "security", "mvp"],
+          "metadata": {
+            "confidence": 0.95,
+            "reasoning": "Explicitly stated — 'Authentication should use email/password'. Must-Have as the app requires user accounts.",
+            "citation": {"source_reference": "Authentication should use email/password", "source_location": "paragraph 7"},
+            "trajectory": [
+              {"step": 1, "action": "retrieve", "tool": null, "detail": "Email/password explicitly specified as primary auth"},
+              {"step": 2, "action": "reason", "tool": null, "detail": "Foundational — everything else requires a logged-in user"},
+              {"step": 3, "action": "generate", "tool": null, "detail": "Must-Have — blocks all personalised features"}
+            ]
+          }
+        },
+        {
+          "id": "FR-12",
+          "title": "Biometric Authentication",
+          "description": "The system shall support optional biometric login (Face ID / fingerprint) for returning users",
+          "user_facing": true,
+          "priority": "Should-Have",
+          "tags": ["authentication", "biometric", "ux"],
+          "metadata": {
+            "confidence": 0.93,
+            "reasoning": "Explicitly stated as 'optional biometric'. Should-Have — enhances UX for returning users but email/password works alone.",
+            "citation": {"source_reference": "optional biometric (Face ID / fingerprint) for returning users", "source_location": "paragraph 7"},
+            "trajectory": [
+              {"step": 1, "action": "retrieve", "tool": null, "detail": "Optional + Face ID + fingerprint + returning users"},
+              {"step": 2, "action": "reason", "tool": null, "detail": "'Optional' = not Must-Have. Convenience layer."},
+              {"step": 3, "action": "generate", "tool": null, "detail": "Should-Have — great UX but not MVP blocking"}
+            ]
+          }
+        }
+      ],
+      "non_functional_requirements": [
+        {
+          "id": "NFR-01",
+          "category": "Reliability",
+          "title": "Offline Operation with Auto-Sync",
+          "description": "The system shall function fully offline for receipt capture, categorisation, and budget viewing, and automatically synchronise all data when connectivity is restored",
+          "priority": "Must-Have",
+          "metadata": {
+            "confidence": 0.96,
+            "reasoning": "Explicitly stated with 'must' — 'The app must work fully offline'. Use case justified: 'client sites or on trains where connectivity is poor'.",
+            "citation": {"source_reference": "The app must work fully offline — users often photograph receipts at client sites or on trains where connectivity is poor. All data should sync automatically when back online", "source_location": "paragraph 5"},
+            "trajectory": [
+              {"step": 1, "action": "retrieve", "tool": null, "detail": "'must work fully offline' + auto-sync + use case justification"},
+              {"step": 2, "action": "reason", "tool": null, "detail": "'must' = Must-Have. Architectural impact: local-first with sync layer."},
+              {"step": 3, "action": "generate", "tool": null, "detail": "NFR-Reliability as it's a quality attribute not a capability"}
+            ]
+          }
+        },
+        {
+          "id": "NFR-02",
+          "category": "Reliability",
+          "title": "Multi-Device Conflict Resolution",
+          "description": "The system shall resolve data conflicts when the same receipt is edited on multiple devices, preserving the most recent edit with audit trail",
+          "priority": "Should-Have",
+          "metadata": {
+            "confidence": 0.88,
+            "reasoning": "Explicitly mentioned — 'conflict resolution if the same receipt was edited on multiple devices'. Should-Have as multi-device is implied but not confirmed as MVP scope.",
+            "citation": {"source_reference": "conflict resolution if the same receipt was edited on multiple devices", "source_location": "paragraph 5"},
+            "trajectory": [
+              {"step": 1, "action": "retrieve", "tool": null, "detail": "Conflict resolution explicitly mentioned"},
+              {"step": 2, "action": "reason", "tool": null, "detail": "Implies multi-device usage — Should-Have for MVP, Must-Have later"},
+              {"step": 3, "action": "generate", "tool": null, "detail": "Added 'most recent edit + audit trail' as standard conflict strategy"}
+            ]
+          }
+        },
+        {
+          "id": "NFR-03",
+          "category": "Scalability",
+          "title": "User and Data Volume Capacity",
+          "description": "The system shall support 10,000 concurrent users with approximately 500,000 receipts processed per month (10,000 users × 50 receipts)",
+          "priority": "Must-Have",
+          "metadata": {
+            "confidence": 0.94,
+            "reasoning": "Explicitly stated capacity targets — '10,000 users in the first year with approximately 50 receipts per user per month'.",
+            "citation": {"source_reference": "handle up to 10,000 users in the first year with approximately 50 receipts per user per month", "source_location": "paragraph 6"},
+            "trajectory": [
+              {"step": 1, "action": "retrieve", "tool": null, "detail": "10K users × 50 receipts/month = 500K receipts/month"},
+              {"step": 2, "action": "reason", "tool": null, "detail": "Explicit capacity requirement — must be designed for from start"},
+              {"step": 3, "action": "generate", "tool": null, "detail": "Calculated aggregate volume for architecture sizing"}
+            ]
+          }
+        },
+        {
+          "id": "NFR-04",
+          "category": "Security",
+          "title": "GDPR Compliance",
+          "description": "The system shall comply with GDPR requirements including data minimisation, right to erasure, consent management, and data portability for UK and EU users",
+          "priority": "Must-Have",
+          "metadata": {
+            "confidence": 0.95,
+            "reasoning": "Explicitly stated — 'must comply with GDPR as we're targeting UK and EU users'. Non-negotiable regulatory requirement.",
+            "citation": {"source_reference": "must comply with GDPR as we're targeting UK and EU users", "source_location": "paragraph 6"},
+            "trajectory": [
+              {"step": 1, "action": "retrieve", "tool": null, "detail": "GDPR + UK/EU targeting explicitly stated"},
+              {"step": 2, "action": "reason", "tool": null, "detail": "Regulatory — 'must comply' = Must-Have. Affects data storage, retention, deletion."},
+              {"step": 3, "action": "generate", "tool": null, "detail": "Expanded to key GDPR rights: erasure, minimisation, consent, portability"}
+            ]
+          }
+        },
+        {
+          "id": "NFR-05",
+          "category": "Performance",
+          "title": "MVP Launch Timeline",
+          "description": "The system MVP shall be delivered within 12 weeks from project start",
+          "priority": "Must-Have",
+          "metadata": {
+            "confidence": 0.95,
+            "reasoning": "Explicitly stated — 'launch an MVP in 12 weeks'. Hard deadline constraint.",
+            "citation": {"source_reference": "launch an MVP in 12 weeks", "source_location": "paragraph 6"},
+            "trajectory": [
+              {"step": 1, "action": "retrieve", "tool": null, "detail": "12-week MVP timeline explicitly stated"},
+              {"step": 2, "action": "reason", "tool": null, "detail": "Constrains scope — Must-Have features must fit in 12 weeks"},
+              {"step": 3, "action": "generate", "tool": null, "detail": "Categorised as NFR-Performance (delivery performance)"}
+            ]
+          }
+        }
+      ],
+      "constraints": [
+        {
+          "id": "CON-01",
+          "type": "Technology",
+          "description": "Backend platform: AWS",
+          "metadata": {
+            "confidence": 0.97,
+            "reasoning": "Fixed technology decision explicitly stated — 'building this on AWS (backend)'. Constrains service selection to AWS ecosystem.",
+            "citation": {"source_reference": "building this on AWS (backend)", "source_location": "paragraph 6"}
+          }
+        },
+        {
+          "id": "CON-02",
+          "type": "Technology",
+          "description": "Mobile framework: React Native (cross-platform iOS and Android)",
+          "metadata": {
+            "confidence": 0.97,
+            "reasoning": "Fixed technology decision — 'React Native (mobile app, cross-platform iOS and Android)'. Determines both platforms from single codebase.",
+            "citation": {"source_reference": "React Native (mobile app, cross-platform iOS and Android)", "source_location": "paragraph 6"}
+          }
+        },
+        {
+          "id": "CON-03",
+          "type": "Regulatory",
+          "description": "Must comply with GDPR (UK and EU data protection)",
+          "metadata": {
+            "confidence": 0.97,
+            "reasoning": "Regulatory constraint — non-negotiable legal requirement for UK/EU users.",
+            "citation": {"source_reference": "must comply with GDPR as we're targeting UK and EU users", "source_location": "paragraph 6"}
+          }
+        },
+        {
+          "id": "CON-04",
+          "type": "Timeline",
+          "description": "MVP must launch within 12 weeks",
+          "metadata": {
+            "confidence": 0.97,
+            "reasoning": "Fixed timeline decision — constrains what can be included in first release.",
+            "citation": {"source_reference": "launch an MVP in 12 weeks", "source_location": "paragraph 6"}
+          }
+        },
+        {
+          "id": "CON-05",
+          "type": "Business",
+          "description": "Target audience: UK/EU small business owners (freelancers, sole traders, micro-businesses 1-5 employees)",
+          "metadata": {
+            "confidence": 0.96,
+            "reasoning": "Fixed audience scope — affects localisation, tax compliance, terminology decisions.",
+            "citation": {"source_reference": "freelancers, sole traders, and micro-businesses with 1-5 employees", "source_location": "paragraph 1"}
+          }
+        }
+      ],
+      "assumptions": [
+        {
+          "id": "ASM-01",
+          "description": "OCR extraction will require a third-party service (e.g., AWS Textract, Google Vision) rather than a custom-built model",
+          "needs_confirmation": true,
+          "metadata": {
+            "confidence": 0.75,
+            "reasoning": "Input says 'using OCR' but doesn't specify build vs buy. Given 12-week MVP timeline, third-party service is strongly implied but not confirmed."
+          }
+        },
+        {
+          "id": "ASM-02",
+          "description": "The 7 predefined expense categories align with HMRC self-assessment categories for the tax summary feature",
+          "needs_confirmation": true,
+          "metadata": {
+            "confidence": 0.70,
+            "reasoning": "Input lists predefined categories AND mentions HMRC tax summary separately. Unclear if they're the same set or if mapping is needed."
+          }
+        },
+        {
+          "id": "ASM-03",
+          "description": "Xero/QuickBooks integration is explicitly out of scope for MVP — standalone operation only",
+          "needs_confirmation": false,
+          "metadata": {
+            "confidence": 0.93,
+            "reasoning": "Explicitly stated — 'integrate with Xero and QuickBooks...in a future phase, but the MVP should work standalone'. Confirmed by stakeholder."
+          }
+        },
+        {
+          "id": "ASM-04",
+          "description": "Push notifications require Apple Push Notification Service (APNs) and Firebase Cloud Messaging (FCM) integration",
+          "needs_confirmation": true,
+          "metadata": {
+            "confidence": 0.80,
+            "reasoning": "React Native cross-platform + push notifications implies APNs + FCM, but no specific push service mentioned."
+          }
+        }
+      ],
+      "gaps": [
+        {
+          "id": "GAP-01",
+          "description": "No data retention policy specified — how long are receipts and expense records stored?",
+          "impact": "Cannot design storage architecture, backup strategy, or GDPR compliance for data lifecycle",
+          "suggested_question": "How long should expense data be retained? Indefinitely? 7 years (UK tax records)? Should users be able to delete all their data (GDPR right to erasure)?",
+          "metadata": {
+            "reasoning": "GDPR requires defined retention periods. Tax records in UK must be kept 5-7 years. No guidance given — critical for architecture."
+          }
+        },
+        {
+          "id": "GAP-02",
+          "description": "No multi-user/team functionality specified — can multiple employees in a micro-business share an account or view consolidated expenses?",
+          "impact": "Cannot design data model for single-user vs multi-user. Affects permissions, consolidation, and reporting.",
+          "suggested_question": "Is this single-user only, or can a business owner see all employees' expenses? Do employees submit for approval? Or is each user completely independent?",
+          "metadata": {
+            "reasoning": "Target audience includes 'micro-businesses with 1-5 employees' but all features are described in single-user terms. Unclear if multi-user is needed for MVP."
+          }
+        },
+        {
+          "id": "GAP-03",
+          "description": "No currency specification — single currency (GBP) or multi-currency support?",
+          "impact": "Cannot design amount storage, display formatting, or exchange rate handling. UK/EU targeting implies potential multi-currency need.",
+          "suggested_question": "Should the app support only GBP, or also EUR and other currencies? If multi-currency, is exchange rate conversion needed for reporting?",
+          "metadata": {
+            "reasoning": "UK + EU targeting means users may have expenses in GBP and EUR. No mention of currency handling anywhere in the input."
+          }
+        },
+        {
+          "id": "GAP-04",
+          "description": "No error recovery UX specified for failed OCR extraction",
+          "impact": "Cannot design the user flow when OCR fails or produces low-confidence results. Affects user satisfaction.",
+          "suggested_question": "When OCR fails or confidence is low, should the app: (a) show extracted data with red flags for review, (b) fall back to manual entry, or (c) queue for retry? What's the expected OCR accuracy threshold?",
+          "metadata": {
+            "reasoning": "OCR will not be 100% accurate. No guidance on the failure UX — critical for user experience with the core feature."
+          }
+        }
+      ]
+    },
+    "execution_summary": "• Produced 12 FRs (6 Must-Have, 4 Should-Have, 1 Could-Have, 1 Should-Have), 5 NFRs (4 Must-Have, 1 Should-Have), 5 constraints, 4 assumptions, 4 gaps\n• Key decisions: classified offline/sync as NFR (not FR) — quality attribute. Separated custom categories from predefined (different priorities). Weekly summary demoted to Could-Have (engagement, not core).\n• Reflection: initially missed FR-12 (biometric auth) — added. Initially had NFR-05 (12-week timeline) as constraint only — duplicated as NFR since it affects delivery performance. Verified all input paragraphs covered.\n• 4 gaps need stakeholder input before architecture: data retention, multi-user model, currency support, OCR failure UX."
+  },
+  "evaluation_criteria": {
+    "min_functional_requirements": 10,
+    "min_non_functional_requirements": 3,
+    "min_constraints": 4,
+    "min_assumptions": 3,
+    "min_gaps": 3,
+    "faithfulness": ">= 0.95",
+    "hallucination": "<= 0.05",
+    "citation_completeness": ">= 0.95",
+    "consistency": ">= 0.95",
+    "has_execution_summary": true,
+    "no_invented_features": true,
+    "priorities_assigned": true,
+    "ids_sequential": true,
+    "nfrs_measurable": true
+  }
+}

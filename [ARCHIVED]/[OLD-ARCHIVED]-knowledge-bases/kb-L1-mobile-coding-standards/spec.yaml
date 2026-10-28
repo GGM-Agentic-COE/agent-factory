@@ -1,0 +1,52 @@
+name: Mobile Coding Standards
+id: kb-L0-mobile-coding-standards
+layer: L0
+version: "1.0"
+status: active
+description: >
+  Platform-agnostic mobile coding standards covering architecture, state management,
+  accessibility, offline-first, navigation, design system, networking, security,
+  performance, testing, error handling, and code quality for Android and iOS.
+owner: mobile-platform-team
+created: "2026-04-21"
+last_updated: "2026-04-21"
+sections:
+  - id: MC1
+    title: Architecture
+  - id: MC2
+    title: State Management
+  - id: MC3
+    title: Accessibility
+  - id: MC4
+    title: Offline-First
+  - id: MC5
+    title: Navigation
+  - id: MC6
+    title: Design System
+  - id: MC7
+    title: Networking
+  - id: MC8
+    title: Security
+  - id: MC9
+    title: Performance
+  - id: MC10
+    title: Testing
+  - id: MC11
+    title: Error Handling
+  - id: MC12
+    title: Code Quality
+cross_references:
+  - target: EA7
+    sections: [MC3, MC9]
+    relation: "accessibility and performance standards"
+  - target: EA10
+    sections: [MC1, MC2, MC4, MC5]
+    relation: "mobile architecture patterns"
+  - target: EA11
+    sections: [MC6]
+    relation: "design system alignment"
+  - target: EA5
+    sections: [MC7, MC8]
+    relation: "security standards"
+content:
+  - path: content/kb-L0-mobile-coding-standards.md

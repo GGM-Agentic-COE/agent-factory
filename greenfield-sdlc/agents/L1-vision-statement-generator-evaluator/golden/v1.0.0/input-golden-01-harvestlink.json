@@ -1,0 +1,384 @@
+{
+  "original_input": {
+    "idea_brief_items": {
+      "problem_statement": {
+        "summary": "Regional UK producers face wholesaler consolidation and lack required compliance infrastructure.",
+        "confidence": 0.93,
+        "reasoning": "Combines the source page's stated consolidation pressure and compliance-documentation requirement into a single problem statement; the 'locks smaller producers out on quality alone' framing is a direct restatement of 'they lose contracts even when their product is better'.",
+        "traced_to": "big wholesalers are consolidating the market and buyers increasingly want compliance documentation (HACCP, allergen declarations, cold-chain records) before they'll even consider a new supplier... they lose contracts even when their product is better"
+      },
+      "target_users": [
+        {
+          "id": "TU-01",
+          "summary": "Independent/regional UK producers and distributors (SMEs) without an in-house compliance team.",
+          "confidence": 0.9,
+          "reasoning": "Directly named in the source as the party lacking compliance infrastructure",
+          "traced_to": "Producers without an in-house compliance team can't produce this evidence"
+        },
+        {
+          "id": "TU-02",
+          "summary": "Foodservice (HORECA) buyers wanting traceable, local ingredients but needing compliance evidence.",
+          "confidence": 0.85,
+          "reasoning": "The source names foodservice buyers as the discovery counterpart but doesn't spell out their compliance-evidence requirement as explicitly as producers' gap — inferred from 'buyers increasingly want compliance documentation... before they'll even consider a new supplier'.",
+          "traced_to": "a way for foodservice buyers (restaurants, caterers, institutional kitchens) to discover them directly... buyers increasingly want compliance documentation"
+        }
+      ],
+      "value_proposition": {
+        "summary": "Out-of-the-box compliance/traceability layer plus direct foodservice-buyer discovery for producers.",
+        "confidence": 0.92,
+        "reasoning": "Near-verbatim restatement of the source's proposed solution, with 'wholesaler-grade compliance evidence' added as a synthesis of the consolidation-pressure context earlier in the source.",
+        "traced_to": "give these producers an out-of-the-box compliance and traceability layer (HACCP records, allergen declarations, cold-chain temperature logs) plus a way for foodservice buyers... to discover them directly"
+      },
+      "candidate_success_metrics": [
+        {
+          "id": "SM-01",
+          "metric": "Time from producer onboarding to first fully-documented, compliance-complete trade with a foodservice buyer",
+          "status": "suggested",
+          "confidence": 0.7,
+          "reasoning": "The source describes the compliance-and-discovery value proposition but states no target speed or timeframe — inferred as the natural metric for that value prop, not stated by the source.",
+          "traced_to": "give these producers an out-of-the-box compliance and traceability layer... plus a way for foodservice buyers... to discover them directly"
+        },
+        {
+          "id": "SM-02",
+          "metric": "Reduction in compliance-related contract rejections for onboarded producers",
+          "status": "suggested",
+          "confidence": 0.72,
+          "reasoning": "Directly inferred from the stated problem (producers losing contracts due to compliance gaps) but the source gives no target reduction percentage.",
+          "traced_to": "they lose contracts even when their product is better"
+        }
+      ],
+      "open_questions": [
+        {
+          "id": "OQ-01",
+          "question": "The source does not specify which foodservice sub-segments (independent restaurants vs. institutional catering vs. hotel groups) are the initial target — sequencing is not defined.",
+          "reasoning": "Source names three buyer types together (restaurants, caterers, institutional kitchens) with no prioritisation among them."
+        },
+        {
+          "id": "OQ-02",
+          "question": "No stakeholder list was attached to the source Confluence page; sponsoring business unit is not yet identified.",
+          "reasoning": "stakeholder_list parameter was empty and the fetched page content names no sponsoring team."
+        }
+      ]
+    },
+    "market_analysis_items": {
+      "competitor_matrix": [
+        {
+          "id": "CM-01",
+          "name": "Bidfood",
+          "positioning_summary": "Major UK foodservice wholesaler",
+          "strengths_summary": "Full compliance infrastructure built in; broad catalogue and delivery network",
+          "weaknesses_summary": "Not producer-friendly -- consolidates supply rather than giving producers direct buyer access.",
+          "citation": {
+            "source_reference": "kb-L2-domain-market#known-market-player-categories",
+            "retrieved_date": "2026-08-02"
+          },
+          "confidence": 0.8,
+          "reasoning": "Named directly in the market-domain KB as a major foodservice wholesaler category example; weakness inferred from the KB's producer-access gap framing."
+        },
+        {
+          "id": "CM-02",
+          "name": "Brakes",
+          "positioning_summary": "Major UK foodservice wholesaler",
+          "strengths_summary": "Scale, established delivery network, buyer trust",
+          "weaknesses_summary": "Same structural gap as Bidfood — no direct-producer marketplace model",
+          "citation": {
+            "source_reference": "kb-L2-domain-market#known-market-player-categories",
+            "retrieved_date": "2026-08-02"
+          },
+          "confidence": 0.8,
+          "reasoning": "Named directly in the market-domain KB alongside Bidfood as a comparable major wholesaler."
+        },
+        {
+          "id": "CM-03",
+          "name": "Booker (Tesco-owned wholesale)",
+          "positioning_summary": "Retail-focused wholesale distribution",
+          "strengths_summary": "Strong retail-distribution scale",
+          "weaknesses_summary": "Retail-focused, not foodservice-specific; no compliance-facilitation tooling for producers.",
+          "citation": {
+            "source_reference": "kb-L2-domain-market#known-market-player-categories",
+            "retrieved_date": "2026-08-02"
+          },
+          "confidence": 0.75,
+          "reasoning": "Named in the KB; included as a boundary case (adjacent but not a direct foodservice competitor) rather than excluded, since target users include foodservice buyers evaluating alternatives broadly."
+        },
+        {
+          "id": "CM-04",
+          "name": "Independent/regional distributors (fragmented long tail)",
+          "positioning_summary": "Local relationships, trusted by small producers",
+          "strengths_summary": "Local trust; flexibility",
+          "weaknesses_summary": "No shared compliance infrastructure or digital traceability tooling; vulnerable to consolidation",
+          "citation": {
+            "source_reference": "kb-L2-domain-market#known-market-player-categories",
+            "retrieved_date": "2026-08-02"
+          },
+          "confidence": 0.75,
+          "reasoning": "Directly named in the KB as the long-tail category that includes the target producer segment's current distribution channel."
+        }
+      ],
+      "swot": {
+        "strengths": [
+          {
+            "id": "ST-01",
+            "summary": "Combines compliance-facilitation tooling with direct buyer discovery -- no competitor does both.",
+            "confidence": 0.85,
+            "reasoning": "Derived from the weaknesses of all four competitor entries, each missing one half of this combination."
+          },
+          {
+            "id": "ST-02",
+            "summary": "Targets producers squeezed by CM-01/CM-02 consolidation, not competing for the same large accounts.",
+            "confidence": 0.8,
+            "reasoning": "Derived from CM-01 and CM-02's weaknesses around producer access."
+          }
+        ],
+        "weaknesses": [
+          {
+            "id": "WK-01",
+            "summary": "No existing brand trust with either producers or foodservice buyers",
+            "confidence": 0.75,
+            "reasoning": "Inferred from CM-02's strength being buyer trust, which a new entrant does not yet have."
+          },
+          {
+            "id": "WK-02",
+            "summary": "Regulatory/legal structuring runway is a dependency before any trade can be facilitated.",
+            "confidence": 0.8,
+            "reasoning": "Derived from the idea-brief's target users, cross-referenced against the fact that none of CM-01 through CM-04 face this structuring question since they are already-established, conventionally-licensed businesses."
+          }
+        ],
+        "opportunities": [
+          {
+            "id": "OP-01",
+            "summary": "Foodservice buyers growing appetite for traceable, local ingredients is a favourable backdrop.",
+            "confidence": 0.75,
+            "reasoning": "Derived from kb-L2-domain-market's industry-trends section on rising traceability/provenance demand."
+          },
+          {
+            "id": "OP-02",
+            "summary": "Producers squeeze from wholesaler consolidation creates demand for an alternative channel.",
+            "confidence": 0.8,
+            "reasoning": "Derived directly from CM-01/CM-02's consolidation-pressure weakness and the KB's consolidation-pressure trend note."
+          }
+        ],
+        "threats": [
+          {
+            "id": "TH-01",
+            "summary": "Bidfood or Brakes could bundle a producer-marketplace feature before a new entrant reaches scale.",
+            "confidence": 0.7,
+            "reasoning": "Derived from CM-01/CM-02's strength (full compliance infrastructure already built) — closing the producer-access gap is plausible for them."
+          },
+          {
+            "id": "TH-02",
+            "summary": "Regulatory ambiguity on facilitation-vs-FBO status could slow sign-off vs a registered incumbent.",
+            "confidence": 0.65,
+            "reasoning": "Derived from WK-02 — the same structuring dependency is also a competitive-speed risk relative to incumbents who don't face it."
+          }
+        ]
+      },
+      "data_sufficiency": {
+        "status": "sufficient",
+        "rationale_summary": "4 competitor types reviewed, covering the full set of alternatives for both producers and foodservice buyers."
+      }
+    },
+    "regulatory_feasibility_items": {
+      "constraints": [
+        {
+          "id": "CON-01",
+          "name": "Food Business Operator (FBO) status",
+          "status": "Red",
+          "citation": {
+            "source_reference": "kb-L2-domain-regulatory#registration-licensing",
+            "regulation": "Regulation (EC) 852/2004 (retained UK law), Regulation (EC) 178/2002 (General Food Law)"
+          },
+          "rationale_summary": "Taking possession, repackaging, or relabelling food -- rather than only facilitating data/matching -- would make HarvestLink an FBO itself.",
+          "mitigation_summary": "Platform operates strictly as a data/matching layer; producers and distributors remain the FBOs, HarvestLink never takes possession of food.",
+          "requires_legal_review": false,
+          "confidence": 0.75,
+          "reasoning": "Classified Red because the default/naive platform design (taking possession to simplify logistics) would trigger FBO status; the facilitation-only mitigation is a precedented pattern used by other UK marketplace/SaaS platforms to avoid a regulated-activity status they aren't built for, so requires_legal_review is not needed for this specific mitigation, though the boundary itself should still be legally confirmed (see open_items)."
+        },
+        {
+          "id": "CON-02",
+          "name": "Traceability record integrity",
+          "status": "Amber",
+          "citation": {
+            "source_reference": "kb-L2-domain-regulatory#distribution-cold-chain",
+            "regulation": "Regulation (EC) 178/2002, Article 18 (one step back, one step forward)"
+          },
+          "rationale_summary": "Traceability records will be relied on by buyers and enforcement during a recall, so record integrity must be designed deliberately.",
+          "mitigation_summary": "Require producer and distributor dual sign-off on every traceability record, with an immutable, append-only audit log.",
+          "requires_legal_review": false,
+          "confidence": 0.8,
+          "reasoning": "Amber because the requirement is well-defined by the regulation and the dual-sign-off/immutable-log mitigation is a standard technical pattern, not a novel legal question."
+        },
+        {
+          "id": "CON-03",
+          "name": "Allergen declaration liability",
+          "status": "Amber",
+          "citation": {
+            "source_reference": "kb-L2-domain-regulatory#allergen-labelling",
+            "regulation": "Food Information (Amendment) (England) Regulations 2019 (\"Natasha's Law\"); Food Information Regulations 2014 / EU FIC Regulation 1169/2011"
+          },
+          "rationale_summary": "If HarvestLink auto-generates or edits an allergen declaration without attestation, liability could shift from the FBO to HarvestLink.",
+          "mitigation_summary": "Allergen declarations must be producer-attested and signed off before being finalised; HarvestLink is documentation infrastructure only.",
+          "requires_legal_review": false,
+          "confidence": 0.8,
+          "reasoning": "Amber because the liability-shifting risk is well understood and the producer-attestation mitigation is a standard, precedented pattern for platforms that facilitate but don't originate regulated content."
+        },
+        {
+          "id": "CON-04",
+          "name": "Data protection",
+          "status": "Green",
+          "citation": {
+            "source_reference": "kb-L1-regulatory-frameworks-index#cross-domain-index",
+            "regulation": "UK GDPR / Data Protection Act 2018"
+          },
+          "rationale_summary": "Standard obligation for any platform handling producer and buyer business data; not a feasibility blocker on its own.",
+          "mitigation_summary": null,
+          "requires_legal_review": false,
+          "confidence": 0.85,
+          "reasoning": "Classified Green — this is an ongoing design/monitoring requirement common to virtually any B2B platform, not something specific or novel to HarvestLink's model."
+        }
+      ],
+      "overall_status": {
+        "status": "Amber",
+        "rationale_summary": "CON-01 is Red but has a precedented facilitation-only mitigation; both Amber items have mitigations too, so overall discounts to Amber."
+      },
+      "open_items": []
+    },
+    "viability_score": 7.4
+  },
+  "generator_output": {
+    "agent_id": "L1-vision-statement-generator",
+    "agent_version": "1.0.0",
+    "execution_id": "exec-2e91c7d8",
+    "workflow_execution_id": "wf-a17c5e92",
+    "status": "success",
+    "content": {
+      "type": "vision_statement",
+      "schema_version": "1.0",
+      "items": {
+        "problem_statement": {
+          "summary": "Regional UK food producers, squeezed by wholesaler consolidation, lack compliance infrastructure buyers now require, losing contracts on paperwork.",
+          "confidence": 0.95,
+          "reasoning": "Carried forward verbatim from idea_brief_items.problem_statement — no drift."
+        },
+        "target_users": {
+          "summary": "Independent UK food producers/distributors without compliance teams, and foodservice buyers wanting traceable, compliance-documented ingredients.",
+          "confidence": 0.9,
+          "reasoning": "Condensed from idea_brief_items.target_users (TU-01, TU-02) without dropping either."
+        },
+        "value_proposition": {
+          "summary": "Out-of-the-box compliance/traceability layer plus direct foodservice-buyer discovery — no in-house compliance team needed.",
+          "confidence": 0.92,
+          "reasoning": "Carried forward verbatim from idea_brief_items.value_proposition — no drift."
+        },
+        "market_context": {
+          "summary": "No competitor combines producer-friendly access with built-in compliance tooling; top threat is Bidfood/Brakes bundling this first.",
+          "confidence": 0.82,
+          "reasoning": "Condenses market_analysis_items' SWOT (ST-01 for the strength, TH-01 for the threat) into the single most decision-relevant insight, rather than re-listing all four competitor entries.",
+          "traced_to": "CM-01, CM-02, CM-03, CM-04, ST-01, TH-01"
+        },
+        "regulatory_posture": {
+          "overall_status": "Amber",
+          "constraint_summaries": [
+            {
+              "constraint_id": "CON-01",
+              "status": "Red",
+              "mitigation_summary": "Operate strictly as a data/matching and documentation layer; producers and distributors remain the FBOs, HarvestLink never takes physical possession of food."
+            },
+            {
+              "constraint_id": "CON-02",
+              "status": "Amber",
+              "mitigation_summary": "Require producer and distributor dual sign-off on every traceability record, with an immutable audit log."
+            },
+            {
+              "constraint_id": "CON-03",
+              "status": "Amber",
+              "mitigation_summary": "Require producer attestation and sign-off before any allergen declaration is finalised on-platform."
+            }
+          ]
+        },
+        "north_star_metrics": [
+          {
+            "id": "NSM-01",
+            "metric": "Time from producer onboarding to first fully-documented, compliance-complete trade",
+            "target": "Under 14 days",
+            "confidence": 0.75,
+            "reasoning": "Carried from idea_brief_items' candidate_success_metrics (SM-01), resolved to a concrete target consistent with the roadmap's phased rollout."
+          },
+          {
+            "id": "NSM-02",
+            "metric": "Compliance-documentation completeness score at first trade",
+            "target": "At least 95%",
+            "confidence": 0.75,
+            "reasoning": "Carried from idea_brief_items' candidate_success_metrics (SM-02), resolved to a concrete target."
+          }
+        ],
+        "roadmap": [
+          {
+            "phase_number": 1,
+            "title": "Structure the platform as facilitation-only",
+            "description_summary": "Legal/product design validated with counsel to resolve the FBO-status gap (CON-01); nothing downstream proceeds until this is right.",
+            "resolves_risk": "OR-01"
+          },
+          {
+            "phase_number": 2,
+            "title": "Design and validate dual-sign-off traceability and allergen-declaration workflows",
+            "description_summary": "The Amber mitigations (CON-02, CON-03) must be built and tested with real producer/distributor data before onboarding opens beyond a pilot cohort.",
+            "resolves_risk": "OR-02"
+          },
+          {
+            "phase_number": 3,
+            "title": "Pilot launch with capped cohort and completeness-scaled transaction limits",
+            "description_summary": "Then widen limits as completeness data accumulates."
+          }
+        ],
+        "open_risks": [
+          {
+            "id": "OR-01",
+            "description_summary": "Facilitation-only structuring risk: the roadmap depends on this being right first; no fallback path exists if it can't fully avoid FBO status.",
+            "source": "regulatory",
+            "related_ids": [
+              "CON-01"
+            ]
+          },
+          {
+            "id": "OR-02",
+            "description_summary": "Compliance-completeness methodology: dual-sign-off and completeness-scoring is a design commitment, not yet a validated methodology.",
+            "source": "regulatory",
+            "related_ids": [
+              "CON-02",
+              "CON-03"
+            ]
+          },
+          {
+            "id": "OR-03",
+            "description_summary": "Competitive response speed: Bidfood or Brakes could bundle a producer-marketplace feature before HarvestLink reaches pilot launch.",
+            "source": "market",
+            "related_ids": [
+              "TH-01"
+            ]
+          }
+        ],
+        "executive_summary": {
+          "summary": "Compliance-and-discovery platform connecting UK food producers to foodservice buyers; feasible if kept facilitation-only, the key open risk.",
+          "confidence": 0.88,
+          "reasoning": "Every sentence condenses a claim already present in problem_statement, market_context, regulatory_posture, or open_risks (OR-01) — no new claim introduced. Written last, after every other section was finalized."
+        }
+      },
+      "artifacts": [
+        {
+          "id": "artifact-1b2c3d4e",
+          "type": "document",
+          "name": "vision.md",
+          "format": "markdown",
+          "storage": {
+            "provider": "s3",
+            "location": "s3://adlc-artifacts/exec-2e91c7d8/vision.md"
+          },
+          "description": "Vision statement for HarvestLink, reconciling idea, market, and regulatory findings",
+          "produced_by": "L1-vision-statement-generator"
+        }
+      ],
+      "execution_summary": "• Produced 2 north-star metrics, 3 roadmap phases, 3 open risks (2 regulatory, 1 market).\n• Key reconciliation: all 3 Amber/Red constraints (CON-01, CON-02, CON-03) are covered by open_risks — CON-01 got its own entry (OR-01) since it's the Red item with the most distinct mitigation path; CON-02 and CON-03 were grouped into one combined entry (OR-02) since both are the same underlying 'compliance workflow design' concern. Coverage confirmed, not forced into a rigid 1:1 count.\n• viability_score: 7.4 — clears qg-L1-viability-score (≥7); no HITL escalation needed.\n• Knowledge bases consulted: none — synthesis-only agent.\n• Guardrails evaluated: gr-L1-output-schema-validator (pass), gr-L1-pii-detection (pass), gr-L1-hallucination-check (pass), gr-L1-consistency-check (pass — every regulatory constraint_id appears in at least one open_risks.related_ids).\n• Tools invoked: none — publishing is L1-confluence-publisher's job, not this agent's.\n• Gaps flagged: none beyond what's already captured in open_risks."
+    }
+  }
+}

@@ -1,0 +1,202 @@
+{
+  "test_id": "golden-01-auth-stories",
+  "description": "Production-grade story decomposition for Authentication epic — foundation through enhancement tiers",
+  "agent_id": "L1-inception-stories-generator-agent",
+  "agent_version": "1.0.0",
+  "execution_id": "exec-golden-stories-001",
+  "input_summary": {
+    "source": "agent_output",
+    "source_agent_id": "L1-inception-epics-generator-agent",
+    "parameters": {"epic_count": 1, "feature_count": 2}
+  },
+  "content": {
+    "type": "stories",
+    "schema_version": "1.0",
+    "items": {
+      "total_stories": 6,
+      "total_story_points": 24,
+      "epics": [
+        {
+          "epic_id": "EP-05",
+          "epic_title": "Authentication & Security",
+          "stories": [
+            {
+              "story_id": "US-001",
+              "feature_id": "F-05.1",
+              "title": "Registration Form & Email Validation",
+              "user_story": "As a new user, I want to register with my email and password, so that I can create an account and start tracking expenses.",
+              "acceptance_criteria": [
+                "Given I am on the registration screen, When I enter a valid email and password meeting requirements (min 8 chars, 1 uppercase, 1 number), Then my account is created and a welcome email is sent",
+                "Given I enter an email already registered, When I tap 'Register', Then I see 'Account already exists' with a link to the login screen",
+                "Given I enter a password that doesn't meet requirements, When I tap 'Register', Then inline validation shows which requirements are not met"
+              ],
+              "story_points": 5,
+              "data_sensitivity": "Confidential",
+              "change_type": "new",
+              "regulatory_linkage": "GDPR Art. 6 — consent for account creation",
+              "depends_on": [],
+              "metadata": {
+                "confidence": 0.95,
+                "reasoning": "Foundation story for all auth — no dependencies. 5 points: form UI + validation + email send + duplicate handling. Confidential: stores email/password.",
+                "citation": {"source_reference": "F-05.1", "source_location": "EP-05 > F-05.1"},
+                "trajectory": [
+                  {"step": 1, "action": "retrieve", "tool": null, "detail": "Feature specifies email/password registration with validation rules"},
+                  {"step": 2, "action": "reason", "tool": null, "detail": "Foundation — all other auth stories depend on account existing"},
+                  {"step": 3, "action": "generate", "tool": null, "detail": "Registration form with full validation and error handling"}
+                ]
+              }
+            },
+            {
+              "story_id": "US-002",
+              "feature_id": "F-05.1",
+              "title": "Login with Email/Password",
+              "user_story": "As a registered user, I want to log in with my email and password, so that I can access my expense data securely.",
+              "acceptance_criteria": [
+                "Given I am on the login screen, When I enter valid credentials, Then I am authenticated and redirected to the home screen",
+                "Given I enter incorrect credentials, When I tap 'Login', Then I see 'Invalid email or password' without revealing which is wrong",
+                "Given I fail login 5 times, When I attempt a 6th login, Then my account is temporarily locked for 15 minutes with a message explaining why"
+              ],
+              "story_points": 3,
+              "data_sensitivity": "Confidential",
+              "change_type": "new",
+              "regulatory_linkage": null,
+              "depends_on": ["US-001"],
+              "metadata": {
+                "confidence": 0.95,
+                "reasoning": "Core auth flow — depends on registration (US-001). 3 points: simpler than registration (no email send, no account creation). Includes rate limiting.",
+                "citation": {"source_reference": "F-05.1", "source_location": "EP-05 > F-05.1"},
+                "trajectory": [
+                  {"step": 1, "action": "retrieve", "tool": null, "detail": "Feature requires login capability"},
+                  {"step": 2, "action": "reason", "tool": null, "detail": "Depends on registration — can't login without account"},
+                  {"step": 3, "action": "generate", "tool": null, "detail": "Login flow with security (rate limiting, no credential enumeration)"}
+                ]
+              }
+            },
+            {
+              "story_id": "US-003",
+              "feature_id": "F-05.1",
+              "title": "Password Reset Flow",
+              "user_story": "As a user who forgot my password, I want to reset it via email, so that I can regain access to my account.",
+              "acceptance_criteria": [
+                "Given I tap 'Forgot Password', When I enter my registered email, Then a password reset link is sent (valid for 1 hour, single-use)",
+                "Given I click the reset link, When I enter a new password meeting requirements, Then my password is updated and all existing sessions are invalidated",
+                "Given I enter an unregistered email, When I tap 'Send Reset Link', Then the same success message is shown (no account enumeration)"
+              ],
+              "story_points": 3,
+              "data_sensitivity": "Confidential",
+              "change_type": "new",
+              "regulatory_linkage": null,
+              "depends_on": ["US-001"],
+              "metadata": {
+                "confidence": 0.88,
+                "reasoning": "Enhancement to registration — not explicitly in feature description but essential for production auth. Lower confidence (inferred). 3 points: reset email + token + session invalidation.",
+                "citation": {"source_reference": "F-05.1", "source_location": "EP-05 > F-05.1"},
+                "trajectory": [
+                  {"step": 1, "action": "reason", "tool": null, "detail": "Password reset is implied by email/password auth — users forget passwords"},
+                  {"step": 2, "action": "generate", "tool": null, "detail": "Reset flow with security best practices (no enumeration, expiry, single-use)"}
+                ]
+              }
+            },
+            {
+              "story_id": "US-004",
+              "feature_id": "F-05.2",
+              "title": "Biometric Enrolment After First Login",
+              "user_story": "As a returning user, I want to enrol my biometric (Face ID or fingerprint) after my first successful login, so that I can log in faster next time.",
+              "acceptance_criteria": [
+                "Given I have just logged in with email/password for the first time, When the home screen loads, Then I am prompted 'Enable Face ID/fingerprint for faster login?'",
+                "Given I accept biometric enrolment, When the OS biometric prompt completes successfully, Then biometric login is enabled and confirmed",
+                "Given my device does not support biometrics, When login completes, Then no biometric prompt is shown and password-only flow continues"
+              ],
+              "story_points": 5,
+              "data_sensitivity": "Restricted",
+              "change_type": "new",
+              "regulatory_linkage": null,
+              "depends_on": ["US-002"],
+              "metadata": {
+                "confidence": 0.93,
+                "reasoning": "Foundation for biometric feature — enrolment must happen before biometric login works. Depends on password login (US-002). 5 points: OS biometric API + secure storage + device capability check. Restricted: biometric data.",
+                "citation": {"source_reference": "F-05.2", "source_location": "EP-05 > F-05.2"},
+                "trajectory": [
+                  {"step": 1, "action": "retrieve", "tool": null, "detail": "Feature specifies enrolment after first successful login"},
+                  {"step": 2, "action": "reason", "tool": null, "detail": "Must happen before biometric login — prerequisite"},
+                  {"step": 3, "action": "generate", "tool": null, "detail": "Enrolment prompt with device capability detection"}
+                ]
+              }
+            },
+            {
+              "story_id": "US-005",
+              "feature_id": "F-05.2",
+              "title": "Biometric Login for Returning Users",
+              "user_story": "As a returning user with biometrics enabled, I want to log in using Face ID or fingerprint, so that I can access my data without typing my password.",
+              "acceptance_criteria": [
+                "Given I have biometrics enabled, When I open the app, Then the OS biometric prompt appears automatically",
+                "Given biometric authentication succeeds, When the OS confirms identity, Then I am logged in and see the home screen within 2 seconds",
+                "Given biometric fails 3 consecutive times, When I attempt a 4th time, Then biometric is disabled for this session and I am prompted to enter my password"
+              ],
+              "story_points": 5,
+              "data_sensitivity": "Restricted",
+              "change_type": "new",
+              "regulatory_linkage": null,
+              "depends_on": ["US-004"],
+              "metadata": {
+                "confidence": 0.93,
+                "reasoning": "Core biometric flow — depends on enrolment (US-004). 5 points: OS biometric API + session management + fallback logic. Restricted: biometric verification.",
+                "citation": {"source_reference": "F-05.2", "source_location": "EP-05 > F-05.2"},
+                "trajectory": [
+                  {"step": 1, "action": "retrieve", "tool": null, "detail": "Feature specifies Face ID/fingerprint login for returning users"},
+                  {"step": 2, "action": "reason", "tool": null, "detail": "Depends on enrolment — can't use biometric without setting it up"},
+                  {"step": 3, "action": "generate", "tool": null, "detail": "Biometric login with 3-attempt fallback to password"}
+                ]
+              }
+            },
+            {
+              "story_id": "US-006",
+              "feature_id": "F-05.2",
+              "title": "Biometric Revocation and Re-enrolment",
+              "user_story": "As a user, I want to disable biometric login from settings and optionally re-enrol, so that I have control over my authentication method.",
+              "acceptance_criteria": [
+                "Given I am in Settings > Security, When I tap 'Disable Biometric Login', Then biometric is disabled immediately and I must use password for next login",
+                "Given biometrics are disabled, When I tap 'Enable Biometric Login', Then the enrolment flow is triggered again",
+                "Given I have changed my device's registered biometrics (e.g., added new fingerprint), When I next open the app, Then I am prompted to re-authenticate with password before biometric is re-enabled"
+              ],
+              "story_points": 3,
+              "data_sensitivity": "Restricted",
+              "change_type": "new",
+              "regulatory_linkage": null,
+              "depends_on": ["US-005"],
+              "metadata": {
+                "confidence": 0.85,
+                "reasoning": "Enhancement — management of biometric settings. Lower confidence (inferred from 'optional biometric' implying user control). 3 points: settings UI + revocation + re-enrolment. Restricted: modifies biometric config.",
+                "citation": {"source_reference": "F-05.2", "source_location": "EP-05 > F-05.2"},
+                "trajectory": [
+                  {"step": 1, "action": "reason", "tool": null, "detail": "'Optional' biometric implies user can disable/re-enable"},
+                  {"step": 2, "action": "generate", "tool": null, "detail": "Settings-based management with security re-check on biometric change"}
+                ]
+              }
+            }
+          ],
+          "coverage_matrix": [
+            {"feature_id": "F-05.1", "stories": ["US-001", "US-002", "US-003"], "total_points": 11},
+            {"feature_id": "F-05.2", "stories": ["US-004", "US-005", "US-006"], "total_points": 13}
+          ]
+        }
+      ]
+    },
+    "execution_summary": "• Produced 6 stories (24 points total) for 1 epic, 2 features\n• Feature coverage: F-05.1 (3 stories, 11 pts), F-05.2 (3 stories, 13 pts)\n• Dependency chain: US-001 → US-002 → US-004 → US-005 → US-006; US-001 → US-003\n• Key decisions: added password reset (US-003) as inferred necessity — confidence 0.88. Added biometric revocation (US-006) as user control requirement.\n• Reflection: verified no circular dependencies, all ACs are Given/When/Then, no story exceeds 5 points. US-003 and US-006 are inferred (not explicit in feature) — flagged with lower confidence.\n• Data sensitivity: 3 stories Confidential (email/password), 3 stories Restricted (biometric)."
+  },
+  "evaluation_criteria": {
+    "min_stories_per_feature": 2,
+    "max_story_points": 8,
+    "ac_count_range": [3, 5],
+    "given_when_then_format": true,
+    "dependencies_acyclic": true,
+    "all_features_covered": true,
+    "has_coverage_matrix": true,
+    "has_execution_summary": true,
+    "faithfulness": ">= 0.90",
+    "hallucination": "<= 0.10",
+    "consistency": ">= 0.90",
+    "data_sensitivity_assigned": true,
+    "user_story_format": "As a..."
+  }
+}

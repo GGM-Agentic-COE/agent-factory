@@ -1,0 +1,13 @@
+prompts:
+  - task: self_check_output
+    content: |
+      Agent output: {{ bot_response }}
+      
+      For multi-item outputs, check internal consistency:
+      1. Are all item IDs unique (no duplicates)?
+      2. Are there contradictions between items (conflicting claims about the same entity)?
+      3. Is the same field given conflicting enum values across items?
+      4. Are entities referenced consistently (same name/format throughout)?
+      5. Do items contradict each other logically?
+      
+      Answer "yes" if output is internally consistent. Answer "no" if contradictions or duplicates are found.

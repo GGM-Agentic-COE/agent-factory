@@ -1,0 +1,478 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">
+<title>E2E SDLC Agent Architecture — Greenfield (Idea → Code)</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+:root{--navy:#1B2A4A;--teal:#0A7E8C;--teal-lt:#E8F6F7;--green:#1B8C3A;--green-lt:#E8F5E9;--amber:#D4880F;--amber-lt:#FFF8E1;--red:#C62828;--purple:#5E35B1;--gray:#F4F5F7;--gray-mid:#E0E3E8;--gray-txt:#666;--charcoal:#2D3748;
+--idea:#AD1457;--idea-lt:#FCE4EC;--reqs:#3949AB;--reqs-lt:#E8EAF6;--plan:#EF6C00;--plan-lt:#FFF3E0;--incept:#0052CC;--incept-lt:#E9F2FF;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Inter',sans-serif;background:#fff;color:var(--charcoal);}
+.page{max-width:1500px;margin:0 auto;padding:24px;}
+h2{font-size:16px;font-weight:800;color:var(--navy);margin:20px 0 8px;}
+h3{font-size:13px;font-weight:700;color:var(--navy);margin:14px 0 6px;}
+.phase{border:2px solid var(--gray-mid);border-radius:12px;padding:16px;margin-bottom:12px;position:relative;}
+.phase-label{position:absolute;top:-10px;left:16px;background:#fff;padding:0 8px;font-size:11px;font-weight:800;letter-spacing:1px;}
+.phase-sub{font-size:10px;color:var(--gray-txt);margin:0 0 8px;font-style:italic;}
+.agent-box{border:2px solid var(--teal);border-radius:8px;padding:10px;background:var(--teal-lt);display:inline-block;vertical-align:top;margin:4px;min-width:140px;text-align:center;font-size:9px;}
+.agent-box h5{font-size:10px;font-weight:700;color:var(--teal);margin-bottom:3px;}
+.tool-box{border:2px solid var(--green);border-radius:8px;padding:8px;background:var(--green-lt);display:inline-block;vertical-align:top;margin:4px;min-width:110px;text-align:center;font-size:9px;}
+.tool-box h5{font-size:10px;font-weight:700;color:var(--green);margin-bottom:2px;}
+.kb-box{border:2px solid var(--amber);border-radius:8px;padding:8px;background:var(--amber-lt);display:inline-block;vertical-align:top;margin:4px;min-width:130px;text-align:center;font-size:9px;}
+.kb-box h5{font-size:10px;font-weight:700;color:var(--amber);margin-bottom:2px;}
+.gr-box{border:2px solid var(--red);border-radius:8px;padding:8px;background:#FFEBEE;display:inline-block;vertical-align:top;margin:4px;min-width:120px;text-align:center;font-size:9px;}
+.gr-box h5{font-size:10px;font-weight:700;color:var(--red);margin-bottom:2px;}
+.qg-box{border:2px solid var(--purple);border-radius:6px;padding:4px 8px;background:#F3E8FF;display:inline-block;font-size:8px;font-weight:700;color:var(--purple);margin:2px;}
+.output-box{border:2px solid var(--navy);border-radius:8px;padding:8px;background:#E9F2FF;display:inline-block;vertical-align:top;margin:4px;min-width:110px;text-align:center;font-size:9px;}
+.output-box h5{font-size:10px;font-weight:700;color:var(--navy);margin-bottom:2px;}
+.arrow{display:inline-block;font-size:16px;color:var(--gray-txt);vertical-align:middle;margin:0 4px;}
+.arrow-down{text-align:center;font-size:18px;color:var(--teal);padding:4px 0;}
+.flow-row{display:flex;align-items:center;gap:4px;flex-wrap:wrap;margin:6px 0;}
+.legend{display:flex;gap:12px;flex-wrap:wrap;margin:12px 0;font-size:10px;}
+.legend-item{display:flex;align-items:center;gap:4px;}
+.legend-dot{width:12px;height:12px;border-radius:3px;border:2px solid;}
+table{width:100%;border-collapse:collapse;font-size:10.5px;margin:8px 0;}
+th{padding:6px 8px;background:var(--navy);color:#fff;font-weight:700;font-size:9.5px;text-transform:uppercase;text-align:left;}
+td{padding:6px 8px;border-bottom:1px solid var(--gray-mid);}
+tr:nth-child(even) td{background:#FAFBFC;}
+code{background:#E5E7EB;padding:1px 4px;border-radius:3px;font-size:9.5px;}
+.chip{display:inline-block;padding:2px 8px;border-radius:10px;font-size:9px;font-weight:700;}
+.callout{border-radius:8px;padding:10px 14px;margin:10px 0;font-size:11px;border:1px solid;}
+.new-tag{background:var(--idea);color:#fff;font-size:7px;font-weight:800;padding:1px 5px;border-radius:4px;margin-left:3px;vertical-align:middle;}
+</style></head><body>
+
+<div style="background:linear-gradient(135deg,var(--navy),#2A3F6A);padding:20px 40px;color:#fff;">
+<div style="max-width:1500px;margin:0 auto;">
+<div style="font-size:9px;text-transform:uppercase;letter-spacing:1px;opacity:.5;">Agent Factory Reference — Greenfield Extension</div>
+<h1 style="font-size:22px;font-weight:800;">E2E SDLC Agent Architecture — Idea → Vision → Requirements → Code</h1>
+<p style="opacity:.7;font-size:12px;">Idea → Vision → Requirements → Impact Assessment → Dependency Graph → Sprint Planning → Epics/Stories → HLD/LLD/Wireframes/User Journeys/API Specs → Test Scenarios/Cases/Scripts → API Code Gen + UI Code Gen → PR</p>
+<p style="opacity:.55;font-size:10.5px;margin-top:4px;">Extends <code style="background:rgba(255,255,255,.15);color:#fff;">Agent_Factory_E2E_SDLC_Diagram.html</code> (Phases 3–7 below) upstream to cover full greenfield inception, per <code style="background:rgba(255,255,255,.15);color:#fff;">00-ai-augmented-sdlc.html</code> and named per <code style="background:rgba(255,255,255,.15);color:#fff;">01-agent-development-naming-standard.html</code>.</p>
+</div></div>
+
+<div class="page">
+
+<!-- LEGEND -->
+<div class="legend">
+<div class="legend-item"><div class="legend-dot" style="background:var(--teal-lt);border-color:var(--teal);"></div> Agent</div>
+<div class="legend-item"><div class="legend-dot" style="background:var(--green-lt);border-color:var(--green);"></div> Tool</div>
+<div class="legend-item"><div class="legend-dot" style="background:var(--amber-lt);border-color:var(--amber);"></div> Knowledge Base</div>
+<div class="legend-item"><div class="legend-dot" style="background:#FFEBEE;border-color:var(--red);"></div> Guardrail</div>
+<div class="legend-item"><div class="legend-dot" style="background:#F3E8FF;border-color:var(--purple);"></div> Quality Gate / Verifier</div>
+<div class="legend-item"><div class="legend-dot" style="background:#E9F2FF;border-color:var(--navy);"></div> Output / Artifact</div>
+<div class="legend-item"><span class="new-tag">NEW</span> Agent not present in the original 14-agent diagram</div>
+</div>
+
+<!-- INPUT -->
+<div style="text-align:center;margin:12px 0;">
+<div style="display:inline-block;background:var(--navy);color:#fff;padding:10px 24px;border-radius:8px;font-size:12px;font-weight:700;">
+💡 INPUT: Idea — "HarvestLink — a compliance-enabled marketplace connecting independent UK food producers directly to foodservice buyers"
+</div>
+</div>
+<div class="arrow-down">▼</div>
+
+<!-- PHASE 0: IDEA & VISION -->
+<div class="phase" style="border-color:var(--idea);">
+<div class="phase-label" style="color:var(--idea);">PHASE 0: IDEA → VISION</div>
+<p class="phase-sub">Turns a raw idea into a validated, fundable vision. Human gate: Product Lead sign-off before Requirements starts.</p>
+
+<div class="flow-row">
+<div class="agent-box" style="border-color:var(--idea);background:var(--idea-lt);"><h5>B1: Idea Intake Agent <span class="new-tag">NEW</span></h5>L1-vision-idea-intake<br>Reflection + Grounding</div>
+<span class="arrow">→</span>
+<div class="agent-box" style="border-color:var(--idea);background:var(--idea-lt);"><h5>B2: Market Analyzer <span class="new-tag">NEW</span></h5>L1-vision-market-analyzer<br>Grounding + Citation<br><span style="font-size:8px;">Competitor scan + SWOT</span></div>
+<span class="arrow">→</span>
+<div class="agent-box" style="border-color:var(--idea);background:var(--idea-lt);"><h5>B3: Regulatory Feasibility Checker <span class="new-tag">NEW</span></h5>L1-vision-regulatory-feasibility-checker<br>Grounding + Citation</div>
+<span class="arrow">→</span>
+<div class="qg-box">QG: viability-score ≥7</div>
+<span class="arrow">→</span>
+<div class="agent-box" style="border-color:var(--idea);background:var(--idea-lt);"><h5>B4: Vision Statement Generator <span class="new-tag">NEW</span></h5>L1-vision-statement-generator<br>Reflection + CoT</div>
+<span class="arrow">→</span>
+<div class="output-box"><h5>📄 vision.md</h5>Problem, target users,<br>north-star metrics, roadmap outline</div>
+</div>
+
+<div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap;">
+<div class="gr-box"><h5>🛡 Guardrails</h5>gr-L1-hallucination-check<br>gr-L1-consistency-check</div>
+<div class="kb-box"><h5>📚 Knowledge Bases</h5>kb-L2-domain-market <span class="new-tag">NEW</span><br>kb-L1-regulatory-frameworks-index <span class="new-tag">NEW</span><br>kb-L2-domain-regulatory <span class="new-tag">NEW</span><br><span style="font-size:8px;color:var(--gray-txt);">(B1/B4 need none — template folded into instructions per S4)</span></div>
+<div class="tool-box"><h5>🔧 Tools</h5>tool-L1-web-search-competitor-scan <span class="new-tag">NEW</span><br>tool-L1-regulatory-db-lookup <span class="new-tag">NEW</span></div>
+</div>
+<div class="callout" style="background:var(--idea-lt);border-color:var(--idea);color:#7d0e42;"><strong>Human gate:</strong> Product Lead validates vision statement and viability score before Requirements Elaboration is authorized. No Jira/GitHub side effects at this phase — pure analysis and drafting.</div>
+</div>
+
+<div class="arrow-down">▼ Vision Statement</div>
+
+<!-- PHASE 1: REQUIREMENTS & IMPACT ANALYSIS -->
+<div class="phase" style="border-color:var(--reqs);">
+<div class="phase-label" style="color:var(--reqs);">PHASE 1: REQUIREMENTS → IMPACT ASSESSMENT → DEPENDENCY GRAPH</div>
+<p class="phase-sub">Structures the vision into requirements, classifies NFRs, and models blast radius and sequencing risk before anything is prioritized.</p>
+
+<div class="flow-row">
+<div class="agent-box" style="border-color:var(--reqs);background:var(--reqs-lt);"><h5>B5: Requirements Elicitor <span class="new-tag">NEW</span></h5>L1-requirements-elicitor<br>Reflection + Grounding</div>
+<span class="arrow">→</span>
+<div class="agent-box" style="border-color:var(--reqs);background:var(--reqs-lt);"><h5>B6: NFR Classifier <span class="new-tag">NEW</span></h5>L1-requirements-nfr-classifier<br>Grounding + CoT</div>
+<span class="arrow">→</span>
+<div class="qg-box">QG: requirements-completeness ≥7</div>
+<span class="arrow">→</span>
+<div class="output-box"><h5>📄 requirements.md</h5>Functional + NFR spec,<br>boundary conditions</div>
+</div>
+
+<div class="flow-row">
+<span style="width:60px;display:inline-block;"></span>
+<span class="arrow">↳</span>
+<div class="agent-box" style="border-color:var(--reqs);background:var(--reqs-lt);"><h5>B7: Impact Assessor <span class="new-tag">NEW</span></h5>L1-planning-impact-assessor<br>CoT + Verification</div>
+<span class="arrow">→</span>
+<div class="agent-box" style="border-color:var(--reqs);background:var(--reqs-lt);"><h5>B8: Dependency Mapper <span class="new-tag">NEW</span></h5>L1-planning-dependency-mapper<br>Graph reasoning + Verification</div>
+<span class="arrow">→</span>
+<div class="qg-box">QG: dependency-graph-integrity ≥7 (no cycles)</div>
+<span class="arrow">→</span>
+<div class="output-box"><h5>📊 dependency-graph.json</h5>Component/service graph,<br>critical path, risk scores</div>
+</div>
+
+<div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap;">
+<div class="gr-box"><h5>🛡 Guardrails</h5>gr-L1-schema-validator<br>gr-L1-consistency-check<br>gr-L2-food-domain-compliance</div>
+<div class="kb-box"><h5>📚 Knowledge Bases</h5>kb-L1-enterprise-architecture<br>kb-L2-domain-regulatory</div>
+</div>
+</div>
+
+<div class="arrow-down">▼ Requirements + Dependency Graph</div>
+
+<!-- PHASE 2: PROJECT / SPRINT PLANNING -->
+<div class="phase" style="border-color:var(--plan);">
+<div class="phase-label" style="color:var(--plan);">PHASE 2: PROJECT / SPRINT PLANNING</div>
+<p class="phase-sub">Sequences work by value, effort, and dependency risk; fits it into 5-day Feature Cycles ahead of Inception breakdown.</p>
+
+<div class="flow-row">
+<div class="agent-box" style="border-color:var(--plan);background:var(--plan-lt);"><h5>B9: Backlog Prioritizer <span class="new-tag">NEW</span></h5>L1-planning-backlog-prioritizer<br>CoT + Grounding</div>
+<span class="arrow">→</span>
+<div class="agent-box" style="border-color:var(--plan);background:var(--plan-lt);"><h5>B10: Sprint Planner <span class="new-tag">NEW</span></h5>L1-planning-sprint-planner<br>CoT + Grounding<br><span style="font-size:8px;">5-day Feature Cycle allocation</span></div>
+<span class="arrow">→</span>
+<div class="qg-box">QG: backlog-sequencing-validity ≥7</div>
+<span class="arrow">→</span>
+<div class="agent-box" style="border-color:var(--green);background:var(--green-lt);"><h5>Jira Orchestrator</h5>Creates initiative + roadmap in Jira</div>
+<span class="arrow">→</span>
+<div class="output-box"><h5>📌 Roadmap</h5>Sequenced Feature Cycles<br>with capacity fit</div>
+</div>
+
+<div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap;">
+<div class="tool-box"><h5>🔧 Tools</h5>tool-L1-jira-create-issue<br>tool-L1-jira-update-issue</div>
+<div class="callout" style="background:var(--plan-lt);border-color:var(--plan);color:#8a4400;"><strong>Human gate:</strong> Product Lead approves dependencies and capacity fit. No Feature enters Inception until the roadmap is human-approved (per Inception "Backlog approval" gate).</div>
+</div>
+</div>
+
+<div class="arrow-down">▼ Approved Roadmap</div>
+
+<!-- PHASE 3: INCEPTION (existing, unchanged) -->
+<div class="phase" style="border-color:var(--incept);">
+<div class="phase-label" style="color:var(--incept);">PHASE 3: INCEPTION — EPICS, FEATURES, STORIES <span style="font-weight:400;color:var(--gray-txt);">(from original diagram)</span></div>
+
+<div class="flow-row">
+<div class="agent-box"><h5>A1: Epic Creator</h5>L1-inception-epic-creator<br>Reflection + Grounding</div>
+<span class="arrow">→</span>
+<div class="qg-box">QG: epic-quality ≥7</div>
+<span class="arrow">→</span>
+<div class="agent-box"><h5>A2: Feature Decomposer</h5>L1-inception-feature-decomposer<br>Reflection + Grounding + CoT</div>
+<span class="arrow">→</span>
+<div class="qg-box">QG: feature-completeness ≥7</div>
+<span class="arrow">→</span>
+<div class="agent-box" style="border-color:var(--incept);background:var(--incept-lt);"><h5>A3: Story Generator</h5>L1-inception-story-generator<br>Reflection + Grounding + Citation</div>
+<span class="arrow">→</span>
+<div class="qg-box">QG: story-quality ≥7</div>
+<span class="arrow">→</span>
+<div class="agent-box"><h5>A12: Verifier</h5>L1-quality-verifier<br>Independent review</div>
+</div>
+
+<div class="flow-row">
+<span style="width:60px;display:inline-block;"></span>
+<span class="arrow">↳</span>
+<div class="agent-box"><h5>A4: Task Generator</h5>L1-inception-task-generator<br>Reflection + Grounding</div>
+<span class="arrow">→</span>
+<div class="qg-box">QG: task-completeness ≥6</div>
+<span class="arrow">→</span>
+<div class="agent-box" style="border-color:var(--green);background:var(--green-lt);"><h5>A13: Jira Orchestrator</h5>Creates epics, stories, tasks in Jira</div>
+<span class="arrow">→</span>
+<div class="output-box"><h5>📌 Jira Issues</h5>Epics, stories, tasks</div>
+</div>
+
+<div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap;">
+<div class="gr-box"><h5>🛡 Guardrails</h5>gr-L1-schema-validator<br>gr-L1-pii-detection<br>gr-L1-hallucination-check<br>gr-L2-food-domain-compliance</div>
+<div class="kb-box"><h5>📚 Knowledge Bases</h5>kb-L1-enterprise-security<br>kb-L1-sdlc-templates<br>kb-L2-food-domain</div>
+<div class="tool-box"><h5>🔧 Tools</h5>tool-L1-jira-fetch-issue<br>tool-L1-jira-create-issue</div>
+</div>
+</div>
+
+<div class="arrow-down">▼ Stories + Features</div>
+
+<!-- PHASE 4: DESIGN (existing + user journeys + data architect) -->
+<div class="phase" style="border-color:var(--teal);">
+<div class="phase-label" style="color:var(--teal);">PHASE 4: DESIGN — USER JOURNEYS, WIREFRAMES, HLD, LLD, API SPEC, DATA MODEL</div>
+
+<div style="display:flex;gap:8px;flex-wrap:wrap;">
+
+<div style="flex:1;min-width:200px;">
+<div class="agent-box" style="width:100%;border-color:var(--idea);background:var(--idea-lt);"><h5>A5a: User Journey Mapper <span class="new-tag">NEW</span></h5>L1-design-user-journey-mapper<br>Reflection + Grounding</div>
+<div class="qg-box" style="display:block;margin-top:4px;">QG: journey-coverage ≥7</div>
+<div class="output-box" style="display:block;margin-top:4px;"><h5>📄 user-journeys.md</h5>End-to-end persona flows,<br>touchpoints, drop-off risks</div>
+</div>
+
+<div style="flex:1;min-width:200px;">
+<div class="agent-box" style="width:100%;"><h5>A5: UX Wireframe Agent</h5>L1-design-ux-wireframe<br>Reflection + Verification</div>
+<div class="qg-box" style="display:block;margin-top:4px;">QG: ux-completeness ≥7</div>
+<div class="output-box" style="display:block;margin-top:4px;"><h5>📄 wireframes.md</h5>Component hierarchy,<br>screen layouts, interactions</div>
+</div>
+
+<div style="flex:1;min-width:200px;">
+<div class="agent-box" style="width:100%;"><h5>A7: HLD Agent</h5>L1-design-hld<br>Reflection + CoT + Verification</div>
+<div class="qg-box" style="display:block;margin-top:4px;">QG+Verify: hld-quality ≥7</div>
+<div class="output-box" style="display:block;margin-top:4px;"><h5>📄 hld.md</h5>C4 diagrams, components,<br>data flow, integrations</div>
+</div>
+
+<div style="flex:1;min-width:200px;">
+<div class="agent-box" style="width:100%;"><h5>A6: API Spec Agent</h5>L1-design-api-spec<br>Reflection + Grounding + Schema</div>
+<div class="gr-box" style="display:block;margin-top:4px;"><h5>🛡 OpenAPI Schema Validation</h5></div>
+<div class="output-box" style="display:block;margin-top:4px;"><h5>📄 openapi.yaml</h5>Endpoints, schemas,<br>auth, error codes</div>
+</div>
+
+<div style="flex:1;min-width:200px;">
+<div class="agent-box" style="width:100%;"><h5>A8: LLD Agent</h5>L1-design-lld<br>Reflection + CoT + Verification</div>
+<div class="qg-box" style="display:block;margin-top:4px;">QG: lld-quality ≥7</div>
+<div class="output-box" style="display:block;margin-top:4px;"><h5>📄 lld.md</h5>Classes, sequences,<br>error handling</div>
+</div>
+
+<div style="flex:1;min-width:200px;">
+<div class="agent-box" style="width:100%;border-color:var(--idea);background:var(--idea-lt);"><h5>A8a: Data Architect <span class="new-tag">NEW</span></h5>L1-design-data-architect<br>CoT + Verification</div>
+<div class="qg-box" style="display:block;margin-top:4px;">QG: data-model-integrity ≥7</div>
+<div class="output-box" style="display:block;margin-top:4px;"><h5>📄 db-schema.sql</h5>Schema, lineage,<br>migration plan</div>
+</div>
+
+</div>
+
+<div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap;">
+<div class="agent-box" style="border-color:var(--green);background:var(--green-lt);"><h5>A14: GitHub Orchestrator</h5>Commits all design docs to branch</div>
+<span class="arrow">→</span>
+<div class="output-box"><h5>🔀 GitHub Branch</h5>aava/design-*<br>6 design documents</div>
+<div class="kb-box"><h5>📚 KBs</h5>kb-L1-enterprise-architecture<br>kb-L2-food-domain-api-patterns</div>
+<div class="tool-box"><h5>🔧 Tools</h5>tool-L1-github-upload-file<br>tool-L1-confluence-create-page</div>
+</div>
+</div>
+
+<div class="arrow-down">▼ LLD + API Spec + Journeys</div>
+
+<!-- PHASE 5: TESTING (existing + script gen + synthetic data) -->
+<div class="phase" style="border-color:var(--amber);">
+<div class="phase-label" style="color:var(--amber);">PHASE 5: TEST STRATEGY — SCENARIOS, CASES, SCRIPTS</div>
+
+<div class="flow-row">
+<div class="agent-box"><h5>A10: Scenario Writer</h5>L1-testing-scenario-writer<br>Reflection + Grounding + Citation</div>
+<span class="arrow">→</span>
+<div class="qg-box">QG: test-coverage ≥7</div>
+<span class="arrow">→</span>
+<div class="agent-box"><h5>A11: Case Writer</h5>L1-testing-case-writer<br>Reflection + Grounding<br><span style="font-size:8px;">Cucumber Given/When/Then</span></div>
+<span class="arrow">→</span>
+<div class="agent-box" style="border-color:var(--idea);background:var(--idea-lt);"><h5>A11a: Script Generator <span class="new-tag">NEW</span></h5>L1-testing-script-generator<br>Grounding + Verification<br><span style="font-size:8px;">Playwright / REST Assured</span></div>
+<span class="arrow">→</span>
+<div class="gr-box"><h5>🛡 Schema + Executability Check</h5></div>
+<span class="arrow">→</span>
+<div class="agent-box" style="border-color:var(--green);background:var(--green-lt);"><h5>A13: XRay Orchestrator</h5>Creates test cases in XRay</div>
+<span class="arrow">→</span>
+<div class="output-box"><h5>🧪 XRay Tests</h5>Cases + executable scripts<br>linked to stories</div>
+</div>
+
+<div class="flow-row">
+<span style="width:60px;display:inline-block;"></span>
+<span class="arrow">↳</span>
+<div class="agent-box" style="border-color:var(--idea);background:var(--idea-lt);"><h5>A11b: Synthetic Data Generator <span class="new-tag">NEW</span></h5>L1-testing-synthetic-data-generator<br>Grounding + PII-safe</div>
+<span class="arrow">→</span>
+<div class="gr-box"><h5>🛡 gr-L1-pii-detection</h5>Blocks real PII in synthetic sets</div>
+<span class="arrow">→</span>
+<div class="output-box"><h5>📦 synthetic-data.json</h5>Anonymised fixtures<br>for test execution</div>
+</div>
+
+<div style="margin-top:4px;display:flex;gap:8px;flex-wrap:wrap;">
+<div class="kb-box"><h5>📚 KBs</h5>kb-L1-testing-standards<br>kb-L2-food-domain</div>
+<div class="tool-box"><h5>🔧 Tools</h5>tool-L1-xray-create-test</div>
+</div>
+</div>
+
+<div class="arrow-down">▼ API Spec + LLD + Test Scripts</div>
+
+<!-- PHASE 6: CONSTRUCTION (split into API + UI code gen) -->
+<div class="phase" style="border-color:var(--green);">
+<div class="phase-label" style="color:var(--green);">PHASE 6: CONSTRUCTION — API CODE GENERATION + UI CODE GENERATION</div>
+<p class="phase-sub">Original diagram's single A9 "Code Generator" (Spring Boot + React + PostgreSQL bundled) is split into independently reviewable API and UI generation tracks.</p>
+
+<div style="display:flex;gap:8px;flex-wrap:wrap;">
+
+<div style="flex:1;min-width:220px;">
+<div class="agent-box" style="width:100%;border-width:3px;border-color:var(--idea);background:var(--idea-lt);"><h5>A9a: API Code Generator <span class="new-tag">NEW</span></h5>L1-construction-api-code-generator<br>Verification + Grounding<br><span style="font-size:8px;">Spring Boot + PostgreSQL, from LLD + OpenAPI</span></div>
+<div class="qg-box" style="display:block;margin-top:4px;">QG+Verify: api-code-quality ≥7</div>
+</div>
+
+<div style="flex:1;min-width:220px;">
+<div class="agent-box" style="width:100%;border-width:3px;border-color:var(--idea);background:var(--idea-lt);"><h5>A9b: UI Code Generator <span class="new-tag">NEW</span></h5>L1-construction-ui-code-generator<br>Verification + Grounding<br><span style="font-size:8px;">React, from wireframes + journeys + OpenAPI</span></div>
+<div class="qg-box" style="display:block;margin-top:4px;">QG+Verify: ui-code-quality ≥7</div>
+</div>
+
+<div style="flex:1;min-width:220px;">
+<div class="agent-box" style="width:100%;border-color:var(--idea);background:var(--idea-lt);"><h5>A9c: Unit Test Generator <span class="new-tag">NEW</span></h5>L1-construction-unit-test-generator<br>Reflection + Grounding</div>
+<div class="qg-box" style="display:block;margin-top:4px;">QG: unit-test-coverage ≥7</div>
+</div>
+
+</div>
+
+<div class="flow-row" style="margin-top:8px;">
+<div class="agent-box" style="border-color:var(--idea);background:var(--idea-lt);"><h5>A9d: Code Reviewer <span class="new-tag">NEW</span></h5>L1-construction-code-reviewer<br>Verification + CoT<br><span style="font-size:8px;">Standards, vulns, refactor suggestions</span></div>
+<span class="arrow">→</span>
+<div class="agent-box" style="border-color:var(--idea);background:var(--idea-lt);"><h5>A9e: Doc Generator <span class="new-tag">NEW</span></h5>L1-construction-doc-generator<br>Grounding<br><span style="font-size:8px;">API + code docs, changelog</span></div>
+<span class="arrow">→</span>
+<div class="agent-box" style="border-color:var(--green);background:var(--green-lt);"><h5>A14: GitHub Orchestrator</h5>Commits code to impl branch</div>
+<span class="arrow">→</span>
+<div class="output-box"><h5>🔀 GitHub Branch</h5>aava/impl-*<br>API + UI source files</div>
+</div>
+
+<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px;">
+<div class="kb-box"><h5>📚 KBs</h5>kb-L1-enterprise-architecture<br>kb-L1-enterprise-security</div>
+<div class="gr-box"><h5>🛡 Guardrails</h5>gr-L1-schema-validator<br>gr-L1-pii-detection<br>gr-L1-secret-scanner <span class="new-tag">NEW</span><br>gr-L1-license-compliance-check <span class="new-tag">NEW</span></div>
+<div class="tool-box"><h5>🔧 Tools</h5>tool-L1-github-upload-file<br>tool-L1-github-fetch-file</div>
+</div>
+</div>
+
+<div class="arrow-down">▼ Impl Branch + Tests</div>
+
+<!-- PHASE 7: PR (existing, unchanged) -->
+<div class="phase" style="border-color:var(--navy);">
+<div class="phase-label" style="color:var(--navy);">PHASE 7: PR CREATION <span style="font-weight:400;color:var(--gray-txt);">(from original diagram)</span></div>
+
+<div class="flow-row">
+<div class="agent-box" style="border-color:var(--green);background:var(--green-lt);"><h5>A14: GitHub Orchestrator</h5>Creates Pull Request</div>
+<span class="arrow">→</span>
+<div class="output-box" style="border-width:3px;"><h5>🔀 Pull Request</h5>
+<span style="font-size:8px;">
+feat: producer-to-foodservice marketplace (HarvestLink)<br>
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━<br>
+💡 Vision + Requirements + Dependency Graph<br>
+📌 Roadmap + Jira epics/stories/tasks<br>
+📄 Journeys, Wireframes, HLD, LLD, OpenAPI, Data Model<br>
+💻 API code + UI code + unit tests<br>
+🧪 Test cases + scripts + synthetic data<br>
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━<br>
+Generated by AAVA v2.0.0 (Greenfield)
+</span>
+</div>
+</div>
+
+<div style="display:flex;gap:8px;margin-top:4px;">
+<div class="tool-box"><h5>🔧 Tools</h5>tool-L1-github-create-pr</div>
+</div>
+</div>
+
+<!-- CROSS-CUTTING -->
+<h2>Cross-Cutting Components</h2>
+
+<div style="display:flex;gap:12px;flex-wrap:wrap;">
+
+<div style="flex:1;min-width:250px;border:2px solid var(--purple);border-radius:10px;padding:12px;">
+<h5 style="color:var(--purple);font-size:11px;margin-bottom:6px;">🔍 Quality Assurance Layer</h5>
+<div class="agent-box" style="display:block;margin:4px 0;"><h5>A12: Quality Verifier Agent</h5>Independent rubric-based scoring<br>Used after: vision, requirements, epics, stories, HLD, code (API + UI)</div>
+<div class="qg-box" style="display:block;margin:4px 0;">18 quality gates across full lifecycle (min score 7/10, except task-completeness ≥6)</div>
+<div style="font-size:9px;color:var(--gray-txt);margin-top:4px;">
+Patterns active: Reflection (all agents) · Verification (critical steps) · CoT (design + planning agents) · Grounding (all agents) · Citation (vision, story, test agents) · Graph reasoning (dependency mapper)
+</div>
+</div>
+
+<div style="flex:1;min-width:250px;border:2px solid var(--red);border-radius:10px;padding:12px;">
+<h5 style="color:var(--red);font-size:11px;margin-bottom:6px;">🛡 Guardrail Chain (applied to every agent output)</h5>
+<div style="display:flex;flex-direction:column;gap:3px;">
+<div class="gr-box" style="display:block;text-align:left;"><h5>1. gr-L1-output-schema-validator</h5>Reject if output doesn't match JSON schema</div>
+<div class="gr-box" style="display:block;text-align:left;"><h5>2. gr-L1-pii-detection</h5>Block if real PII found in output or synthetic data</div>
+<div class="gr-box" style="display:block;text-align:left;"><h5>3. gr-L1-hallucination-check</h5>Flag ungrounded claims (entities, references)</div>
+<div class="gr-box" style="display:block;text-align:left;"><h5>4. gr-L1-consistency-check</h5>Flag contradictions within/across phase outputs</div>
+<div class="gr-box" style="display:block;text-align:left;"><h5>5. gr-L2-food-domain-compliance</h5>Validate HACCP/Natasha's-Law references correct</div>
+<div class="gr-box" style="display:block;text-align:left;"><h5>6. gr-L1-secret-scanner <span class="new-tag">NEW</span></h5>Block hardcoded credentials in generated code</div>
+<div class="gr-box" style="display:block;text-align:left;"><h5>7. gr-L1-license-compliance-check <span class="new-tag">NEW</span></h5>Flag disallowed OSS license in generated dependencies</div>
+</div>
+</div>
+
+<div style="flex:1;min-width:250px;border:2px solid var(--navy);border-radius:10px;padding:12px;">
+<h5 style="color:var(--navy);font-size:11px;margin-bottom:6px;">📊 Observability & Audit</h5>
+<div style="font-size:9px;line-height:1.6;">
+<strong>Correlation ID:</strong> Generated at Idea intake; propagated through all 8 phases, every agent, tool, and event<br>
+<strong>Events:</strong> workflow.started → phase.*.started → step.*.completed → step.*.quality_gate.pass/fail → phase.*.completed → workflow.completed<br>
+<strong>Audit trail:</strong> Input, output, reasoning (CoT), citations, quality scores, guardrail results per step, per phase<br>
+<strong>Version manifest:</strong> Agent versions, instruction hashes, KB versions, model, tokens, cost<br>
+<strong>HITL logging:</strong> If quality gate fails → Jira subtask created, human decision recorded; 4 explicit human gates (Vision, Roadmap, Design, Code review) per <code>00-ai-augmented-sdlc.html</code>
+</div>
+</div>
+
+</div>
+
+<!-- LAYERING NOTE -->
+<div style="margin-top:12px;border:2px solid #0052CC;border-radius:10px;padding:12px;">
+<h5 style="color:#0052CC;font-size:11px;margin-bottom:6px;">🧬 Layering (per naming standard)</h5>
+<p style="font-size:10.5px;color:var(--gray-txt);">Every agent below is defined at <strong>L1 (Enterprise)</strong> — generic, reusable across any domain. For a specific LOB, extend via <code>instructions_append</code> + <code>knowledge_bases_append</code>, e.g. <code>L2-food-domain-vision-market-analyzer</code> extends <code>L1-vision-market-analyzer</code> with HACCP/Natasha's-Law framing. For a specific project, <code>L3-{project}-design-hld</code> extends the L2 domain agent with ADRs and sprint baselines. Tools remain L1 unless the system is domain-specific (e.g. <code>tool-L2-food-domain-cold-chain-sensor-read</code>). See <code>01-agent-development-naming-standard.html</code> for the full inheritance model.</p>
+</div>
+
+<!-- SECRETS -->
+<div style="margin-top:12px;border:2px solid var(--green);border-radius:10px;padding:12px;">
+<h5 style="color:var(--green);font-size:11px;margin-bottom:6px;">🔐 Secrets Management (all tools)</h5>
+<div style="display:flex;gap:8px;flex-wrap:wrap;font-size:9px;">
+<div style="background:var(--green-lt);padding:6px 10px;border-radius:6px;"><strong>SecretsSDK</strong> injected into every tool</div>
+<div style="background:var(--green-lt);padding:6px 10px;border-radius:6px;">Org-scoped: <code>/secrets/{org_id}/jira</code></div>
+<div style="background:var(--green-lt);padding:6px 10px;border-radius:6px;">Backend: HashiCorp Vault / AWS SM (plug-and-play)</div>
+<div style="background:var(--green-lt);padding:6px 10px;border-radius:6px;">Zero hardcoded credentials</div>
+<div style="background:var(--green-lt);padding:6px 10px;border-radius:6px;">Cached 5 min TTL</div>
+<div style="background:var(--green-lt);padding:6px 10px;border-radius:6px;">Audit logged</div>
+</div>
+</div>
+
+<!-- STATS -->
+<div style="margin-top:16px;display:flex;gap:12px;flex-wrap:wrap;text-align:center;">
+<div style="flex:1;background:var(--idea-lt);padding:12px;border-radius:8px;"><div style="font-size:24px;font-weight:800;color:var(--idea);">8</div><div style="font-size:10px;color:var(--gray-txt);">Phases</div></div>
+<div style="flex:1;background:var(--teal-lt);padding:12px;border-radius:8px;"><div style="font-size:24px;font-weight:800;color:var(--teal);">34</div><div style="font-size:10px;color:var(--gray-txt);">Agents (30 thinking + 4 orchestrators)</div></div>
+<div style="flex:1;background:var(--green-lt);padding:12px;border-radius:8px;"><div style="font-size:24px;font-weight:800;color:var(--green);">11</div><div style="font-size:10px;color:var(--gray-txt);">Tools</div></div>
+<div style="flex:1;background:var(--amber-lt);padding:12px;border-radius:8px;"><div style="font-size:24px;font-weight:800;color:var(--amber);">9</div><div style="font-size:10px;color:var(--gray-txt);">Knowledge Bases</div></div>
+<div style="flex:1;background:#FFEBEE;padding:12px;border-radius:8px;"><div style="font-size:24px;font-weight:800;color:var(--red);">7</div><div style="font-size:10px;color:var(--gray-txt);">Guardrails</div></div>
+<div style="flex:1;background:#F3E8FF;padding:12px;border-radius:8px;"><div style="font-size:24px;font-weight:800;color:var(--purple);">18</div><div style="font-size:10px;color:var(--gray-txt);">Quality Gates</div></div>
+<div style="flex:1;background:#E9F2FF;padding:12px;border-radius:8px;"><div style="font-size:24px;font-weight:800;color:var(--navy);">4</div><div style="font-size:10px;color:var(--gray-txt);">Human-in-the-Loop Gates</div></div>
+</div>
+
+<!-- FULL AGENT CATALOG -->
+<h2 style="margin-top:24px;">Full Agent Catalog (L1, in build order)</h2>
+<table>
+<thead><tr><th>#</th><th>Agent Name</th><th>Phase</th><th>Purpose</th><th>Status</th></tr></thead>
+<tbody>
+<tr><td>B1</td><td><code>L1-vision-idea-intake</code></td><td>Idea → Vision</td><td>Structures a raw idea into problem statement, target users, success metrics</td><td>New</td></tr>
+<tr><td>B2</td><td><code>L1-vision-market-analyzer</code></td><td>Idea → Vision</td><td>Competitor analysis + SWOT</td><td>New</td></tr>
+<tr><td>B3</td><td><code>L1-vision-regulatory-feasibility-checker</code></td><td>Idea → Vision</td><td>Regulatory feasibility assessment</td><td>New</td></tr>
+<tr><td>B4</td><td><code>L1-vision-statement-generator</code></td><td>Idea → Vision</td><td>Synthesizes vision statement and roadmap outline</td><td>New</td></tr>
+<tr><td>B5</td><td><code>L1-requirements-elicitor</code></td><td>Requirements</td><td>Converts vision into structured functional requirements</td><td>New</td></tr>
+<tr><td>B6</td><td><code>L1-requirements-nfr-classifier</code></td><td>Requirements</td><td>Classifies non-functional requirements and boundary conditions</td><td>New</td></tr>
+<tr><td>B7</td><td><code>L1-planning-impact-assessor</code></td><td>Impact Assessment</td><td>Change/blast-radius impact analysis across proposed components</td><td>New</td></tr>
+<tr><td>B8</td><td><code>L1-planning-dependency-mapper</code></td><td>Dependency Graph</td><td>Builds dependency graph across epics/services/integrations</td><td>New</td></tr>
+<tr><td>B9</td><td><code>L1-planning-backlog-prioritizer</code></td><td>Sprint Planning</td><td>Prioritizes backlog by value/effort/dependency risk</td><td>New</td></tr>
+<tr><td>B10</td><td><code>L1-planning-sprint-planner</code></td><td>Sprint Planning</td><td>Allocates work into 5-day Feature Cycles by capacity</td><td>New</td></tr>
+<tr><td>A1</td><td><code>L1-inception-epic-creator</code></td><td>Inception</td><td>Generic epic generation</td><td>Existing</td></tr>
+<tr><td>A2</td><td><code>L1-inception-feature-decomposer</code></td><td>Inception</td><td>Decomposes epics into features</td><td>Existing</td></tr>
+<tr><td>A3</td><td><code>L1-inception-story-generator</code></td><td>Inception</td><td>Generic story generation</td><td>Existing</td></tr>
+<tr><td>A4</td><td><code>L1-inception-task-generator</code></td><td>Inception</td><td>Decomposes stories into tasks</td><td>Existing</td></tr>
+<tr><td>A5a</td><td><code>L1-design-user-journey-mapper</code></td><td>Design</td><td>Maps end-to-end persona journeys ahead of wireframes</td><td>New</td></tr>
+<tr><td>A5</td><td><code>L1-design-ux-wireframe</code></td><td>Design</td><td>Generic wireframe/UX generation</td><td>Existing</td></tr>
+<tr><td>A6</td><td><code>L1-design-api-spec</code></td><td>Design</td><td>OpenAPI contract generation</td><td>Existing</td></tr>
+<tr><td>A7</td><td><code>L1-design-hld</code></td><td>Design</td><td>High-level design / C4 diagrams</td><td>Existing</td></tr>
+<tr><td>A8</td><td><code>L1-design-lld</code></td><td>Design</td><td>Low-level design / class + sequence diagrams</td><td>Existing</td></tr>
+<tr><td>A8a</td><td><code>L1-design-data-architect</code></td><td>Design</td><td>Data architecture, schema, and lineage design</td><td>New</td></tr>
+<tr><td>A10</td><td><code>L1-testing-scenario-writer</code></td><td>Test Strategy</td><td>Generic test scenario generation</td><td>Existing</td></tr>
+<tr><td>A11</td><td><code>L1-testing-case-writer</code></td><td>Test Strategy</td><td>Cucumber-style test case generation</td><td>Existing</td></tr>
+<tr><td>A11a</td><td><code>L1-testing-script-generator</code></td><td>Test Strategy</td><td>Executable automation scripts from test cases</td><td>New</td></tr>
+<tr><td>A11b</td><td><code>L1-testing-synthetic-data-generator</code></td><td>Test Strategy</td><td>PII-safe synthetic test data / fixtures</td><td>New</td></tr>
+<tr><td>A9a</td><td><code>L1-construction-api-code-generator</code></td><td>Construction</td><td>Backend/API implementation from LLD + OpenAPI</td><td>New (split from A9)</td></tr>
+<tr><td>A9b</td><td><code>L1-construction-ui-code-generator</code></td><td>Construction</td><td>Frontend/UI implementation from wireframes + journeys</td><td>New (split from A9)</td></tr>
+<tr><td>A9c</td><td><code>L1-construction-unit-test-generator</code></td><td>Construction</td><td>AI-generated unit tests for API + UI code</td><td>New</td></tr>
+<tr><td>A9d</td><td><code>L1-construction-code-reviewer</code></td><td>Construction</td><td>Automated PR review — standards, vulnerabilities, refactors</td><td>New</td></tr>
+<tr><td>A9e</td><td><code>L1-construction-doc-generator</code></td><td>Construction</td><td>API/code documentation and changelogs</td><td>New</td></tr>
+<tr><td>A12</td><td><code>L1-quality-verifier</code></td><td>Cross-cutting</td><td>Independent rubric-based scoring at every quality gate</td><td>Existing</td></tr>
+<tr><td>A13</td><td><code>L1-jira-orchestrator</code></td><td>Cross-cutting</td><td>Jira issue lifecycle (epics/stories/tasks)</td><td>Existing</td></tr>
+<tr><td>A13x</td><td><code>L1-xray-orchestrator</code></td><td>Cross-cutting</td><td>XRay test case lifecycle</td><td>Existing</td></tr>
+<tr><td>A14</td><td><code>L1-github-orchestrator</code></td><td>Cross-cutting</td><td>Branch, commit, and PR lifecycle</td><td>Existing</td></tr>
+<tr><td>A14c</td><td><code>L1-confluence-orchestrator</code></td><td>Cross-cutting</td><td>Design doc publishing to Confluence</td><td>Existing (implicit)</td></tr>
+</tbody>
+</table>
+<p style="font-size:10px;color:var(--gray-txt);font-style:italic;margin-top:6px;">L2/L3/L4 domain, project, and squad variants (e.g. <code>L2-food-domain-design-hld</code>) are created by extension per the naming standard — not duplicated here.</p>
+
+</div>
+</body></html>

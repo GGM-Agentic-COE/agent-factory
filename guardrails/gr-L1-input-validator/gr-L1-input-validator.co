@@ -1,0 +1,15 @@
+# gr-L1-input-validator — LLM-Driven Colang Implementation
+# Layer: L1 — Input Validator
+# Validation: LLM self_check (pure Colang)
+# Python actions preserved in actions.py for reference/hybrid mode
+
+define flow check input validation
+  """LLM validates input validator rules on input."""
+  $result = execute self_check_input
+
+  if not $result
+    bot block L1 input validator
+    stop
+
+define bot block L1 input validator
+  "Input rejected: request does not match expected format. Please check required fields and try again."

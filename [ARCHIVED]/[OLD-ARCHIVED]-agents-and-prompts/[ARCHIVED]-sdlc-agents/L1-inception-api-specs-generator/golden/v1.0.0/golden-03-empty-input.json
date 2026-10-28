@@ -1,0 +1,25 @@
+{
+  "test_id": "golden-03",
+  "description": "Correct handling of an offensive/invalid topic — returns empty items",
+  "input": {"source": "direct_input", "source_agent_id": null, "parameters": {"topic": ""}},
+  "expected_output": {
+    "agent_id": "L1-inception-template-agent",
+    "agent_version": "1.0.0",
+    "execution_id": "exec-golden-003",
+    "input_summary": {
+      "source": "direct_input",
+      "source_agent_id": null,
+      "parameters": {"topic": ""}
+    },
+    "output": {
+      "type": "fact",
+      "schema_version": "1.0",
+      "items": []
+    }
+  },
+  "evaluation_criteria": {
+    "schema_valid": true,
+    "items_empty": true,
+    "no_hallucination": true
+  }
+}

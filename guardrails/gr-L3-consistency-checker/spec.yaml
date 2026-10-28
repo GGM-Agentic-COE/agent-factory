@@ -1,0 +1,36 @@
+spec_version: "1.0"
+artifact_type: guardrail
+metadata:
+  name: gr-L3-consistency-checker
+  version: "1.0.0"
+  layer: L3
+  owner: project-lead
+  implementation: colang
+
+purpose:
+  description: "Detect contradictions, conflicting enums, and duplicate IDs in multi-item output"
+
+triggers_on:
+  - post_execution
+
+on_fail: warn_and_escalate_to_hitl
+applies_to: multi_item_output_agents
+
+rules:
+  - name: no-duplicate-ids
+    description: "All item IDs must be unique within the output"
+    action: block
+    severity: critical
+
+  - name: no-conflicting-enums
+    description: "Same field cannot have conflicting enum values across items"
+    action: flag
+    severity: high
+
+  - name: entity-consistency
+    description: "Same entity must be referenced consistently across items"
+    action: flag
+    severity: high
+
+evaluation:
+  false_positive_threshold: 0.05

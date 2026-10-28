@@ -1,0 +1,15 @@
+# gr-L2-memory-safety — LLM-Driven Colang Implementation
+# Layer: L2 — Memory Safety
+# Validation: LLM self_check (pure Colang)
+# Python actions preserved in actions.py for reference/hybrid mode
+
+define flow check memory safety
+  """LLM validates memory safety rules on input."""
+  $result = execute self_check_input
+
+  if not $result
+    bot block L2 memory safety
+    stop
+
+define bot block L2 memory safety
+  "Memory access denied: this operation violates memory isolation rules. Agents can only access their own memory stores unless explicitly shared."

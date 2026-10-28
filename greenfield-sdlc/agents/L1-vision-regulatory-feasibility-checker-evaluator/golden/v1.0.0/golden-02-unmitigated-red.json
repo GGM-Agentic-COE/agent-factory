@@ -1,0 +1,31 @@
+{
+  "agent_id": "L1-vision-regulatory-feasibility-checker-evaluator",
+  "agent_version": "1.0.0",
+  "execution_id": "exec-e8f9a0b1",
+  "workflow_execution_id": "wf-a17c5e92",
+  "status": "success",
+  "content": {
+    "type": "evaluation_result",
+    "schema_version": "1.0",
+    "items": {
+      "scores": {
+        "faithfulness": 0.4,
+        "hallucination": 0.4,
+        "consistency": 0.5,
+        "relevance": 0.7,
+        "reasoning_quality": 0.5,
+        "citation_completeness": 0.75
+      },
+      "overall_score": 3.8,
+      "pass": false,
+      "findings": [
+        { "id": "FND-01", "gate": "Citation completeness — BLOCKER", "status": "fail", "detail": "CON-01 cites 'Food Marketplace Facilitation Act 2024' — this regulation does not exist in kb-L1-regulatory-frameworks-index or kb-L2-domain-regulatory, and is not a real, verifiable UK statute. This is a fabricated citation, not a real one." },
+        { "id": "FND-02", "gate": "evaluation.md Quality Gates — Amber/Red has mitigation or legal-review flag", "status": "fail", "detail": "CON-01 is Red with mitigation: null and requires_legal_review: false — this violates the zero-tolerance rule directly; the schema itself should have rejected this, but is being checked here as a defense-in-depth failure." },
+        { "id": "FND-03", "gate": "Discount validation", "status": "fail", "detail": "overall_status claims Red with an honest rationale ('CON-01 is Red with no mitigation') — this part is at least honestly stated, not a false discount, but the underlying constraint itself is unsound." }
+      ],
+      "fixes_applied": [],
+      "final_decision": "escalate_to_hitl"
+    },
+    "execution_summary": "• overall_score: 3.8 (fail), final_decision: escalate_to_hitl.\n• Findings: 3 total, all fail. This is not a mechanically-fixable case: the citation is fabricated (references a non-existent Act), so there's no real regulation to restore a mitigation from — inventing one would compound the hallucination rather than correct it.\n• Fixes applied: none. Restoring the real CON-01 (Food Business Operator status, Reg. (EC) 852/2004, with a real facilitation-only mitigation) is possible in principle, but doing so from this evaluator's side would mean re-deriving the generator's entire analysis, not applying a mechanical fix — that's outside this agent's remit per S6.\n• Knowledge bases consulted: L1-vision-regulatory-feasibility-checker/evaluation.md, kb-L1-regulatory-frameworks-index, kb-L2-domain-regulatory (checked, found no match for the cited Act).\n• Guardrails evaluated: gr-L1-output-schema-validator (fail — the generator's own output_schema.json's Red/Amber conditional structurally rejects mitigation:null combined with requires_legal_review:false; this draft should never have reached this evaluator without already failing that gate), gr-L1-pii-detection (pass), gr-L1-citation-verifier (fail — fabricated citation), gr-L1-hallucination-check (fail).\n• Gaps flagged: escalate immediately — re-run L1-vision-regulatory-feasibility-checker for CON-01. This draft's presence here indicates the workflow orchestration is routing pre-schema-validation drafts to this evaluator (by design, per S6 — the evaluator catches issues before the final schema gate), which is expected; what's not expected is a fabricated citation, which no schema check can catch."
+  }
+}

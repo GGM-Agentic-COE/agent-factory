@@ -1,0 +1,36 @@
+spec_version: "1.0"
+artifact_type: guardrail
+metadata:
+  name: gr-L3-cost-control
+  version: "1.0.0"
+  layer: L3
+  owner: project-lead
+  implementation: colang
+
+purpose:
+  description: "Enforce token and invocation budget caps per agent execution"
+
+triggers_on:
+  - runtime
+
+on_fail: kill_execution
+applies_to: all_agents
+
+rules:
+  - name: token-budget
+    description: "Total tokens (input+output) must not exceed max_token_budget"
+    action: block
+    severity: high
+
+  - name: invocation-cap
+    description: "Agent cannot exceed max invocations per time window"
+    action: block
+    severity: high
+
+  - name: cost-alert
+    description: "Flag executions exceeding 80% of budget"
+    action: flag
+    severity: medium
+
+evaluation:
+  false_positive_threshold: 0.05

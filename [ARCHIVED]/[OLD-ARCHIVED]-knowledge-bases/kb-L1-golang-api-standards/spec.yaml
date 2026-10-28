@@ -1,0 +1,31 @@
+spec_version: "1.0"
+artifact_type: knowledge_base
+metadata:
+  name: kb-L1-golang-api-standards
+  version: "1.0.0"
+  layer: L1
+  owner: agentic-ai-coe
+  last_reviewed: "2026-06-16"
+  review_cadence: quarterly
+
+purpose:
+  description: "Go API development standards — project structure, naming conventions, handler/service/repository patterns, error handling, testing, middleware, and security"
+
+content:
+  format: markdown
+  documents:
+    - path: content/kb-L1-golang-api-standards.md
+      sections: [technology-stack, project-structure, naming, handler-pattern, service-pattern, repository-pattern, error-handling, middleware, testing, configuration, api-responses, security]
+
+  total_tokens_estimate: 12000
+  chunking: by-section
+  embedding_model: text-embedding-3-small
+
+consumers:
+  agents:
+    - L1-construction-code-generator-agent
+    - L2-*-construction-code-generator-agent
+  usage: "Agents reference this KB when generating Go API code to ensure pattern compliance"
+
+visibility:
+  accessible_by: [L1, L2, L3, L4]

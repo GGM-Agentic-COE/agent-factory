@@ -1,0 +1,20 @@
+# gr-L3-agent-rate-limit — Colang Implementation
+# Layer: L3 Project — applies to ALL agents
+# Triggers: runtime (before tool/agent calls)
+
+define flow check agent rate limit
+  """Limit tool calls and downstream agent invocations."""
+  $result = execute check_rate_limits(agent_id=$agent_id, tool_name=$tool_name)
+
+  if $result == "blocked"
+    bot block rate limited
+    stop
+
+  if $result == "throttled"
+    bot warn throttled
+
+define bot block rate limited
+  "Execution blocked: rate limit exceeded. Agent has reached maximum tool calls or downstream agent invocations for this execution."
+
+define bot warn throttled
+  "Warning: approaching rate limit. Cooldown enforced between repeated tool calls."

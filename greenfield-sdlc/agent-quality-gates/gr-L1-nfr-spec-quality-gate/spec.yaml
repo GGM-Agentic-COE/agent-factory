@@ -1,0 +1,58 @@
+spec_version: "1.0"
+artifact_type: guardrail
+metadata:
+  name: gr-L1-nfr-spec-quality-gate
+  version: "1.0.0"
+  layer: L1
+  owner: agentic-ai-coe
+  implementation: colang
+
+purpose:
+  description: "Fires when L1-requirements-nfr-classifier-evaluator concludes. Validates the RESULTANT output — L1-requirements-nfr-classifier's own items, with the evaluator's fixes_applied resolved in — against L1-requirements-nfr-classifier/output_schema.json and its evaluation.md rubric (kb-L1-nfr-classification-taxonomy's six categories, citation form, TBD/source consistency, ID sequencing). Same pattern as gr-L1-requirements-quality-gate: fires on the evaluator, validates the core agent's content, never the evaluator's own scoring bookkeeping."
+
+triggers_on:
+  - post_execution   # fires when the evaluator (not the generator) finishes
+
+on_fail: retry_once_then_escalate
+applies_to: configured_agents   # wired into L1-requirements-nfr-classifier-evaluator/spec.yaml context.guardrails — not global
+
+rules:
+  # --- Output schema validation (of L1-requirements-nfr-classifier's own output_schema.json) ---
+  - name: schema-compliance
+    description: "The resultant items must validate against L1-requirements-nfr-classifier/output_schema.json: every nfr_classifications[] entry has id (FR-NNN), title, boundary_conditions[] (each with category in the taxonomy's six, boundary_condition >=5 chars, source), confidence, reasoning (>=20 chars); an empty boundary_conditions[] is valid only when reasoning states 'No NFR categories apply'"
+    action: block
+    severity: critical
+
+  - name: ids-sequential-no-gaps
+    description: "FR-NNN ids match requirements.md exactly — sequential, no gaps, no duplicates, no invented ids (evaluation.md Quality Gates 1 and 6 — a gap, duplicate, or fabricated id means a requirement was dropped, merged, reordered, or invented, not a cosmetic issue)"
+    action: block
+    severity: high
+
+  # --- Rubric adherence (L1-requirements-nfr-classifier/evaluation.md, checked against the RESULTANT content) ---
+  - name: tbd-source-consistency
+    description: "source is '—' if and only if boundary_condition ends in the literal 'TBD — needs stakeholder input' phrase — schema-enforced via output_schema.json's allOf/if/then, but re-checked deterministically here since the guardrail must not just trust the schema's own self-enforcement was actually followed by the LLM (evaluation.md Quality Gate 5)"
+    action: block
+    severity: critical
+
+  - name: citation-form-validity
+    description: "Every non-TBD source matches one of the three legitimate citation forms (requirements.md § FR-NNN, vision.md § <section> — including vision.md § Regulatory Posture for Compliance, kb-L1-enterprise-security § ES<n>) — a source string that doesn't match any recognized pattern is a bare guess, not a citation (evaluation.md Quality Gate 3)"
+    action: block
+    severity: high
+
+  - name: category-coverage-or-explicit-none
+    description: "Every requirement has >=1 genuinely-applicable category checked against kb-L1-nfr-classification-taxonomy's six categories WHERE APPLICABLE — not a fixed six on every FR, and not silently skipped when one obviously applies — a genuine judgment call, not a regex match (evaluation.md Quality Gate 2)"
+    action: flag
+    severity: high
+
+  - name: fabrication-plausibility-check
+    description: "No boundary condition's number/rule looks fabricated or unrelated to what its cited source would plausibly say — spot-check plausibility, not exhaustive fact-checking against documents the guardrail cannot see (evaluation.md Quality Gate 3's 'never a bare guess' and Quality Gate 4's 'never fabricated')"
+    action: flag
+    severity: high
+
+  - name: no-premature-tbd
+    description: "No boundary condition is marked TBD when a grounded value was clearly already available in the cited sources or elsewhere in the resultant content (evaluation.md Quality Gate 4's 'never marked TBD when a grounded value was actually available')"
+    action: flag
+    severity: medium
+
+evaluation:
+  false_positive_threshold: 0.05

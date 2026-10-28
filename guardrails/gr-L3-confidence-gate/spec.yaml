@@ -1,0 +1,36 @@
+spec_version: "1.0"
+artifact_type: guardrail
+metadata:
+  name: gr-L3-confidence-gate
+  version: "1.0.0"
+  layer: L3
+  owner: project-lead
+  implementation: colang
+
+purpose:
+  description: "Escalate to HITL when agent confidence is below threshold"
+
+triggers_on:
+  - post_execution
+
+on_fail: escalate_to_hitl
+applies_to: all_agents
+
+rules:
+  - name: min-confidence
+    description: "Items with confidence < 0.7 trigger HITL escalation"
+    action: flag
+    severity: high
+
+  - name: low-confidence-block
+    description: "Items with confidence < 0.5 are blocked entirely"
+    action: block
+    severity: critical
+
+  - name: confidence-present
+    description: "Every item must have a confidence score"
+    action: block
+    severity: high
+
+evaluation:
+  false_positive_threshold: 0.05

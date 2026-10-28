@@ -1,0 +1,79 @@
+{
+  "source": "agent_output",
+  "source_agent_id": "L1-inception-epics-generator",
+  "parameters": {
+    "workflow_name": "Inception Pipeline — Expense Tracker",
+    "agent_outputs": [
+      {
+        "agent_id": "L1-inception-vision-generator",
+        "execution_id": "exec-aaa-111",
+        "workflow_execution_id": "wf-abc-123",
+        "status": "success",
+        "content": {
+          "type": "vision_document",
+          "schema_version": "1.0",
+          "items": {
+            "product_name": "ExpenseTrack",
+            "document_summary": {
+              "executive_summary": "ExpenseTrack is a mobile app for small business owners to photograph receipts, auto-extract data, categorise expenses, and generate reports.",
+              "section_count": 5,
+              "feature_area_count": 5,
+              "mvp_feature_count": 7,
+              "risk_count": 4,
+              "open_question_count": 3
+            },
+            "artifact": {
+              "type": "vision_document",
+              "format": "markdown",
+              "location": "https://storage.blob.core.windows.net/artifacts/exec-aaa-111/vision-doc/vision-expensetrack.md",
+              "filename": "vision-expensetrack.md",
+              "container": "artifacts",
+              "blob_path": "/exec-aaa-111/vision-doc/vision-expensetrack.md"
+            },
+            "metadata": {
+              "domain_kb_used": "kb-L2-fintech-domain",
+              "confidence": 0.88,
+              "grounding_coverage": 0.82
+            }
+          },
+          "execution_summary": "• Generated vision document for ExpenseTrack\n• 5 sections, 5 feature areas, 7 MVP features, 4 risks, 3 open questions\n• Grounded in kb-L2-fintech-domain (82% coverage)\n• Reflection: fixed 1 vague metric, added missing offline-sync constraint\n• Uploaded to /exec-aaa-111/vision-doc/vision-expensetrack.md\n• Knowledge bases consulted: kb-L2-fintech-domain (user roles, regulations), kb-L1-vision-document-template (structure)\n• Guardrails evaluated: gr-L1-output-schema-validator (PASS), gr-L1-pii-detection (PASS), gr-L3-hallucination-detector (PASS)\n• Tools invoked: tool-L1-azure-blob-upload (success — uploaded vision doc)"
+        }
+      },
+      {
+        "agent_id": "L1-inception-requirements-extractor",
+        "execution_id": "exec-bbb-222",
+        "workflow_execution_id": "wf-abc-123",
+        "status": "success",
+        "content": {
+          "type": "requirements",
+          "schema_version": "1.0",
+          "items": {
+            "functional_requirements": [{"id": "FR-01"}, {"id": "FR-02"}, {"id": "FR-03"}, {"id": "FR-04"}, {"id": "FR-05"}, {"id": "FR-06"}, {"id": "FR-07"}, {"id": "FR-08"}],
+            "non_functional_requirements": [{"id": "NFR-01"}, {"id": "NFR-02"}, {"id": "NFR-03"}, {"id": "NFR-04"}],
+            "constraints": [{"id": "CON-01"}, {"id": "CON-02"}],
+            "assumptions": [{"id": "ASM-01"}, {"id": "ASM-02"}, {"id": "ASM-03"}],
+            "gaps": [{"id": "GAP-01"}, {"id": "GAP-02"}]
+          },
+          "execution_summary": "• Produced 8 FRs, 4 NFRs, 2 constraints, 3 assumptions, 2 gaps\n• Key decisions: OCR extraction as Must-Have, offline-sync as Must-Have\n• Reflection: re-classified 1 NFR from Should-Have to Must-Have (offline reliability)\n• 2 gaps flagged for stakeholder input (authentication method, supported currencies)\n• Knowledge bases consulted: kb-L1-enterprise-architecture (technology constraints)\n• Guardrails evaluated: gr-L1-output-schema-validator (PASS), gr-L1-pii-detection (PASS), gr-L3-hallucination-detector (PASS), gr-L3-citation-validator (PASS)\n• Tools invoked: none"
+        }
+      },
+      {
+        "agent_id": "L1-inception-epics-generator",
+        "execution_id": "exec-ccc-333",
+        "workflow_execution_id": "wf-abc-123",
+        "status": "success",
+        "content": {
+          "type": "epics",
+          "schema_version": "1.0",
+          "items": {
+            "epics": [{"id": "EP-01", "title": "Receipt Capture & OCR"}, {"id": "EP-02", "title": "Expense Categorisation"}, {"id": "EP-03", "title": "Budget Management"}, {"id": "EP-04", "title": "Reporting & Insights"}],
+            "sprint_allocation": {"sprint_1": ["EP-01"], "sprint_2": ["EP-02", "EP-03"], "sprint_3": ["EP-04"]},
+            "traceability_matrix": {"FR-01": "F-01.1", "FR-02": "F-01.2", "FR-03": "F-02.1"},
+            "coverage_matrix": {"covered": 8, "total": 8, "percentage": 100}
+          },
+          "execution_summary": "• Generated 4 epics with 12 features across 3 sprints\n• Sprint 1: Receipt Capture & OCR (foundation), Sprint 2: Categorisation + Budgets, Sprint 3: Reporting\n• 100% requirements coverage (8/8 FRs mapped)\n• Reflection: moved 1 feature from Sprint 3 to Sprint 2 for dependency resolution\n• Knowledge bases consulted: kb-L1-ntuc-enterprise-architecture (EA constraints), kb-L1-epics-best-practices (decomposition patterns)\n• Guardrails evaluated: gr-L1-output-schema-validator (PASS), gr-L3-hallucination-detector (PASS), gr-L3-consistency-checker (PASS)\n• Tools invoked: none"
+        }
+      }
+    ]
+  }
+}

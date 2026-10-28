@@ -1,0 +1,86 @@
+spec_version: "1.0"
+artifact_type: guardrail
+metadata:
+  name: gr-L1-accessibility-standards
+  version: "1.0.0"
+  layer: L1
+  owner: agentic-ai-coe
+  implementation: colang
+
+purpose:
+  description: "Ensure agent responses comply with accessibility standards and support inclusive access for users of all abilities"
+
+triggers_on:
+  - post_execution
+
+on_fail: retry_once_then_escalate
+applies_to: all_agents
+
+rules:
+  - name: plain-language
+    description: "Output must use plain, clear language — avoid jargon without explanation, keep sentences concise"
+    action: flag
+    severity: high
+
+  - name: alt-text-for-visuals
+    description: "Any visual content (images, diagrams, charts) must include descriptive alt text or text equivalent"
+    action: block
+    severity: critical
+
+  - name: structured-content
+    description: "Output must use proper heading hierarchy, lists, and logical structure — not walls of unstructured text"
+    action: flag
+    severity: high
+
+  - name: colour-independence
+    description: "Information must not rely solely on colour to convey meaning — use labels, patterns, or text alongside colour"
+    action: block
+    severity: high
+
+  - name: actionable-instructions
+    description: "Instructions must be clear and unambiguous — avoid directional references (click here, see above) without context"
+    action: flag
+    severity: medium
+
+  - name: inclusive-language
+    description: "Output must use inclusive, non-discriminatory language — no ableist, gendered, or exclusionary terms"
+    action: flag
+    severity: high
+
+  - name: reading-level
+    description: "Content should target a reading level accessible to a broad audience — aim for clarity over complexity"
+    action: flag
+    severity: medium
+
+  - name: html-contrast
+    description: "Generated HTML/CSS must meet WCAG 1.4.3 minimum contrast ratio (4.5:1 for text, 3:1 for large text)"
+    action: block
+    severity: high
+    applies_when: output_contains_html
+
+  - name: html-lang-attribute
+    description: "Generated HTML must include lang attribute on the html element (WCAG 3.1.1)"
+    action: block
+    severity: high
+    applies_when: output_contains_html
+
+  - name: html-page-title
+    description: "Generated HTML pages must have a meaningful title element (WCAG 2.4.2)"
+    action: block
+    severity: high
+    applies_when: output_contains_html
+
+  - name: html-form-labels
+    description: "Generated form elements must have associated labels (WCAG 3.3.2)"
+    action: block
+    severity: critical
+    applies_when: output_contains_html
+
+  - name: html-link-purpose
+    description: "Generated links must have descriptive text — no bare URLs or generic 'click here' (WCAG 2.4.4)"
+    action: flag
+    severity: high
+    applies_when: output_contains_html
+
+evaluation:
+  false_positive_threshold: 0.05

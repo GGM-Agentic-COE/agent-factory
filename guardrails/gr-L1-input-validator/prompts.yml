@@ -1,0 +1,13 @@
+prompts:
+  - task: self_check_input
+    content: |
+      User input: {{ user_input }}
+      
+      Validate this input for structural correctness:
+      1. Is it valid JSON or a clear, meaningful natural language request?
+      2. Does it contain non-empty, meaningful content (not gibberish or empty)?
+      3. If JSON: does it have a "parameters" object with at least one key-value pair?
+      4. Are field values of reasonable length (not exceeding 5000 characters)?
+      5. Does it appear to be a legitimate request for the agent's capabilities?
+      
+      Answer "yes" if the input is valid and well-formed. Answer "no" if it is malformed, empty, or gibberish.

@@ -1,0 +1,37 @@
+{
+  "agent_id": "L1-inception-workflow-summariser",
+  "execution_id": "exec-g02-ccc",
+  "workflow_execution_id": "wf-golden-002",
+  "status": "success",
+  "_evaluation": {
+    "_note": "Golden-file-only metadata for evaluation.",
+    "expected_scores": {"faithfulness": 0.97, "hallucination": 0.03, "completeness": 0.95, "clarity": 0.90},
+    "key_checks": [
+      "Both agents mentioned: PASS",
+      "Failure highlighted in outcome: PASS",
+      "No invented requirements or counts: PASS",
+      "INSUFFICIENT_CONTEXT reason preserved: PASS"
+    ]
+  },
+  "content": {
+    "type": "workflow_summary",
+    "schema_version": "1.0",
+    "items": {
+      "request_and_intent": "The workflow attempted an inception pipeline for QuickPay — a payments product. The goal was to produce a vision document and extract structured requirements for downstream epic decomposition.",
+      "execution_flow": [
+        "L1-inception-vision-generator: Generated a vision document for QuickPay with 5 sections, 3 feature areas, and 4 MVP features. However, several sections were thin due to limited input detail. Uploaded artifact successfully.",
+        "L1-inception-requirements-extractor: FAILED — returned INSUFFICIENT_CONTEXT. The vision document lacked sufficient detail for structured requirements extraction. Produced 0 requirements and flagged 1 gap."
+      ],
+      "artifacts_and_content": [
+        "Vision document (markdown) uploaded to /exec-g02-aaa/vision-doc/vision-quickpay.md — but noted as thin in several areas",
+        "0 requirements extracted (insufficient input detail)",
+        "1 gap flagged: vision document lacks detail for extraction"
+      ],
+      "outcome": "Workflow partially failed. Vision document was generated but requirements extraction failed due to insufficient detail in the source material. The workflow was halted before epic decomposition. Recommended action: enrich the product idea with more specific features, user types, and constraints, then re-run the pipeline.",
+      "metadata": {
+        "confidence": 0.92,
+        "reasoning": "Both agent execution_summaries provided clear status and reasoning. The failure reason (INSUFFICIENT_CONTEXT) was explicit. Slightly lower confidence due to sparse detail in the failed agent's summary."
+      }
+    }
+  }
+}

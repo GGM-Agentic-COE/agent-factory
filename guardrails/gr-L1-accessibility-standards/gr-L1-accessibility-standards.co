@@ -1,0 +1,15 @@
+# gr-L1-accessibility-standards — LLM-Driven Colang Implementation
+# Layer: L1 Enterprise — applies to ALL agents
+# Validation: LLM self_check_output (pure Colang)
+# Python actions preserved in actions.py for reference/hybrid mode
+
+define flow check output accessibility
+  """LLM validates accessibility standards on output."""
+  $result = execute self_check_output
+
+  if not $result
+    bot block accessibility violation
+    stop
+
+define bot block accessibility violation
+  "Output flagged: accessibility standards violation detected. Output must use plain language, include alt text for visuals, maintain proper structure, avoid colour-only meaning, provide clear instructions, use inclusive language, and target accessible reading level. Regenerating."

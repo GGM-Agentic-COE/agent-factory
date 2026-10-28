@@ -1,0 +1,11 @@
+{
+  "source": "direct_input",
+  "source_agent_id": null,
+  "parameters": {
+    "requirements": {
+      "functional_requirements": [],
+      "non_functional_requirements": [],
+      "constraints": []
+    }
+  }
+}

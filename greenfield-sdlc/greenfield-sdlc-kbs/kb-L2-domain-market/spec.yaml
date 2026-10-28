@@ -1,0 +1,42 @@
+spec_version: "1.0"
+artifact_type: knowledge_base
+metadata:
+  name: kb-L2-domain-market
+  version: "1.0.0"
+  layer: L2
+  owner: food-domain-champion
+  content_hash: "sha256:7213f3adde91dc25a5c66f43e762f44e92d1a0c16175a71273c1685f4df8ff63"
+  last_reviewed: "2026-08-02"
+  review_cadence: monthly
+
+purpose:
+  description: >
+    A domain-KB slot: L1-vision-market-analyzer's prompt and spec reference
+    this id generically, so a different vertical deployment can populate
+    the same slot with its own market facts without changing the agent.
+    This deployment's slot holds food production & distribution market
+    facts needed to ground a competitor matrix and SWOT: distribution
+    channel types, known UK market player categories, industry trends, and
+    cost-structure norms. Pairs with tool-L1-web-search-competitor-scan for
+    anything more current than this KB's review date; this KB is the
+    starting scaffold, not the sole source.
+
+content:
+  format: markdown
+  documents:
+    - path: content/food-market-landscape.md
+      sections: [distribution-channel-types, known-market-players, industry-trends, cost-structure-norms]
+  total_tokens_estimate: 624
+  chunking: by-section
+  embedding_model: text-embedding-3-small
+
+grounding_rules:
+  accessed_by: [L1-vision-market-analyzer]
+  visibility: "L2 — visible to L2 and below within this deployment's domain projects/squads (L3/L4); not visible to other L2 domain deployments using the same slot id"
+
+freshness:
+  trigger_for_update: "a listed competitor exits/enters/merges, or a named trend is superseded"
+  note: >
+    Market content ages faster than regulatory content (monthly vs quarterly
+    review cadence) — company-status claims in this KB are illustrative
+    category examples, not a verified real-time competitor register.

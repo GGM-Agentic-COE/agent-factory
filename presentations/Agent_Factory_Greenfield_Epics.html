@@ -1,0 +1,150 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">
+<title>Agent Factory — Greenfield Build Epics</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+:root{--navy:#1B2A4A;--teal:#0A7E8C;--teal-lt:#E8F6F7;--green:#1B8C3A;--green-lt:#E8F5E9;--amber:#D4880F;--amber-lt:#FFF8E1;--red:#C62828;--purple:#5E35B1;--gray:#F4F5F7;--gray-mid:#E0E3E8;--gray-txt:#666;--charcoal:#2D3748;
+--idea:#AD1457;--idea-lt:#FCE4EC;--reqs:#3949AB;--reqs-lt:#E8EAF6;--plan:#EF6C00;--plan-lt:#FFF3E0;--incept:#0052CC;--incept-lt:#E9F2FF;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Inter',sans-serif;background:#fff;color:var(--charcoal);}
+.page{max-width:1450px;margin:0 auto;padding:24px;}
+h2{font-size:16px;font-weight:800;color:var(--navy);margin:26px 0 8px;}
+.sub{font-size:12px;color:var(--gray-txt);margin-bottom:6px;}
+.phase-tag{display:inline-block;padding:3px 10px;border-radius:12px;font-size:10px;font-weight:700;color:#fff;}
+.table-wrap{overflow-x:auto;border:1px solid var(--gray-mid);border-radius:8px;margin-bottom:6px;}
+table{width:100%;border-collapse:collapse;font-size:10.5px;min-width:1300px;}
+th{padding:7px 8px;background:var(--navy);color:#fff;font-weight:700;font-size:9.5px;text-transform:uppercase;text-align:left;}
+td{padding:7px 8px;border-bottom:1px solid var(--gray-mid);vertical-align:top;line-height:1.45;}
+tbody tr:nth-child(even) td{background:#FAFBFC;}
+tbody tr:hover td{background:#F0F4F8;}
+code{background:#E5E7EB;padding:1px 4px;border-radius:3px;font-size:9.5px;white-space:nowrap;}
+.eid{font-weight:800;color:var(--navy);}
+.title-cell{font-weight:600;min-width:230px;}
+.desc-cell{color:var(--gray-txt);min-width:260px;}
+.dep{font-size:9.5px;color:var(--purple);}
+.callout{border-radius:8px;padding:10px 14px;margin:10px 0;font-size:11px;border:1px solid;}
+</style></head><body>
+
+<div style="background:linear-gradient(135deg,var(--navy),#2A3F6A);padding:20px 40px;color:#fff;">
+<div style="max-width:1450px;margin:0 auto;">
+<div style="font-size:9px;text-transform:uppercase;letter-spacing:1px;opacity:.5;">Agent Factory Reference — Greenfield Extension</div>
+<h1 style="font-size:22px;font-weight:800;">Build Epics — Agentic-AI CoE Backlog</h1>
+<p style="opacity:.7;font-size:12px;">Each of the 35 agents in <code style="background:rgba(255,255,255,.15);color:#fff;">Agent_Factory_E2E_SDLC_Diagram_Greenfield.html</code>, reverse-engineered into the raw business requirement that would justify building it. Epic title = the requirement. "Realizes Agent" = the traceability link back to the diagram/BOM/requirements/workflow docs.</p>
+</div></div>
+
+<div class="page">
+
+<div class="callout" style="background:var(--gray);border-color:var(--gray-mid);">
+<strong>How to read this:</strong> these are epics for the <em>Agentic-AI CoE's own backlog</em> — the team building the Agent Factory itself, not the Feature Cell using it. "Depends On" is the build-order dependency between epics (which agent's output another agent needs to exist first), computed the same way <code>L1-planning-dependency-mapper</code> would compute it for any other backlog — applied here reflexively to the meta-work of building the pipeline. Acceptance criteria are condensed from the full FR list in <code>Agent_Factory_Greenfield_Requirements.html</code>; that document is the source of truth for Definition of Done.
+</div>
+
+<!-- PHASE 0 -->
+<h2><span class="phase-tag" style="background:var(--idea);">PHASE 0</span> Idea → Vision</h2>
+<div class="table-wrap"><table>
+<thead><tr><th style="width:50px;">ID</th><th class="title-cell">Epic Title (Raw Requirement)</th><th class="desc-cell">Description</th><th>Realizes Agent</th><th>Depends On</th></tr></thead>
+<tbody>
+<tr><td class="eid">EPIC-01</td><td class="title-cell">Structure every new idea into a problem statement, target users, and success metrics</td><td class="desc-cell">Idea intake today is unstructured prose with no consistent shape — every downstream step (market analysis, regulatory check, vision synthesis) needs a structured input to work from.</td><td><code>L1-vision-idea-intake</code></td><td class="dep">— (root)</td></tr>
+<tr><td class="eid">EPIC-02</td><td class="title-cell">Produce a competitor and SWOT analysis for every new idea before it's funded</td><td class="desc-cell">No idea should reach a funding decision without knowing who else is already solving this problem and how.</td><td><code>L1-vision-market-analyzer</code></td><td class="dep">EPIC-01</td></tr>
+<tr><td class="eid">EPIC-03</td><td class="title-cell">Assess regulatory feasibility for every new idea before it's funded</td><td class="desc-cell">A viable-looking idea can be dead on arrival for licensing, data-residency, or consumer-protection reasons — that needs to surface before roadmap commitment, not after.</td><td><code>L1-vision-regulatory-feasibility-checker</code></td><td class="dep">EPIC-01</td></tr>
+<tr><td class="eid">EPIC-04</td><td class="title-cell">Synthesize idea, market, and regulatory findings into one approvable vision statement</td><td class="desc-cell">Three separate analyses aren't a decision — the Product Lead needs one document with a north-star metric and roadmap outline to approve or reject.</td><td><code>L1-vision-statement-generator</code></td><td class="dep">EPIC-01, EPIC-02, EPIC-03</td></tr>
+</tbody>
+</table></div>
+
+<!-- PHASE 1 -->
+<h2><span class="phase-tag" style="background:var(--reqs);">PHASE 1</span> Requirements → Impact Assessment → Dependency Graph</h2>
+<div class="table-wrap"><table>
+<thead><tr><th style="width:50px;">ID</th><th class="title-cell">Epic Title (Raw Requirement)</th><th class="desc-cell">Description</th><th>Realizes Agent</th><th>Depends On</th></tr></thead>
+<tbody>
+<tr><td class="eid">EPIC-05</td><td class="title-cell">Break an approved vision into discrete, testable functional requirements</td><td class="desc-cell">A vision statement is not implementable — it needs to become atomic, one-capability-per-item requirements before anything can be designed.</td><td><code>L1-requirements-elicitor</code></td><td class="dep">EPIC-04</td></tr>
+<tr><td class="eid">EPIC-06</td><td class="title-cell">Classify non-functional requirements and boundary conditions for every requirement</td><td class="desc-cell">Performance, security, and compliance constraints are usually left implicit until someone hits them in production — they need to be classified up front.</td><td><code>L1-requirements-nfr-classifier</code></td><td class="dep">EPIC-05</td></tr>
+<tr><td class="eid">EPIC-07</td><td class="title-cell">Assess the blast-radius impact of new requirements on existing systems</td><td class="desc-cell">Before anything is prioritized, someone needs to know what each requirement touches — new build, or an existing system that could break.</td><td><code>L1-planning-impact-assessor</code></td><td class="dep">EPIC-05, EPIC-06</td></tr>
+<tr><td class="eid">EPIC-08</td><td class="title-cell">Map dependencies across proposed epics, services, and integrations</td><td class="desc-cell">Sequencing risk (what blocks what) is invisible until it's modeled as a graph — planning without it produces backlogs that can't actually be executed in the order prioritized.</td><td><code>L1-planning-dependency-mapper</code></td><td class="dep">EPIC-05, EPIC-07</td></tr>
+</tbody>
+</table></div>
+
+<!-- PHASE 2 -->
+<h2><span class="phase-tag" style="background:var(--plan);">PHASE 2</span> Project / Sprint Planning</h2>
+<div class="table-wrap"><table>
+<thead><tr><th style="width:50px;">ID</th><th class="title-cell">Epic Title (Raw Requirement)</th><th class="desc-cell">Description</th><th>Realizes Agent</th><th>Depends On</th></tr></thead>
+<tbody>
+<tr><td class="eid">EPIC-09</td><td class="title-cell">Rank the backlog by value, effort, and dependency risk</td><td class="desc-cell">Priority today is often "whoever asks loudest" — ranking needs to respect the dependency graph so a blocked item can never outrank its blocker.</td><td><code>L1-planning-backlog-prioritizer</code></td><td class="dep">EPIC-05, EPIC-08</td></tr>
+<tr><td class="eid">EPIC-10</td><td class="title-cell">Allocate the prioritized backlog into capacity-aware 5-day Feature Cycles</td><td class="desc-cell">A ranked list still needs to become a real, capacity-checked roadmap before anyone can commit to it — and it needs to land in Jira, not stay in a doc.</td><td><code>L1-planning-sprint-planner</code></td><td class="dep">EPIC-09</td></tr>
+</tbody>
+</table></div>
+
+<!-- PHASE 3 -->
+<h2><span class="phase-tag" style="background:var(--incept);">PHASE 3</span> Inception — Epics, Features, Stories, Tasks</h2>
+<div class="table-wrap"><table>
+<thead><tr><th style="width:50px;">ID</th><th class="title-cell">Epic Title (Raw Requirement)</th><th class="desc-cell">Description</th><th>Realizes Agent</th><th>Depends On</th></tr></thead>
+<tbody>
+<tr><td class="eid">EPIC-11</td><td class="title-cell">Turn an approved roadmap into Jira epics</td><td class="desc-cell">A roadmap line item and a Jira epic are not the same artifact — someone (or something) has to make that translation every cycle.</td><td><code>L1-inception-epic-creator</code></td><td class="dep">EPIC-10, EPIC-04</td></tr>
+<tr><td class="eid">EPIC-12</td><td class="title-cell">Decompose epics into independently shippable features</td><td class="desc-cell">Epics are too coarse to plan against — they need to split into slices a team could ship on their own.</td><td><code>L1-inception-feature-decomposer</code></td><td class="dep">EPIC-11</td></tr>
+<tr><td class="eid">EPIC-13</td><td class="title-cell">Generate user stories with acceptance criteria, traceable to their source requirement</td><td class="desc-cell">Features aren't buildable until they're stories with Given/When/Then criteria — and every story needs to trace back to the requirement it satisfies, or scope silently drifts.</td><td><code>L1-inception-story-generator</code></td><td class="dep">EPIC-12, EPIC-05</td></tr>
+<tr><td class="eid">EPIC-14</td><td class="title-cell">Decompose stories into developer-day-sized engineering tasks</td><td class="desc-cell">Stories are still too big for daily standups — they need task-level granularity a single developer can pick up.</td><td><code>L1-inception-task-generator</code></td><td class="dep">EPIC-13</td></tr>
+<tr><td class="eid">EPIC-15</td><td class="title-cell">Create epics, stories, and tasks in Jira without duplicating existing issues</td><td class="desc-cell">Generated backlog items are worthless until they're real Jira issues with correct hierarchy — and re-running the pipeline must never create duplicates.</td><td><code>L1-jira-orchestrator</code></td><td class="dep">EPIC-11, EPIC-12, EPIC-13, EPIC-14</td></tr>
+</tbody>
+</table></div>
+
+<!-- PHASE 4 -->
+<h2><span class="phase-tag" style="background:var(--teal);">PHASE 4</span> Design — User Journeys, Wireframes, HLD, LLD, API Spec, Data Model</h2>
+<div class="table-wrap"><table>
+<thead><tr><th style="width:50px;">ID</th><th class="title-cell">Epic Title (Raw Requirement)</th><th class="desc-cell">Description</th><th>Realizes Agent</th><th>Depends On</th></tr></thead>
+<tbody>
+<tr><td class="eid">EPIC-16</td><td class="title-cell">Map end-to-end user journeys before any screen is wireframed</td><td class="desc-cell">Designers keep jumping straight to screens without first knowing the persona's actual path through the product — that ordering needs to be enforced, not optional.</td><td><code>L1-design-user-journey-mapper</code></td><td class="dep">EPIC-13, EPIC-04</td></tr>
+<tr><td class="eid">EPIC-17</td><td class="title-cell">Turn stories and user journeys into wireframes</td><td class="desc-cell">Someone has to produce the actual screen/component layout before UI code can be written — and it shouldn't invent UI the story never asked for.</td><td><code>L1-design-ux-wireframe</code></td><td class="dep">EPIC-13, EPIC-16</td></tr>
+<tr><td class="eid">EPIC-18</td><td class="title-cell">Generate a validated OpenAPI contract from story scope</td><td class="desc-cell">Backend and frontend teams both need one agreed contract before either starts building, or they build against assumptions that don't match.</td><td><code>L1-design-api-spec</code></td><td class="dep">EPIC-13, EPIC-06</td></tr>
+<tr><td class="eid">EPIC-19</td><td class="title-cell">Produce a high-level design (C4, components, integrations) from requirements and dependencies</td><td class="desc-cell">Nobody should start low-level design without an agreed picture of components and integration points — and every integration named has to actually exist in the dependency graph.</td><td><code>L1-design-hld</code></td><td class="dep">EPIC-05, EPIC-06, EPIC-08, EPIC-18</td></tr>
+<tr><td class="eid">EPIC-20</td><td class="title-cell">Produce a low-level design (classes, sequences, error handling) from the HLD</td><td class="desc-cell">A component diagram isn't enough to generate code from — classes, sequence flows, and error handling need to be specified first.</td><td><code>L1-design-lld</code></td><td class="dep">EPIC-19, EPIC-18</td></tr>
+<tr><td class="eid">EPIC-21</td><td class="title-cell">Design the data model (schema, lineage, migration plan) with PII fields flagged</td><td class="desc-cell">Schema decisions made ad hoc during coding are how PII ends up in plaintext columns — the data model, and its sensitive fields, need to be decided before code generation.</td><td><code>L1-design-data-architect</code></td><td class="dep">EPIC-20, EPIC-05</td></tr>
+<tr><td class="eid">EPIC-22</td><td class="title-cell">Publish design documents to a branch and Confluence without overwriting prior edits</td><td class="desc-cell">Design artifacts need a durable, versioned home that Feature Owners can review and comment on — and re-running the pipeline must never clobber a human's edits.</td><td><code>L1-github-orchestrator</code> <span style="color:var(--gray-txt);">(design-publish)</span></td><td class="dep">EPIC-16, EPIC-17, EPIC-18, EPIC-19, EPIC-20, EPIC-21</td></tr>
+</tbody>
+</table></div>
+
+<!-- PHASE 5 -->
+<h2><span class="phase-tag" style="background:var(--amber);">PHASE 5</span> Test Strategy — Scenarios, Cases, Scripts, Synthetic Data</h2>
+<div class="table-wrap"><table>
+<thead><tr><th style="width:50px;">ID</th><th class="title-cell">Epic Title (Raw Requirement)</th><th class="desc-cell">Description</th><th>Realizes Agent</th><th>Depends On</th></tr></thead>
+<tbody>
+<tr><td class="eid">EPIC-23</td><td class="title-cell">Generate happy-path and negative test scenarios for every acceptance criterion</td><td class="desc-cell">Test coverage that only exercises the happy path isn't test coverage — every AC clause needs at least one negative scenario too.</td><td><code>L1-testing-scenario-writer</code></td><td class="dep">EPIC-13</td></tr>
+<tr><td class="eid">EPIC-24</td><td class="title-cell">Turn test scenarios into Cucumber Given/When/Then cases</td><td class="desc-cell">Scenarios are still prose — QA needs them as structured, automatable cases, reusing step definitions instead of duplicating them.</td><td><code>L1-testing-case-writer</code></td><td class="dep">EPIC-23</td></tr>
+<tr><td class="eid">EPIC-25</td><td class="title-cell">Generate executable automation scripts from test cases</td><td class="desc-cell">Human-readable Cucumber steps don't run themselves — they need real Playwright/REST Assured scripts that actually lint and execute.</td><td><code>L1-testing-script-generator</code></td><td class="dep">EPIC-24, EPIC-18, EPIC-17</td></tr>
+<tr><td class="eid">EPIC-26</td><td class="title-cell">Generate PII-safe synthetic test data and fixtures</td><td class="desc-cell">Tests need realistic-looking data to run against, but real production PII must never end up in a test fixture — this has to be provably synthetic.</td><td><code>L1-testing-synthetic-data-generator</code></td><td class="dep">EPIC-21, EPIC-24</td></tr>
+<tr><td class="eid">EPIC-27</td><td class="title-cell">Load test cases and scripts into XRay without duplicating existing entries</td><td class="desc-cell">Generated tests are only useful once they're tracked in the system QA actually runs against, linked to their story.</td><td><code>L1-xray-orchestrator</code></td><td class="dep">EPIC-24, EPIC-25</td></tr>
+</tbody>
+</table></div>
+
+<!-- PHASE 6 -->
+<h2><span class="phase-tag" style="background:var(--green);">PHASE 6</span> Construction — API Code Gen, UI Code Gen</h2>
+<div class="table-wrap"><table>
+<thead><tr><th style="width:50px;">ID</th><th class="title-cell">Epic Title (Raw Requirement)</th><th class="desc-cell">Description</th><th>Realizes Agent</th><th>Depends On</th></tr></thead>
+<tbody>
+<tr><td class="eid">EPIC-28</td><td class="title-cell">Generate backend/API implementation code from the LLD, API spec, and data model</td><td class="desc-cell">Design docs don't ship — working, lint-clean backend code does, and it must implement exactly the contract, no speculative endpoints.</td><td><code>L1-construction-api-code-generator</code></td><td class="dep">EPIC-20, EPIC-18, EPIC-21</td></tr>
+<tr><td class="eid">EPIC-29</td><td class="title-cell">Generate frontend/UI implementation code from wireframes, journeys, and the API spec</td><td class="desc-cell">The UI side of the same story — working, lint-clean frontend code wired to the real endpoints, not mocked ones.</td><td><code>L1-construction-ui-code-generator</code></td><td class="dep">EPIC-17, EPIC-16, EPIC-18</td></tr>
+<tr><td class="eid">EPIC-30</td><td class="title-cell">Generate unit tests for generated API and UI code that actually pass</td><td class="desc-cell">Generated code without generated tests is a liability — and the tests have to genuinely execute and hit a coverage bar, not just be schema-valid stubs.</td><td><code>L1-construction-unit-test-generator</code></td><td class="dep">EPIC-28, EPIC-29</td></tr>
+<tr><td class="eid">EPIC-31</td><td class="title-cell">Automatically review generated code for standards, security, and refactor issues</td><td class="desc-cell">Nobody wants AI-generated code merged unreviewed — findings need to be severity-classified, with blockers actually blocking.</td><td><code>L1-construction-code-reviewer</code></td><td class="dep">EPIC-28, EPIC-29, EPIC-30</td></tr>
+<tr><td class="eid">EPIC-32</td><td class="title-cell">Generate API/code documentation that matches the shipped code</td><td class="desc-cell">Generic boilerplate docs that don't reflect the actual code are worse than no docs — they need to be validated against the real source before being returned.</td><td><code>L1-construction-doc-generator</code></td><td class="dep">EPIC-28, EPIC-29, EPIC-18</td></tr>
+<tr><td class="eid">EPIC-33</td><td class="title-cell">Commit generated code, tests, and docs to an implementation branch</td><td class="desc-cell">All of Construction's output needs a single durable branch, and re-running must never silently overwrite in-flight work.</td><td><code>L1-github-orchestrator</code> <span style="color:var(--gray-txt);">(impl-commit)</span></td><td class="dep">EPIC-28, EPIC-29, EPIC-30, EPIC-32</td></tr>
+</tbody>
+</table></div>
+
+<!-- PHASE 7 -->
+<h2><span class="phase-tag" style="background:var(--navy);">PHASE 7</span> PR Creation</h2>
+<div class="table-wrap"><table>
+<thead><tr><th style="width:50px;">ID</th><th class="title-cell">Epic Title (Raw Requirement)</th><th class="desc-cell">Description</th><th>Realizes Agent</th><th>Depends On</th></tr></thead>
+<tbody>
+<tr><td class="eid">EPIC-34</td><td class="title-cell">Bundle Jira, design, code, and test references into a single pull request</td><td class="desc-cell">A reviewer shouldn't have to open five systems to understand what a PR contains — it all needs to be summarized in one place, without opening duplicate PRs on re-run.</td><td><code>L1-github-orchestrator</code> <span style="color:var(--gray-txt);">(PR)</span></td><td class="dep">EPIC-33, EPIC-22, EPIC-15, EPIC-27</td></tr>
+</tbody>
+</table></div>
+
+<!-- CROSS-CUTTING -->
+<h2><span class="phase-tag" style="background:var(--purple);">CROSS-CUTTING</span> Quality Verification</h2>
+<div class="table-wrap"><table>
+<thead><tr><th style="width:50px;">ID</th><th class="title-cell">Epic Title (Raw Requirement)</th><th class="desc-cell">Description</th><th>Realizes Agent</th><th>Depends On</th></tr></thead>
+<tbody>
+<tr><td class="eid">EPIC-35</td><td class="title-cell">Independently score every agent's draft output against a quality rubric before it advances</td><td class="desc-cell">Letting an agent grade its own homework defeats the point of a quality gate — scoring needs to be a separate, independent pass, invoked at all 18 gates across the lifecycle.</td><td><code>L1-quality-verifier</code></td><td class="dep">Cross-cutting — invoked by EPIC-11–13, 19, 28, 29, and others at their quality gate</td></tr>
+</tbody>
+</table></div>
+
+<div class="callout" style="background:var(--gray);border-color:var(--gray-mid);margin-top:16px;"><strong>Build order:</strong> topologically sorting the "Depends On" column gives the CoE's actual build sequence — Phase 0 epics first, then 1→2→3, then Phase 4/5/6 mostly in parallel once Phase 3 lands, then Phase 7 last. This is the same ordering <code>L1-planning-sprint-planner</code> would produce if this backlog were run through the pipeline it describes.</div>
+
+</div>
+</body></html>

@@ -1,0 +1,28 @@
+# gr-L1-pii-detection — Colang Implementation
+# Layer: L1 Enterprise — applies to ALL agents
+# Triggers: pre_execution + post_execution (both rails)
+
+define flow check input pii
+  """Detect PII in incoming input."""
+  $has_pii = execute detect_pii(text=$user_message)
+
+  if $has_pii
+    bot block pii detected
+    stop
+
+define flow check output pii
+  """Detect PII in agent output."""
+  $has_pii = execute detect_pii(text=$bot_message)
+
+  if $has_pii
+    bot block pii detected
+    stop
+
+  $result = execute self_check_output
+
+  if not $result
+    bot block pii detected
+    stop
+
+define bot block pii detected
+  "Content blocked: personally identifiable information detected. PII (emails, phones, SSNs, credit cards, addresses) must be masked before processing."

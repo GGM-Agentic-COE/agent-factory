@@ -1,0 +1,91 @@
+spec_version: "1.0"
+artifact_type: tool
+metadata:
+  name: tool-L0-github-reader-using-PAT
+  version: "2.0.0"
+  layer: L0
+  owner: agentic-ai-coe
+
+purpose:
+  description: "Recursively reads and returns the decoded UTF-8 contents of every file under a folder of a GitHub repository branch owned by the PAT's user, authenticating with a Personal Access Token from AWS Secrets Manager."
+  platform: github
+  operation: read
+
+interface:
+  parameters:
+    folder_location:
+      type: string
+      required: true
+      description: "Repository folder path to read recursively (e.g. 'docs' or 'project/docs'). Must be non-empty; surrounding whitespace and leading/trailing slashes are stripped."
+    repo:
+      type: string
+      required: true
+      description: "Repository name without the owner prefix (e.g. 'my-repo'). The owner is always the login of the user who owns the token."
+    branch:
+      type: string
+      required: true
+      description: "Exact, case-sensitive branch name to read from (e.g. 'main', 'feature/new-login')."
+
+  returns:
+    type: object
+    fields:
+      repository: {type: string, description: "'<owner>/<repo>' identifier, where owner is the token user's login"}
+      branch: {type: string, description: "Branch that was read"}
+      folder_location: {type: string, description: "Normalised folder path"}
+      files:
+        type: object
+        description: >
+          Per-file result keyed by full repository path. Each value has
+          status success (content, size, sha), binary_or_non_utf8
+          (message "File is not UTF-8 text; content not decoded.", size, sha),
+          not_found (message "File '<path>' not found in branch '<branch>'.") or
+          error (message "Failed to decode file content: <detail>" or "Unsupported type: <type>").
+      message: {type: string, nullable: true, description: "Present only when the folder has no files: \"No files found under folder '<folder>'.\""}
+    on_error: >
+      string: "Error reading scripts: 'folder_location' must be a non-empty string." |
+      "Error: Repository '<owner>/<repo>' not found." |
+      "Error reading scripts: Folder '<folder>' not found in branch '<branch>'." |
+      "Error reading scripts: Unable to resolve tree SHA for branch." |
+      "Error reading scripts: <exception>[ | GitHub response: <status> <body>]"
+
+credentials:
+  source: aws-secrets-manager
+  secret_name: "<name-of-secret-in-aws-secrets-manager>"
+  access_method: pod-identity
+  fields_used: [github_token]
+
+configuration:
+  setup_required: [SECRET_NAME, secrets_manager_region]
+  defaults:
+    SECRET_NAME: "<name-of-secret-in-aws-secrets-manager>"
+    secrets_manager_region: "us-east-1"
+    github_api_base: "https://api.github.com"
+    owner_lookup_timeout_seconds: 30
+
+identity:
+  tool_id: "tool-L0-github-reader-using-PAT-001"
+  role: tool-executor
+
+  invocable_by:
+    roles: [content-generator, orchestrator]
+    agents: [any-agent-with-read-permission]
+
+  permissions:
+    operation: read
+    platform: github
+    scope: "org-level"
+
+  credential_scoping:
+    method: org-from-context
+    vault_path_template: "/secrets/{org_id}/github"
+
+resilience:
+  timeout_seconds: 30
+  retry: {max: 2, backoff: exponential, retry_on: [timeout, 429, 502, 503]}
+  circuit_breaker: {failure_threshold: 5, reset_seconds: 60}
+
+security:
+  input_validation: "folder_location must be a non-empty string (whitespace and surrounding slashes stripped); repo and branch accepted as-is (path segments URL-encoded)"
+  output_sanitization: "requests and other exceptions caught and returned as an 'Error reading scripts:' string; on HTTP errors the GitHub status code and raw response body are appended"
+  logging: "No logging; errors are returned directly to the caller. The token is never returned or logged."
+  credential_handling: "GitHub PAT read once at import time from AWS Secrets Manager (key github_token) using the pod's IAM role via Pod Identity; never stored in code. Secret read failures raise RuntimeError at import, so the tool fails to load."

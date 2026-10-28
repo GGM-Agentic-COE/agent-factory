@@ -1,0 +1,68 @@
+spec_version: "1.0"
+artifact_type: guardrail
+metadata:
+  name: gr-L1-prd-quality-gate
+  version: "1.0.0"
+  layer: L1
+  owner: agentic-ai-coe
+  implementation: colang
+
+purpose:
+  description: "Fires when L1-requirements-prd-composer-evaluator concludes. Validates the RESULTANT output — L1-requirements-prd-composer's own items, with the evaluator's fixes_applied resolved in — against L1-requirements-prd-composer/output_schema.json and its evaluation.md rubric: zero-drop composition of requirements.md's FRs and nfr-spec.md's boundary conditions, verbatim compound_splits carry-forward, tagged/traceable Assumptions-Constraints-Risks, absent success metrics, and a complete open_questions TBD rollup. Same pattern as the other Phase 0/1 quality gates: fires on the evaluator, validates the core agent's content, never the evaluator's own scoring bookkeeping."
+
+triggers_on:
+  - post_execution   # fires when the evaluator (not the generator) finishes
+
+on_fail: retry_once_then_escalate
+applies_to: configured_agents   # wired into L1-requirements-prd-composer-evaluator/spec.yaml context.guardrails — not global
+
+rules:
+  # --- Output schema validation (of L1-requirements-prd-composer's own output_schema.json) ---
+  - name: schema-compliance
+    description: "The resultant items must validate against L1-requirements-prd-composer/output_schema.json: executive_summary (summary <=150 chars, confidence, reasoning), requirements[] (id FR-NNN, title, statement, traces_to, nfrs[] with category/boundary_condition/source, confidence, reasoning), assumptions[]/constraints[]/risks[] (short_title, summary <=150 chars, underlies_or_affects, confidence, reasoning), open_questions[] (type tbd|coverage_gap, fr_id+category required when type=tbd, summary <=200 chars), compound_splits[] (source_clause_summary <=150 chars, split_into with >=2 real FR ids)"
+    action: block
+    severity: critical
+
+  # --- Rubric adherence (L1-requirements-prd-composer/evaluation.md, checked against the RESULTANT content) ---
+  - name: zero-drop-requirements
+    description: "evaluation.md Quality Gate #1: the SET of FR ids in resultant requirements[] exactly equals the set of FR ids in original_input.requirements_output.content.items.functional_requirements[].id — no drop, no invented id — and each matched FR's statement is carried verbatim (exact string match), not re-derived or paraphrased"
+    action: block
+    severity: critical
+
+  - name: zero-drop-nfrs
+    description: "evaluation.md Quality Gate #2: for each FR, the SET of (category, boundary_condition) pairs in resultant requirements[].nfrs[] exactly matches original_input.nfr_spec_output's corresponding FR's nfr_classifications[].boundary_conditions — carried verbatim, or both genuinely empty (matching 'No NFR categories apply')"
+    action: block
+    severity: critical
+
+  - name: compound-splits-carried-forward
+    description: "evaluation.md Quality Gate #3: resultant compound_splits[] is carried forward verbatim from original_input.requirements_output.content.items.compound_splits — not re-derived, not dropped, no entry added or altered"
+    action: block
+    severity: high
+
+  - name: assumption-constraint-risk-tagged
+    description: "evaluation.md Quality Gate (line 8): every assumptions[]/constraints[]/risks[] entry's underlies_or_affects is either a non-empty array of real FR-NNN ids or the literal string 'program-level' — re-derives the schema's own oneOf explicitly; never left untagged even after a 'fix'"
+    action: block
+    severity: critical
+
+  - name: no-success-metrics-field
+    description: "evaluation.md Quality Gate #5: no key anywhere in the resultant items looks like a smuggled metrics field (contains 'metric', 'kpi', or 'target' — none of output_schema.json's own defined field names do). vision.md's north_star_metrics stays the single authoritative source; a metrics field here is a defect, not an omission"
+    action: block
+    severity: high
+
+  - name: open-questions-completeness
+    description: "evaluation.md Quality Gate #6: every (fr_id, category) pair in original_input.nfr_spec_output whose boundary_condition source is '—' (TBD) has a corresponding open_questions[] entry with type 'tbd' and matching fr_id/category — no TBD silently dropped during composition"
+    action: block
+    severity: high
+
+  - name: assumption-constraint-risk-traceability
+    description: "evaluation.md Quality Gate (line 7): every assumption/constraint/risk is genuinely traceable to vision.md's Regulatory Posture / Open Risks Carried Forward, OR to a specific FR that reveals a premise vision.md couldn't have known — never an invented product-level claim. Genuinely fuzzy judgment call, not a regex match"
+    action: flag
+    severity: high
+
+  - name: executive-summary-no-new-claims
+    description: "evaluation.md Reflection Checklist: executive_summary introduces no claim absent from the sections below it (requirements/assumptions/constraints/risks/open_questions) — it condenses, it never introduces"
+    action: flag
+    severity: medium
+
+evaluation:
+  false_positive_threshold: 0.05

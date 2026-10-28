@@ -1,0 +1,13 @@
+prompts:
+  - task: self_check_output
+    content: |
+      Agent output: {{ bot_response }}
+      
+      Check the reasoning field quality for each item:
+      1. Does every item have a non-empty metadata.reasoning field?
+      2. Is each reasoning at least 20 characters long?
+      3. Is the reasoning substantive (not just restating the title or content)?
+      4. Does it explain WHY this output was generated (references input data, KB, or decision logic)?
+      5. Does it demonstrate the agent's decision-making process?
+      
+      Answer "yes" if reasoning is adequate. Answer "no" if missing, too short, or just restating the output.

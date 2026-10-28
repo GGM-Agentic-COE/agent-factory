@@ -1,0 +1,32 @@
+id: kb-L0-ui-coding-standards
+name: UI Coding Standards
+layer: L0
+purpose: Framework-agnostic UI coding standards
+version: 1.0.0
+created: 2026-04-21
+status: active
+sections:
+  - id: UC1
+    title: Component Architecture
+  - id: UC2
+    title: State Management
+  - id: UC3
+    title: Accessibility (WCAG 2.1 AA)
+  - id: UC4
+    title: Responsive Design
+  - id: UC5
+    title: Error/Loading/Empty States
+  - id: UC6
+    title: Design System Compliance
+  - id: UC7
+    title: Performance
+  - id: UC8
+    title: Testing Standards
+  - id: UC9
+    title: Routing
+  - id: UC10
+    title: API Integration
+  - id: UC11
+    title: Security
+  - id: UC12
+    title: Code Quality

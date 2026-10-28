@@ -1,0 +1,21 @@
+# gr-L1-idea-intake-quality-gate — Python-Hybrid Colang Implementation
+# Layer: L1 — fires at L1-vision-idea-intake-evaluator's post_execution
+# Validates L1-vision-idea-intake's RESULTANT output (not the evaluator's own bookkeeping)
+# Deterministic checks via actions.py + LLM for semantic checks
+
+define flow check output idea intake quality gate
+  """Deterministic schema/rubric check on the resultant content, then LLM semantic check."""
+  $has_issues = execute check_idea_intake_quality_gate(output=$bot_message, generator_output=$generator_output)
+
+  if $has_issues
+    bot block idea intake quality gate violation
+    stop
+
+  $result = execute self_check_output
+
+  if not $result
+    bot block idea intake quality gate violation
+    stop
+
+define bot block idea intake quality gate violation
+  "L1-vision-idea-intake's resultant output (post-evaluation) failed its quality gate: schema violation or a rubric item from L1-vision-idea-intake/evaluation.md not actually satisfied. The workflow cannot proceed to market-analysis/regulatory-feasibility with non-conformant content. Retrying."

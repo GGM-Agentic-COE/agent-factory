@@ -1,0 +1,54 @@
+{
+  "test_id": "golden-01",
+  "description": "Perfect response for a biology topic with high confidence",
+  "input": {"topic": "tardigrades"},
+  "expected_output": {
+    "agent_id": "L1-inception-template-agent",
+    "agent_version": "1.0.0",
+    "execution_id": "exec-golden-001",
+    "input_summary": {
+      "source": "direct_input",
+      "source_agent_id": null,
+      "parameters": {"topic": "tardigrades"}
+    },
+    "output": {
+      "type": "fact",
+      "schema_version": "1.0",
+      "items": [
+        {
+          "id": "item-001",
+          "title": "Tardigrade Space Survival",
+          "content": {
+            "description": "A unique fact is: Tardigrades can survive the vacuum of outer space, withstanding extreme radiation, temperatures from -272°C to 150°C, and pressures six times greater than the deepest ocean trench."
+          },
+          "tags": ["tardigrades", "biology", "extremophiles"],
+          "metadata": {
+            "confidence": 0.96,
+            "reasoning": "Confirmed by ESA's TARDIS experiment (2007) which exposed tardigrades to open space on the FOTON-M3 mission. Multiple peer-reviewed studies confirm their cryptobiosis capabilities.",
+            "citation": [
+              {
+                "source_reference": "general-knowledge",
+                "source_location": "microbiology/extremophiles",
+                "start_index": 0,
+                "end_index": 0
+              }
+            ],
+            "trajectory": [
+              {"step": 1, "action": "reason", "tool": null, "detail": "Identified tardigrades' extreme survival as their most remarkable lesser-known property"},
+              {"step": 2, "action": "generate", "tool": null, "detail": "Combined multiple survival extremes into a single concise fact"},
+              {"step": 3, "action": "validate", "tool": null, "detail": "Cross-checked temperature range, pressure tolerance, and space exposure claims"}
+            ]
+          }
+        }
+      ]
+    }
+  },
+  "evaluation_criteria": {
+    "faithfulness": ">= 0.95",
+    "hallucination": "<= 0.05",
+    "relevance": ">= 0.95",
+    "schema_valid": true,
+    "single_item": true,
+    "confidence_range": [0.85, 1.0]
+  }
+}

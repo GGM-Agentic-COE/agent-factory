@@ -1,0 +1,17 @@
+prompts:
+  - task: self_check_input
+    content: |
+      Agent: {{ agent_id }}
+      Iteration count: {{ iteration_count }}
+      Elapsed seconds: {{ elapsed_seconds }}
+      Max iterations: {{ max_iterations }}
+      Timeout seconds: {{ timeout_seconds }}
+      Recursion depth: {{ recursion_depth }}
+      Max recursion: {{ max_recursion }}
+      
+      Has this execution entered a dangerous state?
+      1. Has iteration_count exceeded max_iterations?
+      2. Has elapsed_seconds exceeded timeout_seconds?
+      3. Has recursion_depth exceeded max_recursion?
+      
+      Answer "yes" if within safe limits. Answer "kill" if execution should be terminated.

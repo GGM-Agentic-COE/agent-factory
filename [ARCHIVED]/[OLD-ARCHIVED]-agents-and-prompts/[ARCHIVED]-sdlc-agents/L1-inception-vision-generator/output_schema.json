@@ -1,0 +1,155 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "L1-inception-vision-generator Output",
+  "type": "object",
+  "required": ["agent_id", "execution_id", "workflow_execution_id", "status", "content"],
+  "properties": {
+    "agent_id": {
+      "type": "string",
+      "const": "L1-inception-vision-generator"
+    },
+    "execution_id": {
+      "type": "string",
+      "description": "Unique execution ID (UUID) generated for this agent run",
+      "pattern": "^exec-[a-f0-9-]{36}$"
+    },
+    "workflow_execution_id": {
+      "type": ["string", "null"],
+      "description": "Unique ID of the workflow this agent is executing within (inherited from upstream or newly generated)",
+      "pattern": "^wf-[a-f0-9-]{36}$"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["success", "failed"]
+    },
+    "content": {
+      "type": "object",
+      "required": ["type", "schema_version", "items", "execution_summary"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "vision_document"
+        },
+        "schema_version": {
+          "type": "string",
+          "const": "1.0"
+        },
+        "items": {
+          "type": "object",
+          "required": ["product_name", "document_summary", "artifact", "metadata"],
+          "properties": {
+            "product_name": {
+              "type": ["string", "null"],
+              "description": "Name of the product (null on failure)"
+            },
+            "document_summary": {
+              "oneOf": [
+                {
+                  "type": "object",
+                  "required": ["executive_summary", "section_count", "feature_area_count", "mvp_feature_count", "risk_count", "open_question_count"],
+                  "properties": {
+                    "executive_summary": {
+                      "type": "string",
+                      "description": "The executive summary paragraph from the vision document"
+                    },
+                    "section_count": {
+                      "type": "integer",
+                      "description": "Number of major sections in the document"
+                    },
+                    "feature_area_count": {
+                      "type": "integer",
+                      "description": "Number of feature areas defined in Full Scope Vision"
+                    },
+                    "mvp_feature_count": {
+                      "type": "integer",
+                      "description": "Number of features in MVP scope"
+                    },
+                    "risk_count": {
+                      "type": "integer",
+                      "description": "Number of risks identified"
+                    },
+                    "open_question_count": {
+                      "type": "integer",
+                      "description": "Number of open questions"
+                    }
+                  }
+                },
+                {"type": "null"}
+              ],
+              "description": "Document summary (null on failure)"
+            },
+            "artifact": {
+              "oneOf": [
+                {
+                  "type": "object",
+                  "required": ["type", "format", "location", "filename", "container", "blob_path"],
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "const": "vision_document"
+                    },
+                    "format": {
+                      "type": "string",
+                      "const": "markdown"
+                    },
+                    "location": {
+                      "type": "string",
+                      "description": "Azure Blob Storage URL where the document was uploaded",
+                      "pattern": "^https://.+/exec-[a-f0-9-]+/vision-doc/.+\\.md$"
+                    },
+                    "filename": {
+                      "type": "string",
+                      "description": "Name of the uploaded file",
+                      "pattern": "^vision-.*\\.md$"
+                    },
+                    "container": {
+                      "type": "string",
+                      "description": "Azure Blob container name"
+                    },
+                    "blob_path": {
+                      "type": "string",
+                      "description": "Full blob path: /<execution-id>/vision-doc/<filename>",
+                      "pattern": "^/exec-[a-f0-9-]+/vision-doc/.+\\.md$"
+                    }
+                  }
+                },
+                {"type": "null"}
+              ],
+              "description": "Artifact location (null on failure)"
+            },
+            "metadata": {
+              "oneOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "domain_kb_used": {
+                      "type": ["string", "null"],
+                      "description": "Name of the domain KB consulted"
+                    },
+                    "confidence": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 1
+                    },
+                    "grounding_coverage": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 1,
+                      "description": "Proportion of content grounded in domain KB vs inferred"
+                    }
+                  }
+                },
+                {"type": "null"}
+              ],
+              "description": "Execution metadata (null on failure)"
+            }
+          }
+        },
+        "execution_summary": {
+          "type": "string",
+          "description": "Plain text bullet-point summary of what was produced, decisions made, and reflection findings"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,91 @@
+spec_version: "1.0"
+artifact_type: tool
+metadata:
+  name: tool-L0-confluence-writer
+  version: "2.0.0"
+  layer: L0
+  owner: agentic-ai-coe
+
+purpose:
+  description: "Creates a Confluence page from Markdown (or storage-format XHTML), or appends the content to the bottom of an existing page with the same title, at the root of a space or inside a folder, using REST API v1 endpoints and classic scopes only."
+  platform: confluence
+  operation: write
+
+interface:
+  parameters:
+    title:
+      type: string
+      required: true
+      description: "Title of the Confluence page. If a page with this title exists in the target space, content is appended to it; otherwise a new page is created."
+    content:
+      type: string
+      required: true
+      description: >
+        Body content in Markdown (headings, paragraphs, bulleted and numbered lists with one level of nesting,
+        pipe tables, fenced code blocks, horizontal rules, links, bold, italic, inline code). Converted to
+        Confluence storage format automatically; fenced code becomes a Confluence code macro with syntax
+        highlighting for known languages. A whole body wrapped in a ```markdown / ```md fence is unwrapped.
+        Content that starts with <p>, <h1>-<h6>, <table>, <ul>, <ol>, <div> or <pre> is treated as
+        storage-format XHTML and passed through unchanged.
+    space_key:
+      type: string
+      required: true
+      description: >
+        Where to write. A space key (e.g. 'ENG') writes at the root of the space. 'SPACEKEY/folderID'
+        (e.g. 'ENG/123456789') writes inside that folder. A digits-only value is looked up as a page/folder ID
+        (GET content by ID, then CQL id search) to find its space; if nothing matches it is used as a numeric space key.
+
+  returns:
+    type: string
+    description: >
+      On append (page with the title exists in the space):
+        "Content appended to existing page.\nconfluence_page_id: <id>\nspace_key: <key>\n[folder_id: <id>\n]\nPage Title: <title>\nVersion: <new_version>\n"
+      On create:
+        "Page created successfully.\nconfluence_page_id: <id> \n space_key: <key>\n[folder_id: <id>\n]\nPage Title: <title>\nVersion: 1 "
+      No page URL is returned. If moving a new page into the folder fails, the page stays at the space root and
+      the create success message is still returned (the failure is not reported).
+      On failure:
+        "Error writing to Confluence page: <requests exception>\nDetails: <HTTP response body>[\nHint: ...]"
+        (hint added for 401 and 403), or "Error in Confluence Page Creator: <ExceptionType>: <detail>".
+
+credentials:
+  source: aws-secrets-manager
+  secret_name: "<name-of-secret-in-aws-secrets-manager>"
+  access_method: pod-identity
+  fields_used: [api_key, id, confluence_base_url]
+
+configuration:
+  setup_required: [SECRET_NAME, secrets_manager_region, secret_key_names]
+  defaults:
+    SECRET_NAME: "<name-of-secret-in-aws-secrets-manager>"
+    secrets_manager_region: "us-east-1"
+    http_timeout_seconds: 30
+  confluence_scopes_required: [write:confluence-content, read:confluence-content.all, read:confluence-space.summary]
+
+identity:
+  tool_id: "tool-L0-confluence-writer-001"
+  role: tool-executor
+
+  invocable_by:
+    roles: [orchestrator]
+    agents: [any-agent-with-write-permission]
+
+  permissions:
+    operation: write
+    platform: confluence
+    scope: "org-level"
+
+  credential_scoping:
+    method: org-from-context
+    vault_path_template: "/secrets/{org_id}/confluence"
+
+resilience:
+  timeout_seconds: 30
+  retry: {max: 2, backoff: exponential, retry_on: [timeout, 429, 502, 503]}
+  circuit_breaker: {failure_threshold: 5, reset_seconds: 60}
+
+security:
+  input_validation: "title and space_key accepted as-is (space_key trimmed and parsed for the SPACEKEY/folderID form); Markdown special characters and raw HTML in Markdown content are escaped; storage-format content is passed through without validation"
+  output_sanitization: "requests exceptions caught; the HTTP response body is included in the error string on failure only; other exceptions returned as '<ExceptionType>: <detail>'"
+  logging: "No dedicated log file; errors are returned directly to the caller rather than logged separately"
+  credential_handling: "Email (secret key 'id') and API token (secret key 'api_key') read from AWS Secrets Manager via Pod Identity at import time and sent as HTTP Basic Auth; never returned or logged"

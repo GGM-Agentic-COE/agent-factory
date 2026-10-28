@@ -1,0 +1,12 @@
+models:
+  - type: main
+    engine: openai
+    model: gpt-4.1
+
+rails:
+  input:
+    flows:
+      - check input policy
+  output:
+    flows:
+      - check output policy

@@ -1,0 +1,21 @@
+# gr-L1-prd-quality-gate — Python-Hybrid Colang Implementation
+# Layer: L1 — fires at L1-requirements-prd-composer-evaluator's post_execution
+# Validates L1-requirements-prd-composer's RESULTANT output (not the evaluator's own bookkeeping)
+# Deterministic checks via actions.py + LLM for semantic checks
+
+define flow check output prd quality gate
+  """Deterministic schema/zero-drop/tagging/metrics-smuggling check on the resultant content, then LLM semantic check."""
+  $has_issues = execute check_prd_quality_gate(output=$bot_message, generator_output=$generator_output, original_input=$original_input)
+
+  if $has_issues
+    bot block prd quality gate violation
+    stop
+
+  $result = execute self_check_output
+
+  if not $result
+    bot block prd quality gate violation
+    stop
+
+define bot block prd quality gate violation
+  "L1-requirements-prd-composer's resultant output (post-evaluation) failed its quality gate: schema violation, a dropped FR or NFR boundary condition, a broken compound-split carry-forward, an untagged assumption/constraint/risk, a smuggled success-metrics field, or a dropped TBD detected. The workflow cannot proceed to impact-assessor/dependency-mapper with non-conformant PRD content. Retrying."

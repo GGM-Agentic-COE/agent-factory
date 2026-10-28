@@ -1,0 +1,27 @@
+{
+  "export_metadata": {
+    "source_system": "CMDB (illustrative)",
+    "org": "Thornbury Foods Group",
+    "exported_at": "2026-08-05T09:00:00Z",
+    "ci_count": 9,
+    "note": "HarvestLink's own proposed components are deliberately NOT included — this export represents the estate BEFORE assessment. Each CI maps 1:1 to a row in kb-L1-enterprise-architecture's EA3 integration-relevance table and to a system named in phase-1/examples/impact-assessment.md's Existing-System Impact table — same underlying estate, three different views (narrative reasoning, service-level catalog, CI-level technical export)."
+  },
+  "configuration_items": [
+    { "ci_id": "CI-APP-001", "name": "SAP ERP (ECC 6.0)", "type": "Application", "environment": "Production", "criticality_tier": 1, "status": "active — migrating to S/4HANA", "owning_service": "SVC-FIN-001" },
+    { "ci_id": "CI-APP-002", "name": "Manhattan WMS", "type": "Application", "environment": "Production", "criticality_tier": 1, "status": "active", "owning_service": "SVC-SCM-001" },
+    { "ci_id": "CI-APP-003", "name": "Supplier Master Data System (SMDS)", "type": "Application", "environment": "Production", "criticality_tier": 2, "status": "active — no planned replacement", "owning_service": "SVC-SCM-001" },
+    { "ci_id": "CI-APP-004", "name": "Compliance Document Store", "type": "Application", "environment": "Production", "criticality_tier": 3, "status": "active — no API, flagged technical debt", "owning_service": "SVC-COMP-001" },
+    { "ci_id": "CI-APP-005", "name": "Azure AD (Employee Identity)", "type": "Identity Provider", "environment": "Production", "criticality_tier": 2, "status": "active — employee-only, no external-party tier", "owning_service": "SVC-ID-001" },
+    { "ci_id": "CI-APP-006", "name": "Snowflake Data Warehouse", "type": "Data Platform", "environment": "Production", "criticality_tier": 2, "status": "active", "owning_service": "SVC-BI-001" },
+    { "ci_id": "CI-APP-007", "name": "Kong API Gateway", "type": "Integration Platform", "environment": "Production", "criticality_tier": 1, "status": "active — mandatory for new digital products from 2026", "owning_service": "SVC-INT-001" },
+    { "ci_id": "CI-APP-008", "name": "MuleSoft ESB", "type": "Integration Platform", "environment": "Production", "criticality_tier": 2, "status": "active — legacy point-to-point integration", "owning_service": "SVC-INT-001" },
+    { "ci_id": "CI-APP-009", "name": "Legacy Wholesale CRM", "type": "Application", "environment": "Production", "criticality_tier": 2, "status": "active", "owning_service": "SVC-CUST-001" }
+  ],
+  "relationships": [
+    { "from": "CI-APP-002", "to": "CI-APP-003", "type": "reads-from", "description": "WMS reads supplier/distributor records from SMDS for warehouse operations" },
+    { "from": "CI-APP-001", "to": "CI-APP-002", "type": "integrates-with", "description": "ERP and WMS exchange inventory/fulfilment data via the ESB" },
+    { "from": "CI-APP-003", "to": "CI-APP-008", "type": "integrates-via", "description": "SMDS is integrated via the legacy ESB, not the new API Gateway" },
+    { "from": "CI-APP-006", "to": "CI-APP-008", "type": "integrates-via", "description": "Data Warehouse ingests via the ESB (legacy pattern) — new digital products should use the API Gateway instead, per kb-L1-enterprise-architecture EA4" },
+    { "from": "CI-APP-009", "to": "CI-APP-005", "type": "depends-on", "description": "Legacy Wholesale CRM authenticates employees via Azure AD" }
+  ]
+}

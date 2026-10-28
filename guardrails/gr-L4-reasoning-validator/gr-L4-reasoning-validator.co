@@ -1,0 +1,15 @@
+# gr-L4-reasoning-validator — LLM-Driven Colang Implementation
+# Layer: L4 — Reasoning Validator
+# Validation: LLM self_check (pure Colang)
+# Python actions preserved in actions.py for reference/hybrid mode
+
+define flow check output reasoning
+  """LLM validates reasoning validator rules on output."""
+  $result = execute self_check_output
+
+  if not $result
+    bot block L4 reasoning validator
+    stop
+
+define bot block L4 reasoning validator
+  "Output flagged: reasoning field is missing or insufficient. Every item must include substantive reasoning explaining the decision process."

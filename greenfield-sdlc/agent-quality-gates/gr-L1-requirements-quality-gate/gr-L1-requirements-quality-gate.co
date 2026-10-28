@@ -1,0 +1,15 @@
+# gr-L1-requirements-quality-gate — LLM-Driven Colang Implementation
+# Layer: L1 — fires at L1-requirements-elicitor-evaluator's post_execution
+# Validates L1-requirements-elicitor's RESULTANT output (not the evaluator's own bookkeeping)
+# Python actions preserved in actions.py for reference/hybrid mode
+
+define flow check output requirements quality gate
+  """LLM validates L1-requirements-elicitor's resultant output against its own schema and ISO/IEC/IEEE 29148 rubric."""
+  $result = execute self_check_output
+
+  if not $result
+    bot block requirements quality gate violation
+    stop
+
+define bot block requirements quality gate violation
+  "L1-requirements-elicitor's resultant output (post-evaluation) failed its quality gate: schema violation, an ID gap, a broken compound-split reference, or an unqualified vague term detected. The workflow cannot proceed to nfr-classifier/prd-composer with non-conformant requirements. Retrying."

@@ -1,0 +1,222 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "L1-inception-epics-generator-output-v1.0",
+  "title": "Epics Generator Output",
+  "description": "Output schema for the epics generator agent. Decomposes requirements into epics, features, and a 4-sprint delivery plan with full traceability.",
+  "type": "object",
+  "required": ["agent_id", "agent_version", "execution_id", "input_summary", "output"],
+  "properties": {
+    "agent_id": {"type": "string", "const": "L1-inception-epics-generator-agent"},
+    "agent_version": {"type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$"},
+    "execution_id": {"type": "string", "pattern": "^exec-.+$"},
+    "input_summary": {
+      "type": "object",
+      "required": ["source", "parameters"],
+      "properties": {
+        "source": {"type": "string", "enum": ["agent_output", "direct_input", "file_upload"]},
+        "source_agent_id": {"type": ["string", "null"]},
+        "parameters": {"type": "object"}
+      }
+    },
+    "content": {
+      "type": "object",
+      "required": ["type", "schema_version", "items", "execution_summary"],
+      "properties": {
+        "type": {"type": "string", "const": "epics"},
+        "schema_version": {"type": "string", "const": "1.0"},
+        "items": {"$ref": "#/$defs/Items"},
+        "execution_summary": {
+          "type": "string",
+          "minLength": 50,
+          "description": "Plain-text summary: sprint allocation, epic/feature count, FR coverage, grouping decisions, reflection findings"
+        }
+      }
+    }
+  },
+  "$defs": {
+    "Items": {
+      "type": "object",
+      "required": ["delivery_plan", "sprints", "epics", "nfr_mapping", "traceability_matrix", "delivery_summary"],
+      "properties": {
+        "delivery_plan": {"$ref": "#/$defs/DeliveryPlan"},
+        "sprints": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"$ref": "#/$defs/Sprint"},
+          "description": "Sprint sequence — each produces a production-deployable increment"
+        },
+        "epics": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"$ref": "#/$defs/Epic"},
+          "description": "Business capability epics ordered by dependency"
+        },
+        "nfr_mapping": {
+          "type": "object",
+          "description": "Maps each NFR ID to applicable epics with implementation notes",
+          "additionalProperties": {"$ref": "#/$defs/NfrEntry"}
+        },
+        "traceability_matrix": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/TraceabilityEntry"},
+          "description": "One entry per FR showing which features cover it"
+        },
+        "delivery_summary": {
+          "type": "string",
+          "minLength": 50,
+          "description": "Plain-text summary of the delivery plan, sprint goals, and incremental value"
+        }
+      }
+    },
+    "DeliveryPlan": {
+      "type": "object",
+      "required": ["total_sprints", "sprint_duration", "total_duration"],
+      "properties": {
+        "total_sprints": {"type": "integer", "minimum": 1},
+        "sprint_duration": {"type": "string", "description": "e.g., '2 weeks'"},
+        "total_duration": {"type": "string", "description": "e.g., '8 weeks'"}
+      }
+    },
+    "Sprint": {
+      "type": "object",
+      "required": ["sprint_id", "name", "goal", "epics"],
+      "description": "A single sprint delivering one or more epics. End-of-sprint output must be production-deployable.",
+      "properties": {
+        "sprint_id": {"type": "string", "pattern": "^S\\d+$"},
+        "name": {"type": "string", "description": "Sprint theme name"},
+        "goal": {"type": "string", "description": "What is deployable at end of this sprint"},
+        "epics": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "Epic IDs delivered in this sprint"
+        }
+      }
+    },
+    "Epic": {
+      "type": "object",
+      "required": ["epic_id", "title", "description", "sprint", "features"],
+      "description": "A business capability epic. Must represent a user-facing capability, NOT a technical layer.",
+      "properties": {
+        "epic_id": {"type": "string", "pattern": "^EP-\\d{2}$"},
+        "title": {"type": "string", "description": "Business capability title (not technical layer)"},
+        "description": {"type": "string"},
+        "sprint": {"type": "string", "pattern": "^S\\d+$", "description": "Which sprint this epic is delivered in"},
+        "scope_in": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "What is included in this epic's scope"
+        },
+        "scope_out": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "What is explicitly excluded from this epic"
+        },
+        "features": {
+          "type": "array",
+          "minItems": 2,
+          "items": {"$ref": "#/$defs/Feature"},
+          "description": "Features within this epic (2-8 per epic)"
+        }
+      }
+    },
+    "Feature": {
+      "type": "object",
+      "required": ["feature_id", "title", "description", "requirements_covered", "user_facing", "data_sensitivity", "metadata"],
+      "description": "A single deliverable feature. Must be specific enough to estimate. Maps to 1-3 FRs.",
+      "properties": {
+        "feature_id": {
+          "type": "string",
+          "pattern": "^F-\\d{2}\\.\\d+$",
+          "description": "Feature ID format: F-{epic_number}.{sequence}"
+        },
+        "title": {"type": "string"},
+        "description": {
+          "type": "string",
+          "minLength": 50,
+          "description": "Must include: what user sees/does, key fields/inputs, validation rules, edge cases, success/failure behaviour"
+        },
+        "requirements_covered": {
+          "type": "array",
+          "items": {"type": "string"},
+          "minItems": 1,
+          "maxItems": 3,
+          "description": "FR IDs this feature implements (1-3 max)"
+        },
+        "nfrs_applicable": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "NFR IDs that apply to this feature"
+        },
+        "user_facing": {"type": "boolean"},
+        "data_sensitivity": {
+          "type": "string",
+          "enum": ["Public", "Internal", "Confidential", "Restricted"],
+          "description": "Public=catalog/rates. Internal=status/config. Confidential=name/email. Restricted=ID/income/biometric."
+        },
+        "change_type": {
+          "type": "string",
+          "enum": ["new", "modified", "unchanged"],
+          "description": "Whether this feature is new, modifies existing, or wraps unchanged behaviour"
+        },
+        "edge_cases": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "Edge cases and error scenarios for this feature"
+        },
+        "metadata": {"$ref": "#/$defs/FeatureMetadata"}
+      }
+    },
+    "FeatureMetadata": {
+      "type": "object",
+      "required": ["confidence", "reasoning", "citation"],
+      "properties": {
+        "confidence": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "0.9+ for features directly from explicit FRs. 0.7-0.9 for inferred decompositions."
+        },
+        "reasoning": {
+          "type": "string",
+          "minLength": 20,
+          "description": "Why this feature exists, why in this epic, why this scope"
+        },
+        "citation": {
+          "type": "object",
+          "properties": {
+            "source_reference": {"type": "string"},
+            "source_location": {"type": "string"}
+          }
+        }
+      }
+    },
+    "NfrEntry": {
+      "type": "object",
+      "required": ["title", "applicable_epics", "implementation_notes"],
+      "properties": {
+        "title": {"type": "string"},
+        "applicable_epics": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "Epic IDs this NFR applies to"
+        },
+        "implementation_notes": {
+          "type": "string",
+          "description": "How this NFR should be implemented across the applicable epics"
+        }
+      }
+    },
+    "TraceabilityEntry": {
+      "type": "object",
+      "required": ["fr_id", "covered_by"],
+      "properties": {
+        "fr_id": {"type": "string", "description": "FR ID from input requirements"},
+        "covered_by": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "Feature IDs that implement this FR"
+        }
+      }
+    }
+  }
+}

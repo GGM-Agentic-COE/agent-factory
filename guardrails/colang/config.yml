@@ -1,0 +1,48 @@
+models:
+  - type: main
+    engine: openai
+    model: gpt-4.1
+
+rails:
+  input:
+    flows:
+      # L1 Enterprise — cannot be overridden
+      - self check input              # LLM-based safety check (uses prompts.yml)
+      - check input jailbreak         # Jailbreak attempt detection (DAN, role-play, encoding)
+      - check input injection         # Pattern-based injection defence
+      - check input pii               # Regex PII detection
+      - check input content safety    # Harmful content patterns
+      - check input validation        # Schema/structure validation
+      # L2 Domain
+      - check input topic adherence   # Domain scope enforcement
+
+  output:
+    flows:
+      # L1 Enterprise
+      - self check output             # LLM-based output safety check
+      - check output schema           # AgentOutput contract validation
+      - check output pii              # PII leakage detection
+      - check output secrets          # Credentials/key detection
+      - check output content safety   # Harmful content check
+      - check output audit trail      # Audit record enforcement
+      # L3 Project
+      - check output hallucination    # Grounding check
+      - check output citations        # Citation completeness
+      - check output confidence       # Confidence threshold gate
+      - check output consistency      # Multi-item contradiction check
+      # L4 Squad
+      - check output reasoning        # Reasoning field validation
+
+  execution:
+    flows:
+      # L2 Domain
+      - check tool permissions        # Least-privilege tool access
+      - check memory safety           # Memory isolation
+      # L3 Project
+      - check rate limit              # Tool call caps
+      - check loop detection          # Infinite loop kill
+      - check cost control            # Token budget enforcement
+
+# Note: Execution rails require a custom ExecutionContextProvider
+# that tracks iteration_count, elapsed_seconds, tool_call_count, total_tokens.
+# See actions.py for implementation hooks.

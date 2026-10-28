@@ -1,0 +1,12 @@
+prompts:
+  - task: self_check_output
+    content: |
+      Agent output: {{ bot_response }}
+      
+      Check citation completeness:
+      1. Does every item in output.items have a non-empty metadata.citation array?
+      2. Does each citation have a non-empty source_reference field?
+      3. Do the source_references appear to be real KB names or valid sources (not fabricated)?
+      4. Is there at least 1 citation per item?
+      
+      Answer "yes" if citations are complete and valid. Answer "no" if any item is missing citations or has invalid references.

@@ -1,0 +1,45 @@
+{
+  "test_id": "golden-02-insufficient-input",
+  "description": "Correct handling of vague, insufficient input — extracts nothing, flags the entire input as a gap",
+  "agent_id": "L1-inception-requirements-extractor",
+  "agent_version": "1.0.0",
+  "execution_id": "exec-golden-002",
+  "workflow_execution_id": null,
+  "status": "failed",
+  "input_summary": {
+    "source": "direct_input",
+    "source_agent_id": null,
+    "parameters": {"idea": "something with AI"}
+  },
+  "content": {
+    "type": "requirements",
+    "schema_version": "1.0",
+    "items": {
+      "functional_requirements": [],
+      "non_functional_requirements": [],
+      "constraints": [],
+      "assumptions": [],
+      "gaps": [
+        {
+          "id": "GAP-01",
+          "description": "Input is too vague to extract any specific requirements — 'something with AI' does not describe a product, feature, or capability",
+          "impact": "Cannot proceed with any downstream work (epics, stories, design, architecture) without a concrete product description",
+          "suggested_question": "Please provide a more detailed description: What problem does this solve? Who are the users? What should they be able to do? What are the key features?",
+          "metadata": {
+            "reasoning": "INSUFFICIENT_CONTEXT — The input contains no describable features, no user types, no capabilities, and no constraints. A single phrase 'something with AI' provides zero actionable information for requirements extraction."
+          }
+        }
+      ]
+    },
+    "execution_summary": "• Produced 0 FRs, 0 NFRs, 0 constraints, 0 assumptions, 1 gap\n• INSUFFICIENT_CONTEXT: Input 'something with AI' is too vague to extract requirements.\n• The only output is a gap documenting what information is needed to proceed.\n• Reflection: confirmed no hidden requirements in the input — it genuinely contains no actionable content."
+  },
+  "evaluation_criteria": {
+    "functional_requirements_empty": true,
+    "non_functional_requirements_empty": true,
+    "has_gap_explaining_insufficiency": true,
+    "has_execution_summary": true,
+    "no_hallucination": true,
+    "no_invented_features": true,
+    "gap_has_suggested_question": true
+  }
+}

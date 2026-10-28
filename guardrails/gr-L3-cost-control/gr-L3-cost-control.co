@@ -1,0 +1,15 @@
+# gr-L3-cost-control — LLM-Driven Colang Implementation
+# Layer: L3 — Cost Control
+# Validation: LLM self_check (pure Colang)
+# Python actions preserved in actions.py for reference/hybrid mode
+
+define flow check cost control
+  """LLM validates cost control rules on input."""
+  $result = execute self_check_input
+
+  if not $result
+    bot block L3 cost control
+    stop
+
+define bot block L3 cost control
+  "Execution terminated: token or invocation budget exceeded. Cost control limit reached."

@@ -1,0 +1,20 @@
+# gr-L3-cost-control — Colang Implementation
+# Layer: L3 Project — applies to ALL agents
+# Triggers: runtime (input rail, before execution)
+
+define flow check cost budget
+  """Enforce token and invocation budget caps."""
+  $result = execute check_budget_limits(agent_id=$agent_id)
+
+  if $result == "exceeded"
+    bot block budget exceeded
+    stop
+
+  if $result == "warning"
+    bot warn budget warning
+
+define bot block budget exceeded
+  "Execution killed: token or invocation budget exceeded. Contact administrator to increase limits or wait for the next time window."
+
+define bot warn budget warning
+  "Warning: execution has consumed 80%+ of allocated budget. Subsequent requests may be blocked."

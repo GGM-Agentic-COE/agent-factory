@@ -1,0 +1,19 @@
+# content-safety — Python-Hybrid Colang Implementation
+# Deterministic regex check + LLM semantic check
+
+define flow check output content safety hybrid
+  """Deterministic + LLM check for unsafe content in output."""
+  $unsafe = execute check_content_safety(text=$bot_message)
+
+  if $unsafe
+    bot block content safety
+    stop
+
+  $llm_result = execute self_check_output
+
+  if $llm_result
+    bot block content safety
+    stop
+
+define bot block content safety
+  "{\"detected\": true, \"verdict\": \"rejected\", \"reason\": \"Unsafe content detected: violates content safety policy\", \"severity\": \"critical\", \"category\": \"content_safety\", \"rail\": \"output\"}"

@@ -1,0 +1,36 @@
+spec_version: "1.0"
+artifact_type: guardrail
+metadata:
+  name: gr-L3-loop-detection
+  version: "1.0.0"
+  layer: L3
+  owner: project-lead
+  implementation: colang
+
+purpose:
+  description: "Detect and kill infinite loops, excessive recursion, and runaway agent execution"
+
+triggers_on:
+  - runtime
+
+on_fail: kill_execution
+applies_to: all_agents
+
+rules:
+  - name: max-iterations
+    description: "Kill execution after N iterations of same action"
+    action: block
+    severity: critical
+
+  - name: timeout
+    description: "Kill execution after configured timeout"
+    action: block
+    severity: critical
+
+  - name: recursion-depth
+    description: "Block recursion deeper than configured max depth"
+    action: block
+    severity: high
+
+evaluation:
+  false_positive_threshold: 0.05

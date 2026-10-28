@@ -1,0 +1,46 @@
+spec_version: "1.0"
+artifact_type: knowledge_base
+metadata:
+  name: kb-L3-application-baseline
+  version: "1.0.0"
+  layer: L3
+  owner: product-team
+  content_hash: "sha256:auto-computed-on-publish"
+  last_reviewed: "2026-04-19"
+  review_cadence: per-sprint
+
+purpose:
+  description: >
+    Living snapshot of the current application state. Describes what exists today:
+    screens, APIs, data model, features, integrations, and known limitations.
+    Used by agents to distinguish between NEW features (build from scratch) and
+    ENHANCEMENTS (modify/extend existing). Updated every sprint as features ship.
+
+scope:
+  attached_to: "Inception agents (A1-Step1, A1-Step2, A3) and design agents (A5, A6, A7, A8)"
+  override_policy: "Product team updates this KB every sprint. Agents treat it as ground truth for what exists."
+
+content:
+  format: markdown
+  documents:
+    - path: kb-L3-application-baseline.md
+      sections:
+        - BL1-application-overview
+        - BL2-feature-inventory
+        - BL3-screen-inventory
+        - BL4-api-inventory
+        - BL5-data-model
+        - BL6-integration-inventory
+        - BL7-known-limitations
+        - BL8-change-log
+  total_tokens_estimate: 12000
+  chunking: by-section
+
+versioning:
+  changes_trigger_regression: false  # baseline changes every sprint, no regression needed
+  notification_on_change: [product-team, all-agent-owners]
+
+freshness:
+  review_cadence: per-sprint
+  last_reviewed: "2026-04-19"
+  staleness_threshold_days: 21  # must be updated at least every sprint

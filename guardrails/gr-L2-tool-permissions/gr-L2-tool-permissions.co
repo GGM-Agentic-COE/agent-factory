@@ -1,0 +1,15 @@
+# gr-L2-tool-permissions — LLM-Driven Colang Implementation
+# Layer: L2 — Tool Permissions
+# Validation: LLM self_check (pure Colang)
+# Python actions preserved in actions.py for reference/hybrid mode
+
+define flow check tool permissions
+  """LLM validates tool permissions rules on input."""
+  $result = execute self_check_input
+
+  if not $result
+    bot block L2 tool permissions
+    stop
+
+define bot block L2 tool permissions
+  "Tool access denied: this agent does not have permission to invoke the requested tool. Check tools_allowed in agent spec."

@@ -1,0 +1,17 @@
+# misogyny-detection — Python-Hybrid Colang Implementation
+# Deterministic regex check + LLM semantic check
+
+define flow check output misogyny hybrid
+  """Deterministic + LLM check for misogynistic content in output."""
+  $regex_hit = execute detect_misogyny_patterns(text=$bot_message)
+
+  if $regex_hit
+    bot block misogyny detected
+    stop
+
+  # Semantic check for subtle misogyny the regex won't catch
+  $llm_result = execute self_check_output
+
+  if not $llm_result
+    bot block misogyny detected
+    stop

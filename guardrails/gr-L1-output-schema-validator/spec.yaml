@@ -1,0 +1,41 @@
+spec_version: "1.0"
+artifact_type: guardrail
+metadata:
+  name: gr-L1-output-schema-validator
+  version: "1.0.0"
+  layer: L1
+  owner: agentic-ai-coe
+  implementation: colang
+
+purpose:
+  description: "Ensure agent output conforms to the AgentOutput contract — structure, required fields, valid types"
+
+triggers_on:
+  - post_execution
+
+on_fail: retry_once_then_escalate
+applies_to: all_agents
+
+rules:
+  - name: schema-compliance
+    description: "Output must match AgentOutput v1.0 schema"
+    action: block
+    severity: critical
+
+  - name: required-fields
+    description: "agent_id, agent_version, execution_id, input_summary, output must be present"
+    action: block
+    severity: critical
+
+  - name: items-not-empty
+    description: "output.items must not be empty unless handling failure"
+    action: flag
+    severity: high
+
+  - name: field-presence
+    description: "metadata.reasoning and metadata.citation must exist on each item"
+    action: block
+    severity: high
+
+evaluation:
+  false_positive_threshold: 0.05

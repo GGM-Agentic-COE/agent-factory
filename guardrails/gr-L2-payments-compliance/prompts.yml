@@ -1,0 +1,13 @@
+prompts:
+  - task: self_check_output
+    content: |
+      Agent output: {{ bot_response }}
+      
+      For payments domain output, check regulatory compliance:
+      1. Are all cited regulations (PSD2, SCA, PCI-DSS) referenced correctly and accurately?
+      2. If payment stories include SCA requirements where applicable?
+      3. Are domain terms used correctly per payments terminology standards?
+      4. Are any phantom regulations cited that don't exist?
+      5. Are compliance requirements complete (not missing mandatory regulatory linkage)?
+      
+      Answer "yes" if output is compliant. Answer "no" if regulatory inaccuracies or omissions are found.

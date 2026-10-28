@@ -1,0 +1,15 @@
+# gr-L2-payments-compliance — LLM-Driven Colang Implementation
+# Layer: L2 — Payments Compliance
+# Validation: LLM self_check (pure Colang)
+# Python actions preserved in actions.py for reference/hybrid mode
+
+define flow check output payments compliance
+  """LLM validates payments compliance rules on output."""
+  $result = execute self_check_output
+
+  if not $result
+    bot block L2 payments compliance
+    stop
+
+define bot block L2 payments compliance
+  "Output blocked: payments compliance check failed. Regulatory references are inaccurate or incomplete."

@@ -1,0 +1,15 @@
+# gr-L3-consistency-checker — LLM-Driven Colang Implementation
+# Layer: L3 — Consistency Checker
+# Validation: LLM self_check (pure Colang)
+# Python actions preserved in actions.py for reference/hybrid mode
+
+define flow check output consistency
+  """LLM validates consistency checker rules on output."""
+  $result = execute self_check_output
+
+  if not $result
+    bot block L3 consistency checker
+    stop
+
+define bot block L3 consistency checker
+  "Output flagged: internal inconsistency detected. Contradictions or duplicate IDs found across items. Escalating to human review."

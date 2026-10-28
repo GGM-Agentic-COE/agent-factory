@@ -1,0 +1,45 @@
+spec_version: "1.0"
+artifact_type: knowledge_base
+metadata:
+  name: kb-L2-domain-regulatory
+  version: "1.0.0"
+  layer: L2
+  owner: food-domain-champion
+  content_hash: "sha256:841c92c9d94a9434d3934835e0d93fe64b401f727b770c3b6bd92b989199308c"
+  last_reviewed: "2026-08-02"
+  review_cadence: quarterly
+
+purpose:
+  description: >
+    A domain-KB slot: L1-vision-regulatory-feasibility-checker's prompt and
+    spec reference this id generically, so a different vertical deployment
+    can populate the same slot with its own regulatory facts without
+    changing the agent. This deployment's slot holds food production &
+    distribution domain facts needed to ground a Green/Amber/Red regulatory
+    feasibility assessment: registration/licensing, hygiene (HACCP, FHRS),
+    allergen labelling (incl. Natasha's Law), cold-chain and traceability
+    rules, and cross-jurisdiction mechanisms (Primary Authority Scheme).
+    Deliberately excludes production-line/technical detail a later
+    design-phase agent would need; per the token-optimisation "condense
+    domain KB" rule (S3), vision-stage agents get PM/feasibility
+    implications only, not field-level technical schemas.
+
+content:
+  format: markdown
+  documents:
+    - path: content/food-regulatory-facts.md
+      sections: [registration-licensing, hygiene-safety, allergen-labelling, distribution-cold-chain, cross-cutting]
+  total_tokens_estimate: 720
+  chunking: by-section
+  embedding_model: text-embedding-3-small
+
+grounding_rules:
+  accessed_by: [L1-vision-regulatory-feasibility-checker]
+  visibility: "L2 — visible to L2 and below within this deployment's domain projects/squads (L3/L4); not visible to other L2 domain deployments using the same slot id"
+
+freshness:
+  trigger_for_update: "FSA/FSS guidance change, new allergen-labelling law, Brexit-related retained-law amendment"
+  note: >
+    Food regulation changes more frequently than most domains. This KB is a
+    starting point for a feasibility assessment, not a substitute for current
+    FSA guidance or legal review before an authorization application.

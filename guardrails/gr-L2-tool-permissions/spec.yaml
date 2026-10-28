@@ -1,0 +1,36 @@
+spec_version: "1.0"
+artifact_type: guardrail
+metadata:
+  name: gr-L2-tool-permissions
+  version: "1.0.0"
+  layer: L2
+  owner: agentic-ai-coe
+  implementation: colang
+
+purpose:
+  description: "Enforce least-privilege tool access — agents can only invoke permitted tools"
+
+triggers_on:
+  - runtime
+
+on_fail: block_and_log
+applies_to: all_agents
+
+rules:
+  - name: allowed-tools
+    description: "Agent can only call tools in its tools_allowed list"
+    action: block
+    severity: critical
+
+  - name: denied-tools
+    description: "Agent must never call tools in its tools_denied list"
+    action: block
+    severity: critical
+
+  - name: scope-check
+    description: "Tool calls must be within agent's org_scope"
+    action: block
+    severity: high
+
+evaluation:
+  false_positive_threshold: 0.05

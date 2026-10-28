@@ -1,0 +1,12 @@
+{
+  "agent_id": "L1-inception-vision-generator",
+  "input": {
+    "idea": "We need a digital platform for our childcare centres that lets parents manage enrolments, view their child's daily activities and learning progress, communicate with educators, and handle fee payments. Currently everything is done through paper forms, verbal handoffs at pickup, and manual invoicing. We operate 12 centres across Singapore with 3,200 enrolled children and 400 staff. The government requires us to submit child development milestones to ECDA quarterly and we need to comply with the Early Childhood Development Centres Act.",
+    "product_name": "ParentConnect",
+    "target_market": "Early childhood education providers in Singapore",
+    "constraints": "Must integrate with existing ECDA Child Development Reporting system. Budget is SGD 2M for Year 1. Must support English and Mandarin. Must comply with PDPA (Personal Data Protection Act) for children's data."
+  },
+  "context": {
+    "domain_kb": "kb-L2-early-childhood-education-domain"
+  }
+}
