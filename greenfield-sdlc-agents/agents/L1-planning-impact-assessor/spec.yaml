@@ -2,63 +2,57 @@
 spec_version: "1.0"
 artifact_type: agent
 metadata:
-  name: L1-planning-impact-assessor
+  name: L0-planning-impact-assessor
   version: "1.0.0"
-  layer: L1
+  layer: L0
   phase: planning
   owner: agentic-ai-coe
-  created: "2026-08-08"
-
+  created: 2026-10-28
 purpose:
-  description: "Assesses a PRD's blast-radius impact against the existing enterprise estate — a service-catalog capability-duplication check, a CMDB configuration-item technical-touch check, and a cross-reference of both against enterprise-architecture narrative for why."
-  input: "Approved prd.md (agent_output) from L1-requirements-prd-composer, plus the enterprise's service-catalog and CMDB exports."
-  output: "impact-assessment.md artifact plus structured capability-check, existing-system-impact, component, and external-dependency items."
-  business_value: "Phase 2 planning (dependency mapping, backlog prioritization) needs to know what a new product duplicates, touches, or newly depends on before effort is committed. Without this agent, a duplicate-build risk or a missed integration touchpoint surfaces only after work has started — a greenfield product is very often built WITHIN an established parent enterprise, not in isolation, so this check is real and non-trivial whenever a real service catalog/CMDB exists, not a rubber stamp."
-
+  description: "Assesses PRD components against the enterprise estate (service catalog + CMDB) and builds a traversal-verified dependency graph from the same findings in one run."
+  input: "prd_output from L0-requirements-prd-composer, plus raw service_catalog and cmdb_export; kb-L1-architecture-principles read via Confluence (page_id 524091393)."
+  output: "AgentOutput (content.type impact_assesment) with impact_assessment + dependency_graph meta-point items and the full <Product name>-impact-assessment.md inlined in artifacts[0].content."
+  business_value: "Prevents duplicate builds and wrong build sequencing by grounding every FR in the real estate and proving cycle_check / critical_path by traversal before backlog prioritisation."
 prompt:
-  ref: "prompts/L1-planning-impact-assessor/instructions.md"
+  ref: "prompts/L0-planning-impact-assessor/instructions.md"
   version: "1.0.0"
-  description: "Runs three checks in sequence — service-catalog capability-duplication, CMDB technical-touch, and cross-reference against kb-L1-enterprise-architecture's narrative — flagging any mismatch between sources as a finding rather than silently resolving it."
-
+  description: "Two-part prompt: Part 1 impact assessment against catalog/CMDB/KB; Part 2 dependency graph (DFS cycle check, longest-path critical path, 1:1 mermaid) built from Part 1, inlined as artifact."
 contract:
   input_schema: "$ref: schemas/agent-input-contract-schema.json"
   output_schema: "$ref: schemas/agent-output-schema.json"
-
   input:
-    accepts_from_agents: [L1-requirements-prd-composer]
-    accepts_direct_input: false
+    accepts_from_agents: [L0-requirements-prd-composer]
+    accepts_direct_input: true
     accepts_file_upload:
-      enabled: false
+      enabled: true
+      formats: [".json", ".md"]
     required_parameters:
-      prd_output: { type: object, description: "L1-requirements-prd-composer's agent_output — must have status: success" }
-      service_catalog: { type: object, description: "External (not a KB, not agent_output): service-catalog export, service grain, e.g. enterprise-data/{org}-service-catalog.json. An empty { \"services\": [] } is valid ONLY for a product with genuinely no parent enterprise — do not default to empty when a real export exists." }
-      cmdb_export: { type: object, description: "External (not a KB, not agent_output): CMDB export, configuration-item grain, e.g. enterprise-data/{org}-cmdb-export.json. An empty { \"configuration_items\": [] } is valid ONLY for a product with genuinely no parent enterprise." }
-    optional_parameters: {}
-
+      prd_output: {type: object, description: "AgentOutput from L0-requirements-prd-composer; status must be success; content.items holds FR-NNN and constraints"}
+      service_catalog: {type: object, description: "Service catalog export; services[] (may be empty)"}
+      cmdb_export: {type: object, description: "CMDB export; configuration_items[], relationships[], export_metadata.exported_at (may be empty)"}
+    optional_parameters:
+      run_date: {type: string, default: "execution date (UTC)", description: "Reference date for export staleness check"}
+      kb_page_id: {type: string, default: "524091393", description: "Confluence page id of kb-L1-architecture-principles"}
   output:
     $ref: "output_schema.json"
-
 context:
   knowledge_bases:
-    - kb-L1-enterprise-architecture   # narrative WHY behind what a component touches/doesn't touch — cross-checked against the CMDB/catalog, not a substitute for checking them
+    - kb-L1-architecture-principles   # fetched at runtime via tool-L1-confluence-fetch-page (page_id 524091393)
   guardrails:
     - gr-L1-output-schema-validator
     - gr-L1-pii-detection
-    - gr-L1-consistency-check          # a CMDB/KB mismatch, or an FR left without a component, is exactly this guardrail's job
-    - gr-L2-food-domain-compliance
+    - gr-L3-hallucination-detector
+    - gr-L3-citation-validator
+    - gr-L3-consistency-checker
+    - gr-L2-tool-permissions
+    - gr-L3-agent-rate-limit
   tools:
-    - tool-L1-confluence-fetch-page   # read-only; fetches architecture-registry detail not already captured in the CMDB export or the KB narrative
-
+    - tool-L1-confluence-fetch-page   # read-only; KB + input page retrieval. No write tool — blob persistence is owned by the paired evaluator.
 quality:
   evaluation_ref: "evaluation.md"
   min_score: 7.0
   hallucination_check: true
   consistency_check: true
-
-performance:
-  target_latency_seconds: 20
-  max_token_budget: 6000
-
 versioning:
   input_version: "1.0"
   output_version: "1.0"

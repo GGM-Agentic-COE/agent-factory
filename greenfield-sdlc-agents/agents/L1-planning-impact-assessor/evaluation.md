@@ -1,27 +1,35 @@
-# Evaluation — L1-planning-impact-assessor
+# Evaluation — L0-planning-impact-assessor
 
 ## Quality Gates
-- [ ] Capability check genuinely run against service_catalog, not skipped — names the closest candidate service even when it is not a duplicate, never "no similar service found" with nothing checked against
-- [ ] Every CMDB CI relevant to a proposed component is checked and cross-referenced against kb-L1-enterprise-architecture's narrative — a mismatch between what the CMDB shows and what the KB claims is flagged as a finding, never silently resolved by picking one source
-- [ ] Every FR in prd.md is mapped to a component with a stated blast-radius rationale (Low/Medium/High per the prompt's embedded classification guide) — no FR silently unmapped
-- [ ] external_dependencies includes anything newly surfaced by the capability/technical-touch checks above (e.g. an identity-provider gap), not just what vision/PRD already named
-- [ ] A genuinely empty service_catalog/cmdb_export (no parent enterprise) is stated explicitly as such, never confused with an unchecked or skipped catalog/CMDB
+- [ ] prd_output.status != success → status failed, INSUFFICIENT_CONTEXT, no artifact
+- [ ] Every FR-NNN in prd_output appears in components_identified AND in some node's source_requirement
+- [ ] Every service_catalog entry named in Capability check (closest match stated even when not a match)
+- [ ] Every CMDB CI has exactly one node (impacted → component/existing; not impacted → existing-ci, no edges)
+- [ ] Catalog + CMDB both empty → "no parent enterprise" stated; KB-mandatory infra (IdP, API Gateway, observability, secrets manager) added as external-dependency nodes
+- [ ] CMDB/KB mismatches and stale/contaminated exports flagged, never reconciled
+- [ ] Edge direction uniform: blocks dep→component, depends-on prerequisite→dependent, integrates-with producer→consumer
+- [ ] cycle_check reproduced by independent DFS; FAIL → critical_path.nodes = [], no edge dropped
+- [ ] critical_path reproduced by longest-path over blocks/depends-on only; all ties reported
+- [ ] Mermaid is 1:1 with nodes[]/edges[] (ids, counts, directions, quoted labels, classDefs, %% comments)
+- [ ] ids kebab-case and unique; no invented FR/CI/SVC ids
+- [ ] executive_summary ≤ 20 words; rationale_summary ≤ 15 words; full text only in artifacts[0].content
+- [ ] Executive Summary in artifact introduces no claim absent from sections below it
 
 ## Scores (≥ threshold to pass)
 | Evaluator | ≥ | Checks |
 |-----------|---|--------|
-| Faithfulness | 0.90 | Every item traces to a real prd.md requirement, service_catalog entry, or CMDB CI |
-| Hallucination | ≤ 0.10 | No invented service, CI, or dependency absent from the input sources |
-| Consistency | 0.90 | existing_system_impact agrees with kb-L1-enterprise-architecture; no two components contradict on the same requirement |
-| Relevance | 0.85 | Output is usable as-is by L1-planning-dependency-mapper and L1-planning-backlog-prioritizer |
-| Reasoning quality | 0.80 | Every rationale/how_or_why_not explains the decision, not just restates the finding |
-| Citation completeness | N/A | This agent grounds against prd.md/service_catalog/cmdb_export/KB directly, not a citation object — ci_id/matched_service_id/requirement_id substitute for citation |
+| Faithfulness | 0.90 | Every component, CI row, dependency traces to PRD/catalog/CMDB/KB |
+| Hallucination | ≤ 0.10 | No invented ids, systems or integrations |
+| Consistency | 0.90 | Items ↔ artifact ↔ mermaid agree; counts match |
+| Relevance | 0.85 | Graph usable as topological-sort input downstream |
+| Reasoning quality | 0.80 | Blast radius and exclusions explained |
+| Citation completeness | 0.95 | Every row cites FR-NNN / CI / SVC id |
 
 ## Reflection Checklist
-- [ ] Every service in service_catalog.services[] was genuinely checked, not assumed clear
-- [ ] Every CI in cmdb_export relevant to a proposed component was genuinely checked, not skipped as "probably not relevant"
-- [ ] No CMDB/KB disagreement was silently reconciled instead of flagged
-- [ ] "No existing internal systems affected" is never conflated with "no external dependencies" — both sections are independently populated
+- [ ] All template sections present, no {placeholder} left
+- [ ] No summary field contains full artifact text
+- [ ] Node ids unique, kebab-case; FR coverage complete
+- [ ] artifacts[0].content is the complete final markdown
 
 ## Reflection Process
 1. Generate → 2. Check all items above → 3. Fix silently → 4. Deliver final only
