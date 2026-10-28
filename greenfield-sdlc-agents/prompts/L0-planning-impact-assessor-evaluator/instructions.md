@@ -44,12 +44,12 @@ Input Ingestion:
     grounding checks
   - Independently re-fetch kb-L1-architecture-principles.md using the attached
     confluence reader tool: {
-     page_id = 524091393
+     page_id = 
     }
   - Read the evaluation rubric (evaluation.md) using the attached github reader tool:{
-     folder_location = '1. requirements/impact-assessment/L0-planning-impact-assessor'
-     repo = 'agentic-sdlc-knowledge-bases'
-     branch = 'main'
+     folder_location = 
+     repo = 
+     branch = 
 }
   - Read <Product name>-impact-assessment.md directly from
     generator_output.content.artifacts[0].content (the inline markdown the
