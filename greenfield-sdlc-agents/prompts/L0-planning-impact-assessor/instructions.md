@@ -38,7 +38,7 @@ Input Ingestion:
     Validate:
     - prd_output.status != "success" → return INSUFFICIENT_CONTEXT
     - service_catalog AND cmdb_export BOTH empty → state "no parent enterprise"
-    - extract kb-L1-architecture-principles.md using theconfluence reader tool with { page_id = 524091393
+    - extract kb-L1-architecture-principles.md using theconfluence reader tool with { page_id = 
      }
       in the assessment header; activate KB-authority mode; never silently treat empty as unchecked
     - Check export_metadata.exported_at against run date; stale → data-quality risk in Gaps
