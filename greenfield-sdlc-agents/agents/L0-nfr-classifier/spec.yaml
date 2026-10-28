@@ -1,0 +1,71 @@
+# Agent Specification Document
+spec_version: "1.0"
+artifact_type: agent
+metadata:
+  name: L0-nfr-classifier
+  version: "1.0.0"
+  layer: L0
+  phase: requirements
+  owner: agentic-ai-coe
+  created: "2026-10-26"
+
+purpose:
+  description: "Classifies the non-functional boundary conditions for every evaluated functional requirement across the six standard NFR categories, grounding each in a real source or marking it TBD."
+  input: "The evaluated requirement set from L0-requirements-elicitor-evaluator, plus the vision document (for its regulatory feasibility analysis) read from Confluence."
+  output: "nfr_classifications[] — one entry per FR with only the genuinely applicable categories, each boundary condition cited to its source or marked 'TBD — needs stakeholder input'."
+  business_value: "Fabricated NFR numbers become fake commitments in the PRD. This agent makes every boundary condition either traceable to requirements, vision.md, regulatory-feasibility.md or an enterprise security policy, or openly TBD — and resolves TBDs a group policy already answers."
+
+prompt:
+  ref: "agents/L0-nfr-classifier/L0-nfr-classifier-prompt.md"
+  version: "1.0.0"
+  description: "Walks the six taxonomy categories per FR, applies only relevant ones, looks for a grounded number/rule in a fixed source order, and otherwise writes TBD; mechanical self-check only."
+
+contract:
+  input_schema: "$ref: schemas/agent-input-contract-schema.json"
+  output_schema: "$ref: schemas/agent-output-schema.json"
+
+  input:
+    accepts_from_agents: [L0-requirements-elicitor-evaluator]   # the EVALUATED requirements, never the raw elicitor output
+    accepts_direct_input: false
+    accepts_file_upload:
+      enabled: false
+    required_parameters:
+      requirements_output: { type: object, description: "L0-requirements-elicitor-evaluator's JSON output; status must be success and functional_requirements non-empty" }
+      confluence_vision_page_id: { type: string, description: "Confluence page_id of the vision document, read for its regulatory feasibility analysis" }
+      github-nfr-classifier-kb-folder-location: { type: string, description: "GitHub folder holding kb-L0-nfr-classification-taxonomy" }
+      github-nfr-classifier-kb-repo-name: { type: string, description: "GitHub repository holding kb-L0-nfr-classification-taxonomy" }
+      github-nfr-classifier-kb-branch: { type: string, description: "GitHub branch holding kb-L0-nfr-classification-taxonomy" }
+    optional_parameters:
+      regulatory_feasibility_output: { type: object, default: "none", description: "Regulatory feasibility analysis; if missing or failed, every Compliance boundary condition is marked TBD rather than failing the run" }
+
+  output:
+    $ref: "output_schema.json"   # content.type: "nfr_classification" — schema file not yet created
+
+context:
+  knowledge_bases:
+    - kb-L0-nfr-classification-taxonomy   # classification METHOD per category; never itself supplies a number — retrieved from GitHub at runtime
+    - kb-L0-enterprise-architecture
+    - kb-L0-enterprise-security           # group policy (ES3/ES4) checked before any Security/Compliance/Availability TBD is written
+  guardrails:
+    - gr-L1-output-schema-validator
+    - gr-L1-pii-detection
+    - gr-L3-hallucination-detector
+    - gr-L3-citation-validator
+    - gr-L3-consistency-checker
+    - gr-L2-tool-permissions
+    - gr-L3-agent-rate-limit
+  tools:
+    - tool-L0-confluence-reader          # reads the vision document's regulatory feasibility analysis
+    - tool-L0-github-reader-using-PAT    # reads kb-L0-nfr-classification-taxonomy; tool-L0-github-reader-using-app takes the same parameters if that variant is deployed instead
+    # read-only — this agent writes nothing to any store; the JSON output is the artifact of record
+
+quality:
+  evaluation_ref: "evaluation.md"   # generator rubric loaded by L0-nfr-classifier-evaluator (S6) — not yet present in this folder
+  min_score: 7.0
+  hallucination_check: true
+  consistency_check: true
+
+versioning:
+  input_version: "1.0"
+  output_version: "1.0"
+  instruction_hash: "sha256:pending"
