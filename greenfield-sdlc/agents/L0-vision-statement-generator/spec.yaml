@@ -1,0 +1,66 @@
+# Agent Specification Document
+spec_version: "1.0"
+artifact_type: agent
+metadata:
+  name: L0-vision-statement-generator
+  version: "2.0.0"
+  layer: L0
+  phase: vision
+  owner: agentic-ai-coe
+  created: "2026-08-02"
+  updated: "2026-10-05"
+
+purpose:
+  description: "Synthesizes idea, market, and regulatory findings into one reconciled vision statement and roadmap outline, and returns the full vision.md inside its JSON output (nothing is written to blob storage). L0-vision-statement-generator-evaluator evaluates it and publishes it to Confluence; Product Lead sign-off is still required before Phase 1."
+  input: "idea-brief.json items, regulatory_feasibility items, and the viability_score owned by L0-vision-regulatory-feasibility-checker at qg-L1-viability-score; market_analysis items optionally, when the market analyzer ran; product_name optionally, from the user."
+  output: "vision.md (markdown, as the content of an artifact in the JSON output) plus structured items reconciling the upstream inputs."
+  business_value: "Three separate analyses aren't a decision — the Product Lead needs one document with a north-star metric and roadmap outline to approve or reject. This agent is also the last chance to catch a dropped regulatory finding before it reaches a human."
+
+prompt:
+  ref: "prompts/L0-vision-statement-generator/instructions.md"
+  version: "2.0.0"
+  description: "Reconciles the upstream artifacts into one vision statement; every Amber/Red regulatory item must survive into open_risks with a roadmap dependency, and the viability_score is reported exactly as received."
+
+contract:
+  input_schema: "$ref: schemas/agent-input-contract-schema.json"
+  output_schema: "$ref: schemas/agent-output-schema.json"
+
+  input:
+    accepts_from_agents: [L1-vision-idea-intake, L1-vision-market-analyzer, L0-vision-regulatory-feasibility-checker, L0-vision-regulatory-feasibility-checker-evaluator]   # the checker evaluator's output carries workflow_execution_id
+    accepts_direct_input: false
+    accepts_file_upload:
+      enabled: false
+    required_parameters:
+      idea_brief_items: { type: object, description: "Full items object from L1-vision-idea-intake, sourced from idea-brief.json (JSON, parsed by key path — never scanned as markdown). Its generated_date, where present, is only the fallback run date: the agent has no clock and takes the run date from tool-L1-system-current-date (timezone UTC). With neither available it writes \"not available\" in the header and completes the vision — a missing date never halts the run, and is never filled from an example, a fixture, or training data" }
+      regulatory_feasibility_items: { type: object, description: "Full items object from L0-vision-regulatory-feasibility-checker as corrected by its evaluator, including its viability object" }
+      viability_score: { type: number, description: "Owned by L0-vision-regulatory-feasibility-checker and re-derived by its evaluator at qg-L1-viability-score. Carried here as a parameter and reported exactly as received — this agent may not compute, re-derive, round, or adjust it" }
+    optional_parameters:
+      market_analysis_items: { type: object, description: "Full items object from L1-vision-market-analyzer. OPTIONAL — the market analyzer may not have run. When absent, vision.md's Market Context reads 'Not assessed', items.market_context is emitted with confidence 0 and traced_to 'none', and no market-sourced open risks are carried. The viability score is unaffected: it carries no market component" }
+
+  output:
+    $ref: "output_schema.json"
+
+context:
+  knowledge_bases: []   # vision structure is embedded in instructions.md per S4 — this agent synthesizes purely from upstream artifacts.
+  guardrails:
+    - gr-L1-output-schema-validator
+    - gr-L1-pii-detection
+    - gr-L1-hallucination-check
+    - gr-L1-consistency-check   # checks reconciliation: no upstream Amber/Red item silently dropped
+  tools:
+    - tool-L1-azure-blob-reader      # reads idea-brief.json/regulatory-feasibility.md/market-analysis.md from blob storage in one call
+
+quality:
+  evaluation_ref: "evaluation.md"
+  min_score: 7.0
+  hallucination_check: true
+  consistency_check: true
+
+performance:
+  target_latency_seconds: 15
+  max_token_budget: 8000
+
+versioning:
+  input_version: "1.0"
+  output_version: "1.0"
+  instruction_hash: "sha256:pending"
