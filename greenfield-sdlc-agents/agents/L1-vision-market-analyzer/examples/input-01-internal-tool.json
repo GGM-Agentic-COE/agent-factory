@@ -1,9 +1,0 @@
-{
-  "problem_statement": "Expense reimbursement is slow: claims pass through 2-3 manager approvals with no visibility into status, and Finance manually re-keys every claim into the accounting system, consuming hours of staff time each week.",
-  "target_users": [
-    "Employees submitting expense claims, who currently have no visibility into where their claim is stuck",
-    "Approving managers in the 2-3 step approval chain",
-    "Finance Operations staff who manually re-key claims and chase approvers"
-  ],
-  "known_competitor_list": []
-}
