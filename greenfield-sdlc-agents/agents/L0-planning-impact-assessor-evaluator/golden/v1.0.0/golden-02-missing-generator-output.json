@@ -1,0 +1,51 @@
+{
+  "expected_output": {
+    "agent_id": "L0-planning-impact-assessor-evaluator",
+    "agent_version": "1.0.0",
+    "execution_id": "exec-3c1670a0-b214-5fc5-bda3-4563fc7cd13a",
+    "workflow_execution_id": "wf-e150a800-ae34-5c6d-80f5-5159a559ae7d",
+    "status": "failed",
+    "content": {
+      "type": "evaluation_result",
+      "schema_version": "1.0",
+      "items": {
+        "scores": {
+          "faithfulness": null,
+          "hallucination": null,
+          "consistency": null,
+          "relevance": null,
+          "reasoning_quality": null,
+          "citation_completeness": null
+        },
+        "overall_score": null,
+        "pass": false,
+        "findings": [
+          {
+            "id": "FND-01",
+            "gate": "Input validation & source fetch",
+            "status": "fail",
+            "detail": "generator_output is null — no L0-planning-impact-assessor items or artifacts[0].content to evaluate; INSUFFICIENT_CONTEXT. original_input (prd_output for ClaimsIntake Hub) present but not evaluated in isolation",
+            "resolution": "escalated"
+          }
+        ],
+        "fixes_applied": [],
+        "final_decision": "escalate_to_hitl"
+      },
+      "artifacts": [],
+      "execution_summary": "• Produced 0 evaluations — INSUFFICIENT_CONTEXT.\n• Reason: generator_output missing/empty; nothing from L0-planning-impact-assessor to re-derive or verify.\n• overall_score null, pass=false, final_decision=escalate_to_hitl\n• workflow_execution_id: generator_output absent, so a new wf id was generated (original_input.prd_output id not substituted — instructions require inheritance from generator_output only)\n• Knowledge bases consulted: none — halted at input validation before rubric/KB fetch.\n• Tools invoked: none.\n• confluence write failed: not performed — no evaluated impact-assessment.md exists to persist; storage.location omitted (no artifact).\n• Guardrails evaluated: gr-L1-output-schema-validator pass; gr-L1-impact-assessment-quality-gate not fired (no final iteration).\n• Suggested: re-run L0-planning-impact-assessor for this workflow and pass its output."
+    }
+  },
+  "evaluation_criteria": {
+    "expected_status": "failed",
+    "expected_final_decision": "escalate_to_hitl",
+    "must": [
+      "artifacts empty; no storage.location fabricated",
+      "no score invented (all null)",
+      "execution_summary states INSUFFICIENT_CONTEXT, reason, and why no Confluence write occurred",
+      "new execution_id"
+    ],
+    "scores": {
+      "hallucination": "0.00"
+    }
+  }
+}
