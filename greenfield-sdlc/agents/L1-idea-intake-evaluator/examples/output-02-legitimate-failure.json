@@ -1,0 +1,30 @@
+{
+  "agent_id": "L1-vision-idea-intake-evaluator",
+  "agent_version": "1.0.0",
+  "execution_id": "exec-a2b3c4d5",
+  "workflow_execution_id": "wf-f6a7b8c9",
+  "status": "success",
+  "content": {
+    "type": "evaluation_result",
+    "schema_version": "1.0",
+    "items": {
+      "scores": {
+        "faithfulness": 1.0,
+        "hallucination": 0.0,
+        "consistency": 1.0,
+        "relevance": 1.0,
+        "reasoning_quality": 0.9,
+        "citation_completeness": null
+      },
+      "overall_score": 9.5,
+      "pass": true,
+      "findings": [
+        { "id": "FND-01", "gate": "Quality Gates — if input was insufficient, status is failed with items empty", "status": "pass", "detail": "The input 'we should build something for small businesses' genuinely names no problem, user segment, or metric. The generator correctly returned status: failed with empty items rather than inventing content." },
+        { "id": "FND-02", "gate": "Reflection Checklist — execution_summary states INSUFFICIENT_CONTEXT with reason", "status": "pass", "detail": "execution_summary clearly states INSUFFICIENT_CONTEXT and explains what's missing and what to ask the stakeholder." }
+      ],
+      "fixes_applied": [],
+      "final_decision": "approved"
+    },
+    "execution_summary": "• overall_score: 9.5 (pass), final_decision: approved — no fixes needed.\n• Findings: 2 total, both pass. This is exactly the correct behaviour for a genuinely vague input: fail explicitly, don't guess.\n• Fixes applied: none — an honest failure is not something to 'fix' into a fabricated success.\n• Knowledge bases consulted: L1-vision-idea-intake/evaluation.md.\n• Guardrails evaluated: gr-L1-output-schema-validator (n/a — generator's status was failed), gr-L1-pii-detection (pass).\n• Gaps flagged: none."
+  }
+}
