@@ -10,15 +10,15 @@ metadata:
   created: "2026-08-02"
 
 purpose:
-  description: "Structures a raw idea into a problem statement, target users, and candidate success metrics."
-  input: "Raw idea brief text (direct input) or a Confluence page reference, plus an optional stakeholder list."
-  output: "Structured items only, no document artifact (problem statement, target users, value proposition, candidate success metrics, open questions), each carried in full and grounded via traced_to."
+  description: "Structures a raw idea into a problem statement, target users, value proposition, and candidate success metrics, without inventing anything the input does not support."
+  input: "Raw idea brief text (direct input) or a Confluence page reference, plus an optional stakeholder list. The source filename and workflow ID are read from runtime metadata."
+  output: "Structured items (problem statement, target users, value proposition, success metrics, open questions), each carried in full and grounded via a verbatim traced_to excerpt, returned in a success/failed envelope. On success the items are also persisted as idea-brief.json in Amazon S3 (<product-name>/wf-<workflow-id>/idea-brief.json) and referenced via document_reference. No separate narrative document artifact."
   business_value: "Every downstream Phase 0 agent (market analysis, regulatory feasibility, vision synthesis) needs the same structured starting facts. Without this agent, each would re-interpret the raw idea text independently and drift."
 
 prompt:
   ref: "prompts/L1-vision-idea-intake/instructions.md"
   version: "1.0.0"
-  description: "Extracts problem statement, target users, value proposition, and candidate metrics from a raw idea; flags anything missing rather than inventing it."
+  description: "Extracts problem statement, target users, value proposition, and success metrics from a raw idea; classifies metrics as stated or suggested; flags anything missing rather than inventing it; runs the quality gate once and stores the validated brief in Amazon S3."
 
 contract:
   input_schema: "$ref: schemas/agent-input-contract-schema.json"
@@ -29,15 +29,15 @@ contract:
     accepts_direct_input: true
     accepts_file_upload:
       enabled: true
-      formats: [".md", ".txt"]
+      formats: [".md", ".txt"]   # source filename (minus extension and version/timestamp suffix) becomes the product name used in the S3 key
     required_parameters: {}   # exactly one of idea_brief_text / confluence_page_ref is required — see optional_parameters and instructions.md's Input Ingestion validation
     optional_parameters:
-      idea_brief_text: { type: string, default: null, description: "Raw free-text idea brief, up to ~2,000 words. Required unless confluence_page_ref is given." }
-      confluence_page_ref: { type: string, default: null, description: "Confluence page URL/ID to fetch the raw brief from, if idea_brief_text is not passed inline. Required unless idea_brief_text is given." }
-      stakeholder_list: { type: array, default: [], description: "Sponsoring stakeholder names/roles, if known" }
+      idea_brief_text: { type: string, default: null, description: "Raw free-text idea brief. Takes precedence when non-blank (Confluence is then not invoked). Required unless confluence_page_ref is given." }
+      confluence_page_ref: { type: string, default: null, description: "Confluence page URL/ID to fetch the raw brief from. Used only when idea_brief_text is blank. Required unless idea_brief_text is given." }
+      stakeholder_list: { type: array, default: [], description: "Sponsoring stakeholder names/roles, if known. Never used to infer target users." }
 
   output:
-    $ref: "output_schema.json"
+    $ref: "output_schema.json"   # envelope with content.items {problem_statement, target_users, value_proposition, success_metrics, open_questions}, document_reference, execution_summary; failed envelope uses classification + reason
 
 context:
   knowledge_bases: []   # idea-brief structure is embedded in instructions.md per S4 — no KB needed
@@ -45,9 +45,10 @@ context:
     - gr-L1-output-schema-validator
     - gr-L1-pii-detection
     - gr-L1-hallucination-check
-    - gr-L1-consistency-check
+    - gr-L1-consistency-check   # quality gate runs exactly once on the final candidate, before S3 storage; its failure message is passed through in the failed envelope
   tools:
-    - tool-L1-confluence-fetch-page   # read-only; invoked directly, per the Core/Utility split (writes are Utility-only)
+    - tool-L1-confluence-fetch-page   # read-only; invoked directly, only when idea_brief_text is blank and confluence_page_ref is present
+    - tool-L1-s3-store-object   # TODO: confirm actual tool/integration name. Writes idea-brief.json (exactly content.items) to the configured bucket only after the quality gate passes; no retry unless runtime storage policy allows
 
 quality:
   evaluation_ref: "evaluation.md"

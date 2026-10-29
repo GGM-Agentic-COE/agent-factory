@@ -1,61 +1,334 @@
 # Agent Specification Document
 spec_version: "1.0"
 artifact_type: agent
+
 metadata:
   name: L1-vision-idea-intake-evaluator
-  version: "1.0.0"
+  version: "1.1.0"
   layer: L1
   phase: vision
   owner: agentic-ai-coe
-  created: "2026-08-02"
+  created: "2026-10-28"
 
 purpose:
-  description: "Independently scores L1-vision-idea-intake's output against its evaluation.md rubric, fixes fixable issues directly in items, and reports the result — or escalates to HITL if it can't reach a passing score."
-  input: "L1-vision-idea-intake's original input plus its draft output."
-  output: "Scores, findings, any fixes applied, and a final decision."
-  business_value: "Letting a generator grade its own homework defeats the point of a quality gate. This agent is the independent, different-prompt check the Generator->Evaluator pattern requires (S6) — it does not duplicate the generator's rubric in its own prompt, it loads evaluation.md as source of truth."
+  description: >
+    Independently evaluates the idea-brief.json produced by
+    L1-vision-idea-intake against the authoritative evaluation knowledge base.
+    It validates the artifact, scores applicable dimensions and quality gates,
+    applies only corrections that are directly grounded in the available
+    document or source evidence, re-uploads the corrected artifact to the same
+    location when fixes are applied, and returns a single structured evaluation
+    result. Missing or unsupported business information is reported as a
+    finding and is never invented.
+  input: >
+    L1-vision-idea-intake's generated idea-brief.json content together with
+    the generator output and inherited workflow_execution_id required for
+    artifact traceability and re-upload.
+  output: >
+    A single JSON evaluation result containing verdict, scores, quality-gate
+    results, findings, grounded fixes applied, knowledge-base retrieval status,
+    artifact re-upload status, and actual runtime tools/guardrails used.
+  business_value: >
+    Provides an independent post-generation quality gate for the Vision
+    pipeline. It prevents the generator from grading its own output, detects
+    schema, grounding, traceability, metric-classification, and execution
+    reporting defects, applies only evidence-supported corrections, and
+    prevents unsupported information from propagating to downstream Vision
+    agents.
 
 prompt:
   ref: "prompts/L1-vision-idea-intake-evaluator/instructions.md"
-  version: "1.0.0"
-  description: "Scores against L1-vision-idea-intake/evaluation.md; fixes what can be fixed without re-running the generator from scratch; escalates what can't."
+  version: "1.1.0"
+  description: >
+    Evaluates idea-brief.json against the authoritative L1 Vision idea
+    evaluation knowledge base, applies only grounded corrections, records
+    unfixable gaps as findings, preserves workflow traceability, and re-uploads
+    the corrected artifact to its original location when applicable.
 
 contract:
   input_schema: "$ref: schemas/agent-input-contract-schema.json"
   output_schema: "$ref: schemas/agent-output-schema.json"
 
   input:
-    accepts_from_agents: [L1-vision-idea-intake]
+    accepts_from_agents:
+      - L1-vision-idea-intake
     accepts_direct_input: false
+
     accepts_file_upload:
       enabled: false
+
     required_parameters:
-      original_input: { type: object, description: "The input L1-vision-idea-intake received" }
-      generator_output: { type: object, description: "L1-vision-idea-intake's draft items output" }
+      document_content:
+        type: object
+        description: >
+          Full parsed content of idea-brief.json. If not supplied directly,
+          it may be resolved from the artifact location provided by the
+          generator output using an available file-read capability.
+
+      generator_output:
+        type: object
+        description: >
+          L1-vision-idea-intake's Agent Output JSON. Provides the authoritative
+          artifact location and workflow execution context required for
+          evaluation and any artifact re-upload.
+
+      workflow_execution_id:
+        type: string
+        description: >
+          Workflow execution identifier inherited from generator_output.
+          It must never be generated, substituted, or replaced with an
+          execution_id.
 
   output:
     $ref: "output_schema.json"
 
 context:
   knowledge_bases:
-    - ref: "../L1-vision-idea-intake/evaluation.md"   # source of truth for scoring — not duplicated in this agent's prompt
+    - ref: "../L1-vision-idea-intake/evaluation.md"
+      role: primary_evaluation_source
+      description: >
+        Authoritative evaluation rubric for dimensions, thresholds, and
+        quality gates. The evaluator must load the applicable evaluation
+        knowledge before scoring and must not invent missing rubric criteria,
+        gates, or thresholds.
+
   guardrails:
     - gr-L1-output-schema-validator
     - gr-L1-pii-detection
-    - gr-L1-idea-intake-quality-gate   # fires when THIS evaluator concludes; validates L1-vision-idea-intake's RESULTANT output against its own schema+evaluation.md (guardrails/gr-L1-idea-intake-quality-gate)
-  tools: []
+    - gr-L1-idea-intake-quality-gate
+
+  tools:
+    - capability: directory_read
+      required_when: >
+        document_content is unavailable and fallback artifact discovery
+        is required.
+      usage: >
+        Lists candidate files only. It must not be treated as a source of
+        artifact content.
+
+    - capability: file_read
+      required_when: >
+        document_content is not supplied inline and the generated artifact
+        must be read from its known or unambiguously discovered location.
+      usage: >
+        Reads idea-brief.json using the exact resolved artifact path.
+
+    - capability: evaluation_kb_read
+      required_when: evaluation begins after successful input validation.
+      usage: >
+        Retrieves the configured evaluation knowledge base. Scoring must not
+        proceed when the required evaluation rubric cannot be loaded.
+
+    - capability: artifact_write
+      required_when: >
+        grounded fixes were applied and the evaluator has sufficient workflow
+        and artifact-location information to leave read-only mode.
+      usage: >
+        Writes the corrected idea-brief.json back to the same artifact
+        location. A second artifact location must not be created.
 
 quality:
-  evaluation_ref: "evaluation.md"   # this file covers THIS evaluator's own meta-quality, not the generator's rubric
-  min_score: 8.0   # evaluators are held to a higher bar than generators — a wrong finding is worse than a wrong story
+  evaluation_ref: "evaluation.md"
+  min_score: 8.0
   hallucination_check: true
   consistency_check: true
+
+  evaluation_requirements:
+    grounded_fixes_only: true
+    unsupported_content_prohibited: true
+    preserve_correct_content: true
+    evaluate_all_applicable_dimensions: true
+    evaluate_all_applicable_quality_gates: true
+    validate_schema_and_structure: true
+    validate_traceability_and_citations: true
+    validate_metric_classification: true
+    validate_execution_summary: true
+    validate_artifact_integrity: true
+    validate_guardrail_reporting: true
+
+  evaluation_dimensions:
+    - input_grounding_and_accuracy
+    - problem_statement_quality
+    - pain_point_identification
+    - target_user_identification
+    - value_proposition_quality
+    - business_benefits
+    - success_metrics
+    - constraints_risks_dependencies
+    - open_questions
+    - confidence_and_reasoning
+    - traceability_and_citations
+    - schema_and_structure_compliance
+    - execution_summary_accuracy
+    - guardrail_compliance
+    - artifact_integrity
+
+  default_thresholds:
+    accuracy: 0.90
+    fix_quality: 0.85
+    completeness: 0.90
+    grounding: 0.90
+    schema_compliance: 0.95
+    traceability: 0.90
+    metric_classification: 0.90
+    execution_reporting: 0.90
+
+  threshold_policy: >
+    Thresholds defined by the authoritative evaluation knowledge base take
+    precedence over defaults declared in this specification.
+
+  quality_gates:
+    - input_content_sufficient
+    - all_dimensions_evaluated
+    - findings_have_category_description
+    - findings_have_rubric_criterion
+    - findings_have_fix_applied
+    - scores_valid_range
+    - no_unsupported_content_introduced
+    - problem_statement_grounded
+    - target_users_grounded
+    - value_proposition_grounded
+    - metrics_correctly_classified
+    - citations_valid
+    - schema_valid
+    - no_agent_output_metadata_embedded
+    - execution_summary_accurate
+    - tools_reported_actually_invoked
+    - knowledge_sources_actually_used
+    - guardrail_reporting_accurate
+    - reupload_to_same_location_if_fixed
+    - verdict_consistent_with_scores
+
+  scoring_policy:
+    score_range:
+      min: 0.0
+      max: 1.0
+    not_evaluated_score: null
+    rules:
+      - >
+        A dimension or gate that was not actually evaluated must be reported
+        as not_evaluated and must never receive a synthetic score.
+      - >
+        A 0.0 score represents an evaluated failure and must never be used
+        as a substitute for not_evaluated.
+      - >
+        Fix quality is not_applicable with a null score when no fixes were
+        applied.
+
+  verdict_policy:
+    pass_when:
+      - all mandatory scores meet their applicable thresholds
+      - all mandatory quality gates pass
+      - no critical grounding issue remains
+      - no critical schema issue remains
+      - no critical traceability issue remains
+
+    fail_when:
+      - any mandatory quality gate fails
+      - any mandatory score remains below its applicable threshold
+      - artifact is fundamentally unusable
+      - a critical schema, grounding, or traceability issue remains
+      - >
+        required correction would require inventing unsupported business
+        information
+
+  fix_policy:
+    apply_only_when_grounded: true
+    invent_missing_information: false
+    change_correct_content: false
+    fundamentally_unusable_artifact:
+      apply_fixes: false
+      verdict: fail
+
+  metric_policy:
+    stated: >
+      Use only when the source explicitly provides the metric, target,
+      baseline, or outcome.
+    suggested: >
+      Use when a candidate metric is identified but is not explicitly stated
+      by the source.
+    fabricated_numeric_targets_allowed: false
+
+  traceability_policy:
+    require_real_source_content: true
+    traced_to_must_resolve: true
+    citations_must_resolve: true
+    document_reference_requires_actual_external_document_use: true
+
+  execution_reporting_policy:
+    report_only_actual_tools_invoked: true
+    report_only_actual_knowledge_sources_used: true
+    report_only_actual_guardrails_invoked: true
+    require_accurate_produced_counts: true
+
+runtime:
+  input_validation:
+    order: first
+
+    resolution:
+      - priority: 1
+        source: document_content
+        action: use_inline_content_when_available
+
+      - priority: 2
+        source: generator_output_artifact_location
+        action: read_using_available_file_read_capability
+
+      - priority: 3
+        source: working_directory
+        action: >
+          Discover and read only when exactly one unambiguous
+          idea-brief*.json candidate exists.
+
+    invalid_or_unavailable_document:
+      action: stop
+      retrieve_evaluation_kb: false
+      evaluate: false
+      apply_fixes: false
+      verdict: fail
+      result_mode: input_failure
+
+    missing_generator_context:
+      mode: read_only
+      evaluate: true
+      apply_fixes: false
+      reupload: false
+      artifact_reupload_status: not_attempted
+      finding_severity: major
+
+  knowledge_base:
+    retrieve_after_input_validation: true
+    retrieval_failure:
+      verdict: fail
+      apply_fixes: false
+      scores_status: not_evaluated
+
+  artifact_update:
+    condition: >
+      Perform only when one or more grounded fixes were actually applied
+      and evaluator is not operating in read-only mode.
+    destination: same_artifact_location
+    create_second_location: false
+    write_content: corrected_artifact_verbatim
+    no_fixes:
+      reupload: false
+    writer_unavailable:
+      artifact_reupload_status: failed
+
+  retry_policy:
+    max_attempts_per_tool: 2
+    after_max_attempts: stop_retrying_and_apply_defined_fallback
+
+  invocation_limits:
+    evaluation_kb_retrieval: 1
+    artifact_read: 1
+    artifact_reupload: 1
 
 performance:
   target_latency_seconds: 15
   max_token_budget: 5000
 
 versioning:
-  input_version: "1.0"
-  output_version: "1.0"
+  input_version: "1.1"
+  output_version: "1.1"
   instruction_hash: "sha256:pending"
