@@ -65,11 +65,11 @@ quality_gates:
 # -----------------------------------------------------------------------------
 hitl_gates:
   - id: gate-vision-approval
-    after_workflow: L0-WF-vision-idea-to-statement
+    after_workflow: L0-WF-idea-to-statement
     role: Product Lead
     approves: vision.md
     blocking: true
-    on_reject: { action: return_to_step, workflow: L0-WF-vision-idea-to-statement, step: 4 }
+    on_reject: { action: return_to_step, workflow: L0-WF-idea-to-statement, step: 4 }
   - id: gate-requirements-validation
     after_workflow: L0-WF-requirements-vision-to-dependency-graph
     role: Product Lead
@@ -99,11 +99,11 @@ hitl_gates:
 # =============================================================================
 # PHASE 0 — IDEA → VISION
 # =============================================================================
-L0-WF-vision-idea-to-statement:
+L0-WF-idea-to-statement:
   description: Turns a raw idea into a human-approved vision statement.
   steps:
     - step_id: 1
-      agent: L0-vision-idea-intake
+      agent: L0-idea-intake
       input: { source: direct_input, parameters: { idea_brief_text: "{{trigger.idea_text}}", confluence_page_ref: "{{trigger.confluence_page_ref | optional}}" } }
       tool: tool-L0-confluence-fetch-page
       # no knowledge_bases: idea-brief structure is folded into instructions.md per
@@ -112,7 +112,7 @@ L0-WF-vision-idea-to-statement:
       quality_gate: null
     - step_id: 2
       agent: L0-vision-market-analyzer
-      input: { source: agent_output, source_agent: L0-vision-idea-intake }   # items-only upstream, no artifact to name
+      input: { source: agent_output, source_agent: L0-idea-intake }   # items-only upstream, no artifact to name
       tool: tool-L0-web-search-competitor-scan
       knowledge_bases: [kb-L1-domain-market]
       guardrails_additional: [gr-L0-citation-verifier]
@@ -120,7 +120,7 @@ L0-WF-vision-idea-to-statement:
       quality_gate: null
     - step_id: 3
       agent: L0-regulatory-feasibility-checker
-      input: { source: agent_output, source_agent: L0-vision-idea-intake }   # items-only upstream, no artifact to name
+      input: { source: agent_output, source_agent: L0-idea-intake }   # items-only upstream, no artifact to name
       tool: tool-L0-regulatory-db-lookup
       knowledge_bases: [kb-L0-regulatory-frameworks-index, kb-L1-domain-regulatory]
       guardrails_additional: [gr-L0-citation-verifier]
@@ -131,7 +131,7 @@ L0-WF-vision-idea-to-statement:
       agent: L0-vision-statement-generator
       input:
         source: agent_output
-        source_agents: [L0-vision-idea-intake, L0-vision-market-analyzer, L0-regulatory-feasibility-checker]   # all three items-only now; no artifacts to name
+        source_agents: [L0-idea-intake, L0-vision-market-analyzer, L0-regulatory-feasibility-checker]   # all three items-only now; no artifacts to name
         parameters: { viability_score: "{{step_3.quality_gate.score}}" }
       tool: tool-L0-confluence-create-page
       # no knowledge_bases: vision structure is folded into instructions.md per S4;
@@ -492,7 +492,7 @@ L0-WF-greenfield-idea-to-pr:
   description: End-to-end greenfield delivery — Idea through Pull Request.
   trigger: { type: manual_or_api, payload: { idea_text: string, confluence_page_ref: string, rice_wsjf_fields: object } }
   steps:
-    - workflow: L0-WF-vision-idea-to-statement
+    - workflow: L0-WF-idea-to-statement
     - workflow: L0-WF-requirements-vision-to-dependency-graph
     - workflow: L0-WF-backlog-to-roadmap
     - workflow: L0-WF-roadmap-to-tasks

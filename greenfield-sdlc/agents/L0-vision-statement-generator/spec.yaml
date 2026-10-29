@@ -26,12 +26,12 @@ contract:
   output_schema: "$ref: schemas/agent-output-schema.json"
 
   input:
-    accepts_from_agents: [L0-vision-idea-intake, L0-vision-market-analyzer, L0-regulatory-feasibility-checker, L0-regulatory-feasibility-checker-evaluator]   # the checker evaluator's output carries workflow_execution_id
+    accepts_from_agents: [L0-idea-intake, L0-vision-market-analyzer, L0-regulatory-feasibility-checker, L0-regulatory-feasibility-checker-evaluator]   # the checker evaluator's output carries workflow_execution_id
     accepts_direct_input: false
     accepts_file_upload:
       enabled: false
     required_parameters:
-      idea_brief_items: { type: object, description: "Full items object from L0-vision-idea-intake, sourced from idea-brief.json (JSON, parsed by key path — never scanned as markdown). Its generated_date, where present, is only the fallback run date: the agent has no clock and takes the run date from tool-L0-system-current-date (timezone UTC). With neither available it writes \"not available\" in the header and completes the vision — a missing date never halts the run, and is never filled from an example, a fixture, or training data" }
+      idea_brief_items: { type: object, description: "Full items object from L0-idea-intake, sourced from idea-brief.json (JSON, parsed by key path — never scanned as markdown). Its generated_date, where present, is only the fallback run date: the agent has no clock and takes the run date from tool-L0-system-current-date (timezone UTC). With neither available it writes \"not available\" in the header and completes the vision — a missing date never halts the run, and is never filled from an example, a fixture, or training data" }
       regulatory_feasibility_items: { type: object, description: "Full items object from L0-regulatory-feasibility-checker as corrected by its evaluator, including its viability object" }
       viability_score: { type: number, description: "Owned by L0-regulatory-feasibility-checker and re-derived by its evaluator at qg-L0-viability-score. Carried here as a parameter and reported exactly as received — this agent may not compute, re-derive, round, or adjust it" }
     optional_parameters:

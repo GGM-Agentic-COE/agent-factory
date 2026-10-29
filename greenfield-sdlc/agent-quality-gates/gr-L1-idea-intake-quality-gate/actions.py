@@ -1,7 +1,7 @@
-"""gr-L0-idea-intake-quality-gate: validates the RESULTANT L0-vision-idea-intake
+"""gr-L0-idea-intake-quality-gate: validates the RESULTANT L0-idea-intake
 output (its own items, with the evaluator's fixes_applied resolved in) against
-L0-vision-idea-intake/output_schema.json and L0-vision-idea-intake/evaluation.md.
-Fires at L0-vision-idea-intake-evaluator's post_execution — evaluation concluded,
+L0-idea-intake/output_schema.json and L0-idea-intake/evaluation.md.
+Fires at L0-idea-intake-evaluator's post_execution — evaluation concluded,
 resultant content is what actually flows downstream.
 """
 import json

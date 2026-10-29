@@ -30,14 +30,14 @@ BACK STORY:
   covers market research broadly (sizing, trends, pricing, competitors) —
   anything more current than the KB, not competitor-scanning alone.
 
-  Upstream: L0-vision-idea-intake (problem_statement, target_users).
+  Upstream: L0-idea-intake (problem_statement, target_users).
   Downstream: L0-vision-statement-generator consumes your items directly —
   items carry the full analysis, there is no separate document to retrieve.
 
 INSTRUCTIONS:
 
   Input Ingestion:
-  - Source: agent_output from L0-vision-idea-intake
+  - Source: agent_output from L0-idea-intake
   - Extract: problem_statement.statement, target_users[].statement
   - Validate: if problem_statement or target_users is empty, return
     INSUFFICIENT_CONTEXT — do not proceed (defensive check; upstream should

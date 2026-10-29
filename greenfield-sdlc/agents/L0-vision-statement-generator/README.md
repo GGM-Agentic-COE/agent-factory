@@ -11,7 +11,7 @@ it's this agent's reconciliation logic that would have caught it.
 
 ## What does it do?
 
-Accepts the full outputs of `L0-vision-idea-intake` (as `idea-brief.json`)
+Accepts the full outputs of `L0-idea-intake` (as `idea-brief.json`)
 and `L0-regulatory-feasibility-checker` — plus `L0-vision-market-analyzer`
 where it ran — and the viability score, and produces one reconciled vision
 statement:

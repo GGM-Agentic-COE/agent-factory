@@ -12,7 +12,7 @@ metadata:
 
 purpose:
   description: "Classifies regulatory feasibility (licensing, data protection, consumer, sector and cross-cutting regimes) for a proposed idea as Green/Amber/Red per constraint, with citation and mitigation — and derives the viability_score that gates the pipeline at qg-L0-viability-score."
-  input: "idea-brief.json (problem statement, target geography/product category, target users, value proposition) from L0-vision-idea-intake."
+  input: "idea-brief.json (problem statement, target geography/product category, target users, value proposition) from L0-idea-intake."
   output: "regulatory-feasibility.md artifact plus structured constraint items and the viability score with its component breakdown and caps."
   business_value: "A viable-looking idea can be dead on arrival for regulatory reasons — this must surface before roadmap commitment, not after. Zero tolerance for omitting a Red-classified constraint: a false negative here is a compliance risk, not a quality nuance. Owning the viability score here keeps the gate with the agent that holds the blocking evidence, and out of the agent whose auto-publish depends on it."
 
@@ -26,13 +26,13 @@ contract:
   output_schema: "$ref: schemas/agent-output-schema.json"
 
   input:
-    accepts_from_agents: [L0-vision-idea-intake]
+    accepts_from_agents: [L0-idea-intake]
     accepts_direct_input: false
     accepts_file_upload:
       enabled: true
       formats: [".json"]   # idea-brief.json — parsed as JSON by key path, never scanned as markdown
     required_parameters:
-      problem_statement: { type: string, description: "From L0-vision-idea-intake's idea-brief.json" }
+      problem_statement: { type: string, description: "From L0-idea-intake's idea-brief.json" }
       target_geography: { type: string, description: "Target geography for the idea — a country, or a country plus sub-national regions. Resolved at runtime against the jurisdiction the attached KBs declare; a country they do not cover fails with JURISDICTION_MISMATCH rather than being translated" }
     optional_parameters:
       # No date parameter is required. The run date comes from tool-L0-system-current-date,

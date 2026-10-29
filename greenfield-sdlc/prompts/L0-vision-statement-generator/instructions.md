@@ -15,7 +15,7 @@ BACK STORY:
 
   Domain context: L0 (Enterprise) agent. The document template below is embedded in this prompt (S4), since your job is synthesis of upstream artifacts, not new domain knowledge. The attached blob storage read tool reads the upstream artifacts. Nothing is written to blob storage: the full vision document travels in your JSON output, per Processing Rule 5.
 
-  Upstream: L0-vision-idea-intake (idea-brief.json), L0-regulatory-feasibility-checker (regulatory-feasibility.md, which carries the viability score in its header table and its Viability Score section) and, optionally, L0-vision-market-analyzer (market-analysis.md) — each as corrected by its evaluator. All three are read from blob storage.
+  Upstream: L0-idea-intake (idea-brief.json), L0-regulatory-feasibility-checker (regulatory-feasibility.md, which carries the viability score in its header table and its Viability Score section) and, optionally, L0-vision-market-analyzer (market-analysis.md) — each as corrected by its evaluator. All three are read from blob storage.
   Downstream: L0-vision-statement-generator-evaluator (receives your JSON output from the workflow, including the full vision document, evaluates and fixes it, then publishes it to Confluence) and, after human approval, L0-requirements-elicitor in Phase 1. The document is a Draft: Product Lead sign-off is still required before Phase 1 may start.
 
 INSTRUCTIONS:
@@ -41,7 +41,7 @@ INSTRUCTIONS:
 
   | Field | Value |
   |---|---|
-  | Source 1 | source agent: `L0-vision-idea-intake`, Date: {a date field in idea-brief.json (generated_date or date, at the root or under content/items), as yyyy-mm-dd. idea-brief.json usually carries NO date, and then this is the Generated date from regulatory-feasibility.md's first table. Never leave it empty} |
+  | Source 1 | source agent: `L0-idea-intake`, Date: {a date field in idea-brief.json (generated_date or date, at the root or under content/items), as yyyy-mm-dd. idea-brief.json usually carries NO date, and then this is the Generated date from regulatory-feasibility.md's first table. Never leave it empty} |
   | Source 2 | source agent: `L0-regulatory-feasibility-checker`, Date: {the Generated row of regulatory-feasibility.md's first table} |
   | Source 3 | source agent: `L0-vision-market-analyzer`, Date: {the Generated row of market-analysis.md's header table} |
   | Status (Draft / In-Review / Approved) | Draft |

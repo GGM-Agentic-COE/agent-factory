@@ -1,26 +1,26 @@
 # gr-L0-idea-intake-quality-gate
 
 **Layer:** L0
-**Triggers on:** post_execution (output rail) — fires when `L0-vision-idea-intake-evaluator` concludes
+**Triggers on:** post_execution (output rail) — fires when `L0-idea-intake-evaluator` concludes
 **On fail:** Retry once, then escalate to HITL
 **Implementation:** LLM-driven (Colang) — Python actions preserved for hybrid mode
-**Applies to:** `L0-vision-idea-intake-evaluator` only (`configured_agents`)
+**Applies to:** `L0-idea-intake-evaluator` only (`configured_agents`)
 
 ## What does it do?
 
-`L0-vision-idea-intake-evaluator` scores `L0-vision-idea-intake`'s draft
-output against `L0-vision-idea-intake/evaluation.md` and fixes what it can.
+`L0-idea-intake-evaluator` scores `L0-idea-intake`'s draft
+output against `L0-idea-intake/evaluation.md` and fixes what it can.
 This guardrail fires at that point (post-evaluation) but validates a
-different thing entirely: the **resultant** `L0-vision-idea-intake` output
+different thing entirely: the **resultant** `L0-idea-intake` output
 — its own `items`, with the evaluator's `fixes_applied` resolved in — is
 what actually flows to `L0-vision-market-analyzer` and
 `L0-regulatory-feasibility-checker`. This gate checks THAT content:
 
 1. **Output schema validation** — does the resultant content conform to
-   `L0-vision-idea-intake/output_schema.json` (not the evaluator's own
+   `L0-idea-intake/output_schema.json` (not the evaluator's own
    output shape)?
 2. **Capability checklist / rubric adherence** — does the resultant
-   content actually satisfy `L0-vision-idea-intake/evaluation.md`'s
+   content actually satisfy `L0-idea-intake/evaluation.md`'s
    Quality Gates and Reflection Checklist (sequential IDs, correctly
    labeled stated/suggested metrics, grounded `traced_to`, no
    placeholder text, honest INSUFFICIENT_CONTEXT handling)?
@@ -49,12 +49,12 @@ actual resultant content.
 ## How It Works
 
 ```
-L0-vision-idea-intake-evaluator concludes (scores, fixes, final_decision)
+L0-idea-intake-evaluator concludes (scores, fixes, final_decision)
         ↓
 ┌────────────────────────────────────────────────────────────────────┐
 │  IDEA-INTAKE QUALITY GATE (post_execution, fires on evaluator)      │
 │                                                                      │
-│  Reconstruct RESULTANT content: L0-vision-idea-intake's items with  │
+│  Reconstruct RESULTANT content: L0-idea-intake's items with  │
 │  fixes_applied[].before→after resolved in                           │
 │                                                                      │
 │  DETERMINISTIC (actions.py):                                        │

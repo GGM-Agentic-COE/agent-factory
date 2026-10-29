@@ -1,15 +1,15 @@
 prompts:
   - task: self_check_output
     content: |
-      L0-vision-idea-intake's original output (items): {{ generator_output }}
-      L0-vision-idea-intake-evaluator's verdict (fixes_applied, final_decision): {{ bot_response }}
-      Original idea_brief_text given to L0-vision-idea-intake: {{ original_input }}
+      L0-idea-intake's original output (items): {{ generator_output }}
+      L0-idea-intake-evaluator's verdict (fixes_applied, final_decision): {{ bot_response }}
+      Original idea_brief_text given to L0-idea-intake: {{ original_input }}
 
-      Reconstruct the RESULTANT output: L0-vision-idea-intake's items with
+      Reconstruct the RESULTANT output: L0-idea-intake's items with
       every fixes_applied[].before → after substitution resolved in. This
       guardrail checks that resultant content — not the evaluator's own
-      scoring bookkeeping — against L0-vision-idea-intake/output_schema.json
-      and L0-vision-idea-intake/evaluation.md:
+      scoring bookkeeping — against L0-idea-intake/output_schema.json
+      and L0-idea-intake/evaluation.md:
 
       1. Schema compliance: does the resultant problem_statement and
          value_proposition each have statement, confidence,

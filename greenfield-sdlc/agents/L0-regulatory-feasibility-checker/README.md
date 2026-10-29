@@ -54,7 +54,7 @@ the jurisdiction in hand, never from the analogue they know best.
 
 ## What does it do?
 
-Accepts `idea-brief.json` from `L0-vision-idea-intake` and produces:
+Accepts `idea-brief.json` from `L0-idea-intake` and produces:
 - A list of applicable regulatory constraints, each classified Green/Amber/Red
 - A citation to a specific regulation/section for every constraint — no
   generic "comply with regulations" statements
@@ -147,7 +147,7 @@ be the agent that sets it.
 
 ## Input
 
-- **Source:** `idea-brief.json` from `L0-vision-idea-intake` — uploaded with
+- **Source:** `idea-brief.json` from `L0-idea-intake` — uploaded with
   the request, or read from blob storage. **JSON, not markdown:** it is
   parsed and read by key path
 - **Required:** `problem_statement`, `target_geography`
