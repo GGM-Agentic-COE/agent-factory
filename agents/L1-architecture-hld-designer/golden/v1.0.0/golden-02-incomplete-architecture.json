@@ -1,0 +1,68 @@
+{
+  "golden_id": "golden-02-incomplete-architecture",
+  "input_ref": "input-golden-02-incomplete-architecture.json",
+  "expected_artifact_ref": null,
+  "expected_output": {
+    "agent_id": "L1-architecture-hld-designer",
+    "agent_version": "1.0.0",
+    "execution_id": "exec-5c8a0e2f-b713-4d96-a4e0-c1f8d72b3e56",
+    "workflow_execution_id": "wf-91d4b7e3-5a20-4c6f-8e1b-0f37a2c95d84",
+    "status": "failed",
+    "content": {
+      "type": "hld",
+      "schema_version": "1.0",
+      "items": {
+        "document_header": null,
+        "components": [],
+        "data_flows": [],
+        "state_machine": null,
+        "deployment": null,
+        "security": null,
+        "observability": [],
+        "nfr_compliance": [],
+        "binding_principle_checks": [],
+        "gaps": [],
+        "open_questions": [
+          {
+            "id": "OQ-01",
+            "question_summary": "Provide data-architecture.md: alert store, alert lifecycle and durability approach for NFR-2.",
+            "blocking": true,
+            "related_ids": [
+              "F-07.1",
+              "F-07.2"
+            ]
+          },
+          {
+            "id": "OQ-02",
+            "question_summary": "Provide integration-architecture.md: GPS vendor ingestion path and connector; currently TBD.",
+            "blocking": true,
+            "related_ids": [
+              "F-07.1"
+            ]
+          }
+        ]
+      },
+      "artifacts": [],
+      "execution_summary": "• Produced 0 items — INSUFFICIENT_CONTEXT. status: failed; no hld.md written.\n• data_architecture is empty: no datastore, alert lifecycle or durability design, so §3, §4 data tier and NFR-2 cannot be assessed.\n• integration_architecture is a placeholder ('TBD … after the GPS vendor is selected'): the GPS ingestion path that drives NFR-1 and FLW for F-07.1 is undefined.\n• prd.md (v0.9) and platform-architecture.md (v0.3) were present and parsed, but an HLD built from them alone would invent the data and integration halves.\n• Reflection: confirmed no component, gap or NFR status was emitted from partial inputs; open questions carry the minimum needed to re-run.\n• KBs consulted: none — validation failed before Phase 1 KB extraction.\n• Guardrails: gr-L1-output-schema-validator pass; gr-L1-pii-detection pass; gr-L3-hallucination-detector pass (no content generated); gr-L3-citation-validator not applicable; gr-L3-consistency-checker not applicable; gr-L2-tool-permissions pass (no write attempted).\n• Tools: tool-L1-confluence-create-page not invoked.\n• Suggested: ask the data architect for data-architecture.md (store, alert entity lifecycle, durability) and the integration architect for integration-architecture.md once the GPS vendor is chosen, then re-run with the same workflow_execution_id."
+    }
+  },
+  "evaluation_criteria": {
+    "must_pass_gates": [
+      "status is failed",
+      "execution_summary states INSUFFICIENT_CONTEXT and names both missing views",
+      "No components, gaps, NFR statuses or flows emitted",
+      "artifacts empty; Confluence tool not invoked",
+      "Open questions name exactly what to supply"
+    ],
+    "expected_counts": {
+      "components": 0,
+      "gaps": 0,
+      "open_questions": 2
+    },
+    "common_failures_to_catch": [
+      "Building a partial HLD from PRD + platform only",
+      "Inventing a datastore such as PostgreSQL for the alert store",
+      "Publishing an empty or skeleton page to Confluence"
+    ]
+  }
+}

@@ -1,0 +1,127 @@
+{
+  "workflow_execution_id": "wf-fca5d307-ca3b-5b56-a2b8-ae893a30ca07",
+  "prioritized_backlog": {
+    "agent_id": "L1-planning-backlog-prioritizer",
+    "agent_version": "1.0.0",
+    "execution_id": "exec-1997a324-c77d-5a95-9ca0-aae581f74a67",
+    "workflow_execution_id": "wf-fca5d307-ca3b-5b56-a2b8-ae893a30ca07",
+    "status": "success",
+    "content": {
+      "type": "prioritized_backlog",
+      "schema_version": "1.0",
+      "items": {
+        "prioritized_features": [
+          {
+            "feature_id": "F-04.1",
+            "name": "Document upload (ID and address proof)",
+            "rank": 1,
+            "scoring_method": "WSJF",
+            "priority_score": 18,
+            "effort_estimate": 5,
+            "blocks_feature_ids": [
+              "F-04.2",
+              "F-04.4"
+            ],
+            "blocked_by_feature_ids": [],
+            "confidence": 0.85,
+            "summary": "Highest WSJF; unblocks OCR and Video KYC.",
+            "citation": {
+              "source_reference": "value-scoring-sheet.xlsx",
+              "source_location": "row2"
+            }
+          },
+          {
+            "feature_id": "F-04.2",
+            "name": "OCR data extraction",
+            "rank": 2,
+            "scoring_method": "WSJF",
+            "priority_score": 15,
+            "effort_estimate": 6,
+            "blocks_feature_ids": [
+              "F-04.3"
+            ],
+            "blocked_by_feature_ids": [
+              "F-04.1"
+            ],
+            "confidence": 0.85,
+            "summary": "High value; needs uploaded documents first.",
+            "citation": {
+              "source_reference": "value-scoring-sheet.xlsx",
+              "source_location": "row3"
+            }
+          },
+          {
+            "feature_id": "F-04.3",
+            "name": "Sanctions and PEP screening",
+            "rank": 3,
+            "scoring_method": "WSJF",
+            "priority_score": 14,
+            "effort_estimate": 5,
+            "blocks_feature_ids": [
+              "F-04.5"
+            ],
+            "blocked_by_feature_ids": [
+              "F-04.2"
+            ],
+            "confidence": 0.85,
+            "summary": "Regulatory must-have; screens extracted identity data.",
+            "citation": {
+              "source_reference": "value-scoring-sheet.xlsx",
+              "source_location": "row4"
+            }
+          },
+          {
+            "feature_id": "F-04.5",
+            "name": "Risk scoring and manual review queue",
+            "rank": 4,
+            "scoring_method": "WSJF",
+            "priority_score": 11,
+            "effort_estimate": 7,
+            "blocks_feature_ids": [],
+            "blocked_by_feature_ids": [
+              "F-04.3"
+            ],
+            "confidence": 0.85,
+            "summary": "Completes the onboarding decision.",
+            "citation": {
+              "source_reference": "value-scoring-sheet.xlsx",
+              "source_location": "row6"
+            }
+          },
+          {
+            "feature_id": "F-04.4",
+            "name": "Video KYC",
+            "rank": 5,
+            "scoring_method": "WSJF",
+            "priority_score": 9,
+            "effort_estimate": 6,
+            "blocks_feature_ids": [],
+            "blocked_by_feature_ids": [
+              "F-04.1"
+            ],
+            "confidence": 0.85,
+            "summary": "Lowest WSJF; flagged as an Epic needing a new bounded context.",
+            "citation": {
+              "source_reference": "value-scoring-sheet.xlsx",
+              "source_location": "row5"
+            },
+            "epic_not_ready": true
+          }
+        ],
+        "gaps": []
+      }
+    }
+  },
+  "cadence": {
+    "cycle_length_days": 5,
+    "pi_cycles": 6,
+    "pi_start_date": "2026-10-19"
+  },
+  "cycle_capacity_effort": 8,
+  "mvp_feature_ids": [
+    "F-04.1",
+    "F-04.2",
+    "F-04.3",
+    "F-04.5"
+  ]
+}

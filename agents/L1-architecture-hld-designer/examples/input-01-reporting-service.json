@@ -1,0 +1,13 @@
+{
+  "workflow_execution_id": "wf-27f0c3d9-8e61-4a5b-b2c4-6d19e80a7f35",
+  "source": "agent_output",
+  "parameters": {
+    "prd": "# PRD — Producer Earnings Report\n**Epic:** EP-05\n\n| ID | Feature | Scope |\n|---|---|---|\n| F-05.1 | Producer views monthly earnings summary | Committed |\n| F-05.2 | Producer exports earnings as CSV | Committed |\n\nRoles: PRODUCER (own earnings only), ADMIN (all producers).\nNFR-1 Report P95 ≤ 800 ms. NFR-2 A producer can never see another producer's earnings.\nOwner: Payouts squad.\n",
+    "platform_architecture": "# Platform — Producer Earnings Report\nearnings-report-api: Java 17 / Spring Boot 3, `eclipse-temurin:17-jre-alpine`, port 8082, 250m/1000m CPU, 256Mi/512Mi, probe /actuator/health, on EKS namespace payouts, HPA 2-4, behind the shared ALB (TLS 1.3). Already deployed to production in Cycle 5 — target = current build.\nproducer-portal: existing React app; new Earnings page only.\nAuth: Cognito RS256 JWT via AuthFilter (EA-05). RBAC: GET /v1/earnings and GET /v1/earnings/export — PRODUCER own producerId forced server-side; ADMIN any producer.\nObservability: JSON logs with correlation id, Micrometer → Prometheus, /actuator/health. OpenTelemetry tracing not yet added.\nLoad test LT-12 (Cycle 5): report P95 610 ms at 50 rps.\n",
+    "data_architecture": "# Data — Producer Earnings Report\nRead-only. Reads the `orders` schema on the PostgreSQL RDS read replica (KMS encrypted at rest, EA-04). No writes, no entities with a lifecycle owned by this module. No cache.\n",
+    "integration_architecture": "# Integration — Producer Earnings Report\nNo external systems. No events produced or consumed.\n",
+    "document_version": "1.0.0",
+    "confluence_space_key": "ARCH",
+    "confluence_parent_page_id": "884736112"
+  }
+}

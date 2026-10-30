@@ -1,0 +1,36 @@
+{
+  "agent_id": "L1-planning-feature-cycle-mapper-evaluator",
+  "agent_version": "1.0.0",
+  "execution_id": "exec-81e37d0f-d71b-5350-85af-6188cca969a0",
+  "workflow_execution_id": "wf-fca5d307-ca3b-5b56-a2b8-ae893a30ca07",
+  "status": "failed",
+  "content": {
+    "type": "cycle_plan_evaluation",
+    "schema_version": "1.0",
+    "items": {
+      "evaluated": {
+        "agent_id": "L1-planning-feature-cycle-mapper",
+        "agent_version": "3.2.0",
+        "execution_id": "exec-9fb9058e-6fc8-5700-844b-a81c90ad6d32"
+      },
+      "final_decision": null,
+      "overall_score": null,
+      "scores": {},
+      "quality_gates": [],
+      "findings": [],
+      "corrected_output": null,
+      "gaps": [
+        {
+          "gap_id": "GAP-01",
+          "type": "insufficient_context",
+          "related_ids": [
+            "generator_input"
+          ],
+          "summary": "generator_input missing; the plan cannot be re-derived independently.",
+          "question": "Please supply the exact input given to L1-planning-feature-cycle-mapper (prioritized_backlog, cadence, capacity) for this run."
+        }
+      ]
+    },
+    "execution_summary": "• Produced 0 evaluations — INSUFFICIENT_CONTEXT.\n• generator_output received, but generator_input is missing, so the plan cannot be re-derived and the mapper's self-check would have to be trusted.\n• Decision: no decision issued; trusting the mapper's own claims is not allowed.\n• Knowledge bases consulted: none (validation failed before evaluation).\n• Guardrails: gr-L1-output-schema-validator pass; gr-L1-pii-detection pass (no personal data).\n• Gaps: GAP-01 generator_input missing."
+  }
+}

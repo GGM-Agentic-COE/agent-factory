@@ -1,0 +1,135 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.internal/agents/L1-planning-feature-cycle-mapper-evaluator/output_schema.json",
+  "title": "L1-planning-feature-cycle-mapper-evaluator Output",
+  "description": "Full AgentOutput envelope for the evaluation of one L1-planning-feature-cycle-mapper output. corrected_output, when present, must itself validate against ../L1-planning-feature-cycle-mapper/output_schema.json.",
+  "type": "object",
+  "required": ["agent_id", "agent_version", "execution_id", "workflow_execution_id", "status", "content"],
+  "additionalProperties": false,
+  "properties": {
+    "agent_id": { "const": "L1-planning-feature-cycle-mapper-evaluator" },
+    "agent_version": { "type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$" },
+    "execution_id": { "type": "string", "pattern": "^exec-[0-9a-f-]{36}$" },
+    "workflow_execution_id": { "type": "string", "pattern": "^wf-[0-9a-f-]{36}$", "description": "Inherited from generator_output." },
+    "status": { "enum": ["success", "failed"] },
+    "content": {
+      "type": "object",
+      "required": ["type", "schema_version", "items", "execution_summary"],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "const": "cycle_plan_evaluation" },
+        "schema_version": { "const": "1.0" },
+        "items": { "$ref": "#/$defs/Items" },
+        "execution_summary": { "type": "string", "minLength": 1, "description": "Plain-text bullet summary, not JSON." }
+      }
+    }
+  },
+  "$defs": {
+    "Summary": { "type": "string", "minLength": 1, "maxLength": 150 },
+    "Confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+    "Citation": {
+      "type": "object",
+      "required": ["source_reference", "source_location"],
+      "additionalProperties": false,
+      "properties": {
+        "source_reference": { "type": "string", "description": "Rule source, e.g. L1-planning-feature-cycle-mapper/evaluation.md or generator_input." },
+        "source_location": { "type": "string", "description": "Exact gate, rule or row, e.g. QG-04 or prioritized_features[rank=6] F-03.6." }
+      }
+    },
+    "Score": {
+      "type": "object",
+      "required": ["before", "after", "threshold", "pass"],
+      "additionalProperties": false,
+      "properties": {
+        "before": { "type": "number", "minimum": 0, "maximum": 1, "description": "Score of the original mapper output." },
+        "after": { "type": "number", "minimum": 0, "maximum": 1, "description": "Score after fixes; equals before when nothing was fixed." },
+        "threshold": { "type": "number", "minimum": 0, "maximum": 1, "description": "Threshold from the mapper's evaluation.md (hallucination is a maximum)." },
+        "pass": { "type": "boolean", "description": "Whether the after score meets the threshold." }
+      }
+    },
+    "Items": {
+      "type": "object",
+      "required": ["evaluated", "final_decision", "overall_score", "scores", "quality_gates", "findings", "corrected_output", "gaps"],
+      "additionalProperties": false,
+      "properties": {
+        "evaluated": {
+          "type": ["object", "null"],
+          "description": "Identity of the evaluated mapper run; null when generator_output was missing.",
+          "required": ["agent_id", "agent_version", "execution_id"],
+          "additionalProperties": false,
+          "properties": {
+            "agent_id": { "type": "string" },
+            "agent_version": { "type": "string" },
+            "execution_id": { "type": "string" }
+          }
+        },
+        "final_decision": { "enum": ["approved", "fixed_and_approved", "rejected", null], "description": "Null only when this evaluator itself failed (INSUFFICIENT_CONTEXT)." },
+        "overall_score": { "type": ["number", "null"], "minimum": 0, "maximum": 10 },
+        "scores": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "faithfulness": { "$ref": "#/$defs/Score" },
+            "hallucination": { "$ref": "#/$defs/Score" },
+            "consistency": { "$ref": "#/$defs/Score" },
+            "relevance": { "$ref": "#/$defs/Score" },
+            "reasoning_quality": { "$ref": "#/$defs/Score" },
+            "citation_completeness": { "$ref": "#/$defs/Score" }
+          }
+        },
+        "quality_gates": { "type": "array", "items": { "$ref": "#/$defs/QualityGate" } },
+        "findings": { "type": "array", "items": { "$ref": "#/$defs/Finding" } },
+        "corrected_output": { "type": ["object", "null"], "description": "Full corrected mapper AgentOutput when final_decision is fixed_and_approved; null otherwise." },
+        "gaps": { "type": "array", "items": { "$ref": "#/$defs/Gap" } }
+      },
+      "allOf": [
+        { "if": { "properties": { "final_decision": { "const": "fixed_and_approved" } } },
+          "then": { "properties": { "corrected_output": { "type": "object", "required": ["agent_id", "content"] } } },
+          "else": { "properties": { "corrected_output": { "type": "null" } } } },
+        { "if": { "properties": { "final_decision": { "const": "approved" } } },
+          "then": { "properties": { "findings": { "maxItems": 0 } } } }
+      ]
+    },
+    "QualityGate": {
+      "type": "object",
+      "required": ["gate_id", "gate", "status", "finding_ids"],
+      "additionalProperties": false,
+      "properties": {
+        "gate_id": { "type": "string", "pattern": "^QG-\\d{2}$" },
+        "gate": { "type": "string", "maxLength": 120, "description": "Short name of the gate as listed in the mapper's evaluation.md." },
+        "status": { "enum": ["pass", "fail_fixed", "fail_unfixed"] },
+        "finding_ids": { "type": "array", "items": { "type": "string", "pattern": "^FND-\\d{2}$" } }
+      }
+    },
+    "Finding": {
+      "type": "object",
+      "required": ["finding_id", "severity", "category", "location", "summary", "expected", "actual", "fix_applied", "fix_summary", "confidence", "citation"],
+      "additionalProperties": false,
+      "properties": {
+        "finding_id": { "type": "string", "pattern": "^FND-\\d{2}$" },
+        "severity": { "enum": ["blocker", "major", "minor"] },
+        "category": { "enum": ["schema", "dependency_order", "capacity", "exclusion", "split_rule", "story_numbering", "cycle_reference", "summary_table", "citation", "reasoning", "hallucination", "status"] },
+        "location": { "type": "string", "description": "JSON path in generator_output, e.g. content.items.feature_assignments[5].cycle_id." },
+        "summary": { "$ref": "#/$defs/Summary" },
+        "expected": { "type": "string", "description": "Concrete re-derived or rule-required value." },
+        "actual": { "type": "string", "description": "Concrete value found in generator_output." },
+        "fix_applied": { "type": "boolean" },
+        "fix_summary": { "type": ["string", "null"], "maxLength": 150, "description": "What was changed; null when not fixed." },
+        "confidence": { "$ref": "#/$defs/Confidence" },
+        "citation": { "$ref": "#/$defs/Citation" }
+      }
+    },
+    "Gap": {
+      "type": "object",
+      "required": ["gap_id", "type", "related_ids", "summary", "question"],
+      "additionalProperties": false,
+      "properties": {
+        "gap_id": { "type": "string", "pattern": "^GAP-\\d{2}$" },
+        "type": { "enum": ["insufficient_context", "rerun_generator", "missing_input"] },
+        "related_ids": { "type": "array", "items": { "type": "string" } },
+        "summary": { "$ref": "#/$defs/Summary" },
+        "question": { "type": "string", "maxLength": 200 }
+      }
+    }
+  }
+}

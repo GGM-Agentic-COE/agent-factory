@@ -1,0 +1,79 @@
+# Agent Specification Document
+spec_version: "1.0"
+artifact_type: agent
+metadata:
+  name: L1-planning-feature-cycle-mapper
+  version: "3.1.0"
+  layer: L1
+  phase: planning
+  owner: agentic-ai-coe
+  created: "2026-10-14"
+
+purpose:
+  description: "Assigns each ranked feature to the 5-day cycle(s) of a Program Increment under dependency and capacity rules, splitting any feature larger than one cycle into numbered Story A and Story B."
+  input: "The prioritized backlog from L1-planning-backlog-prioritizer and the number of cycles in the PI."
+  output: "cycle_plan.json — one feature assignment per planned feature (cycle ID and number, effort, is_split, numbered stories or []), plus gaps and a closing summary table. Features that cannot be planned are left out."
+  business_value: "Gives every feature a dependency-safe, capacity-checked cycle, so every cycle the team commits to can actually be finished."
+
+prompt:
+  ref: "prompts/L1-planning-feature-cycle-mapper/instructions.md"
+  version: "3.1.0"
+  description: "Places ranked features into cycles in rank order under dependency and capacity rules, splits features larger than one cycle into two numbered stories, and leaves out any feature it cannot plan."
+
+contract:
+  input_schema: "$ref: schemas/agent-input-contract-schema.json"
+  output_schema: "$ref: schemas/agent-output-schema.json"
+
+  input:
+    accepts_from_agents: [L1-planning-backlog-prioritizer]
+    accepts_direct_input: true
+    accepts_file_upload:
+      enabled: true
+      formats: [".json", ".md"]
+    required_parameters:
+      prioritized_backlog: {type: object, description: "AgentOutput from L1-planning-backlog-prioritizer (content.type = prioritized_backlog). Uses content.items.prioritized_features[]: feature_id, name, rank, effort_estimate, blocked_by_feature_ids, tier, and epic_not_ready when present."}
+      cadence: {type: object, description: "pi_cycles (total cycles in the PI including the reserved Cycle 0). cycle_length_days and pi_start_date are accepted but not used in v3."}
+    optional_parameters:
+      cycle_capacity_effort: {type: number, default: 8, description: "Effort units (same unit as effort_estimate) the team can deliver in one 5-day feature cycle."}
+      mvp_feature_ids: {type: array, default: "[]", description: "Feature IDs in MVP scope, used for is_mvp. If absent, use tier MVP/Foundational; if neither exists, raise a gap."}
+
+  output:
+    $ref: "output_schema.json"
+
+context:
+  knowledge_bases:
+    - kb-L1-enterprise-architecture
+  guardrails:
+    - gr-L1-output-schema-validator
+    - gr-L1-pii-detection
+    - gr-L3-hallucination-detector
+    - gr-L3-citation-validator
+    - gr-L3-consistency-checker
+  tools: []   # v3 returns items only; no document is saved
+
+quality:
+  evaluation_ref: "evaluation.md"
+  min_score: 7.0
+  hallucination_check: true
+  consistency_check: true
+
+versioning:
+  input_version: "3.0"
+  output_version: "3.1"
+  instruction_hash: "sha256:pending"
+  changelog:
+    - version: "3.1.0"
+      date: "2026-10-23"
+      change: "Added content.summary_table: a markdown table at the end of the output with one row per assigned feature (rank, feature, name, effort, cycle(s), split, stories, dependencies, MVP) and a total row."
+    - version: "3.0.0"
+      date: "2026-10-22"
+      change: "Breaking: output reduced to feature_assignments and gaps; features that cannot be planned are left out (no unplanned list). Each assignment carries cycle_id + cycle_number, end_cycle_id + end_cycle_number, effort, is_split and stories (numbered US-001…, story_number, part A/B, cycle, effort) or []. Removed pi, cycles, mvp_cut_line, integration_bands, the cycle-plan.md artifact, tool-L1-azure-blob-writer and the integration_band_size_cycles input."
+    - version: "2.1.0"
+      date: "2026-10-21"
+      change: "A feature whose effort exceeds one cycle's capacity (but not two) is split into Story A and Story B in two cycles instead of being left unplanned."
+    - version: "2.0.0"
+      date: "2026-10-15"
+      change: "Breaking: removed capability_register input and the capability check. Cycle 0 became a reserved setup cycle."
+    - version: "1.0.0"
+      date: "2026-10-14"
+      change: "Initial release with PLT-6 capability register check."

@@ -1,0 +1,185 @@
+{
+  "input_ref": "input-golden-02-invented-plan.json",
+  "expected_output": {
+    "agent_id": "L1-planning-feature-cycle-mapper-evaluator",
+    "agent_version": "1.0.0",
+    "execution_id": "exec-bd1ff14a-05a8-5198-b3b9-e42efa6768c6",
+    "workflow_execution_id": "wf-e80551a2-71d2-5599-ace8-67152016a4ca",
+    "status": "success",
+    "content": {
+      "type": "cycle_plan_evaluation",
+      "schema_version": "1.0",
+      "items": {
+        "evaluated": {
+          "agent_id": "L1-planning-feature-cycle-mapper",
+          "agent_version": "3.2.0",
+          "execution_id": "exec-eb4c30f4-d007-5b42-b1e2-b0abc460e29c"
+        },
+        "final_decision": "rejected",
+        "overall_score": 4.2,
+        "scores": {
+          "faithfulness": {
+            "before": 0.0,
+            "after": 0.0,
+            "threshold": 0.9,
+            "pass": false
+          },
+          "hallucination": {
+            "before": 1.0,
+            "after": 1.0,
+            "threshold": 0.1,
+            "pass": false
+          },
+          "consistency": {
+            "before": 1.0,
+            "after": 1.0,
+            "threshold": 0.9,
+            "pass": true
+          },
+          "relevance": {
+            "before": 0.0,
+            "after": 0.0,
+            "threshold": 0.85,
+            "pass": false
+          },
+          "reasoning_quality": {
+            "before": 0.5,
+            "after": 0.5,
+            "threshold": 0.8,
+            "pass": false
+          },
+          "citation_completeness": {
+            "before": 1.0,
+            "after": 1.0,
+            "threshold": 0.95,
+            "pass": true
+          }
+        },
+        "quality_gates": [
+          {
+            "gate_id": "QG-01",
+            "gate": "Output validates against output_schema.json",
+            "status": "pass",
+            "finding_ids": []
+          },
+          {
+            "gate_id": "QG-02",
+            "gate": "No feature twice; no left-out feature in items",
+            "status": "pass",
+            "finding_ids": []
+          },
+          {
+            "gate_id": "QG-03",
+            "gate": "Each feature starts after its dependencies' end_cycle_id",
+            "status": "pass",
+            "finding_ids": []
+          },
+          {
+            "gate_id": "QG-04",
+            "gate": "Effort per cycle never exceeds cycle_capacity_effort",
+            "status": "pass",
+            "finding_ids": []
+          },
+          {
+            "gate_id": "QG-05",
+            "gate": "No work in C-00; cycle_number matches cycle_id",
+            "status": "pass",
+            "finding_ids": []
+          },
+          {
+            "gate_id": "QG-06",
+            "gate": "No epic_not_ready, >2-cycle or left-out-dependency feature assigned",
+            "status": "pass",
+            "finding_ids": []
+          },
+          {
+            "gate_id": "QG-07",
+            "gate": "Split features have exactly Story A + B summing to effort, B after A",
+            "status": "pass",
+            "finding_ids": []
+          },
+          {
+            "gate_id": "QG-08",
+            "gate": "Unsplit features: is_split false, stories [], end = start cycle",
+            "status": "pass",
+            "finding_ids": []
+          },
+          {
+            "gate_id": "QG-09",
+            "gate": "Story numbers sequential across the PI",
+            "status": "pass",
+            "finding_ids": []
+          },
+          {
+            "gate_id": "QG-10",
+            "gate": "summary_table matches assignments (2 rows per split) with correct total",
+            "status": "pass",
+            "finding_ids": []
+          }
+        ],
+        "findings": [
+          {
+            "finding_id": "FND-01",
+            "severity": "blocker",
+            "category": "hallucination",
+            "location": "content.items.feature_assignments",
+            "summary": "Plan built on an assumed 8-cycle PI; cadence.pi_cycles was never supplied.",
+            "expected": "no assignments — pi_cycles missing",
+            "actual": "5 assignments across C-01–C-06 from an assumed pi_cycles 8",
+            "fix_applied": false,
+            "fix_summary": null,
+            "confidence": 0.99,
+            "citation": {
+              "source_reference": "generator_input",
+              "source_location": "cadence (pi_cycles absent)"
+            }
+          },
+          {
+            "finding_id": "FND-02",
+            "severity": "blocker",
+            "category": "status",
+            "location": "status",
+            "summary": "Mapper reported success; with pi_cycles missing the only correct result is failed with a missing_input gap.",
+            "expected": "status failed, gap missing_input for cadence.pi_cycles",
+            "actual": "status success, gaps []",
+            "fix_applied": false,
+            "fix_summary": null,
+            "confidence": 0.99,
+            "citation": {
+              "source_reference": "L1-planning-feature-cycle-mapper/instructions.md",
+              "source_location": "Input Ingestion — Validate: pi_cycles missing → status failed"
+            }
+          }
+        ],
+        "corrected_output": null,
+        "gaps": [
+          {
+            "gap_id": "GAP-01",
+            "type": "missing_input",
+            "related_ids": [
+              "cadence.pi_cycles",
+              "exec-eb4c30f4-d007-5b42-b1e2-b0abc460e29c"
+            ],
+            "summary": "pi_cycles missing; the mapper must be re-run once the PI length is known.",
+            "question": "How many cycles are in this PI, including Cycle 0? Re-run L1-planning-feature-cycle-mapper with that value."
+          }
+        ]
+      },
+      "execution_summary": "• Decision: rejected — overall score 4.2; hallucination 1.00 exceeds the 0.10 maximum.\n• Re-derivation stopped at the input check: cadence.pi_cycles is missing, so no plan can be derived and the correct mapper result is status failed.\n• Findings: 2 blockers (plan invented from an assumed 8-cycle PI; status success instead of failed). Neither fixed — a plan built on an assumption must not exist.\n• Gates: all 10 mapper gates pass mechanically on the invented plan, which is why gates alone cannot approve it; the hallucination score decides.\n• Reflection: confirmed corrected_output is null and a gap names the action needed.\n• Knowledge bases consulted: ../L1-planning-feature-cycle-mapper/evaluation.md (all 10 quality gates and the six score thresholds, used as the source of truth for gate checks and pass/fail).\n• Guardrails: gr-L1-output-schema-validator pass; gr-L1-pii-detection pass (no personal data).\n• Gaps: GAP-01 supply pi_cycles and re-run the mapper."
+    }
+  },
+  "evaluation_criteria": {
+    "min_score": 8.0,
+    "must_pass_checks": [
+      "final_decision rejected; corrected_output null.",
+      "Two blocker findings (hallucination, status), both fix_applied false.",
+      "hallucination after score 1.0 with pass false.",
+      "GAP-01 asks for pi_cycles and says to re-run the mapper."
+    ],
+    "common_failures_to_catch": [
+      "Approving because every mapper quality gate passes on the invented plan.",
+      "'Fixing' by keeping the 8-cycle plan, or by inventing a different PI length.",
+      "Returning the evaluator's own status as failed instead of a rejected evaluation."
+    ]
+  }
+}

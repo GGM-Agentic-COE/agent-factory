@@ -1,0 +1,405 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "agents/L1-architecture-hld-designer/output_schema.json",
+  "title": "L1-architecture-hld-designer output",
+  "description": "AgentOutput for the HLD designer. Items + Artifacts (meta-points pattern): the full HLD prose and ASCII diagrams live ONLY in the hld.md artifact. Every *_summary field is a capped distillation (~15-20 words). Structural fields (IDs, enums, realization, status, citations, gap_ids, participant_ids) are complete and authoritative for downstream reconciliation.",
+  "type": "object",
+  "required": ["agent_id", "agent_version", "execution_id", "workflow_execution_id", "status", "content"],
+  "additionalProperties": false,
+  "properties": {
+    "agent_id": { "const": "L1-architecture-hld-designer" },
+    "agent_version": { "type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$" },
+    "execution_id": { "type": "string", "pattern": "^exec-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$" },
+    "workflow_execution_id": { "$ref": "#/$defs/WorkflowId" },
+    "status": { "enum": ["success", "failed"] },
+    "content": {
+      "type": "object",
+      "required": ["type", "schema_version", "items", "artifacts", "execution_summary"],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "const": "hld" },
+        "schema_version": { "const": "1.0" },
+        "items": { "$ref": "#/$defs/Items" },
+        "artifacts": { "type": "array", "maxItems": 1, "items": { "$ref": "#/$defs/Artifact" } },
+        "execution_summary": { "type": "string", "minLength": 1, "pattern": "^•", "description": "Plain-text bullet points, not JSON." }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "status": { "const": "success" } } },
+      "then": {
+        "properties": {
+          "content": {
+            "properties": {
+              "artifacts": { "minItems": 1 },
+              "items": {
+                "properties": {
+                  "document_header": { "type": "object" },
+                  "components": { "minItems": 1 },
+                  "deployment": { "type": "object" },
+                  "security": { "type": "object" },
+                  "state_machine": { "type": "object" }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "WorkflowId": { "type": "string", "pattern": "^wf-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$" },
+    "FeatureId": { "type": "string", "pattern": "^F-\\d{2}\\.\\d+$", "description": "Feature ID, F-{epic}.{seq}" },
+    "GapId": { "type": "string", "pattern": "^GAP-\\d{2}$" },
+    "ComponentId": { "type": "string", "pattern": "^CMP-\\d{2}$" },
+    "Confidence": { "type": "number", "minimum": 0, "maximum": 1, "description": "0.9+ explicit in inputs, 0.7-0.89 inferred, <0.7 uncertain" },
+    "Reasoning": { "type": "string", "minLength": 10, "maxLength": 300, "description": "Why this item/decision was made." },
+    "Summary": { "type": "string", "minLength": 3, "maxLength": 150 },
+    "ShortSummary": { "type": "string", "minLength": 2, "maxLength": 120 },
+    "Citation": {
+      "type": "object",
+      "required": ["source_reference", "source_location"],
+      "additionalProperties": false,
+      "properties": {
+        "source_reference": {
+          "enum": ["prd.md", "platform-architecture.md", "data-architecture.md", "integration-architecture.md", "kb-L1-enterprise-architecture", "kb-L1-architectural-binding-principles", "previous_hld"],
+          "description": "Document or KB the item derives from."
+        },
+        "source_location": { "type": "string", "minLength": 1, "maxLength": 120, "description": "Section, heading, or ID inside the source (e.g. '§3 Lifecycle', 'EA-05', 'NFR-2')." },
+        "source_excerpt": { "type": "string", "maxLength": 150, "description": "Short supporting phrase from the source." }
+      }
+    },
+    "Items": {
+      "type": "object",
+      "required": ["document_header", "components", "data_flows", "state_machine", "deployment", "security", "observability", "nfr_compliance", "binding_principle_checks", "gaps", "open_questions"],
+      "additionalProperties": false,
+      "properties": {
+        "document_header": {
+          "description": "HLD header block. null only on INSUFFICIENT_CONTEXT.",
+          "oneOf": [
+            { "type": "null" },
+            {
+              "type": "object",
+              "required": ["document_version", "baseline_reference", "feature_coverage", "stack_summary", "correlation_id", "sections_present"],
+              "additionalProperties": false,
+              "properties": {
+                "document_version": { "type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$" },
+                "baseline_reference": { "type": "string", "maxLength": 100, "description": "EA KB name and version" },
+                "feature_coverage": {
+                  "type": "object",
+                  "required": ["committed", "designed_not_built"],
+                  "additionalProperties": false,
+                  "properties": {
+                    "committed": { "type": "array", "items": { "$ref": "#/$defs/FeatureId" } },
+                    "designed_not_built": { "type": "array", "items": { "$ref": "#/$defs/FeatureId" } }
+                  }
+                },
+                "stack_summary": { "$ref": "#/$defs/Summary" },
+                "correlation_id": { "$ref": "#/$defs/WorkflowId" },
+                "sections_present": {
+                  "type": "array",
+                  "items": { "enum": ["§0", "§1", "§2", "§3", "§4", "§5", "§6", "§7", "§8"] },
+                  "uniqueItems": true,
+                  "description": "Sections written in hld.md; §3 may be absent when state_machine.applicable is false."
+                }
+              }
+            }
+          ]
+        },
+        "components": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "name", "kind", "target_summary", "mvp_summary", "realization", "gap_ids", "citation", "confidence", "reasoning"],
+            "additionalProperties": false,
+            "properties": {
+              "id": { "$ref": "#/$defs/ComponentId" },
+              "name": { "type": "string", "minLength": 1, "maxLength": 60 },
+              "kind": { "enum": ["actor", "ingress", "frontend", "backend", "auth", "controller", "service", "connector", "datastore", "cache", "event_bus", "external_system"] },
+              "target_summary": { "$ref": "#/$defs/ShortSummary" },
+              "mvp_summary": { "$ref": "#/$defs/ShortSummary" },
+              "realization": { "enum": ["real", "mocked", "simplified", "deferred", "absent", "unconfirmed"], "description": "State of the current build vs. target." },
+              "gap_ids": { "type": "array", "items": { "$ref": "#/$defs/GapId" }, "description": "Required non-empty unless realization is 'real'." },
+              "citation": { "$ref": "#/$defs/Citation" },
+              "confidence": { "$ref": "#/$defs/Confidence" },
+              "reasoning": { "$ref": "#/$defs/Reasoning" }
+            },
+            "if": { "properties": { "realization": { "not": { "const": "real" } } } },
+            "then": { "properties": { "gap_ids": { "minItems": 1 } } }
+          }
+        },
+        "data_flows": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "name", "feature_ids", "participant_ids", "step_count", "branch_conditions", "touches_mocked_component", "summary", "gap_ids", "citation", "confidence", "reasoning"],
+            "additionalProperties": false,
+            "properties": {
+              "id": { "type": "string", "pattern": "^FLW-\\d{2}$" },
+              "name": { "type": "string", "maxLength": 60 },
+              "feature_ids": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/FeatureId" } },
+              "participant_ids": { "type": "array", "minItems": 2, "items": { "$ref": "#/$defs/ComponentId" } },
+              "step_count": { "type": "integer", "minimum": 1 },
+              "branch_conditions": { "type": "array", "items": { "type": "string", "maxLength": 80 } },
+              "touches_mocked_component": { "type": "boolean" },
+              "summary": { "$ref": "#/$defs/Summary" },
+              "gap_ids": { "type": "array", "items": { "$ref": "#/$defs/GapId" } },
+              "citation": { "$ref": "#/$defs/Citation" },
+              "confidence": { "$ref": "#/$defs/Confidence" },
+              "reasoning": { "$ref": "#/$defs/Reasoning" }
+            }
+          }
+        },
+        "state_machine": {
+          "description": "null only on INSUFFICIENT_CONTEXT. applicable=false when no lifecycle-bearing entity (then §3 is omitted with a reason).",
+          "oneOf": [
+            { "type": "null" },
+            {
+              "type": "object",
+              "required": ["applicable", "entity", "omission_reason_summary", "feature_ids", "states", "transitions", "citation", "confidence", "reasoning"],
+              "additionalProperties": false,
+              "properties": {
+                "applicable": { "type": "boolean" },
+                "entity": { "type": ["string", "null"], "maxLength": 60 },
+                "omission_reason_summary": { "type": ["string", "null"], "maxLength": 150 },
+                "feature_ids": { "type": "array", "items": { "$ref": "#/$defs/FeatureId" } },
+                "states": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": ["name", "terminal", "built"],
+                    "additionalProperties": false,
+                    "properties": {
+                      "name": { "type": "string", "pattern": "^[A-Z][A-Z_]*$" },
+                      "terminal": { "type": "boolean" },
+                      "built": { "type": "boolean" }
+                    }
+                  }
+                },
+                "transitions": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": ["from", "to", "trigger_summary", "guard_summary", "built"],
+                    "additionalProperties": false,
+                    "properties": {
+                      "from": { "type": "string", "pattern": "^[A-Z][A-Z_]*$" },
+                      "to": { "type": "string", "pattern": "^[A-Z][A-Z_]*$" },
+                      "trigger_summary": { "type": "string", "maxLength": 80 },
+                      "guard_summary": { "type": ["string", "null"], "maxLength": 100 },
+                      "built": { "type": "boolean" }
+                    }
+                  }
+                },
+                "citation": { "$ref": "#/$defs/Citation" },
+                "confidence": { "$ref": "#/$defs/Confidence" },
+                "reasoning": { "$ref": "#/$defs/Reasoning" }
+              }
+            }
+          ]
+        },
+        "deployment": {
+          "description": "null only on INSUFFICIENT_CONTEXT.",
+          "oneOf": [
+            { "type": "null" },
+            {
+              "type": "object",
+              "required": ["target_summary", "mvp_summary", "ea_refs", "services", "absent_infra", "gap_ids", "citation", "confidence", "reasoning"],
+              "additionalProperties": false,
+              "properties": {
+                "target_summary": { "$ref": "#/$defs/Summary" },
+                "mvp_summary": { "$ref": "#/$defs/Summary" },
+                "ea_refs": { "type": "array", "items": { "type": "string", "pattern": "^EA-\\d{2}$" } },
+                "services": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": ["name", "image_base", "port", "resources_summary", "probe_status"],
+                    "additionalProperties": false,
+                    "properties": {
+                      "name": { "type": "string", "maxLength": 60 },
+                      "image_base": { "type": "string", "maxLength": 80 },
+                      "port": { "type": ["integer", "null"] },
+                      "resources_summary": { "type": "string", "maxLength": 80 },
+                      "probe_status": { "enum": ["present", "target_only", "absent"] }
+                    }
+                  }
+                },
+                "absent_infra": { "type": "array", "items": { "type": "string", "maxLength": 60 } },
+                "gap_ids": { "type": "array", "items": { "$ref": "#/$defs/GapId" } },
+                "citation": { "$ref": "#/$defs/Citation" },
+                "confidence": { "$ref": "#/$defs/Confidence" },
+                "reasoning": { "$ref": "#/$defs/Reasoning" }
+              }
+            }
+          ]
+        },
+        "security": {
+          "description": "null only on INSUFFICIENT_CONTEXT.",
+          "oneOf": [
+            { "type": "null" },
+            {
+              "type": "object",
+              "required": ["target_auth_summary", "mvp_auth_summary", "encryption_boundaries", "authz_rules", "gap_ids", "citation", "confidence", "reasoning"],
+              "additionalProperties": false,
+              "properties": {
+                "target_auth_summary": { "$ref": "#/$defs/ShortSummary" },
+                "mvp_auth_summary": { "$ref": "#/$defs/ShortSummary" },
+                "encryption_boundaries": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": ["boundary", "target", "mvp_reality"],
+                    "additionalProperties": false,
+                    "properties": {
+                      "boundary": { "type": "string", "maxLength": 60 },
+                      "target": { "type": "string", "maxLength": 80 },
+                      "mvp_reality": { "type": "string", "maxLength": 80 }
+                    }
+                  }
+                },
+                "authz_rules": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": ["id", "endpoint", "role", "decision", "scope_summary"],
+                    "additionalProperties": false,
+                    "properties": {
+                      "id": { "type": "string", "pattern": "^AZ-\\d{2}$" },
+                      "endpoint": { "type": "string", "pattern": "^(GET|POST|PUT|PATCH|DELETE) /\\S+$" },
+                      "role": { "type": "string", "maxLength": 40 },
+                      "decision": { "enum": ["allowed_scoped", "allowed_all", "forbidden"] },
+                      "scope_summary": { "type": "string", "maxLength": 100 }
+                    }
+                  }
+                },
+                "gap_ids": { "type": "array", "items": { "$ref": "#/$defs/GapId" } },
+                "citation": { "$ref": "#/$defs/Citation" },
+                "confidence": { "$ref": "#/$defs/Confidence" },
+                "reasoning": { "$ref": "#/$defs/Reasoning" }
+              }
+            }
+          ]
+        },
+        "observability": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["signal", "target_summary", "mvp_summary", "status", "gap_ids", "confidence", "reasoning"],
+            "additionalProperties": false,
+            "properties": {
+              "signal": { "enum": ["structured_logs", "metrics", "health_probes", "tracing", "audit_trail"] },
+              "target_summary": { "$ref": "#/$defs/ShortSummary" },
+              "mvp_summary": { "$ref": "#/$defs/ShortSummary" },
+              "status": { "enum": ["in_place", "partial", "absent"] },
+              "gap_ids": { "type": "array", "items": { "$ref": "#/$defs/GapId" } },
+              "confidence": { "$ref": "#/$defs/Confidence" },
+              "reasoning": { "$ref": "#/$defs/Reasoning" }
+            }
+          }
+        },
+        "nfr_compliance": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "nfr_summary", "target_mechanism_summary", "status", "status_rationale_summary", "gap_ids", "citation", "confidence", "reasoning"],
+            "additionalProperties": false,
+            "properties": {
+              "id": { "type": "string", "pattern": "^NFR-\\d{2}$" },
+              "nfr_summary": { "$ref": "#/$defs/ShortSummary" },
+              "target_mechanism_summary": { "$ref": "#/$defs/ShortSummary" },
+              "status": { "enum": ["met", "met_differently", "not_applicable", "not_tested", "not_met"] },
+              "status_rationale_summary": { "$ref": "#/$defs/Summary" },
+              "gap_ids": { "type": "array", "items": { "$ref": "#/$defs/GapId" } },
+              "citation": { "$ref": "#/$defs/Citation" },
+              "confidence": { "$ref": "#/$defs/Confidence" },
+              "reasoning": { "$ref": "#/$defs/Reasoning" }
+            },
+            "if": { "properties": { "status": { "const": "not_met" } } },
+            "then": { "properties": { "gap_ids": { "minItems": 1 } } }
+          }
+        },
+        "binding_principle_checks": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "principle_ref", "principle_summary", "outcome", "gap_ids", "citation", "confidence", "reasoning"],
+            "additionalProperties": false,
+            "properties": {
+              "id": { "type": "string", "pattern": "^BPC-\\d{2}$" },
+              "principle_ref": { "type": "string", "pattern": "^ABP-\\d{2}$" },
+              "principle_summary": { "$ref": "#/$defs/ShortSummary" },
+              "outcome": { "enum": ["compliant", "deviation_recorded", "not_applicable"] },
+              "gap_ids": { "type": "array", "items": { "$ref": "#/$defs/GapId" } },
+              "citation": { "$ref": "#/$defs/Citation" },
+              "confidence": { "$ref": "#/$defs/Confidence" },
+              "reasoning": { "$ref": "#/$defs/Reasoning" }
+            },
+            "if": { "properties": { "outcome": { "const": "deviation_recorded" } } },
+            "then": { "properties": { "gap_ids": { "minItems": 1 } } }
+          }
+        },
+        "gaps": {
+          "type": "array",
+          "description": "§8 Gap Register — single source of truth for target vs. reality.",
+          "items": {
+            "type": "object",
+            "required": ["id", "summary", "gap_type", "ea_reference", "owner", "severity", "raised_in_sections", "citation", "confidence", "reasoning"],
+            "additionalProperties": false,
+            "properties": {
+              "id": { "$ref": "#/$defs/GapId" },
+              "summary": { "$ref": "#/$defs/ShortSummary" },
+              "gap_type": { "enum": ["mocked", "simplified", "deferred", "absent", "unconfirmed"] },
+              "ea_reference": { "type": "string", "pattern": "^(((EA|ABP)-\\d{2})(, (EA|ABP)-\\d{2})*|PRD scope)$", "description": "EA/ABP refs; 'PRD scope' only for designed-not-built feature deferrals." },
+              "owner": { "type": "string", "minLength": 2, "maxLength": 80 },
+              "severity": { "enum": ["blocker", "high", "medium", "low"], "description": "Impact on promoting the build beyond current scope." },
+              "raised_in_sections": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "enum": ["§1", "§2", "§3", "§4", "§5", "§6", "§7"] } },
+              "citation": { "$ref": "#/$defs/Citation" },
+              "confidence": { "$ref": "#/$defs/Confidence" },
+              "reasoning": { "$ref": "#/$defs/Reasoning" }
+            }
+          }
+        },
+        "open_questions": {
+          "type": "array",
+          "description": "Input conflicts, unconfirmed realities, missing owners, or (on failure) missing inputs.",
+          "items": {
+            "type": "object",
+            "required": ["id", "question_summary", "blocking", "related_ids"],
+            "additionalProperties": false,
+            "properties": {
+              "id": { "type": "string", "pattern": "^OQ-\\d{2}$" },
+              "question_summary": { "$ref": "#/$defs/Summary" },
+              "blocking": { "type": "boolean" },
+              "related_ids": { "type": "array", "items": { "type": "string", "pattern": "^(CMP|FLW|AZ|NFR|BPC|GAP)-\\d{2}$|^F-\\d{2}\\.\\d+$" } }
+            }
+          }
+        }
+      }
+    },
+    "Artifact": {
+      "type": "object",
+      "required": ["id", "type", "name", "format", "storage", "description", "produced_by"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string", "pattern": "^artifact-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$" },
+        "type": { "const": "document" },
+        "name": { "const": "hld.md" },
+        "format": { "const": "markdown" },
+        "storage": {
+          "type": "object",
+          "required": ["provider", "location"],
+          "additionalProperties": false,
+          "properties": {
+            "provider": { "enum": ["s3", "local", "confluence", "github", "jira_attachment"] },
+            "location": { "type": "string", "pattern": "^[a-z0-9]+://.+/wf-[0-9a-f-]{36}/hld\\.md$", "description": "Folder keyed by workflow_execution_id, e.g. confluence://ARCH/{workflow_execution_id}/hld.md" },
+            "page_id": { "type": "string", "description": "Confluence page id returned by tool-L1-confluence-create-page" }
+          }
+        },
+        "description": { "type": "string", "maxLength": 200 },
+        "produced_by": { "const": "L1-architecture-hld-designer" }
+      }
+    }
+  }
+}

@@ -1,0 +1,222 @@
+{
+  "input_ref": "input-golden-01-merchant-payouts.json",
+  "expected_output": {
+    "agent_id": "L1-planning-feature-cycle-mapper",
+    "agent_version": "3.1.0",
+    "execution_id": "exec-ae4c7a41-f28b-52f0-a12d-0c703e11a13f",
+    "workflow_execution_id": "wf-56b8d7cf-278d-57b1-918c-84824b433f23",
+    "status": "success",
+    "content": {
+      "type": "cycle_plan",
+      "schema_version": "3.1",
+      "items": {
+        "feature_assignments": [
+          {
+            "feature_id": "F-03.1",
+            "name": "Merchant onboarding and bank account verification",
+            "rank": 1,
+            "effort": 5,
+            "cycle_id": "C-01",
+            "cycle_number": 1,
+            "end_cycle_id": "C-01",
+            "end_cycle_number": 1,
+            "is_split": false,
+            "stories": [],
+            "depends_on_feature_ids": [],
+            "is_mvp": true,
+            "confidence": 0.8,
+            "summary": "Rank 1 \u2192 C-01: fits one cycle (5 \u2264 8); no dependencies.",
+            "citation": {
+              "source_reference": "prioritized_backlog",
+              "source_location": "prioritized_features[rank=1] F-03.1"
+            }
+          },
+          {
+            "feature_id": "F-03.2",
+            "name": "Payout scheduling (daily and weekly)",
+            "rank": 2,
+            "effort": 3,
+            "cycle_id": "C-02",
+            "cycle_number": 2,
+            "end_cycle_id": "C-02",
+            "end_cycle_number": 2,
+            "is_split": false,
+            "stories": [],
+            "depends_on_feature_ids": [
+              "F-03.1"
+            ],
+            "is_mvp": true,
+            "confidence": 0.8,
+            "summary": "Rank 2 \u2192 C-02: fits one cycle (3 \u2264 8); after F-03.1.",
+            "citation": {
+              "source_reference": "prioritized_backlog",
+              "source_location": "prioritized_features[rank=2] F-03.2"
+            }
+          },
+          {
+            "feature_id": "F-03.3",
+            "name": "Payout ledger and balance calculation",
+            "rank": 3,
+            "effort": 11,
+            "cycle_id": "C-03",
+            "cycle_number": 3,
+            "end_cycle_id": "C-04",
+            "end_cycle_number": 4,
+            "is_split": true,
+            "stories": [
+              {
+                "story_id": "US-001",
+                "story_number": 1,
+                "part": "A",
+                "cycle_id": "C-03",
+                "cycle_number": 3,
+                "effort": 6,
+                "depends_on_story_ids": []
+              },
+              {
+                "story_id": "US-002",
+                "story_number": 2,
+                "part": "B",
+                "cycle_id": "C-04",
+                "cycle_number": 4,
+                "effort": 5,
+                "depends_on_story_ids": [
+                  "US-001"
+                ]
+              }
+            ],
+            "depends_on_feature_ids": [
+              "F-03.1"
+            ],
+            "is_mvp": true,
+            "confidence": 0.8,
+            "summary": "Rank 3 \u2192 split C-03\u2013C-04: effort 11 > 8; after F-03.1; C-02 has no room, A slipped to C-03.",
+            "citation": {
+              "source_reference": "prioritized_backlog",
+              "source_location": "prioritized_features[rank=3] F-03.3"
+            }
+          },
+          {
+            "feature_id": "F-03.4",
+            "name": "Bank file generation (ISO 20022 and NACHA)",
+            "rank": 4,
+            "effort": 6,
+            "cycle_id": "C-05",
+            "cycle_number": 5,
+            "end_cycle_id": "C-05",
+            "end_cycle_number": 5,
+            "is_split": false,
+            "stories": [],
+            "depends_on_feature_ids": [
+              "F-03.2",
+              "F-03.3"
+            ],
+            "is_mvp": true,
+            "confidence": 0.8,
+            "summary": "Rank 4 \u2192 C-05: fits one cycle (6 \u2264 8); after F-03.2, F-03.3.",
+            "citation": {
+              "source_reference": "prioritized_backlog",
+              "source_location": "prioritized_features[rank=4] F-03.4"
+            }
+          },
+          {
+            "feature_id": "F-03.5",
+            "name": "Payout status notifications",
+            "rank": 5,
+            "effort": 2,
+            "cycle_id": "C-06",
+            "cycle_number": 6,
+            "end_cycle_id": "C-06",
+            "end_cycle_number": 6,
+            "is_split": false,
+            "stories": [],
+            "depends_on_feature_ids": [
+              "F-03.4"
+            ],
+            "is_mvp": true,
+            "confidence": 0.8,
+            "summary": "Rank 5 \u2192 C-06: fits one cycle (2 \u2264 8); after F-03.4.",
+            "citation": {
+              "source_reference": "prioritized_backlog",
+              "source_location": "prioritized_features[rank=5] F-03.5"
+            }
+          },
+          {
+            "feature_id": "F-03.6",
+            "name": "Fee and FX deduction",
+            "rank": 6,
+            "effort": 5,
+            "cycle_id": "C-06",
+            "cycle_number": 6,
+            "end_cycle_id": "C-06",
+            "end_cycle_number": 6,
+            "is_split": false,
+            "stories": [],
+            "depends_on_feature_ids": [
+              "F-03.3"
+            ],
+            "is_mvp": false,
+            "confidence": 0.8,
+            "summary": "Rank 6 \u2192 C-06: fits one cycle (5 \u2264 8); after F-03.3; C-05 has no room, slipped to C-06.",
+            "citation": {
+              "source_reference": "prioritized_backlog",
+              "source_location": "prioritized_features[rank=6] F-03.6"
+            }
+          },
+          {
+            "feature_id": "F-03.7",
+            "name": "Reconciliation dashboard",
+            "rank": 7,
+            "effort": 6,
+            "cycle_id": "C-07",
+            "cycle_number": 7,
+            "end_cycle_id": "C-07",
+            "end_cycle_number": 7,
+            "is_split": false,
+            "stories": [],
+            "depends_on_feature_ids": [
+              "F-03.4"
+            ],
+            "is_mvp": false,
+            "confidence": 0.8,
+            "summary": "Rank 7 \u2192 C-07: fits one cycle (6 \u2264 8); after F-03.4; C-06 has no room, slipped to C-07.",
+            "citation": {
+              "source_reference": "prioritized_backlog",
+              "source_location": "prioritized_features[rank=7] F-03.7"
+            }
+          }
+        ],
+        "gaps": []
+      },
+      "execution_summary": "\u2022 Produced 7 feature assignments (1 split into 2 stories, 6 single-cycle with stories []), 0 gaps; 2 ranked features left out (not planned this PI).\n\u2022 Decision: MVP scope taken from tier (Foundational + MVP) because mvp_feature_ids was not supplied; confidence held at 0.8.\n\u2022 Decision: F-03.3 ledger (effort 11 > 8) split: US-001 Story A (6) in C-03, since C-02 had only 5 of 8 free, and US-002 Story B (5) in C-04.\n\u2022 Decision: F-03.4 waits for Story B and starts in C-05; F-03.5 and F-03.6 share C-06 (2 + 5 = 7).\n\u2022 Decision: Features that cannot be planned this PI are left out of the output.\n\u2022 Reflection: basic self-check found one summary over 150 characters and trimmed it; confirmed 7 assignments, no duplicates and stories numbered US-001, US-002.\n\u2022 Knowledge bases consulted: kb-L1-enterprise-architecture (bounded-context rule confirming epic_not_ready features need an ADR and EA approval before planning).\n\u2022 Guardrails: gr-L1-output-schema-validator pass; gr-L1-pii-detection pass (no personal data); gr-L3-hallucination-detector pass; gr-L3-citation-validator pass; gr-L3-consistency-checker pass.\n\u2022 Gaps: none.",
+      "summary_table": "| Rank | Feature | Name | Effort | Cycle(s) | Split | Stories | Depends on | MVP |\n|---|---|---|---|---|---|---|---|---|\n| 1 | F-03.1 | Merchant onboarding and bank account verification | 5 | C-01 | No | \u2014 | \u2014 | Yes |\n| 2 | F-03.2 | Payout scheduling (daily and weekly) | 3 | C-02 | No | \u2014 | F-03.1 | Yes |\n| 3 | F-03.3 | Payout ledger and balance calculation | 11 | C-03 \u2192 C-04 | Yes | US-001 A (C-03, 6) \u00b7 US-002 B (C-04, 5) | F-03.1 | Yes |\n| 4 | F-03.4 | Bank file generation (ISO 20022 and NACHA) | 6 | C-05 | No | \u2014 | F-03.2, F-03.3 | Yes |\n| 5 | F-03.5 | Payout status notifications | 2 | C-06 | No | \u2014 | F-03.4 | Yes |\n| 6 | F-03.6 | Fee and FX deduction | 5 | C-06 | No | \u2014 | F-03.3 | No |\n| 7 | F-03.7 | Reconciliation dashboard | 6 | C-07 | No | \u2014 | F-03.4 | No |\n| | **Total** | 7 features | 38 | | 1 split | 2 stories | | |"
+    }
+  },
+  "evaluation_criteria": {
+    "min_score": 7.0,
+    "expected_scores": {
+      "faithfulness": 0.95,
+      "hallucination": 0.0,
+      "consistency": 0.95,
+      "relevance": 0.9,
+      "reasoning_quality": 0.9,
+      "citation_completeness": 1.0
+    },
+    "must_pass_checks": [
+      "7 feature_assignments in rank order; no feature in C-00.",
+      "F-03.3: cycle_id C-03 / cycle_number 3, end_cycle_id C-04 / end_cycle_number 4, effort 11, is_split true.",
+      "F-03.3 stories: US-001 (story_number 1, part A, C-03, effort 6) and US-002 (story_number 2, part B, C-04, effort 5, depends on US-001).",
+      "Every other assignment has is_split false, stories [] and end_cycle_id equal to cycle_id.",
+      "F-03.4 in C-05, strictly after Story B; F-03.5 and F-03.6 in C-06.",
+      "summary_table has 7 feature rows; F-03.3 row shows C-03 \u2192 C-04, Split Yes, US-001 A (C-03, 6) \u00b7 US-002 B (C-04, 5); total row 38 effort, 1 split, 2 stories.",
+      "F-03.8 and F-03.9 do not appear anywhere in items (left out), and items has no unplanned_features key."
+    ],
+    "common_failures_to_catch": [
+      "Leaving F-03.3 unplanned as too large instead of splitting it.",
+      "Creating stories for features that fit one cycle.",
+      "Listing left-out features in an unplanned list or as placeholder rows.",
+      "cycle_number not matching cycle_id, or story numbers restarting per feature.",
+      "summary_table missing a row, adding a left-out feature, or a total that does not match the assignments."
+    ]
+  }
+}

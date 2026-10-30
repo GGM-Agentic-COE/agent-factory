@@ -1,0 +1,238 @@
+{
+  "prioritized_backlog": {
+    "agent_id": "L1-planning-backlog-prioritizer",
+    "agent_version": "1.0.0",
+    "execution_id": "exec-4f1190f8-1ff8-5f7c-866c-8f2bdd2495be",
+    "workflow_execution_id": "wf-5f2a9c84-1d7e-4b60-a3f9-8e2c6d1b0a47",
+    "status": "success",
+    "content": {
+      "type": "prioritized_backlog",
+      "schema_version": "1.0",
+      "items": {
+        "prioritized_features": [
+          {
+            "feature_id": "F-01.1",
+            "name": "Customer registration and login",
+            "rank": 1,
+            "scoring_method": "WSJF",
+            "priority_score": 18.5,
+            "effort_estimate": 5,
+            "blocks_feature_ids": [
+              "F-01.2",
+              "F-02.3"
+            ],
+            "blocked_by_feature_ids": [],
+            "confidence": 0.85,
+            "summary": "Foundational; every journey needs a signed-in customer.",
+            "citation": {
+              "source_reference": "value-scoring-sheet.xlsx",
+              "source_location": "row2"
+            },
+            "tier": "Foundational"
+          },
+          {
+            "feature_id": "F-01.2",
+            "name": "Personal loan application form",
+            "rank": 2,
+            "scoring_method": "WSJF",
+            "priority_score": 16.0,
+            "effort_estimate": 5,
+            "blocks_feature_ids": [
+              "F-01.3",
+              "F-01.4",
+              "F-03.2"
+            ],
+            "blocked_by_feature_ids": [
+              "F-01.1"
+            ],
+            "confidence": 0.85,
+            "summary": "Core MVP entry point.",
+            "citation": {
+              "source_reference": "value-scoring-sheet.xlsx",
+              "source_location": "row3"
+            },
+            "tier": "MVP"
+          },
+          {
+            "feature_id": "F-01.3",
+            "name": "Income document upload with OCR extraction",
+            "rank": 3,
+            "scoring_method": "WSJF",
+            "priority_score": 13.2,
+            "effort_estimate": 6,
+            "blocks_feature_ids": [
+              "F-01.5"
+            ],
+            "blocked_by_feature_ids": [
+              "F-01.2"
+            ],
+            "confidence": 0.85,
+            "summary": "Removes manual income checks.",
+            "citation": {
+              "source_reference": "value-scoring-sheet.xlsx",
+              "source_location": "row4"
+            },
+            "tier": "MVP"
+          },
+          {
+            "feature_id": "F-01.4",
+            "name": "Credit bureau score check",
+            "rank": 4,
+            "scoring_method": "WSJF",
+            "priority_score": 12.8,
+            "effort_estimate": 3,
+            "blocks_feature_ids": [
+              "F-01.5"
+            ],
+            "blocked_by_feature_ids": [
+              "F-01.2"
+            ],
+            "confidence": 0.85,
+            "summary": "Small job; needed for the credit decision.",
+            "citation": {
+              "source_reference": "value-scoring-sheet.xlsx",
+              "source_location": "row5"
+            },
+            "tier": "MVP"
+          },
+          {
+            "feature_id": "F-01.5",
+            "name": "Underwriter review dashboard",
+            "rank": 5,
+            "scoring_method": "WSJF",
+            "priority_score": 11.0,
+            "effort_estimate": 5,
+            "blocks_feature_ids": [
+              "F-02.1"
+            ],
+            "blocked_by_feature_ids": [
+              "F-01.3",
+              "F-01.4"
+            ],
+            "confidence": 0.85,
+            "summary": "Completes the loan decision.",
+            "citation": {
+              "source_reference": "value-scoring-sheet.xlsx",
+              "source_location": "row6"
+            },
+            "tier": "MVP"
+          },
+          {
+            "feature_id": "F-02.1",
+            "name": "E-sign of loan agreement",
+            "rank": 6,
+            "scoring_method": "WSJF",
+            "priority_score": 9.4,
+            "effort_estimate": 4,
+            "blocks_feature_ids": [
+              "F-02.2"
+            ],
+            "blocked_by_feature_ids": [
+              "F-01.5"
+            ],
+            "confidence": 0.85,
+            "summary": "Removes branch visit for signing.",
+            "citation": {
+              "source_reference": "value-scoring-sheet.xlsx",
+              "source_location": "row7"
+            },
+            "tier": "Enhancement"
+          },
+          {
+            "feature_id": "F-02.2",
+            "name": "Disbursement to customer bank account",
+            "rank": 7,
+            "scoring_method": "WSJF",
+            "priority_score": 8.9,
+            "effort_estimate": 4,
+            "blocks_feature_ids": [
+              "F-03.3"
+            ],
+            "blocked_by_feature_ids": [
+              "F-02.1"
+            ],
+            "confidence": 0.85,
+            "summary": "Closes the loan journey end to end.",
+            "citation": {
+              "source_reference": "value-scoring-sheet.xlsx",
+              "source_location": "row8"
+            },
+            "tier": "Enhancement"
+          },
+          {
+            "feature_id": "F-02.3",
+            "name": "Multilingual SMS notifications (Tamil, Hindi, English)",
+            "rank": 8,
+            "scoring_method": "WSJF",
+            "priority_score": 7.5,
+            "effort_estimate": 3,
+            "blocks_feature_ids": [],
+            "blocked_by_feature_ids": [
+              "F-01.1"
+            ],
+            "confidence": 0.85,
+            "summary": "Reduces drop-off for regional customers.",
+            "citation": {
+              "source_reference": "value-scoring-sheet.xlsx",
+              "source_location": "row9"
+            },
+            "tier": "Enhancement"
+          },
+          {
+            "feature_id": "F-03.2",
+            "name": "Real-time fraud scoring engine",
+            "rank": 9,
+            "scoring_method": "WSJF",
+            "priority_score": 6.8,
+            "effort_estimate": 10,
+            "blocks_feature_ids": [],
+            "blocked_by_feature_ids": [
+              "F-01.2"
+            ],
+            "confidence": 0.85,
+            "summary": "Large job; high risk reduction.",
+            "citation": {
+              "source_reference": "value-scoring-sheet.xlsx",
+              "source_location": "row10"
+            },
+            "tier": "Enhancement"
+          },
+          {
+            "feature_id": "F-03.3",
+            "name": "Collections and repayment tracking",
+            "rank": 10,
+            "scoring_method": "WSJF",
+            "priority_score": 5.1,
+            "effort_estimate": 6,
+            "blocks_feature_ids": [],
+            "blocked_by_feature_ids": [
+              "F-02.2"
+            ],
+            "confidence": 0.85,
+            "summary": "Flagged as an Epic: collections is a new bounded context.",
+            "citation": {
+              "source_reference": "value-scoring-sheet.xlsx",
+              "source_location": "row11"
+            },
+            "tier": "Enhancement",
+            "epic_not_ready": true
+          }
+        ],
+        "gaps": []
+      }
+    }
+  },
+  "cadence": {
+    "cycle_length_days": 5,
+    "pi_cycles": 6,
+    "pi_start_date": "2026-10-19"
+  },
+  "cycle_capacity_effort": 8,
+  "mvp_feature_ids": [
+    "F-01.1",
+    "F-01.2",
+    "F-01.3",
+    "F-01.4",
+    "F-01.5"
+  ]
+}

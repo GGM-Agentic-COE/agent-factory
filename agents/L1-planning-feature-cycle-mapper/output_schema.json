@@ -1,0 +1,336 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.internal/agents/L1-planning-feature-cycle-mapper/output_schema.json",
+  "title": "L1-planning-feature-cycle-mapper Output (v3.1)",
+  "description": "Full AgentOutput envelope. v3 returns one feature assignment per planned feature (cycle, effort, split flag and numbered stories) plus gaps. Features that cannot be planned are left out entirely. No cycle table, MVP cut line, integration bands or document artifact. v3.1 adds content.summary_table, a markdown table restating the assignments (one row per feature plus a total row).",
+  "type": "object",
+  "required": [
+    "agent_id",
+    "agent_version",
+    "execution_id",
+    "workflow_execution_id",
+    "status",
+    "content"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "agent_id": {
+      "const": "L1-planning-feature-cycle-mapper"
+    },
+    "agent_version": {
+      "type": "string",
+      "pattern": "^3\\.\\d+\\.\\d+$"
+    },
+    "execution_id": {
+      "type": "string",
+      "pattern": "^exec-[0-9a-f-]{36}$"
+    },
+    "workflow_execution_id": {
+      "type": "string",
+      "pattern": "^wf-[0-9a-f-]{36}$",
+      "description": "Inherited from the prioritized backlog."
+    },
+    "status": {
+      "enum": [
+        "success",
+        "failed"
+      ]
+    },
+    "content": {
+      "type": "object",
+      "required": [
+        "type",
+        "schema_version",
+        "items",
+        "execution_summary",
+        "summary_table"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "cycle_plan"
+        },
+        "schema_version": {
+          "const": "3.1"
+        },
+        "items": {
+          "$ref": "#/$defs/Items"
+        },
+        "execution_summary": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Plain-text bullet summary, not JSON."
+        },
+        "summary_table": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Markdown table, last key in content: Rank | Feature | Name | Effort | Cycle(s) | Split | Stories | Depends on | MVP, one row per feature_assignment plus a total row. \"No features assigned \u2014 see gaps.\" when status is failed."
+        }
+      }
+    }
+  },
+  "$defs": {
+    "FeatureId": {
+      "type": "string",
+      "pattern": "^F-\\d{2}\\.\\d+$",
+      "description": "Feature ID as received from the prioritizer (F-{epic}.{seq})."
+    },
+    "CycleId": {
+      "type": "string",
+      "pattern": "^C-(0[1-9]|[1-9]\\d)$",
+      "description": "Feature cycle ID, C-01 onward (C-00 is reserved and never assigned)."
+    },
+    "CycleNumber": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Numeric form of the cycle ID (C-03 \u2192 3)."
+    },
+    "StoryId": {
+      "type": "string",
+      "pattern": "^US-\\d{3}$",
+      "description": "Story ID, US-{story_number:03d}."
+    },
+    "Summary": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 150
+    },
+    "Confidence": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "0.9+ explicit, 0.7-0.8 default used, <0.7 uncertain."
+    },
+    "Citation": {
+      "type": "object",
+      "required": [
+        "source_reference",
+        "source_location"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "source_reference": {
+          "type": "string",
+          "description": "Source agent output, e.g. prioritized_backlog."
+        },
+        "source_location": {
+          "type": "string",
+          "description": "Exact row, e.g. prioritized_features[rank=3] F-03.3."
+        }
+      }
+    },
+    "Items": {
+      "type": "object",
+      "required": [
+        "feature_assignments",
+        "gaps"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "feature_assignments": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/FeatureAssignment"
+          },
+          "description": "One row per planned feature, in rank order."
+        },
+        "gaps": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Gap"
+          }
+        }
+      }
+    },
+    "FeatureAssignment": {
+      "type": "object",
+      "required": [
+        "feature_id",
+        "name",
+        "rank",
+        "effort",
+        "cycle_id",
+        "cycle_number",
+        "end_cycle_id",
+        "end_cycle_number",
+        "is_split",
+        "stories",
+        "depends_on_feature_ids",
+        "is_mvp",
+        "confidence",
+        "summary",
+        "citation"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "feature_id": {
+          "$ref": "#/$defs/FeatureId"
+        },
+        "name": {
+          "type": "string"
+        },
+        "rank": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "effort": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Effort estimate as received from the prioritizer."
+        },
+        "cycle_id": {
+          "$ref": "#/$defs/CycleId",
+          "description": "Cycle where the feature starts (Story A's cycle when split)."
+        },
+        "cycle_number": {
+          "$ref": "#/$defs/CycleNumber"
+        },
+        "end_cycle_id": {
+          "$ref": "#/$defs/CycleId",
+          "description": "Cycle where the feature finishes (Story B's cycle when split; equals cycle_id otherwise)."
+        },
+        "end_cycle_number": {
+          "$ref": "#/$defs/CycleNumber"
+        },
+        "is_split": {
+          "type": "boolean",
+          "description": "True only when effort exceeds cycle_capacity_effort."
+        },
+        "stories": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Story"
+          },
+          "description": "Exactly two stories (A, B) when is_split; [] otherwise."
+        },
+        "depends_on_feature_ids": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/FeatureId"
+          }
+        },
+        "is_mvp": {
+          "type": "boolean"
+        },
+        "confidence": {
+          "$ref": "#/$defs/Confidence"
+        },
+        "summary": {
+          "$ref": "#/$defs/Summary"
+        },
+        "citation": {
+          "$ref": "#/$defs/Citation"
+        }
+      },
+      "if": {
+        "properties": {
+          "is_split": {
+            "const": true
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "stories": {
+            "minItems": 2,
+            "maxItems": 2
+          }
+        }
+      },
+      "else": {
+        "properties": {
+          "stories": {
+            "maxItems": 0
+          }
+        }
+      }
+    },
+    "Story": {
+      "type": "object",
+      "required": [
+        "story_id",
+        "story_number",
+        "part",
+        "cycle_id",
+        "cycle_number",
+        "effort",
+        "depends_on_story_ids"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "story_id": {
+          "$ref": "#/$defs/StoryId"
+        },
+        "story_number": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Sequential across the PI."
+        },
+        "part": {
+          "enum": [
+            "A",
+            "B"
+          ]
+        },
+        "cycle_id": {
+          "$ref": "#/$defs/CycleId"
+        },
+        "cycle_number": {
+          "$ref": "#/$defs/CycleNumber"
+        },
+        "effort": {
+          "type": "number",
+          "minimum": 0,
+          "description": "A = ceil(effort/2), B = floor(effort/2)."
+        },
+        "depends_on_story_ids": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/StoryId"
+          },
+          "description": "Story B depends on Story A; Story A has none."
+        }
+      }
+    },
+    "Gap": {
+      "type": "object",
+      "required": [
+        "gap_id",
+        "type",
+        "related_ids",
+        "summary",
+        "question"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "gap_id": {
+          "type": "string",
+          "pattern": "^GAP-\\d{2}$"
+        },
+        "type": {
+          "enum": [
+            "missing_input",
+            "unknown_dependency",
+            "mvp_scope_unknown",
+            "feature_too_large",
+            "insufficient_context"
+          ]
+        },
+        "related_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "summary": {
+          "$ref": "#/$defs/Summary"
+        },
+        "question": {
+          "type": "string",
+          "maxLength": 200,
+          "description": "The question to put to the RTE or Product Lead."
+        }
+      }
+    }
+  }
+}

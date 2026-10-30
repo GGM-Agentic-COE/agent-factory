@@ -1,0 +1,104 @@
+{
+  "agent_id": "L1-planning-feature-cycle-mapper",
+  "agent_version": "3.1.0",
+  "execution_id": "exec-9fb9058e-6fc8-5700-844b-a81c90ad6d32",
+  "workflow_execution_id": "wf-fca5d307-ca3b-5b56-a2b8-ae893a30ca07",
+  "status": "success",
+  "content": {
+    "type": "cycle_plan",
+    "schema_version": "3.1",
+    "items": {
+      "feature_assignments": [
+        {
+          "feature_id": "F-04.1",
+          "name": "Document upload (ID and address proof)",
+          "rank": 1,
+          "effort": 5,
+          "cycle_id": "C-01",
+          "cycle_number": 1,
+          "end_cycle_id": "C-01",
+          "end_cycle_number": 1,
+          "is_split": false,
+          "stories": [],
+          "depends_on_feature_ids": [],
+          "is_mvp": true,
+          "confidence": 0.9,
+          "summary": "Rank 1 \u2192 C-01: fits one cycle (5 \u2264 8); no dependencies.",
+          "citation": {
+            "source_reference": "prioritized_backlog",
+            "source_location": "prioritized_features[rank=1] F-04.1"
+          }
+        },
+        {
+          "feature_id": "F-04.2",
+          "name": "OCR data extraction",
+          "rank": 2,
+          "effort": 6,
+          "cycle_id": "C-02",
+          "cycle_number": 2,
+          "end_cycle_id": "C-02",
+          "end_cycle_number": 2,
+          "is_split": false,
+          "stories": [],
+          "depends_on_feature_ids": [
+            "F-04.1"
+          ],
+          "is_mvp": true,
+          "confidence": 0.9,
+          "summary": "Rank 2 \u2192 C-02: fits one cycle (6 \u2264 8); after F-04.1.",
+          "citation": {
+            "source_reference": "prioritized_backlog",
+            "source_location": "prioritized_features[rank=2] F-04.2"
+          }
+        },
+        {
+          "feature_id": "F-04.3",
+          "name": "Sanctions and PEP screening",
+          "rank": 3,
+          "effort": 5,
+          "cycle_id": "C-03",
+          "cycle_number": 3,
+          "end_cycle_id": "C-03",
+          "end_cycle_number": 3,
+          "is_split": false,
+          "stories": [],
+          "depends_on_feature_ids": [
+            "F-04.2"
+          ],
+          "is_mvp": true,
+          "confidence": 0.9,
+          "summary": "Rank 3 \u2192 C-03: fits one cycle (5 \u2264 8); after F-04.2.",
+          "citation": {
+            "source_reference": "prioritized_backlog",
+            "source_location": "prioritized_features[rank=3] F-04.3"
+          }
+        },
+        {
+          "feature_id": "F-04.5",
+          "name": "Risk scoring and manual review queue",
+          "rank": 4,
+          "effort": 7,
+          "cycle_id": "C-04",
+          "cycle_number": 4,
+          "end_cycle_id": "C-04",
+          "end_cycle_number": 4,
+          "is_split": false,
+          "stories": [],
+          "depends_on_feature_ids": [
+            "F-04.3"
+          ],
+          "is_mvp": true,
+          "confidence": 0.9,
+          "summary": "Rank 4 \u2192 C-04: fits one cycle (7 \u2264 8); after F-04.3.",
+          "citation": {
+            "source_reference": "prioritized_backlog",
+            "source_location": "prioritized_features[rank=4] F-04.5"
+          }
+        }
+      ],
+      "gaps": []
+    },
+    "execution_summary": "\u2022 Produced 4 feature assignments (0 split into 0 stories, 4 single-cycle with stories []), 0 gaps; 1 ranked features left out (not planned this PI).\n\u2022 Decision: Chain dependencies (F-04.1 \u2192 F-04.2 \u2192 F-04.3 \u2192 F-04.5) force one feature per cycle, C-01 to C-04; every feature fits one cycle, so no stories.\n\u2022 Decision: Only plannable features are returned; the epic-not-ready feature is left out.\n\u2022 Reflection: basic self-check confirmed 4 assignments, no duplicates, all stories arrays empty.\n\u2022 Knowledge bases consulted: kb-L1-enterprise-architecture (bounded-context rule confirming epic_not_ready features need an ADR and EA approval before planning).\n\u2022 Guardrails: gr-L1-output-schema-validator pass; gr-L1-pii-detection pass (no personal data); gr-L3-hallucination-detector pass; gr-L3-citation-validator pass; gr-L3-consistency-checker pass.\n\u2022 Gaps: none.",
+    "summary_table": "| Rank | Feature | Name | Effort | Cycle(s) | Split | Stories | Depends on | MVP |\n|---|---|---|---|---|---|---|---|---|\n| 1 | F-04.1 | Document upload (ID and address proof) | 5 | C-01 | No | \u2014 | \u2014 | Yes |\n| 2 | F-04.2 | OCR data extraction | 6 | C-02 | No | \u2014 | F-04.1 | Yes |\n| 3 | F-04.3 | Sanctions and PEP screening | 5 | C-03 | No | \u2014 | F-04.2 | Yes |\n| 4 | F-04.5 | Risk scoring and manual review queue | 7 | C-04 | No | \u2014 | F-04.3 | Yes |\n| | **Total** | 4 features | 23 | | 0 split | 0 stories | | |"
+  }
+}

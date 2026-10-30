@@ -1,0 +1,233 @@
+{
+  "generator_output": {
+    "agent_id": "L1-planning-feature-cycle-mapper",
+    "agent_version": "3.2.0",
+    "execution_id": "exec-9fb9058e-6fc8-5700-844b-a81c90ad6d32",
+    "workflow_execution_id": "wf-fca5d307-ca3b-5b56-a2b8-ae893a30ca07",
+    "status": "success",
+    "content": {
+      "type": "cycle_plan",
+      "schema_version": "3.2",
+      "items": {
+        "feature_assignments": [
+          {
+            "feature_id": "F-04.1",
+            "name": "Document upload (ID and address proof)",
+            "rank": 1,
+            "effort": 5,
+            "cycle_id": "C-01",
+            "cycle_number": 1,
+            "end_cycle_id": "C-01",
+            "end_cycle_number": 1,
+            "is_split": false,
+            "stories": [],
+            "depends_on_feature_ids": [],
+            "is_mvp": true,
+            "confidence": 0.9,
+            "summary": "Rank 1 → C-01: fits one cycle (5 ≤ 8); no dependencies.",
+            "citation": {
+              "source_reference": "prioritized_backlog",
+              "source_location": "prioritized_features[rank=1] F-04.1"
+            }
+          },
+          {
+            "feature_id": "F-04.2",
+            "name": "OCR data extraction",
+            "rank": 2,
+            "effort": 6,
+            "cycle_id": "C-02",
+            "cycle_number": 2,
+            "end_cycle_id": "C-02",
+            "end_cycle_number": 2,
+            "is_split": false,
+            "stories": [],
+            "depends_on_feature_ids": [
+              "F-04.1"
+            ],
+            "is_mvp": true,
+            "confidence": 0.9,
+            "summary": "Rank 2 → C-02: fits one cycle (6 ≤ 8); after F-04.1.",
+            "citation": {
+              "source_reference": "prioritized_backlog",
+              "source_location": "prioritized_features[rank=2] F-04.2"
+            }
+          },
+          {
+            "feature_id": "F-04.3",
+            "name": "Sanctions and PEP screening",
+            "rank": 3,
+            "effort": 5,
+            "cycle_id": "C-03",
+            "cycle_number": 3,
+            "end_cycle_id": "C-03",
+            "end_cycle_number": 3,
+            "is_split": false,
+            "stories": [],
+            "depends_on_feature_ids": [
+              "F-04.2"
+            ],
+            "is_mvp": true,
+            "confidence": 0.9,
+            "summary": "Rank 3 → C-03: fits one cycle (5 ≤ 8); after F-04.2.",
+            "citation": {
+              "source_reference": "prioritized_backlog",
+              "source_location": "prioritized_features[rank=3] F-04.3"
+            }
+          },
+          {
+            "feature_id": "F-04.5",
+            "name": "Risk scoring and manual review queue",
+            "rank": 4,
+            "effort": 7,
+            "cycle_id": "C-04",
+            "cycle_number": 4,
+            "end_cycle_id": "C-04",
+            "end_cycle_number": 4,
+            "is_split": false,
+            "stories": [],
+            "depends_on_feature_ids": [
+              "F-04.3"
+            ],
+            "is_mvp": true,
+            "confidence": 0.9,
+            "summary": "Rank 4 → C-04: fits one cycle (7 ≤ 8); after F-04.3.",
+            "citation": {
+              "source_reference": "prioritized_backlog",
+              "source_location": "prioritized_features[rank=4] F-04.5"
+            }
+          }
+        ],
+        "gaps": []
+      },
+      "execution_summary": "• Produced 4 feature assignments (0 split into 0 stories, 4 single-cycle with stories []), 0 gaps; 1 ranked features left out (not planned this PI).\n• Decision: Chain dependencies (F-04.1 → F-04.2 → F-04.3 → F-04.5) force one feature per cycle, C-01 to C-04; every feature fits one cycle, so no stories.\n• Decision: Only plannable features are returned; the epic-not-ready feature is left out.\n• Reflection: basic self-check confirmed 4 assignments, no duplicates, all stories arrays empty.\n• Knowledge bases consulted: kb-L1-enterprise-architecture (bounded-context rule confirming epic_not_ready features need an ADR and EA approval before planning).\n• Guardrails: gr-L1-output-schema-validator pass; gr-L1-pii-detection pass (no personal data); gr-L3-hallucination-detector pass; gr-L3-citation-validator pass; gr-L3-consistency-checker pass.\n• Gaps: none.",
+      "summary_table": "| Rank | Feature | Name | Cycle | Story | Effort | Split | Depends on | MVP |\n|---|---|---|---|---|---|---|---|---|\n| 1 | F-04.1 | Document upload (ID and address proof) | C-01 | — | 5 | No | — | Yes |\n| 2 | F-04.2 | OCR data extraction | C-02 | — | 6 | No | F-04.1 | Yes |\n| 3 | F-04.3 | Sanctions and PEP screening | C-03 | — | 5 | No | F-04.2 | Yes |\n| 4 | F-04.5 | Risk scoring and manual review queue | C-04 | — | 7 | No | F-04.3 | Yes |\n| | **Total** | 4 features, 4 rows | | 0 stories | 23 | 0 split | | |"
+    }
+  },
+  "generator_input": {
+    "workflow_execution_id": "wf-fca5d307-ca3b-5b56-a2b8-ae893a30ca07",
+    "prioritized_backlog": {
+      "agent_id": "L1-planning-backlog-prioritizer",
+      "agent_version": "1.0.0",
+      "execution_id": "exec-1997a324-c77d-5a95-9ca0-aae581f74a67",
+      "workflow_execution_id": "wf-fca5d307-ca3b-5b56-a2b8-ae893a30ca07",
+      "status": "success",
+      "content": {
+        "type": "prioritized_backlog",
+        "schema_version": "1.0",
+        "items": {
+          "prioritized_features": [
+            {
+              "feature_id": "F-04.1",
+              "name": "Document upload (ID and address proof)",
+              "rank": 1,
+              "scoring_method": "WSJF",
+              "priority_score": 18,
+              "effort_estimate": 5,
+              "blocks_feature_ids": [
+                "F-04.2",
+                "F-04.4"
+              ],
+              "blocked_by_feature_ids": [],
+              "confidence": 0.85,
+              "summary": "Highest WSJF; unblocks OCR and Video KYC.",
+              "citation": {
+                "source_reference": "value-scoring-sheet.xlsx",
+                "source_location": "row2"
+              }
+            },
+            {
+              "feature_id": "F-04.2",
+              "name": "OCR data extraction",
+              "rank": 2,
+              "scoring_method": "WSJF",
+              "priority_score": 15,
+              "effort_estimate": 6,
+              "blocks_feature_ids": [
+                "F-04.3"
+              ],
+              "blocked_by_feature_ids": [
+                "F-04.1"
+              ],
+              "confidence": 0.85,
+              "summary": "High value; needs uploaded documents first.",
+              "citation": {
+                "source_reference": "value-scoring-sheet.xlsx",
+                "source_location": "row3"
+              }
+            },
+            {
+              "feature_id": "F-04.3",
+              "name": "Sanctions and PEP screening",
+              "rank": 3,
+              "scoring_method": "WSJF",
+              "priority_score": 14,
+              "effort_estimate": 5,
+              "blocks_feature_ids": [
+                "F-04.5"
+              ],
+              "blocked_by_feature_ids": [
+                "F-04.2"
+              ],
+              "confidence": 0.85,
+              "summary": "Regulatory must-have; screens extracted identity data.",
+              "citation": {
+                "source_reference": "value-scoring-sheet.xlsx",
+                "source_location": "row4"
+              }
+            },
+            {
+              "feature_id": "F-04.5",
+              "name": "Risk scoring and manual review queue",
+              "rank": 4,
+              "scoring_method": "WSJF",
+              "priority_score": 11,
+              "effort_estimate": 7,
+              "blocks_feature_ids": [],
+              "blocked_by_feature_ids": [
+                "F-04.3"
+              ],
+              "confidence": 0.85,
+              "summary": "Completes the onboarding decision.",
+              "citation": {
+                "source_reference": "value-scoring-sheet.xlsx",
+                "source_location": "row6"
+              }
+            },
+            {
+              "feature_id": "F-04.4",
+              "name": "Video KYC",
+              "rank": 5,
+              "scoring_method": "WSJF",
+              "priority_score": 9,
+              "effort_estimate": 6,
+              "blocks_feature_ids": [],
+              "blocked_by_feature_ids": [
+                "F-04.1"
+              ],
+              "confidence": 0.85,
+              "summary": "Lowest WSJF; flagged as an Epic needing a new bounded context.",
+              "citation": {
+                "source_reference": "value-scoring-sheet.xlsx",
+                "source_location": "row5"
+              },
+              "epic_not_ready": true
+            }
+          ],
+          "gaps": []
+        }
+      }
+    },
+    "cadence": {
+      "cycle_length_days": 5,
+      "pi_cycles": 6,
+      "pi_start_date": "2026-10-19"
+    },
+    "cycle_capacity_effort": 8,
+    "mvp_feature_ids": [
+      "F-04.1",
+      "F-04.2",
+      "F-04.3",
+      "F-04.5"
+    ]
+  }
+}

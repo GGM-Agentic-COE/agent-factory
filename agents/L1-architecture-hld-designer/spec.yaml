@@ -1,0 +1,71 @@
+# Agent Specification Document
+spec_version: "1.0"
+artifact_type: agent
+metadata:
+  name: L1-architecture-hld-designer
+  version: "1.0.0"
+  layer: L1
+  phase: design
+  owner: agentic-ai-coe
+  created: "2026-10-14"
+
+purpose:
+  description: "Synthesises a PRD and three architecture views into a target-vs-reality High-Level Design (hld.md) for one module or feature slice."
+  input: "prd.md, platform-architecture.md, data-architecture.md, integration-architecture.md"
+  output: "hld.md published to Confluence, plus meta-point items (components, flows, state machine, deployment, security, observability, NFR status, binding-principle checks, gap register)"
+  business_value: "Gives reviewers, LLD/code agents and auditors one document that states exactly what is real, mocked, simplified or deferred against the enterprise target, so nothing is silently claimed as done."
+
+prompt:
+  ref: "prompts/L1-architecture-hld-designer/instructions.md"
+  version: "1.0.0"
+  description: "Two-phase prompt: extract EA references and binding principles from KBs, then fill the embedded 9-section HLD template (§0–§8) with target and MVP reality side by side, publish via Confluence, and emit meta-point items."
+
+contract:
+  input_schema: "$ref: schemas/agent-input-contract-schema.json"
+  output_schema: "$ref: schemas/agent-output-schema.json"
+
+  input:
+    accepts_from_agents: [any]   # typically the platform / data / integration architecture designers + PRD generator
+    accepts_direct_input: true
+    accepts_file_upload:
+      enabled: true
+      formats: [".md", ".txt"]
+    required_parameters:
+      prd: {type: string, description: "Full text of prd.md — features (F-XX.X), personas/roles, user flows, NFRs, MVP/cycle scope"}
+      platform_architecture: {type: string, description: "Full text of platform-architecture.md — runtime, deployment, ingress, auth, observability, target and current build"}
+      data_architecture: {type: string, description: "Full text of data-architecture.md — datastores, schema, entity lifecycles, caching, encryption"}
+      integration_architecture: {type: string, description: "Full text of integration-architecture.md — external systems, connectors, events, mocked vs real"}
+    optional_parameters:
+      document_version: {type: string, default: "1.0.0", description: "Semantic version of the HLD being produced"}
+      previous_hld: {type: string, default: "", description: "Prior hld.md, used to write the §0 revision note"}
+      confluence_space_key: {type: string, default: "ARCH", description: "Confluence space the HLD page is created in"}
+      confluence_parent_page_id: {type: string, default: "", description: "Parent page under which the {workflow_execution_id} folder page is created"}
+
+  output:
+    $ref: "output_schema.json"
+
+context:
+  knowledge_bases:
+    - kb-L1-enterprise-architecture            # EA-xx references: target platform, datastores, auth, deployment, observability
+    - kb-L1-architectural-binding-principles   # ABP-xx principles every HLD must be checked against
+  guardrails:
+    - gr-L1-output-schema-validator
+    - gr-L1-pii-detection
+    - gr-L3-hallucination-detector
+    - gr-L3-citation-validator
+    - gr-L3-consistency-checker
+    - gr-L2-tool-permissions     # agent holds a write tool
+    - gr-L3-agent-rate-limit
+  tools:
+    - tool-L1-confluence-create-page   # publishes hld.md; NOTE: write tool attached directly per requester — see README "Design notes"
+
+quality:
+  evaluation_ref: "evaluation.md"
+  min_score: 7.0
+  hallucination_check: true
+  consistency_check: true
+
+versioning:
+  input_version: "1.0"
+  output_version: "1.0"
+  instruction_hash: "sha256:pending"

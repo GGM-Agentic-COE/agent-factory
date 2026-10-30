@@ -1,0 +1,484 @@
+{
+  "agent_id": "L1-architecture-hld-designer",
+  "agent_version": "1.0.0",
+  "execution_id": "exec-d03b9f61-47ac-4e28-9b5d-82e1c6a4f0b7",
+  "workflow_execution_id": "wf-27f0c3d9-8e61-4a5b-b2c4-6d19e80a7f35",
+  "status": "success",
+  "content": {
+    "type": "hld",
+    "schema_version": "1.0",
+    "items": {
+      "document_header": {
+        "document_version": "1.0.0",
+        "baseline_reference": "kb-L1-enterprise-architecture v2.1",
+        "feature_coverage": {
+          "committed": [
+            "F-05.1",
+            "F-05.2"
+          ],
+          "designed_not_built": []
+        },
+        "stack_summary": "Java 17 + Spring Boot 3 + PostgreSQL RDS read replica; React producer-portal",
+        "correlation_id": "wf-27f0c3d9-8e61-4a5b-b2c4-6d19e80a7f35",
+        "sections_present": [
+          "§0",
+          "§1",
+          "§2",
+          "§4",
+          "§5",
+          "§6",
+          "§7",
+          "§8"
+        ]
+      },
+      "components": [
+        {
+          "id": "CMP-01",
+          "name": "Producer Browser",
+          "kind": "actor",
+          "target_summary": "producer-portal Earnings page over HTTPS",
+          "mvp_summary": "Same — in production",
+          "realization": "real",
+          "gap_ids": [],
+          "citation": {
+            "source_reference": "prd.md",
+            "source_location": "Roles"
+          },
+          "confidence": 0.9,
+          "reasoning": "Producer role and portal stated; target equals build."
+        },
+        {
+          "id": "CMP-02",
+          "name": "Shared ALB ingress",
+          "kind": "ingress",
+          "target_summary": "Shared ALB, TLS 1.3",
+          "mvp_summary": "Same — in production",
+          "realization": "real",
+          "gap_ids": [],
+          "citation": {
+            "source_reference": "platform-architecture.md",
+            "source_location": "earnings-report-api"
+          },
+          "confidence": 0.95,
+          "reasoning": "Stated as deployed in Cycle 5."
+        },
+        {
+          "id": "CMP-03",
+          "name": "producer-portal",
+          "kind": "frontend",
+          "target_summary": "Existing React app with new Earnings page",
+          "mvp_summary": "Same — in production",
+          "realization": "real",
+          "gap_ids": [],
+          "citation": {
+            "source_reference": "platform-architecture.md",
+            "source_location": "producer-portal"
+          },
+          "confidence": 0.9,
+          "reasoning": "Existing app; only a page is added."
+        },
+        {
+          "id": "CMP-04",
+          "name": "earnings-report-api",
+          "kind": "backend",
+          "target_summary": "Spring Boot 3 on EKS payouts, HPA 2-4",
+          "mvp_summary": "Same — target = current build",
+          "realization": "real",
+          "gap_ids": [],
+          "citation": {
+            "source_reference": "platform-architecture.md",
+            "source_location": "earnings-report-api",
+            "source_excerpt": "target = current build"
+          },
+          "confidence": 0.95,
+          "reasoning": "Explicitly stated as already in production."
+        },
+        {
+          "id": "CMP-05",
+          "name": "AuthFilter",
+          "kind": "auth",
+          "target_summary": "Cognito RS256 JWT (EA-05)",
+          "mvp_summary": "Same — in production",
+          "realization": "real",
+          "gap_ids": [],
+          "citation": {
+            "source_reference": "platform-architecture.md",
+            "source_location": "Auth"
+          },
+          "confidence": 0.95,
+          "reasoning": "Real auth; no mock stated."
+        },
+        {
+          "id": "CMP-06",
+          "name": "/v1/earnings routes",
+          "kind": "controller",
+          "target_summary": "GET summary and CSV export, RBAC in code",
+          "mvp_summary": "Same — in production",
+          "realization": "real",
+          "gap_ids": [],
+          "citation": {
+            "source_reference": "platform-architecture.md",
+            "source_location": "Auth / RBAC"
+          },
+          "confidence": 0.9,
+          "reasoning": "Endpoints and RBAC listed."
+        },
+        {
+          "id": "CMP-07",
+          "name": "PostgreSQL read replica",
+          "kind": "datastore",
+          "target_summary": "RDS read replica of orders schema, KMS at rest",
+          "mvp_summary": "Same — in production",
+          "realization": "real",
+          "gap_ids": [],
+          "citation": {
+            "source_reference": "data-architecture.md",
+            "source_location": "Read-only"
+          },
+          "confidence": 0.95,
+          "reasoning": "Data doc states the replica and encryption."
+        }
+      ],
+      "data_flows": [
+        {
+          "id": "FLW-01",
+          "name": "View monthly earnings",
+          "feature_ids": [
+            "F-05.1"
+          ],
+          "participant_ids": [
+            "CMP-01",
+            "CMP-05",
+            "CMP-06",
+            "CMP-07"
+          ],
+          "step_count": 6,
+          "branch_conditions": [
+            "PRODUCER: producerId forced to caller",
+            "ADMIN: any producerId"
+          ],
+          "touches_mocked_component": false,
+          "summary": "Authenticated read of aggregated earnings from the read replica, scoped server-side for producers.",
+          "gap_ids": [],
+          "citation": {
+            "source_reference": "prd.md",
+            "source_location": "F-05.1"
+          },
+          "confidence": 0.9,
+          "reasoning": "Read path from platform RBAC and data doc; no writes."
+        },
+        {
+          "id": "FLW-02",
+          "name": "Export earnings CSV",
+          "feature_ids": [
+            "F-05.2"
+          ],
+          "participant_ids": [
+            "CMP-01",
+            "CMP-05",
+            "CMP-06",
+            "CMP-07"
+          ],
+          "step_count": 6,
+          "branch_conditions": [
+            "PRODUCER: own producerId only",
+            "ADMIN: any producerId"
+          ],
+          "touches_mocked_component": false,
+          "summary": "Same scoped query as the summary, streamed back as CSV.",
+          "gap_ids": [],
+          "citation": {
+            "source_reference": "prd.md",
+            "source_location": "F-05.2"
+          },
+          "confidence": 0.85,
+          "reasoning": "Export endpoint and scoping stated; streaming format is the only inferred detail."
+        }
+      ],
+      "state_machine": {
+        "applicable": false,
+        "entity": null,
+        "omission_reason_summary": "Read-only reporting module; owns no entity with a lifecycle, so §3 is omitted.",
+        "feature_ids": [],
+        "states": [],
+        "transitions": [],
+        "citation": {
+          "source_reference": "data-architecture.md",
+          "source_location": "Read-only",
+          "source_excerpt": "no entities with a lifecycle"
+        },
+        "confidence": 0.95,
+        "reasoning": "Data doc states read-only with no lifecycle-bearing entity."
+      },
+      "deployment": {
+        "target_summary": "EKS namespace payouts, HPA 2-4, shared ALB with TLS 1.3, RDS read replica.",
+        "mvp_summary": "Target = reality: deployed to production in Cycle 5.",
+        "ea_refs": [
+          "EA-04",
+          "EA-06"
+        ],
+        "services": [
+          {
+            "name": "earnings-report-api",
+            "image_base": "eclipse-temurin:17-jre-alpine",
+            "port": 8082,
+            "resources_summary": "250m/1000m CPU, 256Mi/512Mi",
+            "probe_status": "present"
+          }
+        ],
+        "absent_infra": [],
+        "gap_ids": [],
+        "citation": {
+          "source_reference": "platform-architecture.md",
+          "source_location": "earnings-report-api"
+        },
+        "confidence": 0.95,
+        "reasoning": "Platform doc states target equals current build."
+      },
+      "security": {
+        "target_auth_summary": "Cognito RS256 JWT via AuthFilter (EA-05)",
+        "mvp_auth_summary": "Same — in production",
+        "encryption_boundaries": [
+          {
+            "boundary": "Browser → API",
+            "target": "TLS 1.3 at ALB",
+            "mvp_reality": "Same"
+          },
+          {
+            "boundary": "API → Database",
+            "target": "RDS read replica, KMS at rest",
+            "mvp_reality": "Same"
+          }
+        ],
+        "authz_rules": [
+          {
+            "id": "AZ-01",
+            "endpoint": "GET /v1/earnings",
+            "role": "PRODUCER",
+            "decision": "allowed_scoped",
+            "scope_summary": "own producerId forced server-side"
+          },
+          {
+            "id": "AZ-02",
+            "endpoint": "GET /v1/earnings",
+            "role": "ADMIN",
+            "decision": "allowed_all",
+            "scope_summary": "any producer"
+          },
+          {
+            "id": "AZ-03",
+            "endpoint": "GET /v1/earnings/export",
+            "role": "PRODUCER",
+            "decision": "allowed_scoped",
+            "scope_summary": "own producerId forced server-side"
+          },
+          {
+            "id": "AZ-04",
+            "endpoint": "GET /v1/earnings/export",
+            "role": "ADMIN",
+            "decision": "allowed_all",
+            "scope_summary": "any producer"
+          }
+        ],
+        "gap_ids": [],
+        "citation": {
+          "source_reference": "platform-architecture.md",
+          "source_location": "Auth"
+        },
+        "confidence": 0.95,
+        "reasoning": "RBAC rules stated for both endpoints and roles."
+      },
+      "observability": [
+        {
+          "signal": "structured_logs",
+          "target_summary": "JSON with correlation id",
+          "mvp_summary": "Same",
+          "status": "in_place",
+          "gap_ids": [],
+          "confidence": 0.95,
+          "reasoning": "Stated in platform doc."
+        },
+        {
+          "signal": "metrics",
+          "target_summary": "Micrometer → Prometheus",
+          "mvp_summary": "Same",
+          "status": "in_place",
+          "gap_ids": [],
+          "confidence": 0.95,
+          "reasoning": "Stated in platform doc."
+        },
+        {
+          "signal": "health_probes",
+          "target_summary": "/actuator/health",
+          "mvp_summary": "Same",
+          "status": "in_place",
+          "gap_ids": [],
+          "confidence": 0.95,
+          "reasoning": "Stated in platform doc."
+        },
+        {
+          "signal": "tracing",
+          "target_summary": "OpenTelemetry (EA-09)",
+          "mvp_summary": "Not yet added",
+          "status": "absent",
+          "gap_ids": [
+            "GAP-01"
+          ],
+          "confidence": 0.95,
+          "reasoning": "Platform doc: tracing not yet added."
+        }
+      ],
+      "nfr_compliance": [
+        {
+          "id": "NFR-01",
+          "nfr_summary": "Report P95 at most 800 ms",
+          "target_mechanism_summary": "Read replica queries",
+          "status": "met",
+          "status_rationale_summary": "Load test LT-12 recorded P95 610 ms at 50 rps.",
+          "gap_ids": [],
+          "citation": {
+            "source_reference": "platform-architecture.md",
+            "source_location": "Load test LT-12",
+            "source_excerpt": "P95 610 ms at 50 rps"
+          },
+          "confidence": 0.95,
+          "reasoning": "Measured result stated in inputs."
+        },
+        {
+          "id": "NFR-02",
+          "nfr_summary": "Producer never sees another producer's earnings",
+          "target_mechanism_summary": "producerId forced server-side for PRODUCER",
+          "status": "met",
+          "status_rationale_summary": "Server-side scoping enforced on both endpoints.",
+          "gap_ids": [],
+          "citation": {
+            "source_reference": "platform-architecture.md",
+            "source_location": "Auth / RBAC"
+          },
+          "confidence": 0.85,
+          "reasoning": "Mechanism stated; no dedicated test named, so confidence 0.85."
+        }
+      ],
+      "binding_principle_checks": [
+        {
+          "id": "BPC-01",
+          "principle_ref": "ABP-01",
+          "principle_summary": "Public APIs versioned in the path",
+          "outcome": "compliant",
+          "gap_ids": [],
+          "citation": {
+            "source_reference": "platform-architecture.md",
+            "source_location": "Auth / RBAC"
+          },
+          "confidence": 0.95,
+          "reasoning": "Endpoints under /v1."
+        },
+        {
+          "id": "BPC-02",
+          "principle_ref": "ABP-02",
+          "principle_summary": "Services are stateless",
+          "outcome": "compliant",
+          "gap_ids": [],
+          "citation": {
+            "source_reference": "platform-architecture.md",
+            "source_location": "earnings-report-api"
+          },
+          "confidence": 0.8,
+          "reasoning": "JWT auth, HPA-scaled read service; no session state described."
+        },
+        {
+          "id": "BPC-03",
+          "principle_ref": "ABP-03",
+          "principle_summary": "PII/PHI encrypted at rest",
+          "outcome": "compliant",
+          "gap_ids": [],
+          "citation": {
+            "source_reference": "data-architecture.md",
+            "source_location": "Read-only",
+            "source_excerpt": "KMS encrypted at rest"
+          },
+          "confidence": 0.95,
+          "reasoning": "Replica is KMS encrypted."
+        },
+        {
+          "id": "BPC-04",
+          "principle_ref": "ABP-04",
+          "principle_summary": "External integrations behind connectors",
+          "outcome": "not_applicable",
+          "gap_ids": [],
+          "citation": {
+            "source_reference": "integration-architecture.md",
+            "source_location": "header",
+            "source_excerpt": "No external systems"
+          },
+          "confidence": 0.95,
+          "reasoning": "No external integrations."
+        },
+        {
+          "id": "BPC-05",
+          "principle_ref": "ABP-05",
+          "principle_summary": "All writes idempotent",
+          "outcome": "not_applicable",
+          "gap_ids": [],
+          "citation": {
+            "source_reference": "data-architecture.md",
+            "source_location": "Read-only",
+            "source_excerpt": "No writes"
+          },
+          "confidence": 0.95,
+          "reasoning": "Module performs no writes."
+        },
+        {
+          "id": "BPC-06",
+          "principle_ref": "ABP-06",
+          "principle_summary": "Observability by default",
+          "outcome": "compliant",
+          "gap_ids": [],
+          "citation": {
+            "source_reference": "platform-architecture.md",
+            "source_location": "Observability"
+          },
+          "confidence": 0.9,
+          "reasoning": "Logs, metrics and health present; tracing tracked separately under EA-09 (GAP-01)."
+        }
+      ],
+      "gaps": [
+        {
+          "id": "GAP-01",
+          "summary": "OpenTelemetry tracing not yet added",
+          "gap_type": "absent",
+          "ea_reference": "EA-09",
+          "owner": "Payouts squad",
+          "severity": "low",
+          "raised_in_sections": [
+            "§6"
+          ],
+          "citation": {
+            "source_reference": "platform-architecture.md",
+            "source_location": "Observability",
+            "source_excerpt": "OpenTelemetry tracing not yet added"
+          },
+          "confidence": 0.95,
+          "reasoning": "Only divergence from target; owner from PRD."
+        }
+      ],
+      "open_questions": []
+    },
+    "artifacts": [
+      {
+        "id": "artifact-e5a71c28-93b0-4d6f-a1c7-0b84f2d69e31",
+        "type": "document",
+        "name": "hld.md",
+        "format": "markdown",
+        "storage": {
+          "provider": "confluence",
+          "location": "confluence://ARCH/wf-27f0c3d9-8e61-4a5b-b2c4-6d19e80a7f35/hld.md",
+          "page_id": "884737044"
+        },
+        "description": "HLD for Producer Earnings Report; target = reality except tracing; §3 omitted (read-only).",
+        "produced_by": "L1-architecture-hld-designer"
+      }
+    ],
+    "execution_summary": "• Produced hld.md v1.0.0 with §0–§2 and §4–§8 (§3 omitted: read-only module, no lifecycle entity); 7 components, 2 flows, 4 authz rules, 2 NFRs, 6 principle checks, 1 gap.\n• Key decisions: target = reality stated explicitly in §4.2 and §8 because the platform doc says the service is in production; NFR-01 met on the stated LT-12 result.\n• Reflection: deployment.absent_infra was initially missing — added as an empty list; no placeholders found.\n• KBs consulted: kb-L1-enterprise-architecture — EA-04, EA-05, EA-06, EA-09; kb-L1-architectural-binding-principles — ABP-01 to ABP-06 (4 compliant, 2 not applicable).\n• Guardrails: gr-L1-output-schema-validator pass; gr-L1-pii-detection pass; gr-L3-hallucination-detector pass; gr-L3-citation-validator pass; gr-L3-consistency-checker pass; gr-L2-tool-permissions pass.\n• Tools: tool-L1-confluence-create-page — page hld.md (id 884737044) in ARCH: success.\n• Flagged: GAP-01 tracing absent (low)."
+  }
+}

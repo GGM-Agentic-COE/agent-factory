@@ -1,0 +1,13 @@
+{
+  "workflow_execution_id": "wf-91d4b7e3-5a20-4c6f-8e1b-0f37a2c95d84",
+  "source": "file_upload",
+  "parameters": {
+    "prd": "# PRD — Fleet Telematics Alerts\n**Version:** 0.9 · **Epic:** EP-07\n\n## Features\n| ID | Feature | Scope |\n|---|---|---|\n| F-07.1 | Raise an alert when a vehicle exceeds a geofence | Committed |\n| F-07.2 | Dispatcher acknowledges an alert | Committed |\n| F-07.3 | Escalate unacknowledged alerts after 10 min | Designed, not built |\n\n## Roles\nDispatcher, Fleet Manager.\n\n## NFRs\n- NFR-1 Alert raised within 5 s of the breaching GPS fix.\n- NFR-2 No alert lost if the alert service restarts.\n",
+    "platform_architecture": "# Platform Architecture — Fleet Telematics Alerts\n**Version:** 0.3\n\nTarget: alerts-service (Go 1.22) on EKS behind ALB; Cognito JWT (EA-05).\nCurrent build: alerts-service runs locally via `go run`; auth not yet implemented.\nObservability: to be defined.\n",
+    "data_architecture": "",
+    "integration_architecture": "TBD — integration view to follow after the GPS vendor is selected.",
+    "document_version": "1.0.0",
+    "confluence_space_key": "ARCH",
+    "confluence_parent_page_id": "884736112"
+  }
+}

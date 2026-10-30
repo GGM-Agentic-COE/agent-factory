@@ -1,0 +1,124 @@
+{
+  "agent_id": "L1-planning-feature-cycle-mapper-evaluator",
+  "agent_version": "1.0.0",
+  "execution_id": "exec-c4c3b992-2e89-50b2-ad35-072d4e14c9a7",
+  "workflow_execution_id": "wf-fca5d307-ca3b-5b56-a2b8-ae893a30ca07",
+  "status": "success",
+  "content": {
+    "type": "cycle_plan_evaluation",
+    "schema_version": "1.0",
+    "items": {
+      "evaluated": {
+        "agent_id": "L1-planning-feature-cycle-mapper",
+        "agent_version": "3.2.0",
+        "execution_id": "exec-9fb9058e-6fc8-5700-844b-a81c90ad6d32"
+      },
+      "final_decision": "approved",
+      "overall_score": 9.7,
+      "scores": {
+        "faithfulness": {
+          "before": 1.0,
+          "after": 1.0,
+          "threshold": 0.9,
+          "pass": true
+        },
+        "hallucination": {
+          "before": 0.0,
+          "after": 0.0,
+          "threshold": 0.1,
+          "pass": true
+        },
+        "consistency": {
+          "before": 1.0,
+          "after": 1.0,
+          "threshold": 0.9,
+          "pass": true
+        },
+        "relevance": {
+          "before": 0.9,
+          "after": 0.9,
+          "threshold": 0.85,
+          "pass": true
+        },
+        "reasoning_quality": {
+          "before": 0.9,
+          "after": 0.9,
+          "threshold": 0.8,
+          "pass": true
+        },
+        "citation_completeness": {
+          "before": 1.0,
+          "after": 1.0,
+          "threshold": 0.95,
+          "pass": true
+        }
+      },
+      "quality_gates": [
+        {
+          "gate_id": "QG-01",
+          "gate": "Output validates against output_schema.json",
+          "status": "pass",
+          "finding_ids": []
+        },
+        {
+          "gate_id": "QG-02",
+          "gate": "No feature twice; no left-out feature in items",
+          "status": "pass",
+          "finding_ids": []
+        },
+        {
+          "gate_id": "QG-03",
+          "gate": "Each feature starts after its dependencies' end_cycle_id",
+          "status": "pass",
+          "finding_ids": []
+        },
+        {
+          "gate_id": "QG-04",
+          "gate": "Effort per cycle never exceeds cycle_capacity_effort",
+          "status": "pass",
+          "finding_ids": []
+        },
+        {
+          "gate_id": "QG-05",
+          "gate": "No work in C-00; cycle_number matches cycle_id",
+          "status": "pass",
+          "finding_ids": []
+        },
+        {
+          "gate_id": "QG-06",
+          "gate": "No epic_not_ready, >2-cycle or left-out-dependency feature assigned",
+          "status": "pass",
+          "finding_ids": []
+        },
+        {
+          "gate_id": "QG-07",
+          "gate": "Split features have exactly Story A + B summing to effort, B after A",
+          "status": "pass",
+          "finding_ids": []
+        },
+        {
+          "gate_id": "QG-08",
+          "gate": "Unsplit features: is_split false, stories [], end = start cycle",
+          "status": "pass",
+          "finding_ids": []
+        },
+        {
+          "gate_id": "QG-09",
+          "gate": "Story numbers sequential across the PI",
+          "status": "pass",
+          "finding_ids": []
+        },
+        {
+          "gate_id": "QG-10",
+          "gate": "summary_table matches assignments (2 rows per split) with correct total",
+          "status": "pass",
+          "finding_ids": []
+        }
+      ],
+      "findings": [],
+      "corrected_output": null,
+      "gaps": []
+    },
+    "execution_summary": "• Decision: approved — overall score 9.7; 0 findings.\n• Re-derived the plan from generator_input (5 ranked features, 6 cycles, capacity 8): 4 assignments in C-01–C-04, F-04.4 left out (epic_not_ready). Output matches field by field.\n• Gates: 10 passed, 0 fixed, 0 unfixed. No feature needed a split, and every stories array is [].\n• Reflection: confirmed corrected_output is null for an approved decision.\n• Knowledge bases consulted: ../L1-planning-feature-cycle-mapper/evaluation.md (all 10 quality gates and the six score thresholds, used as the source of truth for gate checks and pass/fail).\n• Guardrails: gr-L1-output-schema-validator pass; gr-L1-pii-detection pass (no personal data).\n• Gaps: none. Ready for L1-planning-story-decomposer."
+  }
+}

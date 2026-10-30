@@ -1,0 +1,60 @@
+# Agent Specification Document
+spec_version: "1.0"
+artifact_type: agent
+metadata:
+  name: L1-planning-feature-cycle-mapper-evaluator
+  version: "1.0.0"
+  layer: L1
+  phase: planning
+  owner: agentic-ai-coe
+  created: "2026-10-23"
+
+purpose:
+  description: "Independently re-derives the cycle plan from the mapper's own input, scores the mapper's output against its evaluation.md, fixes what can be fixed, and approves, fixes-and-approves, or rejects it."
+  input: "The AgentOutput of L1-planning-feature-cycle-mapper and the exact input that was fed to it."
+  output: "cycle_plan_evaluation.json — final decision, overall score, per-metric scores before and after fixes, quality-gate results, findings with fixes, and the corrected mapper output when fixes were applied."
+  business_value: "Stops a wrong cycle plan (over-capacity cycle, broken dependency, missing or extra story) from reaching the Story decomposer, without trusting the mapper's own self-check."
+
+prompt:
+  ref: "prompts/L1-planning-feature-cycle-mapper-evaluator/instructions.md"
+  version: "1.0.0"
+  description: "Validates the mapper output, re-derives placements and splits from the mapper input, compares field by field, scores against the mapper rubric, fixes defects, and decides."
+
+contract:
+  input_schema: "$ref: schemas/agent-input-contract-schema.json"
+  output_schema: "$ref: schemas/agent-output-schema.json"
+
+  input:
+    accepts_from_agents: [L1-planning-feature-cycle-mapper]
+    accepts_direct_input: true
+    accepts_file_upload:
+      enabled: true
+      formats: [".json"]
+    required_parameters:
+      generator_output: {type: object, description: "AgentOutput from L1-planning-feature-cycle-mapper (content.type = cycle_plan, schema_version 3.x)."}
+      generator_input: {type: object, description: "The exact input given to the mapper: prioritized_backlog, cadence (pi_cycles), and cycle_capacity_effort / mvp_feature_ids when supplied. Needed to re-derive the plan independently."}
+    optional_parameters:
+      max_fix_rounds: {type: integer, default: 1, description: "Fix-and-recheck rounds before rejecting. One round re-checks the corrected output once."}
+
+  output:
+    $ref: "output_schema.json"
+
+context:
+  knowledge_bases:
+    - ref: "../L1-planning-feature-cycle-mapper/evaluation.md"   # source of truth for gates and score thresholds — never duplicated into this agent's prompt
+  guardrails:
+    - gr-L1-output-schema-validator
+    - gr-L1-pii-detection
+  tools: []   # evaluators score and fix; they don't call platform tools themselves
+
+quality:
+  evaluation_ref: "evaluation.md"   # this agent's own meta-quality bar: are findings genuine, fixes correct, decision consistent
+  min_score: 8.0
+  hallucination_check: true
+  consistency_check: true
+
+versioning:
+  input_version: "1.0"
+  output_version: "1.0"
+  instruction_hash: "sha256:pending"
+  evaluates: "L1-planning-feature-cycle-mapper >= 3.2.0"

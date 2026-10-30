@@ -1,0 +1,1105 @@
+{
+  "golden_id": "golden-01-clinicflow-appointments",
+  "input_ref": "input-golden-01-clinicflow-appointments.json",
+  "expected_artifact_ref": "golden-01-clinicflow-appointments-hld.md",
+  "expected_output": {
+    "agent_id": "L1-architecture-hld-designer",
+    "agent_version": "1.0.0",
+    "execution_id": "exec-a41f6c07-2d8e-4b19-8c35-7e60f9b2d148",
+    "workflow_execution_id": "wf-3c9e1a52-7b4d-4f0e-9a61-d25b8c04e7f3",
+    "status": "success",
+    "content": {
+      "type": "hld",
+      "schema_version": "1.0",
+      "items": {
+        "document_header": {
+          "document_version": "1.0.0",
+          "baseline_reference": "kb-L1-enterprise-architecture v2.1",
+          "feature_coverage": {
+            "committed": [
+              "F-03.1",
+              "F-03.2",
+              "F-03.3"
+            ],
+            "designed_not_built": [
+              "F-03.4",
+              "F-03.5"
+            ]
+          },
+          "stack_summary": "Python 3.12 + FastAPI + PostgreSQL 16 (target) / SQLite (Cycle 4); React 18 + TypeScript + Vite",
+          "correlation_id": "wf-3c9e1a52-7b4d-4f0e-9a61-d25b8c04e7f3",
+          "sections_present": [
+            "§0",
+            "§1",
+            "§2",
+            "§3",
+            "§4",
+            "§5",
+            "§6",
+            "§7",
+            "§8"
+          ]
+        },
+        "components": [
+          {
+            "id": "CMP-01",
+            "name": "Patient Browser",
+            "kind": "actor",
+            "target_summary": "React 18 SPA over HTTPS",
+            "mvp_summary": "Same SPA over plain HTTP on localhost",
+            "realization": "real",
+            "gap_ids": [],
+            "citation": {
+              "source_reference": "prd.md",
+              "source_location": "§2 Personas"
+            },
+            "confidence": 0.95,
+            "reasoning": "Patient persona and portal are stated in the PRD; the browser itself is real in both target and MVP."
+          },
+          {
+            "id": "CMP-02",
+            "name": "Clinician Browser",
+            "kind": "actor",
+            "target_summary": "Same SPA, /clinician route, over HTTPS",
+            "mvp_summary": "Same SPA over plain HTTP on localhost",
+            "realization": "real",
+            "gap_ids": [],
+            "citation": {
+              "source_reference": "platform-architecture.md",
+              "source_location": "§1 Runtime",
+              "source_excerpt": "clinicians use a /clinician route"
+            },
+            "confidence": 0.95,
+            "reasoning": "Platform doc states clinicians use a route in the same SPA; real in both."
+          },
+          {
+            "id": "CMP-03",
+            "name": "Ingress",
+            "kind": "ingress",
+            "target_summary": "AWS ALB, TLS 1.3, 300 read / 60 write per min per user",
+            "mvp_summary": "None; browser calls API directly on localhost",
+            "realization": "absent",
+            "gap_ids": [
+              "GAP-04"
+            ],
+            "citation": {
+              "source_reference": "platform-architecture.md",
+              "source_location": "§2 Ingress"
+            },
+            "confidence": 0.95,
+            "reasoning": "Platform §2 states no ingress in Cycle 4."
+          },
+          {
+            "id": "CMP-04",
+            "name": "patient-portal",
+            "kind": "frontend",
+            "target_summary": "nginx:1.27-alpine on EKS, HPA 2-6",
+            "mvp_summary": "npm run dev on localhost:5173",
+            "realization": "simplified",
+            "gap_ids": [
+              "GAP-04"
+            ],
+            "citation": {
+              "source_reference": "platform-architecture.md",
+              "source_location": "§1 Runtime"
+            },
+            "confidence": 0.95,
+            "reasoning": "Same code, dev-server hosting instead of the EKS deployment."
+          },
+          {
+            "id": "CMP-05",
+            "name": "appointments-api",
+            "kind": "backend",
+            "target_summary": "python:3.12-slim on EKS, HPA 2-10",
+            "mvp_summary": "Single uvicorn process on localhost:8000",
+            "realization": "simplified",
+            "gap_ids": [
+              "GAP-04"
+            ],
+            "citation": {
+              "source_reference": "platform-architecture.md",
+              "source_location": "§1 Runtime"
+            },
+            "confidence": 0.95,
+            "reasoning": "Same service, single local process instead of autoscaled pods."
+          },
+          {
+            "id": "CMP-06",
+            "name": "AuthMiddleware",
+            "kind": "auth",
+            "target_summary": "Cognito OIDC RS256 JWT, roles from cognito:groups",
+            "mvp_summary": "Unsigned X-Demo-User header mapped to seeded users",
+            "realization": "mocked",
+            "gap_ids": [
+              "GAP-01"
+            ],
+            "citation": {
+              "source_reference": "platform-architecture.md",
+              "source_location": "§3 Authentication",
+              "source_excerpt": "No signature, no expiry"
+            },
+            "confidence": 0.95,
+            "reasoning": "Platform §3 explicitly describes the demo header mechanism."
+          },
+          {
+            "id": "CMP-07",
+            "name": "/v1/appointments routes",
+            "kind": "controller",
+            "target_summary": "Book, confirm, decline, cancel, list under /v1",
+            "mvp_summary": "Same routes, RBAC enforced in code",
+            "realization": "real",
+            "gap_ids": [],
+            "citation": {
+              "source_reference": "platform-architecture.md",
+              "source_location": "§3 RBAC enforced in code"
+            },
+            "confidence": 0.9,
+            "reasoning": "Endpoints and RBAC listed as enforced in both target and Cycle 4."
+          },
+          {
+            "id": "CMP-08",
+            "name": "Appointment lifecycle logic",
+            "kind": "service",
+            "target_summary": "Idempotency, slot check, status guards, notify, publish events",
+            "mvp_summary": "Same logic minus event publishing",
+            "realization": "real",
+            "gap_ids": [],
+            "citation": {
+              "source_reference": "data-architecture.md",
+              "source_location": "§3 Integrity, §4 Lifecycle"
+            },
+            "confidence": 0.75,
+            "reasoning": "Not named as a component in inputs; inferred from integrity rules, lifecycle and call order. Name is descriptive."
+          },
+          {
+            "id": "CMP-09",
+            "name": "FhirSchedulingConnector",
+            "kind": "connector",
+            "target_summary": "Sync FHIR R4 Slot read against the EHR",
+            "mvp_summary": "Stub returning slots from seeded local JSON",
+            "realization": "mocked",
+            "gap_ids": [
+              "GAP-02"
+            ],
+            "citation": {
+              "source_reference": "integration-architecture.md",
+              "source_location": "EHR scheduling row",
+              "source_excerpt": "Stub: returns slots from a seeded local JSON file"
+            },
+            "confidence": 0.95,
+            "reasoning": "Integration doc states the stub explicitly."
+          },
+          {
+            "id": "CMP-10",
+            "name": "NotificationConnector",
+            "kind": "connector",
+            "target_summary": "In-app notifications plus Twilio SMS reminders",
+            "mvp_summary": "Writes notifications to console; SMS not built",
+            "realization": "mocked",
+            "gap_ids": [
+              "GAP-03"
+            ],
+            "citation": {
+              "source_reference": "integration-architecture.md",
+              "source_location": "Notifications row"
+            },
+            "confidence": 0.95,
+            "reasoning": "Integration doc states the console stub and SMS deferral."
+          },
+          {
+            "id": "CMP-11",
+            "name": "Primary datastore",
+            "kind": "datastore",
+            "target_summary": "PostgreSQL 16 RDS Multi-AZ, KMS encryption at rest",
+            "mvp_summary": "SQLite file clinicflow.db, unencrypted",
+            "realization": "simplified",
+            "gap_ids": [
+              "GAP-05"
+            ],
+            "citation": {
+              "source_reference": "data-architecture.md",
+              "source_location": "§1 Stores"
+            },
+            "confidence": 0.95,
+            "reasoning": "Data §1 states both target and Cycle 4 store."
+          },
+          {
+            "id": "CMP-12",
+            "name": "Slot cache",
+            "kind": "cache",
+            "target_summary": "Redis (ElastiCache), slot availability, 15 s TTL",
+            "mvp_summary": "Not used",
+            "realization": "absent",
+            "gap_ids": [
+              "GAP-06"
+            ],
+            "citation": {
+              "source_reference": "data-architecture.md",
+              "source_location": "§1 Stores"
+            },
+            "confidence": 0.95,
+            "reasoning": "Data §1 states cache not used in Cycle 4."
+          },
+          {
+            "id": "CMP-13",
+            "name": "Event bus",
+            "kind": "event_bus",
+            "target_summary": "EventBridge clinicflow-events: AppointmentConfirmed/Cancelled",
+            "mvp_summary": "Not implemented",
+            "realization": "absent",
+            "gap_ids": [
+              "GAP-07"
+            ],
+            "citation": {
+              "source_reference": "integration-architecture.md",
+              "source_location": "Domain events row"
+            },
+            "confidence": 0.95,
+            "reasoning": "Integration doc states events not implemented."
+          },
+          {
+            "id": "CMP-14",
+            "name": "EHR FHIR endpoint",
+            "kind": "external_system",
+            "target_summary": "Source of record for clinician slots",
+            "mvp_summary": "Not called; replaced by seeded slots",
+            "realization": "mocked",
+            "gap_ids": [
+              "GAP-02"
+            ],
+            "citation": {
+              "source_reference": "integration-architecture.md",
+              "source_location": "EHR scheduling row"
+            },
+            "confidence": 0.9,
+            "reasoning": "External system exists in target only; MVP substitutes seeded data."
+          }
+        ],
+        "data_flows": [
+          {
+            "id": "FLW-01",
+            "name": "Book appointment",
+            "feature_ids": [
+              "F-03.1"
+            ],
+            "participant_ids": [
+              "CMP-01",
+              "CMP-06",
+              "CMP-07",
+              "CMP-08",
+              "CMP-11",
+              "CMP-09",
+              "CMP-10"
+            ],
+            "step_count": 11,
+            "branch_conditions": [
+              "idempotency key already used",
+              "slot not free per connector",
+              "partial unique index violated (concurrent)",
+              "insert succeeds"
+            ],
+            "touches_mocked_component": true,
+            "summary": "Idempotency check, mocked EHR slot check, insert REQUESTED with DB double-booking guard, mocked clinician notification.",
+            "gap_ids": [
+              "GAP-02",
+              "GAP-03"
+            ],
+            "citation": {
+              "source_reference": "prd.md",
+              "source_location": "§4 UF-1"
+            },
+            "confidence": 0.9,
+            "reasoning": "Steps and order from PRD UF-1 and integration 'Call order on booking'; 409 for taken slot stated in PRD."
+          },
+          {
+            "id": "FLW-02",
+            "name": "Confirm or decline",
+            "feature_ids": [
+              "F-03.2"
+            ],
+            "participant_ids": [
+              "CMP-02",
+              "CMP-06",
+              "CMP-07",
+              "CMP-08",
+              "CMP-11",
+              "CMP-10"
+            ],
+            "step_count": 10,
+            "branch_conditions": [
+              "status is not REQUESTED",
+              "confirm",
+              "decline"
+            ],
+            "touches_mocked_component": true,
+            "summary": "Clinician transitions own REQUESTED appointment to CONFIRMED or DECLINED; patient notified via mocked connector.",
+            "gap_ids": [
+              "GAP-03",
+              "GAP-07"
+            ],
+            "citation": {
+              "source_reference": "prd.md",
+              "source_location": "§4 UF-2"
+            },
+            "confidence": 0.9,
+            "reasoning": "Guard 'only REQUESTED' from PRD UF-2; event publish is target-only per integration doc."
+          },
+          {
+            "id": "FLW-03",
+            "name": "Patient cancels",
+            "feature_ids": [
+              "F-03.3"
+            ],
+            "participant_ids": [
+              "CMP-01",
+              "CMP-06",
+              "CMP-07",
+              "CMP-08",
+              "CMP-11",
+              "CMP-10"
+            ],
+            "step_count": 9,
+            "branch_conditions": [
+              "status terminal",
+              "CONFIRMED and under 24 h to start",
+              "REQUESTED, or CONFIRMED at least 24 h before start"
+            ],
+            "touches_mocked_component": true,
+            "summary": "Patient cancels own REQUESTED or CONFIRMED appointment subject to the cancellation window; slot released; clinician notified.",
+            "gap_ids": [
+              "GAP-03",
+              "GAP-07"
+            ],
+            "citation": {
+              "source_reference": "prd.md",
+              "source_location": "§4 UF-3",
+              "source_excerpt": "at least 24 hours before the slot starts"
+            },
+            "confidence": 0.8,
+            "reasoning": "PRD window (24 h) used as business rule; data arch says 12 h, recorded as OQ-01, so confidence lowered."
+          }
+        ],
+        "state_machine": {
+          "applicable": true,
+          "entity": "Appointment",
+          "omission_reason_summary": null,
+          "feature_ids": [
+            "F-03.1",
+            "F-03.2",
+            "F-03.3"
+          ],
+          "states": [
+            {
+              "name": "REQUESTED",
+              "terminal": false,
+              "built": true
+            },
+            {
+              "name": "CONFIRMED",
+              "terminal": false,
+              "built": true
+            },
+            {
+              "name": "DECLINED",
+              "terminal": true,
+              "built": true
+            },
+            {
+              "name": "CANCELLED",
+              "terminal": true,
+              "built": true
+            },
+            {
+              "name": "COMPLETED",
+              "terminal": true,
+              "built": false
+            }
+          ],
+          "transitions": [
+            {
+              "from": "REQUESTED",
+              "to": "CONFIRMED",
+              "trigger_summary": "clinician confirms",
+              "guard_summary": "own schedule",
+              "built": true
+            },
+            {
+              "from": "REQUESTED",
+              "to": "DECLINED",
+              "trigger_summary": "clinician declines",
+              "guard_summary": "own schedule; slot released",
+              "built": true
+            },
+            {
+              "from": "REQUESTED",
+              "to": "CANCELLED",
+              "trigger_summary": "patient cancels",
+              "guard_summary": "own appointment; slot released",
+              "built": true
+            },
+            {
+              "from": "CONFIRMED",
+              "to": "CANCELLED",
+              "trigger_summary": "patient cancels",
+              "guard_summary": "at least 24 h before start (PRD); data arch says 12 h, OQ-01",
+              "built": true
+            },
+            {
+              "from": "CONFIRMED",
+              "to": "COMPLETED",
+              "trigger_summary": "visit checked in (Cycle 8)",
+              "guard_summary": null,
+              "built": false
+            }
+          ],
+          "citation": {
+            "source_reference": "data-architecture.md",
+            "source_location": "§4 Appointment lifecycle"
+          },
+          "confidence": 0.85,
+          "reasoning": "Lifecycle from data architecture §4; cancel guard taken from PRD per business-rule precedence; COMPLETED marked not built."
+        },
+        "deployment": {
+          "target_summary": "EKS namespace appointments, ALB TLS 1.3 with rate limits, HPA 2-6 / 2-10, RDS Multi-AZ and Redis.",
+          "mvp_summary": "Vite dev server and one uvicorn process on localhost over HTTP, SQLite file; /healthz present.",
+          "ea_refs": [
+            "EA-04",
+            "EA-06"
+          ],
+          "services": [
+            {
+              "name": "patient-portal",
+              "image_base": "nginx:1.27-alpine",
+              "port": 80,
+              "resources_summary": "100m/300m CPU, 128Mi/256Mi",
+              "probe_status": "target_only"
+            },
+            {
+              "name": "appointments-api",
+              "image_base": "python:3.12-slim",
+              "port": 8000,
+              "resources_summary": "250m/1000m CPU, 256Mi/512Mi",
+              "probe_status": "present"
+            }
+          ],
+          "absent_infra": [
+            "EKS",
+            "ALB ingress",
+            "TLS",
+            "HPA",
+            "RDS PostgreSQL",
+            "Redis",
+            "EventBridge"
+          ],
+          "gap_ids": [
+            "GAP-04",
+            "GAP-05",
+            "GAP-06",
+            "GAP-07"
+          ],
+          "citation": {
+            "source_reference": "platform-architecture.md",
+            "source_location": "§1 Runtime, §2 Ingress"
+          },
+          "confidence": 0.95,
+          "reasoning": "All values stated in platform §1-§2 and data §1; /healthz explicitly implemented in Cycle 4, so probe present for the API."
+        },
+        "security": {
+          "target_auth_summary": "Cognito OIDC, RS256 JWT, roles from cognito:groups (EA-05)",
+          "mvp_auth_summary": "Unsigned X-Demo-User header against 7 seeded users; unknown user returns 401",
+          "encryption_boundaries": [
+            {
+              "boundary": "Browser → API",
+              "target": "TLS 1.3 at ALB",
+              "mvp_reality": "Plain HTTP, localhost only"
+            },
+            {
+              "boundary": "API → Database",
+              "target": "TLS to RDS; KMS at rest",
+              "mvp_reality": "Local file; no encryption at rest"
+            },
+            {
+              "boundary": "Auth token",
+              "target": "RS256 JWT from Cognito",
+              "mvp_reality": "Unsigned X-Demo-User header"
+            }
+          ],
+          "authz_rules": [
+            {
+              "id": "AZ-01",
+              "endpoint": "POST /v1/appointments",
+              "role": "PATIENT",
+              "decision": "allowed_scoped",
+              "scope_summary": "own patient id only"
+            },
+            {
+              "id": "AZ-02",
+              "endpoint": "POST /v1/appointments",
+              "role": "CLINICIAN",
+              "decision": "forbidden",
+              "scope_summary": "403"
+            },
+            {
+              "id": "AZ-03",
+              "endpoint": "POST /v1/appointments/{id}/confirm",
+              "role": "CLINICIAN",
+              "decision": "allowed_scoped",
+              "scope_summary": "own schedule only"
+            },
+            {
+              "id": "AZ-04",
+              "endpoint": "POST /v1/appointments/{id}/confirm",
+              "role": "PATIENT",
+              "decision": "forbidden",
+              "scope_summary": "403"
+            },
+            {
+              "id": "AZ-05",
+              "endpoint": "POST /v1/appointments/{id}/decline",
+              "role": "CLINICIAN",
+              "decision": "allowed_scoped",
+              "scope_summary": "own schedule only"
+            },
+            {
+              "id": "AZ-06",
+              "endpoint": "POST /v1/appointments/{id}/decline",
+              "role": "PATIENT",
+              "decision": "forbidden",
+              "scope_summary": "403"
+            },
+            {
+              "id": "AZ-07",
+              "endpoint": "POST /v1/appointments/{id}/cancel",
+              "role": "PATIENT",
+              "decision": "allowed_scoped",
+              "scope_summary": "own appointment only"
+            },
+            {
+              "id": "AZ-08",
+              "endpoint": "POST /v1/appointments/{id}/cancel",
+              "role": "CLINICIAN",
+              "decision": "forbidden",
+              "scope_summary": "403"
+            },
+            {
+              "id": "AZ-09",
+              "endpoint": "GET /v1/appointments",
+              "role": "PATIENT",
+              "decision": "allowed_scoped",
+              "scope_summary": "own appointments only"
+            },
+            {
+              "id": "AZ-10",
+              "endpoint": "GET /v1/appointments",
+              "role": "CLINICIAN",
+              "decision": "allowed_scoped",
+              "scope_summary": "own schedule only"
+            }
+          ],
+          "gap_ids": [
+            "GAP-01",
+            "GAP-04",
+            "GAP-05"
+          ],
+          "citation": {
+            "source_reference": "platform-architecture.md",
+            "source_location": "§3 Authentication & authorization"
+          },
+          "confidence": 0.95,
+          "reasoning": "RBAC rules listed as enforced in code for both target and Cycle 4; forbidden rows follow from role-exclusive rules."
+        },
+        "observability": [
+          {
+            "signal": "structured_logs",
+            "target_summary": "JSON logs with correlation id",
+            "mvp_summary": "uvicorn default console access logs",
+            "status": "absent",
+            "gap_ids": [
+              "GAP-08"
+            ],
+            "confidence": 0.95,
+            "reasoning": "Platform §4 states default access logs only."
+          },
+          {
+            "signal": "metrics",
+            "target_summary": "Prometheus via prometheus-fastapi-instrumentator",
+            "mvp_summary": "Not instrumented",
+            "status": "absent",
+            "gap_ids": [
+              "GAP-08"
+            ],
+            "confidence": 0.95,
+            "reasoning": "Platform §4: no metrics."
+          },
+          {
+            "signal": "health_probes",
+            "target_summary": "/healthz liveness and readiness",
+            "mvp_summary": "/healthz implemented, returns 200",
+            "status": "in_place",
+            "gap_ids": [],
+            "confidence": 0.95,
+            "reasoning": "Platform §1 and §4 both state /healthz exists in Cycle 4."
+          },
+          {
+            "signal": "tracing",
+            "target_summary": "OpenTelemetry",
+            "mvp_summary": "Not instrumented",
+            "status": "absent",
+            "gap_ids": [
+              "GAP-08"
+            ],
+            "confidence": 0.95,
+            "reasoning": "Platform §4: no tracing."
+          },
+          {
+            "signal": "audit_trail",
+            "target_summary": "PHI access audit to central store",
+            "mvp_summary": "Not implemented",
+            "status": "absent",
+            "gap_ids": [
+              "GAP-09"
+            ],
+            "confidence": 0.95,
+            "reasoning": "Platform §4: no audit log; required by NFR-5."
+          }
+        ],
+        "nfr_compliance": [
+          {
+            "id": "NFR-01",
+            "nfr_summary": "Booking request P95 at most 400 ms",
+            "target_mechanism_summary": "No mechanism stated; Redis slot cache (EA-04) is the only lever named",
+            "status": "not_tested",
+            "status_rationale_summary": "No load test or metrics in Cycle 4 and the cache is absent.",
+            "gap_ids": [
+              "GAP-06",
+              "GAP-08"
+            ],
+            "citation": {
+              "source_reference": "prd.md",
+              "source_location": "§5 NFR-1"
+            },
+            "confidence": 0.85,
+            "reasoning": "No test or measurement exists in inputs, so 'met' cannot be claimed."
+          },
+          {
+            "id": "NFR-02",
+            "nfr_summary": "No double-booking, including concurrent submissions",
+            "target_mechanism_summary": "Partial unique index on slot_id for REQUESTED/CONFIRMED",
+            "status": "met",
+            "status_rationale_summary": "Index applied in SQLite migration 002_slot_unique.sql in Cycle 4.",
+            "gap_ids": [],
+            "citation": {
+              "source_reference": "data-architecture.md",
+              "source_location": "§3 Integrity",
+              "source_excerpt": "SQLite migration 002_slot_unique.sql"
+            },
+            "confidence": 0.9,
+            "reasoning": "Mechanism stated as applied in the Cycle 4 build; enforced by the database."
+          },
+          {
+            "id": "NFR-03",
+            "nfr_summary": "99.9% monthly availability",
+            "target_mechanism_summary": "EKS HPA plus RDS Multi-AZ",
+            "status": "not_applicable",
+            "status_rationale_summary": "Single local process has no high-availability story by design.",
+            "gap_ids": [
+              "GAP-04"
+            ],
+            "citation": {
+              "source_reference": "prd.md",
+              "source_location": "§5 NFR-3"
+            },
+            "confidence": 0.9,
+            "reasoning": "Demo scope; HA infra absent."
+          },
+          {
+            "id": "NFR-04",
+            "nfr_summary": "All PHI encrypted at rest",
+            "target_mechanism_summary": "RDS with KMS encryption (ABP-03)",
+            "status": "not_met",
+            "status_rationale_summary": "SQLite file unencrypted; risk contained because Cycle 4 uses synthetic data only.",
+            "gap_ids": [
+              "GAP-05"
+            ],
+            "citation": {
+              "source_reference": "prd.md",
+              "source_location": "§5 NFR-4"
+            },
+            "confidence": 0.95,
+            "reasoning": "Data §1 states no encryption; PRD §6 states synthetic data only."
+          },
+          {
+            "id": "NFR-05",
+            "nfr_summary": "Every appointment read/write written to access audit log",
+            "target_mechanism_summary": "Central audit store (EA-09)",
+            "status": "not_met",
+            "status_rationale_summary": "No audit logging exists in Cycle 4.",
+            "gap_ids": [
+              "GAP-09"
+            ],
+            "citation": {
+              "source_reference": "prd.md",
+              "source_location": "§5 NFR-5"
+            },
+            "confidence": 0.95,
+            "reasoning": "Platform §4 states no audit log."
+          }
+        ],
+        "binding_principle_checks": [
+          {
+            "id": "BPC-01",
+            "principle_ref": "ABP-01",
+            "principle_summary": "Public APIs versioned in the path",
+            "outcome": "compliant",
+            "gap_ids": [],
+            "citation": {
+              "source_reference": "platform-architecture.md",
+              "source_location": "§1 Runtime",
+              "source_excerpt": "versioned under /v1 (ABP-01)"
+            },
+            "confidence": 0.95,
+            "reasoning": "All endpoints are under /v1."
+          },
+          {
+            "id": "BPC-02",
+            "principle_ref": "ABP-02",
+            "principle_summary": "Services are stateless",
+            "outcome": "compliant",
+            "gap_ids": [],
+            "citation": {
+              "source_reference": "platform-architecture.md",
+              "source_location": "§1 Runtime",
+              "source_excerpt": "Services hold no session state"
+            },
+            "confidence": 0.9,
+            "reasoning": "Stated in platform §1; demo header auth is also stateless."
+          },
+          {
+            "id": "BPC-03",
+            "principle_ref": "ABP-03",
+            "principle_summary": "PII/PHI encrypted at rest with managed keys",
+            "outcome": "deviation_recorded",
+            "gap_ids": [
+              "GAP-05"
+            ],
+            "citation": {
+              "source_reference": "data-architecture.md",
+              "source_location": "§1 Stores"
+            },
+            "confidence": 0.95,
+            "reasoning": "Cycle 4 SQLite file is unencrypted."
+          },
+          {
+            "id": "BPC-04",
+            "principle_ref": "ABP-04",
+            "principle_summary": "External integrations behind connector interfaces",
+            "outcome": "compliant",
+            "gap_ids": [],
+            "citation": {
+              "source_reference": "integration-architecture.md",
+              "source_location": "header",
+              "source_excerpt": "all external systems sit behind connector interfaces"
+            },
+            "confidence": 0.95,
+            "reasoning": "EHR and notifications use connectors even as stubs."
+          },
+          {
+            "id": "BPC-05",
+            "principle_ref": "ABP-05",
+            "principle_summary": "All write operations idempotent",
+            "outcome": "compliant",
+            "gap_ids": [],
+            "citation": {
+              "source_reference": "data-architecture.md",
+              "source_location": "§3 Integrity"
+            },
+            "confidence": 0.75,
+            "reasoning": "Booking uses a unique idempotency_key; idempotency of confirm/decline/cancel is not stated (OQ-02)."
+          },
+          {
+            "id": "BPC-06",
+            "principle_ref": "ABP-06",
+            "principle_summary": "Observability by default",
+            "outcome": "deviation_recorded",
+            "gap_ids": [
+              "GAP-08",
+              "GAP-09"
+            ],
+            "citation": {
+              "source_reference": "platform-architecture.md",
+              "source_location": "§4 Observability"
+            },
+            "confidence": 0.9,
+            "reasoning": "Health check present but structured logs, metrics and audit are absent."
+          }
+        ],
+        "gaps": [
+          {
+            "id": "GAP-01",
+            "summary": "Auth is an unsigned X-Demo-User header, not Cognito JWT",
+            "gap_type": "mocked",
+            "ea_reference": "EA-05",
+            "owner": "Identity team",
+            "severity": "blocker",
+            "raised_in_sections": [
+              "§1",
+              "§5"
+            ],
+            "citation": {
+              "source_reference": "platform-architecture.md",
+              "source_location": "§3 Authentication"
+            },
+            "confidence": 0.95,
+            "reasoning": "No signature or expiry; cannot leave demo scope."
+          },
+          {
+            "id": "GAP-02",
+            "summary": "EHR slot check stubbed with seeded JSON; EHR never called",
+            "gap_type": "mocked",
+            "ea_reference": "EA-08",
+            "owner": "Integration squad",
+            "severity": "high",
+            "raised_in_sections": [
+              "§1",
+              "§2"
+            ],
+            "citation": {
+              "source_reference": "integration-architecture.md",
+              "source_location": "EHR scheduling row"
+            },
+            "confidence": 0.95,
+            "reasoning": "Availability is not checked against the source of record."
+          },
+          {
+            "id": "GAP-03",
+            "summary": "Notifications console-only; SMS reminders (F-03.4) not built",
+            "gap_type": "mocked",
+            "ea_reference": "EA-08",
+            "owner": "Engagement squad",
+            "severity": "medium",
+            "raised_in_sections": [
+              "§1",
+              "§2"
+            ],
+            "citation": {
+              "source_reference": "integration-architecture.md",
+              "source_location": "Notifications row"
+            },
+            "confidence": 0.95,
+            "reasoning": "Users receive no real notifications."
+          },
+          {
+            "id": "GAP-04",
+            "summary": "No EKS, ALB, TLS or HPA; two local processes over HTTP",
+            "gap_type": "simplified",
+            "ea_reference": "EA-06",
+            "owner": "Platform team",
+            "severity": "medium",
+            "raised_in_sections": [
+              "§1",
+              "§4",
+              "§5",
+              "§7"
+            ],
+            "citation": {
+              "source_reference": "platform-architecture.md",
+              "source_location": "§1 Runtime, §2 Ingress"
+            },
+            "confidence": 0.95,
+            "reasoning": "Standard onboarding when leaving demo scope."
+          },
+          {
+            "id": "GAP-05",
+            "summary": "Unencrypted SQLite instead of PostgreSQL RDS with KMS",
+            "gap_type": "simplified",
+            "ea_reference": "EA-04, ABP-03",
+            "owner": "Appointments squad",
+            "severity": "blocker",
+            "raised_in_sections": [
+              "§1",
+              "§4",
+              "§5",
+              "§7"
+            ],
+            "citation": {
+              "source_reference": "data-architecture.md",
+              "source_location": "§1 Stores"
+            },
+            "confidence": 0.95,
+            "reasoning": "Blocks any real PHI; NFR-4 not met."
+          },
+          {
+            "id": "GAP-06",
+            "summary": "No Redis slot-availability cache",
+            "gap_type": "absent",
+            "ea_reference": "EA-04",
+            "owner": "Appointments squad",
+            "severity": "low",
+            "raised_in_sections": [
+              "§1",
+              "§4",
+              "§7"
+            ],
+            "citation": {
+              "source_reference": "data-architecture.md",
+              "source_location": "§1 Stores"
+            },
+            "confidence": 0.9,
+            "reasoning": "Only latency lever named for NFR-1."
+          },
+          {
+            "id": "GAP-07",
+            "summary": "Domain events not published to EventBridge",
+            "gap_type": "absent",
+            "ea_reference": "EA-07",
+            "owner": "Appointments squad",
+            "severity": "low",
+            "raised_in_sections": [
+              "§1",
+              "§2"
+            ],
+            "citation": {
+              "source_reference": "integration-architecture.md",
+              "source_location": "Domain events row"
+            },
+            "confidence": 0.8,
+            "reasoning": "Owner not named in inputs; module owner assigned by default (OQ-03)."
+          },
+          {
+            "id": "GAP-08",
+            "summary": "No structured logs, metrics or tracing",
+            "gap_type": "absent",
+            "ea_reference": "EA-09, ABP-06",
+            "owner": "Appointments squad",
+            "severity": "medium",
+            "raised_in_sections": [
+              "§6",
+              "§7"
+            ],
+            "citation": {
+              "source_reference": "platform-architecture.md",
+              "source_location": "§4 Observability"
+            },
+            "confidence": 0.95,
+            "reasoning": "Only /healthz exists."
+          },
+          {
+            "id": "GAP-09",
+            "summary": "No PHI access audit log",
+            "gap_type": "absent",
+            "ea_reference": "EA-09",
+            "owner": "Appointments squad",
+            "severity": "high",
+            "raised_in_sections": [
+              "§6",
+              "§7"
+            ],
+            "citation": {
+              "source_reference": "platform-architecture.md",
+              "source_location": "§4 Observability"
+            },
+            "confidence": 0.9,
+            "reasoning": "NFR-5 not met; required before real PHI."
+          },
+          {
+            "id": "GAP-10",
+            "summary": "Waitlist (F-03.5) and check-in to COMPLETED designed, not built",
+            "gap_type": "deferred",
+            "ea_reference": "PRD scope",
+            "owner": "Appointments squad",
+            "severity": "low",
+            "raised_in_sections": [
+              "§3"
+            ],
+            "citation": {
+              "source_reference": "prd.md",
+              "source_location": "§3 Features"
+            },
+            "confidence": 0.9,
+            "reasoning": "Scheduled for Cycle 7 and Cycle 8 per PRD and data arch."
+          }
+        ],
+        "open_questions": [
+          {
+            "id": "OQ-01",
+            "question_summary": "Cancellation window: PRD says 24 h, data architecture says 12 h. HLD follows PRD; which does Cycle 4 code enforce?",
+            "blocking": true,
+            "related_ids": [
+              "F-03.3",
+              "FLW-03"
+            ]
+          },
+          {
+            "id": "OQ-02",
+            "question_summary": "Do confirm, decline and cancel carry idempotency keys or rely on status guards alone?",
+            "blocking": false,
+            "related_ids": [
+              "BPC-05",
+              "FLW-02",
+              "FLW-03"
+            ]
+          },
+          {
+            "id": "OQ-03",
+            "question_summary": "Which team owns the EventBridge publisher? Defaulted to the Appointments squad.",
+            "blocking": false,
+            "related_ids": [
+              "GAP-07"
+            ]
+          }
+        ]
+      },
+      "artifacts": [
+        {
+          "id": "artifact-6be2d915-0c4a-4f73-b8d1-35a9e7c0f612",
+          "type": "document",
+          "name": "hld.md",
+          "format": "markdown",
+          "storage": {
+            "provider": "confluence",
+            "location": "confluence://ARCH/wf-3c9e1a52-7b4d-4f0e-9a61-d25b8c04e7f3/hld.md",
+            "page_id": "884736201"
+          },
+          "description": "Target-vs-Cycle-4 HLD for ClinicFlow Appointments (EP-03); expected content in golden-01-clinicflow-appointments-hld.md.",
+          "produced_by": "L1-architecture-hld-designer"
+        }
+      ],
+      "execution_summary": "• Produced hld.md v1.0.0 (§0–§8) for ClinicFlow Appointments and published it to Confluence; 14 components, 3 data flows, 1 state machine (5 states, 5 transitions), 10 authz rules, 5 observability signals, 5 NFRs, 6 binding-principle checks, 10 gaps, 3 open questions.\n• Key decisions: realization set from explicit Cycle 4 statements — 3 mocked (auth, FHIR connector, notifications), 3 simplified, 3 absent; NFR-02 'met' only because the partial unique index is stated as applied in migration 002; NFR-04/05 not met.\n• Conflict: cancellation window 24 h (PRD) vs 12 h (data architecture). PRD governs business rules; HLD uses 24 h and raises blocking OQ-01 rather than resolving silently.\n• 'Appointment lifecycle logic' (CMP-08) is not named in inputs; inferred from integrity rules and call order, confidence 0.75.\n• Reflection: GAP-07 owner was missing — assigned to module owner and raised OQ-03; FLW-01 step count corrected from 10 to 11 after adding the concurrent-insert branch; no placeholders remained.\n• KBs consulted: kb-L1-enterprise-architecture v2.1 — EA-04, EA-05, EA-06, EA-07, EA-08, EA-09 used as target references; kb-L1-architectural-binding-principles — ABP-01 to ABP-06 checked (4 compliant, 2 deviations recorded).\n• Guardrails: gr-L1-output-schema-validator pass; gr-L1-pii-detection pass (synthetic data, no PHI); gr-L3-hallucination-detector pass; gr-L3-citation-validator pass; gr-L3-consistency-checker pass; gr-L2-tool-permissions pass; gr-L3-agent-rate-limit pass.\n• Tools: tool-L1-confluence-create-page — created folder page wf-3c9e1a52-7b4d-4f0e-9a61-d25b8c04e7f3 (id 884736190) and page hld.md (id 884736201) in space ARCH: success.\n• Flagged: 2 blocker gaps (GAP-01 auth, GAP-05 unencrypted store) must close before any real PHI; 1 blocking open question (OQ-01)."
+    }
+  },
+  "evaluation_criteria": {
+    "must_pass_gates": [
+      "Schema-valid against output_schema.json",
+      "All 9 sections present; correlation_id equals workflow_execution_id",
+      "Every non-real component maps to a gap; every not_met NFR and deviation_recorded principle maps to a gap",
+      "Cancellation-window conflict surfaced as blocking OQ-01, not silently resolved",
+      "NFR-02 is the only 'met' NFR; NFR-01 'not_tested' (no test or metric stated)",
+      "No Mermaid; all diagrams ASCII in code blocks",
+      "Artifact stored at confluence://ARCH/{workflow_execution_id}/hld.md"
+    ],
+    "expected_counts": {
+      "components": 14,
+      "data_flows": 3,
+      "authz_rules": 10,
+      "nfr_compliance": 5,
+      "binding_principle_checks": 6,
+      "gaps": 10,
+      "open_questions": 3
+    },
+    "target_scores": {
+      "faithfulness": 0.95,
+      "hallucination_max": 0.05,
+      "consistency": 0.95,
+      "relevance": 0.9,
+      "reasoning_quality": 0.85,
+      "citation_completeness": 1.0
+    },
+    "common_failures_to_catch": [
+      "Claiming PostgreSQL or Cognito as in use",
+      "Marking NFR-01 met because the demo is fast",
+      "Dropping COMPLETED or F-03.5 instead of marking not built",
+      "Inventing HTTP status codes other than the stated 409 and 401/403",
+      "Picking 12 h or 24 h without an open question"
+    ]
+  }
+}

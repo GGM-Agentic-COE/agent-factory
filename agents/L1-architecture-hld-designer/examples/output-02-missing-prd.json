@@ -1,0 +1,33 @@
+{
+  "agent_id": "L1-architecture-hld-designer",
+  "agent_version": "1.0.0",
+  "execution_id": "exec-0f9c4e73-1b5a-4d28-96e3-a7c2d84b51f0",
+  "workflow_execution_id": "wf-6a0e2b14-c9d3-4f87-a52e-3b71d0f9c8a6",
+  "status": "failed",
+  "content": {
+    "type": "hld",
+    "schema_version": "1.0",
+    "items": {
+      "document_header": null,
+      "components": [],
+      "data_flows": [],
+      "state_machine": null,
+      "deployment": null,
+      "security": null,
+      "observability": [],
+      "nfr_compliance": [],
+      "binding_principle_checks": [],
+      "gaps": [],
+      "open_questions": [
+        {
+          "id": "OQ-01",
+          "question_summary": "Provide prd.md with features, roles, user flows, NFRs and MVP scope for Loyalty Points.",
+          "blocking": true,
+          "related_ids": []
+        }
+      ]
+    },
+    "artifacts": [],
+    "execution_summary": "• Produced 0 items — INSUFFICIENT_CONTEXT. status: failed; no hld.md written.\n• prd is empty: no features (F-XX.X), roles, user flows or NFRs, so §2, §5 authorization matrix and §7 cannot be grounded.\n• The three architecture views were present but are not enough on their own; flows and NFR status would be invented.\n• KBs consulted: none — validation failed before Phase 1.\n• Guardrails: gr-L1-output-schema-validator pass; gr-L1-pii-detection pass; gr-L3-hallucination-detector pass (no content generated).\n• Tools: tool-L1-confluence-create-page not invoked.\n• Suggested: supply prd.md for Loyalty Points and re-run with the same workflow_execution_id."
+  }
+}

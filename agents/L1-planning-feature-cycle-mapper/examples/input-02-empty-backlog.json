@@ -1,0 +1,23 @@
+{
+  "workflow_execution_id": "wf-52d8e14d-289b-5d7b-b191-58ab049deb3c",
+  "prioritized_backlog": {
+    "agent_id": "L1-planning-backlog-prioritizer",
+    "agent_version": "1.0.0",
+    "execution_id": "exec-0c134d51-2d4f-5533-b195-aad5375a40a6",
+    "workflow_execution_id": "wf-52d8e14d-289b-5d7b-b191-58ab049deb3c",
+    "status": "success",
+    "content": {
+      "type": "prioritized_backlog",
+      "schema_version": "1.0",
+      "items": {
+        "prioritized_features": [],
+        "gaps": []
+      }
+    }
+  },
+  "cadence": {
+    "cycle_length_days": 5,
+    "pi_cycles": 6,
+    "pi_start_date": "2026-10-19"
+  }
+}

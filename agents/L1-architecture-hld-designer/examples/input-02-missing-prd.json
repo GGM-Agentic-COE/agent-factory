@@ -1,0 +1,10 @@
+{
+  "workflow_execution_id": "wf-6a0e2b14-c9d3-4f87-a52e-3b71d0f9c8a6",
+  "source": "direct_input",
+  "parameters": {
+    "prd": "",
+    "platform_architecture": "# Platform — Loyalty Points\nloyalty-api (Node 20, NestJS) on EKS behind ALB; Cognito JWT. Current build: local `npm start`.\n",
+    "data_architecture": "# Data — Loyalty Points\nPostgreSQL RDS target; SQLite in current build. Entity: points_ledger (append-only).\n",
+    "integration_architecture": "# Integration — Loyalty Points\nConsumes OrderCompleted from EventBridge (target); current build polls a local JSON file.\n"
+  }
+}
