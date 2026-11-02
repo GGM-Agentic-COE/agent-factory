@@ -7,7 +7,7 @@ metadata:
   owner: agentic-ai-coe
 
 purpose:
-  description: "Creates a branch from a source branch (or reuses it if it already exists) and commits one or more text files to it in a single commit, authenticating as a GitHub App installation."
+  description: "Creates a branch from a source branch (or reuses it if it already exists) and commits one or more text files to it in a single commit with a caller-supplied commit message, authenticating as a GitHub App installation."
   platform: github
   operation: write
 
@@ -32,6 +32,10 @@ interface:
       type: string
       required: true
       description: "Branch to create from source_branch and commit to (e.g. 'feature/auto-update'). If it already exists, the commit is added on top of its current head"
+    commit_message:
+      type: string
+      required: true
+      description: "Commit message for the single commit (e.g. 'Add API documentation for v2 endpoints'). Required; an empty or blank value returns a failure and nothing is committed"
     source_branch:
       type: string
       required: false
@@ -41,7 +45,7 @@ interface:
   returns:
     type: object
     description: >
-      On success: {status: "success", branch, source_branch, updated_files (list of committed paths),
+      On success: {status: "success", branch, source_branch, commit_message, updated_files (list of committed paths),
       message: "Created '<new_branch>' from '<source_branch>' and committed <n> file(s).",
       url: "https://github.com/<owner>/<repo>/tree/<new_branch>"}.
       On failure: {status: "failure", message}. message is the App/owner resolution error text,
@@ -64,7 +68,6 @@ configuration:
     JWT_REFRESH_MARGIN: 60
     TOKEN_REFRESH_MARGIN: 300
     REQUEST_TIMEOUT: 30
-    commit_message: "Automation Update: <YYYY-MM-DD HH:MM:SS local time>"
     file_mode: "100644"
 
 identity:

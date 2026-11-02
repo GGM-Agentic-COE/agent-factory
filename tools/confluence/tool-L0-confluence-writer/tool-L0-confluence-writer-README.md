@@ -7,7 +7,7 @@ You give the tool a page title, the body content in Markdown, and where to write
 **Key points** (details in [Section 6](#6-nuances)):
 
 - Write the content in Markdown. It is converted automatically, and storage-format XHTML is also accepted unchanged ([6.1](#61-content-is-markdown-converted-automatically)).
-- An existing page with the same title is appended to, never overwritten ([6.2](#62-same-title-means-append-not-overwrite)).
+- An existing page with the same title is appended to, never overwritten. This applies whatever `space_key` you pass: the page is updated where it already lives, not created again ([6.2](#62-same-title-means-append-not-overwrite)).
 - `space_key` also accepts a folder ID or `SPACEKEY/folderID` to write inside a folder ([6.3](#63-choosing-where-the-page-goes)).
 - If the move into a folder fails, the tool still reports success. The output contains no page URL ([6.4](#64-a-failed-folder-move-is-not-reported)).
 
@@ -116,7 +116,7 @@ The tool converts Markdown in `content` to Confluence storage format before writ
 A whole body wrapped in a ```` ```markdown ```` or ```` ```md ```` fence is unwrapped first. If content starts with a storage-format tag (`<p>`, `<h1>`–`<h6>`, `<table>`, `<ul>`, `<ol>`, `<div>`, `<pre>`), it is passed through unchanged. **Do:** send plain Markdown. Do not mix in HTML tags, because inside Markdown they are escaped and appear as literal text.
 
 ### 6.2 Same title means append, not overwrite
-Before writing, the tool searches the target space for a page with exactly that title. If it finds one, it adds an empty paragraph and then the new content after the existing body, and saves the page as the next version. The existing content is never replaced or deleted. **Do:** use a unique title (for example, include a date) when you want a new page, and reuse the title only when you intend to add to the page.
+Before writing, the tool searches the target space for a page with exactly that title. If it finds one, it adds an empty paragraph and then the new content after the existing body, and saves the page as the next version. The existing content is never replaced or deleted. **No matter which space or folder you pass in `space_key`, if a page with the same name already exists, the tool defaults to updating that page in its original location instead of creating a new page with the same name.** **Do:** use a unique title (for example, include a date) when you want a new page, and reuse the title only when you intend to add to the page.
 
 ### 6.3 Choosing where the page goes
 `space_key` decides the location:
