@@ -2,7 +2,7 @@
 
 ## 1. Summary
 
-You give the tool a list of files (path and text content), a repository, a new branch name and optionally a source branch. It signs in as a GitHub App installation, creates the new branch from the source branch (or reuses it if it already exists) and commits all the files to it in a single commit. It returns a dictionary with the status, the committed paths and a link to the branch.
+You give the tool a list of files (path and text content), a repository, a new branch name, a commit message and optionally a source branch. It signs in as a GitHub App installation, creates the new branch from the source branch (or reuses it if it already exists) and commits all the files to it in a single commit. It returns a dictionary with the status, the committed paths and a link to the branch.
 
 **Key points** (details in [Section 6](#6-nuances)):
 
@@ -21,29 +21,7 @@ You give the tool a list of files (path and text content), a repository, a new b
 
 **`files`**
 
-option 1:
-
-```
-[
-  {
-    "filename": "folder/subfolder1/markdownfile.md",
-    "code": "# this is a sample markdown file"
-  },
-
-  {
-    "filename" : "folder/subfolder2/samplecode.py",
-    "code": "print('hello')"
-  }
-]
-```
-
-option 2:
-```
-
-```
-
- Example JSON structure to paste in AAVA, under 'files' variable:
-1. method 1:
+1. option 1:
 
 ```json
 [
@@ -59,7 +37,7 @@ option 2:
 ]
 ```
 
-2. method 2:
+2. option 2:
 ```json
 {
     "src": {
@@ -80,6 +58,11 @@ my-project-repo
 feature/auto-update
 ```
 
+**`commit_message`**
+```
+Add API documentation for v2 endpoints
+```
+
 **`source_branch`**
 ```
 main
@@ -87,12 +70,13 @@ main
 
 ### 2.2 Calling the tool in an agent
 
-`files` is usually the content the agent has just produced, passed verbatim. `new_branch` normally changes per run. `repo_name` and `source_branch` are usually fixed for the workflow. The GitHub App credentials come from AWS Secrets Manager and the owner is derived from the App installation, so the agent passes neither.
+`files` is usually the content the agent has just produced, passed verbatim. `new_branch` and `commit_message` normally change per run. `repo_name` and `source_branch` are usually fixed for the workflow. The GitHub App credentials come from AWS Secrets Manager and the owner is derived from the App installation, so the agent passes neither.
 
 ```
 files = [{"filename": "{{file_path}}", "code": "{{full_file_content}}"}]
 repo_name = {{repo_name}}            # or {{owner}}/{{repo_name}} to skip owner discovery
 new_branch = {{new_branch}}
+commit_message = {{commit_message}}
 source_branch = main
 ```
 
@@ -105,6 +89,7 @@ source_branch = main
 | `files` | List[dict] | ✓ | Files to commit. Each item is either flat `{"filename": "<path>", "code": "<content>"}` or nested `{"<folder>": {"filename": "<name>", "code": "<content>"}}` (committed to `<folder>/<name>`). Both shapes can be mixed. Missing `filename` defaults to `script.py`; missing `code` defaults to an empty file. |
 | `repo_name` | str | ✓ | Repository name, e.g. `my-project-repo`. A fully qualified `owner/repo` is also accepted and skips owner discovery. |
 | `new_branch` | str | ✓ | Branch to create and commit to, e.g. `feature/auto-update`. Reused if it already exists. |
+| `commit_message` | str | ✓ | Commit message for the single commit, e.g. `Add API documentation for v2 endpoints`. Required and must not be empty or blank; an empty value returns a failure and nothing is committed. |
 | `source_branch` | str | | Branch to copy when creating `new_branch`. Default `main`. It is always looked up and must exist, but its content is not used if `new_branch` already exists. |
 
 ---
@@ -120,7 +105,6 @@ source_branch = main
 | Secrets Manager region | Code — `AWSSecretReaderPodIdentity._run` | `SETUP-REQUIRED:` hardcoded to `us-east-1`. Set it to the region the secret lives in. |
 | AWS credentials | Pod Identity (IAM role on the pod) | The role needs `secretsmanager:GetSecretValue` on the secret. |
 | GitHub App installation | GitHub — App settings | The App must be installed on the account that owns the repository, with access to that repository and the **Contents: Read and write** repository permission. |
-| Commit message | Code — `GithubCommitterTool._run` | Fixed to `Automation Update: <YYYY-MM-DD HH:MM:SS>` (server local time). |
 
 Before deploying to a new environment, review every value tagged `SETUP-REQUIRED:` in `tool-L0-github-writer-using-app.py`.
 
@@ -130,7 +114,7 @@ Before deploying to a new environment, review every value tagged `SETUP-REQUIRED
 
 | Module | Package | Used for |
 |--------|---------|----------|
-| `datetime` | stdlib | Commit message timestamp |
+| `datetime` | stdlib | Imported; not used |
 | `os` | stdlib | Imported; not used |
 | `threading` | stdlib | Locks around the JWT, token and owner caches |
 | `time` | stdlib | JWT timestamps and cache expiry |
@@ -163,8 +147,8 @@ There is no owner parameter. With a bare repo name and one installation, the own
 ### 6.5 Write access needs the Contents: Read and write permission
 A 403 response gets a `HINT` appended pointing at the App's **Contents** permission being Read-only. After changing the permission, each installation must accept it before writes work. **Do:** set **Contents: Read and write** on the App and have the installation owner approve the change.
 
-### 6.6 Text content only, with a fixed commit message
-Content is committed as a regular text file (mode `100644`). The commit message is always `Automation Update: <timestamp>`. The `message` in the result counts the items in `files`, not distinct paths. **Do:** pass text only, and use another tool if you need binary files, a custom commit message or a pull request.
+### 6.6 Text content only, with a required commit message
+Content is committed as a regular text file (mode `100644`). The commit message is the required `commit_message` parameter (surrounding whitespace is trimmed). It is not optional: an empty or blank value returns a failure. The `message` in the result counts the items in `files`, not distinct paths. **Do:** pass text only, and use another tool if you need binary files, or a pull request.
 
 ---
 
@@ -194,6 +178,7 @@ Content is committed as a regular text file (mode `100644`). The commit message 
   "status": "success",
   "branch": "<new_branch>",
   "source_branch": "<source_branch>",
+  "commit_message": "<commit_message>",
   "updated_files": ["<path>", ...],
   "message": "Created '<new_branch>' from '<source_branch>' and committed <n> file(s).",
   "url": "https://github.com/<owner>/<repo>/tree/<new_branch>"
@@ -217,6 +202,7 @@ Content is committed as a regular text file (mode `100644`). The commit message 
 | `<HTTP error> \| GitHub response: 404 <body>` | Source branch or repository not found | Check `source_branch` and `repo_name` |
 | `<HTTP error> \| GitHub response: 403 <body> \| HINT: this is almost always the App's Repository permission 'Contents' being Read-only ...` | The App lacks write access | Set **Contents: Read and write** and have the installation accept it |
 | `<HTTP error> \| GitHub response: <status> <body>` | Any other HTTP error (e.g. 401 bad JWT, 422 invalid path) | Read GitHub's status and body in the message |
+| `A non-empty commit_message is required.` | `commit_message` was empty or blank | Pass a non-empty `commit_message` |
 | `<exception text>` | Network error or malformed `files` item | Check connectivity and the `files` shape |
 | `Error retrieving secret: ...` / `Unexpected error: ...` (raised at import) | The secret could not be read or is not a JSON object | Check `SECRET_NAME`, the region, and the pod's IAM role |
 
@@ -224,7 +210,7 @@ Content is committed as a regular text file (mode `100644`). The commit message 
 
 - Cannot delete or rename files; it only adds or overwrites.
 - Cannot open a pull request; it only creates or updates a branch.
-- No parameter for the commit message, author or file mode.
+- No parameter for the commit author or file mode.
 - Text content only; binary files cannot be committed.
 - Always commits to a separate branch; there is no option to fail if `new_branch` already exists.
 

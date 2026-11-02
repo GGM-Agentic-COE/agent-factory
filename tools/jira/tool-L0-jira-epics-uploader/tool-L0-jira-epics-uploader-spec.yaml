@@ -7,7 +7,7 @@ metadata:
   owner: agentic-ai-coe
 
 purpose:
-  description: "Creates Jira Epics and child Stories from a structured payload in one call, resolving logical parent IDs to real Jira keys and turning logical-ID references in descriptions into links to issues already created."
+  description: "Creates Jira Epics and child Stories from a structured payload in one call, resolving logical parent IDs and linking cross-references, and passes per-issue Jira custom fields (customfield_<id>) through to Jira. Credentials always come from the secret."
   platform: jira
   operation: create-issue
 
@@ -28,15 +28,15 @@ interface:
             label / labels (string|array[string], optional) — Jira labels (spaces become "_");
                                                     the first label is the issue's logical ID (EP-01, F-01.1, ...).
             parentKey   (string, optional) — Logical ID of an issue created earlier in this call, or a real Jira key.
+            customfield_<id> (any, optional) — Any number of Jira custom fields, sent to Jira exactly as given
+                                               (e.g. "customfield_10244": {"value": "Functional"}). Null values are skipped.
           baseUrl     (string, optional) — Overrides the Jira base URL from the secret.
-          userEmail   (string, optional) — Overrides the Atlassian account email from the secret.
-          apiToken    (string, optional) — Overrides the API token from the secret (then JIRA_API_TOKEN env var).
 
   returns:
     type: string
     description: >
       Newline-joined result lines, in input order:
-        "<IssueType> created: <KEY>  (<summary>)" followed by "url: <base_url>/browse/<KEY>" on success,
+        "<IssueType> created: <KEY>  (<summary>)" on success (no URL line),
         "Failed: <summary> -> HTTP <code> | Detail: <response text>" when Jira rejects an issue,
         "Failed: <summary> -> <exception> | Detail: <response text or 'No response received'>" on a network error.
       Fatal errors return a single string instead of the per-issue lines:
@@ -83,7 +83,7 @@ resilience:
   circuit_breaker: {failure_threshold: 5, reset_seconds: 60}
 
 security:
-  input_validation: "projectKey must be present and issues must be a non-empty list; nothing else is validated. ADF is sanitised to remove empty nodes before POST"
+  input_validation: "projectKey must be present and issues must be a non-empty list; custom field keys must match ^customfield_\\d+$ but their values are not validated. ADF is sanitised to remove empty nodes before POST"
   output_sanitization: "Jira's raw response body is returned on failure; exception text is returned in fatal errors; credentials are never included in the output"
   logging: "No logging; results are returned directly to the caller"
-  credential_handling: "Jira URL, email and API token are read from AWS Secrets Manager via Pod Identity at import. baseUrl, userEmail and apiToken in the input override the secret values, so tokens passed this way appear in the tool input"
+  credential_handling: "Jira email and API token are always read from AWS Secrets Manager via Pod Identity at import; they cannot be overridden from the input. baseUrl in the input overrides the secret's base_url, and the secret's credentials are then sent to that URL"

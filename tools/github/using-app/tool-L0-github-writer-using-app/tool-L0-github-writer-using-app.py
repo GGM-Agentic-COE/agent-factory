@@ -449,8 +449,9 @@ class GithubCommitSchema(BaseModel):
         ...,
         description="List of dicts with 'filename' (path) and 'code' keys. Example: [{'filename': 'docs/api.txt', 'code': '...'}]"
     )
-    repo_name: str = Field(..., description="The name of the repository. Example: 'my-project-repo'.")
+    repo_name: str = Field(..., description="The name of the repository. Example: 'SCIB-Inception'.")
     new_branch: str = Field(..., description="The new branch to create and commit to. Example: 'feature/auto-update'.")
+    commit_message: str = Field(..., description="The commit message, provided at runtime. Example: 'Add API documentation for v2 endpoints'.")
     source_branch: str = Field(default="main", description="The branch to copy from. Defaults to 'main'.")
 
 
@@ -459,14 +460,15 @@ class GithubCommitterTool(BaseTool):
     Creates a new branch from a source branch and commits files to it,
     authenticating as a GitHub App installation.
 
-    The repository owner is derived from the App installation, exactly as
-    in the reader tool.
+    The repository owner is no longer a module-level constant -- it is derived
+    from the App installation, exactly as in the reader tool. The commit
+    message is supplied by the caller at runtime.
 
     API endpoints used:
         App-level (JWT) -- owner/token resolution, cached after first run:
             GET  /app/installations
             POST /app/installations/{id}/access_tokens
-        Installation-level (ghs_ token) -- the write flow:
+        Installation-level (ghs_ token) -- the write flow, unchanged:
             GET   /repos/{owner}/{repo}/git/ref/heads/{source_branch}
             POST  /repos/{owner}/{repo}/git/refs
             GET   /repos/{owner}/{repo}/git/ref/heads/{new_branch}   (if 422)
@@ -476,13 +478,18 @@ class GithubCommitterTool(BaseTool):
     """
 
     name: str = "Github Branch Committer"
-    description: str = "Creates a new branch from a source branch and commits files to it."
+    description: str = "Creates a new branch from a source branch and commits files to it, using the commit message supplied at runtime."
     args_schema: Type[BaseModel] = GithubCommitSchema
 
-    def _run(self, files: List[dict], repo_name: str, new_branch: str, source_branch: str = "main") -> Any:
+    def _run(self, files: List[dict], repo_name: str, new_branch: str, commit_message: str, source_branch: str = "main") -> Any:
         try:
+            commit_message = (commit_message or "").strip()
+            if not commit_message:
+                return {"status": "failure", "message": "A non-empty commit_message is required."}
+
             # ═══════════════════════════════════════════════════════════════
             # 0. APP AUTHENTICATION + OWNER RESOLUTION
+            #    (the only part that differs from the PAT version)
             # ═══════════════════════════════════════════════════════════════
             try:
                 repo_owner, repo_name, token = _resolve_owner_and_token(repo_name)
@@ -545,9 +552,9 @@ class GithubCommitterTool(BaseTool):
             tree_resp.raise_for_status()
             new_tree_sha = tree_resp.json()["sha"]
 
-            # 5. Create the Commit
+            # 5. Create the Commit, using the caller-supplied message
             commit_payload = {
-                "message": f"Automation Update: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}",
+                "message": commit_message,
                 "tree": new_tree_sha,
                 "parents": [current_sha],
             }
@@ -567,6 +574,7 @@ class GithubCommitterTool(BaseTool):
                 "status": "success",
                 "branch": new_branch,
                 "source_branch": source_branch,
+                "commit_message": commit_message,
                 "updated_files": resolved_paths,
                 "message": f"Created '{new_branch}' from '{source_branch}' and committed {len(files)} file(s).",
                 "url": f"https://github.com/{repo_owner}/{repo_name}/tree/{new_branch}",

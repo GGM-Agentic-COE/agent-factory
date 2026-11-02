@@ -16,7 +16,7 @@ interface:
     title:
       type: string
       required: true
-      description: "Title of the Confluence page. If a page with this title exists in the target space, content is appended to it; otherwise a new page is created."
+      description: "Title of the Confluence page. If a page with this title exists in the target space, content is appended to it; otherwise a new page is created. A page with the same title is always updated in its original location, no matter which space_key is passed, rather than duplicated."
     content:
       type: string
       required: true
