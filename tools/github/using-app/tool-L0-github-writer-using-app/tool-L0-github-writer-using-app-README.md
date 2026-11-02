@@ -21,29 +21,7 @@ You give the tool a list of files (path and text content), a repository, a new b
 
 **`files`**
 
-option 1:
-
-```
-[
-  {
-    "filename": "folder/subfolder1/markdownfile.md",
-    "code": "# this is a sample markdown file"
-  },
-
-  {
-    "filename" : "folder/subfolder2/samplecode.py",
-    "code": "print('hello')"
-  }
-]
-```
-
-option 2:
-```
-
-```
-
- Example JSON structure to paste in AAVA, under 'files' variable:
-1. method 1:
+1. option 1:
 
 ```json
 [
@@ -59,7 +37,7 @@ option 2:
 ]
 ```
 
-2. method 2:
+2. option 2:
 ```json
 {
     "src": {
