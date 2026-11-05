@@ -20,18 +20,15 @@ Enterprise principles are written for every product; a product's PRD is written 
 
 Inputs and Knowledge Bases (edit here to reconfigure):
 
-| Name | Kind | Required | What it is |
-|---|---|---|---|
-| `prd` | Input (markdown) | Yes | The product's PRD. Any layout is accepted as long as it holds keyed functional requirements, quality (non-functional) requirements, regulatory obligations or constraints, assumptions, risks and open questions. Key schemes vary between PRDs (for example `FR-NNN` with per-requirement NFR rows plus `ASSUM`/`CON`/`RISK` tables, or `FR-NNN` plus `NFR-NN`, `NQ-NN` targets to be set, `CON-NN` obligations, `AS`/`DP`/`OR`/`OQ` tables and a business-entities table). Use the PRD's keys exactly as it defines them |
-| `product_name` | Input (string) | Yes | Human-given product name used in the document title and file name |
-| `existing_binding_principles` | Input (JSON) | No | A previously approved `{product_name}-binding-principles.json`. When present, this run produces an updated document plus a delta register for review rather than a fresh document |
-| `reviewer_notes` | Input (text) | No | Human decisions to honour: approved or rejected deviations, answered open questions, approver names |
-| `workflow_execution_id` | Input (string) | No | Supplied by the caller when this run is part of a larger run; otherwise generated |
-| `kb-L0-architecture-patterns` | Knowledge base | Yes | AP2 principle catalogue (the authoritative list of principle IDs and statements), AP3 patterns, AP4 decision rules including RULE-03 deviation format and RULE-04 verdicts |
-| `kb-L0-enterprise-architecture` | Knowledge base | Yes | Enterprise system landscape, integration boundaries (EA3), architecture rules (EA4), governance triggers (EA10) |
-| `kb-L0-enterprise-security` | Knowledge base | Yes | Identity (ES1), classification (ES2), retention (ES3), availability tiering (ES4), secure SDLC (ES5) |
+| Name | Kind | What it is |
+|---|---|---|
+| `prd` | Input (markdown) | The product's PRD. Any layout is accepted as long as it holds keyed functional requirements, quality (non-functional) requirements, regulatory obligations or constraints, assumptions, risks and open questions. Key schemes vary between PRDs (for example `FR-NNN` with per-requirement NFR rows plus `ASSUM`/`CON`/`RISK` tables, or `FR-NNN` plus `NFR-NN`, `NQ-NN` targets to be set, `CON-NN` obligations, `AS`/`DP`/`OR`/`OQ` tables and a business-entities table). Use the PRD's keys exactly as it defines them |
+| `product_name` | Input (string) | Human-given product name used in the document title and file name |
+| `kb-L0-architecture-patterns` | Knowledge base | AP2 principle catalogue (the authoritative list of principle IDs and statements), AP3 patterns, AP4 decision rules including RULE-03 deviation format and RULE-04 verdicts |
+| `kb-L0-enterprise-architecture` | Knowledge base | Enterprise system landscape, integration boundaries (EA3), architecture rules (EA4), governance triggers (EA10) |
+| `kb-L0-enterprise-security` | Knowledge base | Identity (ES1), classification (ES2), retention (ES3), availability tiering (ES4), secure SDLC (ES5) |
 
-All inputs are supplied directly in the request. Knowledge bases are attached at runtime; the agent does not fetch them.
+All inputs are supplied directly in the request. Knowledge bases are attached at runtime; the agent does not fetch them. The request may also carry, when they exist: `existing_binding_principles` (a previously approved document, which turns this run into an update with a delta register), `reviewer_notes` (human decisions to honour: approved or rejected deviations, answered open questions, approver names) and `workflow_execution_id`. Absence of any of these is normal, not an error.
 
 Input Ingestion:
 - `workflow_execution_id`: copy it if supplied; otherwise generate one as `wf-` followed by a fresh UUID. `execution_id`: always generate a new `exec-` UUID for this run.

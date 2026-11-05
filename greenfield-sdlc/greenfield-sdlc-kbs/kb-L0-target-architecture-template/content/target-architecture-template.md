@@ -220,7 +220,7 @@ Fill as `{product_name}-target-architecture.md`. Keep headings, callouts, tables
 | **{term}** | {meaning, citing key where relevant} |
 ---
 ## Appendix B. Change Register (for review)
-*Only when a baseline document was supplied. One row per difference from the baseline; every `**[CHANGE]**` marker in the body has a row here and vice versa.*
+*Only when a baseline document was supplied. One row per difference from the baseline; this register is the complete record of what changed.*
 | Key | Change type | Before | After | Rationale | Review status |
 |---|---|---|---|---|---|
 | **{key}** | {added / amended / withdrawn} | {baseline text, or —} | {new text, or —} | {prd:<key>, principle id or reviewer note that caused it} | pending-human-review |
