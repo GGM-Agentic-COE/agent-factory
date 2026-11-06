@@ -21,6 +21,7 @@ Inputs and Knowledge Bases (edit here to reconfigure):
 | `binding_principles` | Input (JSON) | The same `{product_name}-binding-principles.json` the document was derived from |
 | `product_name` | Input (string) | Human-given product name; `document_code` defaults to its upper-case initials unless supplied |
 | `publish_location` | Input (string) | Where the corrected document is published (for example a Confluence space key or page parent). Passed to the attached document-writer tool unchanged |
+| `evaluation.md` | Knowledge base | THIS evaluator's own meta-quality bar (quality gates, score thresholds, reflection checklist), attached at runtime; applied in the Evaluation Instructions step before delivery |
 | `kb-L0-target-architecture-template` | Knowledge base | The literal template; the document must be this template filled, section for section, column for column |
 | `kb-L0-architecture-patterns` | Knowledge base | AP3 patterns, AP4 rules RULE-01 to RULE-05, AP5 anti-patterns, for checking pattern and rule citations |
 | `kb-L0-enterprise-architecture` | Knowledge base | EA3 systems and relationships, EA4 rules, EA6 SLA tiers, for checking KB-cited evidence |
@@ -70,7 +71,7 @@ Examples:
 - Example 2 (edge case): the PRD entity `Consignment` is owned by two contexts and neither the PRD's "created by" column nor the capabilities settle it → fail finding, no fix, nothing published; `escalate_to_hitl`.
 
 Evaluation Instructions:
-Refer to this agent's own evaluation.md for THIS evaluator's meta-quality bar.
+Refer to the attached `evaluation.md` for THIS evaluator's meta-quality bar; check every gate and threshold there before delivery.
 
 Summary:
 Append a plain-text `execution_summary` (bullet points, NOT JSON):

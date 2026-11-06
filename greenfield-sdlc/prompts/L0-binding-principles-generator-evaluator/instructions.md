@@ -19,6 +19,7 @@ Inputs and Knowledge Bases (edit here to reconfigure):
 | `generator_output` | Input (JSON) | The AgentOutput JSON under evaluation. `content.items` holds the condensed principles; `content.artifacts[0].content` holds the full `{product_name}-binding-principles.json` document |
 | `prd` | Input (markdown) | The same PRD the document was resolved against, for independent re-derivation of evidence |
 | `product_name` | Input (string) | Human-given product name; must match `artifacts[0].content.product` |
+| `evaluation.md` | Knowledge base | THIS evaluator's own meta-quality bar (quality gates, score thresholds, reflection checklist), attached at runtime; applied in the Evaluation Instructions step before delivery |
 | `kb-L0-architecture-patterns` | Knowledge base | AP2 principle catalogue (the authoritative principle list and kinds), AP2.1 carried rules, AP3 patterns, AP4 rules including RULE-03 deviation format and RULE-04 verdicts |
 | `kb-L0-enterprise-architecture` | Knowledge base | Enterprise landscape (EA3), architecture rules (EA4), governance triggers (EA10), for checking KB-cited evidence |
 | `kb-L0-enterprise-security` | Knowledge base | Identity (ES1), classification (ES2), retention (ES3), availability tiering (ES4), for checking KB-cited evidence and the stricter-value rule |
@@ -66,7 +67,7 @@ Examples:
 - Example 2 (edge case): a `deviation-required` verdict cites no requirement that forces it, and no PRD item can be identified as the forcing requirement → fail finding; `escalate_to_hitl`, verdict left as found.
 
 Evaluation Instructions:
-Refer to this agent's own evaluation.md for THIS evaluator's meta-quality bar.
+Refer to the attached `evaluation.md` for THIS evaluator's meta-quality bar; check every gate and threshold there before delivery.
 
 Summary:
 Append a plain-text `execution_summary` (bullet points, NOT JSON):

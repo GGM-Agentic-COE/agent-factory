@@ -119,6 +119,7 @@ Format: JSON (AgentOutput standard)
 content.type: "binding-principles"
 
 ```json
+
 {
   "agent_id": "L0-binding-principles-generator",
   "agent_version": "1.0.0",
@@ -138,7 +139,7 @@ content.type: "binding-principles"
       "delta": [ { "principle_id": "L0-ARCH-04", "change_type": "evidence-changed", "applied": true, "review_status": "pending-human-review", "summary": "<=150 chars" } ]
     },
     "artifacts": [
-      { "id": "artifact-<uuid>", "type": "document", "name": "{product_name}-binding-principles.json", "format": "json", "content": { "...the complete filled Document Template as a JSON object..." }, "description": "Resolution of every enterprise principle against the {product_name} PRD", "produced_by": "L0-binding-principles-generator" }
+      { "id": "artifact-<uuid>", "type": "document", "name": "{product_name}-binding-principles.json", "format": "json", "content": "<...the complete filled Document Template as a JSON object...>" , "description": "Resolution of every enterprise principle against the {product_name} PRD", "produced_by": "L0-binding-principles-generator" }
     ],
     "execution_summary": "• plain text bullets"
   }
