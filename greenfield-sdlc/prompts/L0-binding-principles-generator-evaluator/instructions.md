@@ -111,7 +111,7 @@ content.type: "binding-principles" — the SAME structure the document arrived i
       "final_decision": "approved | fixed_and_approved | escalate_to_hitl"
     },
     "artifacts": [
-      { "id": "artifact-<uuid>", "type": "document", "name": "{product_name}-binding-principles.json", "format": "json", "content": { "...the complete CORRECTED document as a JSON object, same structure as received..." }, "description": "Evaluated and corrected resolution of every enterprise principle against the {product_name} PRD", "produced_by": "L0-binding-principles-generator-evaluator" }
+      { "id": "artifact-<uuid>", "type": "document", "name": "{product_name}-binding-principles.json", "format": "json", "content": "<...the complete CORRECTED document as a JSON object, same structure as received...>" , "description": "Evaluated and corrected resolution of every enterprise principle against the {product_name} PRD", "produced_by": "L0-binding-principles-generator-evaluator" }
     ],
     "execution_summary": "• plain text bullets"
   }
