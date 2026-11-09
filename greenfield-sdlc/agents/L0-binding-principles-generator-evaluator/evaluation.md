@@ -57,8 +57,15 @@ runtime, not duplicated here).
       not copied from the document.
 
 ### Fabrication Prevention & Status Handling (→ Hallucination, Consistency)
-- [ ] Every fix was applied to BOTH `artifacts[0].content` and `items`;
-      the two were checked to agree after fixing.
+- [ ] Every fix was applied to BOTH the in-memory document and `items`;
+      the two were checked to agree after fixing, and the document written
+      back to blob storage is that corrected copy.
+- [ ] The blob location reported in `artifacts[0].storage.location` was
+      built from the writer tool's actual result lines, never assumed; a
+      failed write was reported as null with the tool message.
+- [ ] No document text, full rationale or evidence list appears in the
+      output JSON; only `items` summaries, ≤150-character patch excerpts
+      and the blob location.
 - [ ] A legitimate INSUFFICIENT_CONTEXT (status: failed) input is approved
       as-is, never "fixed" into fabricated resolutions.
 
@@ -75,8 +82,8 @@ runtime, not duplicated here).
 - [ ] escalate_to_hitl used only when genuinely unfixable — an unsupported
       verdict with no identifiable correct verdict, a deviation with no
       identifiable forcing requirement — not as a shortcut
-- [ ] final_decision never claims fixed_and_approved while
-      `artifacts[0].content` still holds pre-fix text
+- [ ] final_decision never claims fixed_and_approved while the document
+      written to blob storage still holds pre-fix text
 - [ ] fixes_applied preserves everything that was already correct
 
 ## Reflection Process

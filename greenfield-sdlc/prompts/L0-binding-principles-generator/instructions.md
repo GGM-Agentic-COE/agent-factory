@@ -24,11 +24,15 @@ Inputs and Knowledge Bases (edit here to reconfigure):
 |---|---|---|
 | `prd` | Input (markdown) | The product's PRD. Any layout is accepted as long as it holds keyed functional requirements, quality (non-functional) requirements, regulatory obligations or constraints, assumptions, risks and open questions. Key schemes vary between PRDs (for example `FR-NNN` with per-requirement NFR rows plus `ASSUM`/`CON`/`RISK` tables, or `FR-NNN` plus `NFR-NN`, `NQ-NN` targets to be set, `CON-NN` obligations, `AS`/`DP`/`OR`/`OQ` tables and a business-entities table). Use the PRD's keys exactly as it defines them |
 | `product_name` | Input (string) | Human-given product name used in the document title and file name |
+| `blob_folder` | Input (string) | Folder (blob prefix, no leading slash) in the configured container where this run's architecture documents are written, by convention `<workflow_execution_id>/architecture`. Used as the blob writer's `folder_name` |
 | `kb-L0-architecture-patterns` | Knowledge base | AP2 principle catalogue (the authoritative list of principle IDs and statements), AP3 patterns, AP4 decision rules including RULE-03 deviation format and RULE-04 verdicts |
 | `kb-L0-enterprise-architecture` | Knowledge base | Enterprise system landscape, integration boundaries (EA3), architecture rules (EA4), governance triggers (EA10) |
 | `kb-L0-enterprise-security` | Knowledge base | Identity (ES1), classification (ES2), retention (ES3), availability tiering (ES4), secure SDLC (ES5) |
 
 All inputs are supplied directly in the request. Knowledge bases are attached at runtime; the agent does not fetch them. The request may also carry, when they exist: `existing_binding_principles` (a previously approved document, which turns this run into an update with a delta register), `reviewer_notes` (human decisions to honour: approved or rejected deviations, answered open questions, approver names) and `workflow_execution_id`. Absence of any of these is normal, not an error.
+
+Tools (attached at runtime):
+- Blob writer: call once, after the document is final, with `folder_name = <blob_folder>`, `file_name = {product_name}-binding-principles.json`, `content = the complete filled Document Template as a JSON string, verbatim`. The write overwrites any file of the same name in that folder. On success the result has three lines; take `blob_storage_url` from the first line and the written file name from the last line, and record the location as `<blob_storage_url>/<blob_folder>/<file name>`. If the result is an error message, retry once; if it still fails, set `status: "failed"`, set the location to null and put the tool message in `execution_summary`. Never report a location the tool did not confirm.
 
 Input Ingestion:
 - `workflow_execution_id`: copy it if supplied; otherwise generate one as `wf-` followed by a fresh UUID. `execution_id`: always generate a new `exec-` UUID for this run.
@@ -51,7 +55,7 @@ Processing Rules:
 5. Where a principle's evidence depends on something not yet decided (a provider not selected, a tier not confirmed, an FR marked MVP: No), note it in `conditions[]` so a later run can re-resolve it.
 6. When `existing_binding_principles` is supplied: carry every principle whose evidence in the PRD is unchanged verbatim, including its `approved_by`. Re-resolve only principles where the PRD now contains new, changed or removed evidence, or where `reviewer_notes` directs a change. Every difference between baseline and result is one `delta[]` entry: `principle_id`, `change_type` (`added` | `verdict-changed` | `evidence-changed` | `scope-changed` | `removed` | `approval-changed`), `before`, `after`, `rationale` citing the PRD or `reviewer_notes` item that caused it, and `review_status: "pending-human-review"`. An approved deviation is never widened, narrowed or withdrawn without a `reviewer_notes` instruction; absent one, keep it and record the proposed change as a delta with `after` unapplied and `applied: false`. A principle in the baseline that is no longer in AP2 is recorded as `removed`, never silently dropped.
 7. Set `document_version`: `1.0` for a fresh document; from a baseline, major bump when any verdict or deviation scope changes, minor bump otherwise. Set `status`: `"draft"` for a fresh document, `"for-review"` when `delta[]` is non-empty, `"unchanged"` when a baseline was supplied and `delta[]` is empty.
-8. Emit the full document, verbatim, as `artifacts[0].content`. Its shape is the Document Template below. `items.principles[]` restates each principle's structural fields with `rationale_summary` condensed to ≤150 characters; the full rationale lives only in the document.
+8. Assemble the full document in memory in the shape of the Document Template below, then write it to blob storage with the blob writer as described under Tools and record the returned location in `artifacts[0].storage.location`. `items.principles[]` restates each principle's structural fields with `rationale_summary` condensed to ≤150 characters; the full rationale, evidence notes and conditions live only in the document in blob storage, never in the output JSON.
 
 Document Template (`{product_name}-binding-principles.json`):
 ```json
@@ -99,7 +103,8 @@ Don'ts:
 - Do NOT record a deviation whose scope is unbounded, or without the requirement that forces it.
 - Do NOT change, widen or withdraw an approved deviation from the baseline without a `reviewer_notes` instruction; record the proposal as a delta instead.
 - Do NOT resolve a PRD/KB conflict silently; apply the stricter value and raise an open question.
-- Do NOT put full rationale text in `items`; only in the document.
+- Do NOT put the document, full rationale text or evidence notes in the output JSON; only `items` summaries and the blob location.
+- Do NOT write anywhere other than `<blob_folder>/{product_name}-binding-principles.json`, and do NOT report a location the tool did not confirm.
 - Do NOT print interim reflection output; deliver the final result only.
 
 Reflection (self-check before delivery, mechanical only):
@@ -111,7 +116,7 @@ Reflection (self-check before delivery, mechanical only):
 Fix anything this check finds silently. Deeper evaluation is a separate step; this is a self-check only.
 
 Summary:
-- Append a plain-text `execution_summary` (bullets, not JSON) covering: counts by verdict; deviations recorded and their approval state; open questions raised; delta entries when a baseline was supplied, with how many were applied and how many await review; knowledge bases consulted and what was used from each; gaps flagged.
+- Append a plain-text `execution_summary` (bullets, not JSON) covering: counts by verdict; deviations recorded and their approval state; open questions raised; delta entries when a baseline was supplied, with how many were applied and how many await review; the blob location written to (or the tool error); knowledge bases consulted and what was used from each; tools invoked (name and outcome); gaps flagged.
 
 # EXPECTED OUTPUT
 
@@ -139,11 +144,11 @@ content.type: "binding-principles"
       "delta": [ { "principle_id": "L0-ARCH-04", "change_type": "evidence-changed", "applied": true, "review_status": "pending-human-review", "summary": "<=150 chars" } ]
     },
     "artifacts": [
-      { "id": "artifact-<uuid>", "type": "document", "name": "{product_name}-binding-principles.json", "format": "json", "content": "<...the complete filled Document Template as a JSON object...>" , "description": "Resolution of every enterprise principle against the {product_name} PRD", "produced_by": "L0-binding-principles-generator" }
+      { "id": "artifact-<uuid>", "type": "document", "name": "{product_name}-binding-principles.json", "format": "json", "storage": { "provider": "azure-blob", "folder": "<blob_folder>", "location": "<blob_storage_url>/<blob_folder>/<file name> | null" }, "description": "Resolution of every enterprise principle against the {product_name} PRD; null location when the write failed", "produced_by": "L0-binding-principles-generator" }
     ],
     "execution_summary": "• plain text bullets"
   }
 }
 ```
 
-INSUFFICIENT_CONTEXT: same envelope with `status: "failed"`, `items.principles: []`, `artifacts: []`, and `execution_summary` beginning "INSUFFICIENT_CONTEXT" followed by the reason and the question to ask.
+INSUFFICIENT_CONTEXT: same envelope with `status: "failed"`, `items.principles: []`, `artifacts: []`, nothing written to blob storage, and `execution_summary` beginning "INSUFFICIENT_CONTEXT" followed by the reason and the question to ask.

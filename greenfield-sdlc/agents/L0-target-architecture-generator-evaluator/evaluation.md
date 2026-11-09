@@ -58,7 +58,14 @@ evaluator's prompt, `kb-L0-target-architecture-template` and
       final document.
 - [ ] The document was published only on `approved` or
       `fixed_and_approved`; on `escalate_to_hitl` or INSUFFICIENT_CONTEXT
-      nothing was published and `artifacts[0].storage.location` is null.
+      nothing was published and `artifacts[0].storage.page_id` is null.
+- [ ] The page id, space key and version in `artifacts[0].storage` were
+      taken from the Confluence writer's actual result, never assumed; the
+      page title carries the document version so a new version never
+      appends to an older page.
+- [ ] No document text or narrative appears in the output JSON; only
+      `items` meta points, ≤150-character patch excerpts and the page
+      reference.
 - [ ] A legitimate INSUFFICIENT_CONTEXT (status: failed) input is approved
       as-is, never "fixed" into a fabricated architecture.
 
