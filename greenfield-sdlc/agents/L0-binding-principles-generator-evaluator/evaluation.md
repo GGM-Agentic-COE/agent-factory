@@ -60,6 +60,11 @@ runtime, not duplicated here).
 - [ ] Every fix was applied to BOTH the in-memory document and `items`;
       the two were checked to agree after fixing, and the document written
       back to blob storage is that corrected copy.
+- [ ] The document was written back whatever the verdict, with `status`
+      `"draft"` and a `review` object whose decision, fixes and unfixed
+      findings match the output's evaluation block exactly; nothing else
+      in its structure changed. Only a legitimate INSUFFICIENT_CONTEXT
+      input left nothing to write.
 - [ ] The blob location reported in `artifacts[0].storage.location` was
       built from the writer tool's actual result lines, never assumed; a
       failed write was reported as null with the tool message.

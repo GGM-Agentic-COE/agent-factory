@@ -15,7 +15,7 @@ reference target architecture (HL-ARC-001).
 Fill as `{product_name}-target-architecture.md`. Keep headings, callouts, tables and the *shall* voice exactly; replace every `{placeholder}`; repeat table rows as needed.
 
 # {product_name} Target Architecture
-**{product_name} · Enterprise Architecture** · Status: **For review**
+**{product_name} · Enterprise Architecture** · Status: **Draft**
 *Domain decomposition, ownership boundaries, cross-viewpoint constraints, and the demands every realisation of {product_name} must satisfy*
 ## 1. Purpose and Scope
 > **PURPOSE**

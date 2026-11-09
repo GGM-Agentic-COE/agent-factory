@@ -56,9 +56,10 @@ evaluator's prompt, `kb-L0-target-architecture-template` and
 - [ ] Every fix was applied to the in-memory document AND to `items`; the
       published text and the `fixes_applied` patches describe the same
       final document.
-- [ ] The document was published only on `approved` or
-      `fixed_and_approved`; on `escalate_to_hitl` or INSUFFICIENT_CONTEXT
-      nothing was published and `artifacts[0].storage.page_id` is null.
+- [ ] The document was published whatever the verdict, as the template
+      filled with status Draft and nothing prepended or appended; verdict
+      and findings appear only in the evaluation block. Only a legitimate
+      INSUFFICIENT_CONTEXT input left nothing to publish.
 - [ ] The page id, space key and version in `artifacts[0].storage` were
       taken from the Confluence writer's actual result, never assumed; the
       page title carries the document version so a new version never

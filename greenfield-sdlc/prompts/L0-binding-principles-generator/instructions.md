@@ -54,7 +54,7 @@ Processing Rules:
 4. Where the PRD and a knowledge base state different values for the same obligation (retention period, availability tier, classification), apply the more stringent, cite both, and add an open question naming the conflict. Never silently pick one. A PRD value marked "to be set", "TBD" or deferred to an open question is not a value: cite the knowledge-base standard as the floor and resolve the principle `at-risk` on that question. Where the PRD's regulators or jurisdiction differ from those the knowledge bases name, both apply: the knowledge base is the enterprise floor, the PRD obligation is the product's own; cite both.
 5. Where a principle's evidence depends on something not yet decided (a provider not selected, a tier not confirmed, an FR marked MVP: No), note it in `conditions[]` so a later run can re-resolve it.
 6. When `existing_binding_principles` is supplied: carry every principle whose evidence in the PRD is unchanged verbatim, including its `approved_by`. Re-resolve only principles where the PRD now contains new, changed or removed evidence, or where `reviewer_notes` directs a change. Every difference between baseline and result is one `delta[]` entry: `principle_id`, `change_type` (`added` | `verdict-changed` | `evidence-changed` | `scope-changed` | `removed` | `approval-changed`), `before`, `after`, `rationale` citing the PRD or `reviewer_notes` item that caused it, and `review_status: "pending-human-review"`. An approved deviation is never widened, narrowed or withdrawn without a `reviewer_notes` instruction; absent one, keep it and record the proposed change as a delta with `after` unapplied and `applied: false`. A principle in the baseline that is no longer in AP2 is recorded as `removed`, never silently dropped.
-7. Set `document_version`: `1.0` for a fresh document; from a baseline, major bump when any verdict or deviation scope changes, minor bump otherwise. Set `status`: `"draft"` for a fresh document, `"for-review"` when `delta[]` is non-empty, `"unchanged"` when a baseline was supplied and `delta[]` is empty.
+7. Set `document_version`: `1.0` for a fresh document; from a baseline, major bump when any verdict or deviation scope changes, minor bump otherwise. Set `status` to `"draft"` always: every document this agent writes awaits human approval where it is stored. Whether a baseline was supplied and whether anything changed is read from `baseline` and `delta[]`, not from `status`.
 8. Assemble the full document in memory in the shape of the Document Template below, then write it to blob storage with the blob writer as described under Tools and record the returned location in `artifacts[0].storage.location`. `items.principles[]` restates each principle's structural fields with `rationale_summary` condensed to ≤150 characters; the full rationale, evidence notes and conditions live only in the document in blob storage, never in the output JSON.
 
 Document Template (`{product_name}-binding-principles.json`):
@@ -62,7 +62,7 @@ Document Template (`{product_name}-binding-principles.json`):
 {
   "product": "{product_name}",
   "document_version": "{1.0 | bumped}",
-  "status": "{draft | for-review | unchanged}",
+  "status": "draft",
   "resolved_at": "{ISO date}",
   "resolved_by": "L0-binding-principles-generator",
   "baseline": "{existing document_version or null}",
@@ -136,7 +136,7 @@ content.type: "binding-principles"
     "schema_version": "1.0",
     "items": {
       "document_version": "1.0",
-      "document_status": "draft | for-review | unchanged",
+      "document_status": "draft",
       "principles": [
         { "id": "L0-ARCH-02", "verdict": "deviation-required", "evidence_locators": ["prd:FR-006", "prd:NFR-06"], "applies_via": ["PAT-04", "PAT-05"], "deviation_scope": "...", "approved_by": "pending", "rationale_summary": "<=150 chars", "confidence": 0.0, "reasoning": "..." }
       ],
