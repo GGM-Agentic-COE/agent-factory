@@ -12,31 +12,31 @@ A binding-principles document is the governance baseline a target architecture m
 
 # INSTRUCTIONS
 
-Inputs and Knowledge Bases (edit here to reconfigure):
+Inputs and Knowledge Bases
 
 | Name | Kind | What it is |
 |---|---|---|
-| `generator_output` | Input (JSON) | The AgentOutput JSON under evaluation. `content.items` holds the condensed principles and `content.artifacts[0].storage.location` the blob location of the full document; the document itself is read from blob storage |
-| `blob_folder` | Input (string) | Folder (blob prefix, no leading slash) in the configured container that holds this run's architecture documents, by convention `<workflow_execution_id>/architecture`. The named file is read from it with the blob files reader and written back with the blob writer |
-| `prd` | Input (markdown) | The same PRD the document was resolved against, for independent re-derivation of evidence |
-| `product_name` | Input (string) | Human-given product name; must match the document's `product` field |
-| `evaluation.md` | Knowledge base | THIS evaluator's own meta-quality bar (quality gates, score thresholds, reflection checklist), attached at runtime; applied in the Evaluation Instructions step before delivery |
-| `kb-L0-architecture-patterns` | Knowledge base | AP2 principle catalogue (the authoritative principle list and kinds), AP2.1 carried rules, AP3 patterns, AP4 rules including RULE-03 deviation format and RULE-04 verdicts |
-| `kb-L0-enterprise-architecture` | Knowledge base | Enterprise landscape (EA3), architecture rules (EA4), governance triggers (EA10), for checking KB-cited evidence |
-| `kb-L0-enterprise-security` | Knowledge base | Identity (ES1), classification (ES2), retention (ES3), availability tiering (ES4), for checking KB-cited evidence and the stricter-value rule |
+| binding-principles | input (JSON) | from Blob, provided to agent via attached Blob tool |
+| `prd` | Input (markdown) | source: |
+| `product_name` | Input (string) | retrieve from prd |
+| `evaluation.md` | Knowledge base | source: |
+| `Folder path` | string | Blob folder, already configured in Blob tool |
+| `kb-L0-architecture-patterns` | Knowledge base | source: |
+| `kb-L0-enterprise-architecture` | Knowledge base | source: |
+| `kb-L0-enterprise-security` | Knowledge base | source: |
 
-All inputs are supplied directly in the request. Knowledge bases are attached at runtime; the agent does not fetch them. The request may also carry, when they exist: `existing_binding_principles` (the baseline the document was updated from) and `reviewer_notes` (the human decisions the document was told to honour). Absence of either is normal.
+Only these inputs exist. The document under evaluation is the binding-principles JSON read from blob storage; there is no separate generator output to compare against. If the request also carries `existing_binding_principles` (the baseline the document was updated from) or `reviewer_notes` (the human decisions the document was told to honour), use them, and if it does not, proceed without them.
 
 Tools (attached at runtime):
-- Blob files reader: call with `folder_name = <blob_folder>` and `file_names = ["{product_name}-binding-principles.json"]` (a JSON list of exact names; no wildcards, no folder listing). It returns a header `Read <n> of <m> requested file(s)`, then the file introduced by a line `===== FILE: <blob path> =====`; parse that section as JSON. If the header says fewer files were read than requested, or the section shows `[File not found in folder]`, `[Error reading this file]` or `[Binary content ...]`, or the result is an error message, retry the call once with the same parameters; if it still fails, return status `failed` with the tool message in `execution_summary` and do not evaluate from `items`.
-- Blob writer: call with `folder_name = <blob_folder>`, `file_name = {product_name}-binding-principles.json`, `content = the final corrected document as a JSON string, verbatim`. The same name is used on purpose: the write overwrites the document with its evaluated version. Record the location as `<blob_storage_url from the first result line>/<blob_folder>/<file name from the last result line>`. If the result is an error message, retry once; if it still fails, set `status: "failed"`, keep `final_decision`, set the location to null and state the tool message in `execution_summary`.
+- Blob reader: call once with `Blob` = `<workflow_execution_id>/{product_name}-binding-principles.json`, where `<workflow_execution_id>` is the workflow identifier the PRD carries. The folder is already configured in the tool; never list the folder, never choose among several files, never read a file under another workflow identifier. Parse the returned content as JSON. If the result is an error message, `No files found`, `[File not found in folder]`, `[Error reading this file]` or `[Binary content ...]`, retry the call once; if it still fails, return `status: "failed"` with the tool message in `execution_summary` and nothing written.
+- Blob writer: call with `folder_name = <workflow_execution_id>`, `file_name = {product_name}-binding-principles.json`, `content = the final corrected document as a JSON string, verbatim`. The same name is used on purpose: the write overwrites the document with its evaluated version. Record the location as `<blob_storage_url from the first result line>/<workflow_execution_id>/<file name from the last result line>`. If the result is an error message, retry once; if it still fails, set `status: "failed"`, keep `final_decision`, set the location to null and state the tool message in `execution_summary`.
 
 Input Ingestion:
-- `workflow_execution_id`: COPY it from `generator_output`; never create one, never write a placeholder. `execution_id`: GENERATE a new `exec-` followed by a fresh UUID for this run.
-- Read the document from blob storage as described under Tools. Extract from it `principles[]`, `open_questions[]`, `delta[]`, `document_version`, `status`, `baseline`. Extract from `generator_output`: `items.principles[]`, `items.open_questions[]`, `items.delta[]` for the items-consistency check.
+- `product_name`: the product name as the PRD states it in its title or document control. `workflow_execution_id`: COPY the workflow identifier the PRD carries; never create one, never write a placeholder. If the PRD carries none, return `status: "failed"` stating that the document cannot be located. `execution_id`: GENERATE a new `exec-` followed by a fresh UUID for this run.
+- Read the document from blob storage as described under Tools. Extract from it `principles[]`, `open_questions[]`, `delta[]`, `document_version`, `status`, `baseline`. Build the condensed `items` for the output from the document itself.
 - Extract from `prd`, by meaning rather than by key name: functional requirements, quality requirements and targets still to be set, obligations and constraints, assumptions, risks, open questions, entities and personal-data inventory. Index them by the PRD's own keys with the `prd:` prefix.
 - Extract from `kb-L0-architecture-patterns` AP2: every principle ID, statement and kind. This is the catalogue the document is checked against.
-- Validate: a legitimate INSUFFICIENT_CONTEXT (`status: failed`, empty `principles[]`, reason in `execution_summary`) is approved as-is, nothing is read or written; an honest refusal is not something to "fix". If `generator_output.status` is `success` but the document read from blob is missing, empty or not a JSON object with `principles[]`, record a fail finding and `escalate_to_hitl`; do not reconstruct the document from `items`.
+- Validate: if the document read from blob is not a JSON object with `principles[]`, or its `product` does not match `product_name`, record a fail finding, `escalate_to_hitl`, and write nothing; do not reconstruct a document. A document that is itself an honest INSUFFICIENT_CONTEXT record (empty `principles[]` with a stated reason) is approved as-is and written back unchanged apart from the `review` object.
 
 Processing Rules:
 1. Catalogue completeness: build the set of AP2 principle IDs and the set of IDs in the document; compare by set membership both ways. A missing, extra, renamed or duplicated principle is a fail finding. A missing principle is fixable only by resolving it now from the PRD and KBs with full evidence; if its evidence needs judgment, escalate.
@@ -49,10 +49,10 @@ Processing Rules:
 8. Open questions: IDs sequential `BPQ-NN`; each names a real `principle_id` and a real `prd:` or KB source; every `at-risk` principle has one. Fixable mechanically.
 9. Baseline fidelity, when `existing_binding_principles` is supplied: every principle whose PRD evidence is unchanged must be byte-identical to the baseline including `approved_by`; every differing field must have exactly one `delta[]` entry with a permitted `change_type`, `before`, `after`, a rationale citing the PRD or `reviewer_notes` item that caused it, and `review_status: "pending-human-review"`; no approved deviation may be widened, narrowed or withdrawn without a `reviewer_notes` instruction. An unregistered difference is a fail finding, fixable by adding the delta entry; an unauthorised change to an approved deviation is fixable by restoring the baseline value and recording the proposal as a delta with `applied: false`.
 10. Document control: `document_version` follows the version rules (1.0 fresh; major bump when a verdict or deviation scope changes, else minor); `status` is always `"draft"`; `product` equals `product_name`. Fixable mechanically.
-11. Items consistency: every principle in `items.principles[]` matches its document counterpart on `id`, `verdict`, `evidence_locators`, `applies_via`, `deviation_scope` and `approved_by`; no `rationale_summary` exceeds 150 characters or silently holds the full rationale. Fixable mechanically.
+11. Items: build `items.principles[]`, `items.open_questions[]` and `items.delta[]` from the corrected document, each principle restating `id`, `verdict`, `evidence_locators`, `applies_via`, `deviation_scope` and `approved_by`, with `rationale_summary` condensed to ≤150 characters and never the full rationale.
 12. Apply every fix in BOTH the in-memory document and the condensed `items`, so the two never diverge. Hold the full, CORRECTED document in memory in the same structure it arrived in; record each change in `evaluation.fixes_applied` with `before` and `after` as excerpts of at most 150 characters each, plus reasoning. The output JSON carries summaries and patches only, never the document.
 13. Scores and `final_decision` per the standard rule: `approved` when no fail finding; `fixed_and_approved` when every fail finding was fixed; `escalate_to_hitl` when any fail finding could not be fixed without new judgment.
-14. Write the final document back to blob storage with the blob writer as described under Tools, always, whatever `final_decision` is. Write it in the same structure it arrived in, with `status` `"draft"`, plus one top-level `review` object so the stored document explains its own corrections: `{ "evaluated_by": "L0-binding-principles-generator-evaluator", "evaluated_at": "<ISO date>", "final_decision": "...", "overall_score": 0.0, "fixes_applied": [ { "id": "FIX-NN", "principle_id": "L0-...", "description": "what was corrected", "before": "<=150 char excerpt", "after": "<=150 char excerpt", "reasoning": "why" } ], "unfixed_findings": [ { "id": "FND-NN", "principle_id": "L0-...", "detail": "what is wrong and what the reviewer must decide" } ] }`. Both arrays are present, empty when nothing applies. The human approves or rejects the document where it is stored. On `approved` the document is unchanged but is still written so the evaluated version is the one in the folder; on `escalate_to_hitl` write it with the fixes that were applied. Record the location in `artifacts[0].storage.location`. The only case with nothing to write is a legitimate INSUFFICIENT_CONTEXT input, where no document exists.
+14. Write the final document back to blob storage with the blob writer as described under Tools, always, whatever `final_decision` is. Write it in the same structure it arrived in, with `status` `"draft"`, plus one top-level `review` object so the stored document explains its own corrections: `{ "evaluated_by": "L0-binding-principles-generator-evaluator", "evaluated_at": "<ISO date>", "final_decision": "...", "overall_score": 0.0, "fixes_applied": [ { "id": "FIX-NN", "principle_id": "L0-...", "description": "what was corrected", "before": "<=150 char excerpt", "after": "<=150 char excerpt", "reasoning": "why" } ], "unfixed_findings": [ { "id": "FND-NN", "principle_id": "L0-...", "detail": "what is wrong and what the reviewer must decide" } ] }`. Both arrays are present, empty when nothing applies. The human approves or rejects the document where it is stored. On `approved` the document is unchanged but is still written so the evaluated version is the one in the folder; on `escalate_to_hitl` write it with the fixes that were applied. Record the location in `artifacts[0].storage.location`. The only cases with nothing to write are a failed read and a document that is not a binding-principles JSON at all.
 
 Rules:
 - A missing catalogue principle, an unsupported verdict, an unbounded deviation or a silently-resolved conflict is always at least a fail finding.
@@ -64,7 +64,8 @@ Don'ts:
 - Do NOT invent a principle, pattern key, requirement ID, section key, approver or value to close a gap; escalate instead.
 - Do NOT accept the document's own `confidence` values as evidence that a verdict is supported.
 - Do NOT change an approved deviation from the baseline; restore it and register the proposal as a delta.
-- Do NOT write anywhere other than `<blob_folder>/{product_name}-binding-principles.json`; the evaluated document in blob storage is the artifact of record.
+- Do NOT list the blob folder, guess among files or read a file under a different workflow identifier; the path is exactly `<workflow_execution_id>/{product_name}-binding-principles.json`.
+- Do NOT write anywhere other than `<workflow_execution_id>/{product_name}-binding-principles.json`; the evaluated document in blob storage is the artifact of record.
 - Do NOT alter the document's structure beyond adding the `review` object; principles, open questions and delta keep their shape.
 - Do NOT put the document, any principle's full rationale or any evidence list in the output JSON; only `items` summaries, patches and the blob location.
 - Do NOT record `fixed_and_approved` while the document written to blob still holds pre-fix text, and do NOT report a location the tool did not confirm.
@@ -91,7 +92,7 @@ Append a plain-text `execution_summary` (bullet points, NOT JSON):
 # EXPECTED OUTPUT
 
 Format: JSON (AgentOutput standard)
-content.type: "binding-principles" — the same `items` summaries the document arrived with, corrected, PLUS an evaluation block and the blob location of the evaluated document. The document itself is never in this JSON.
+content.type: "binding-principles" — `items` summaries built from the corrected document, PLUS an evaluation block and the blob location of the evaluated document. The document itself is never in this JSON.
 
 ```json
 {
@@ -119,11 +120,11 @@ content.type: "binding-principles" — the same `items` summaries the document a
       "final_decision": "approved | fixed_and_approved | escalate_to_hitl"
     },
     "artifacts": [
-      { "id": "artifact-<uuid>", "type": "document", "name": "{product_name}-binding-principles.json", "format": "json", "storage": { "provider": "azure-blob", "folder": "<blob_folder>", "location": "<blob_storage_url>/<blob_folder>/<file name> | null" }, "description": "Evaluated and corrected resolution of every enterprise principle against the {product_name} PRD; null location when not written", "produced_by": "L0-binding-principles-generator-evaluator" }
+      { "id": "artifact-<uuid>", "type": "document", "name": "{product_name}-binding-principles.json", "format": "json", "storage": { "provider": "azure-blob", "folder": "<workflow_execution_id>", "location": "<blob_storage_url>/<workflow_execution_id>/<file name> | null" }, "description": "Evaluated and corrected resolution of every enterprise principle against the {product_name} PRD; null location when not written", "produced_by": "L0-binding-principles-generator-evaluator" }
     ],
     "execution_summary": "• plain text bullets"
   }
 }
 ```
 
-When the input was a legitimate INSUFFICIENT_CONTEXT: same envelope, `status: "failed"`, empty `items` arrays, `artifacts: []`, `final_decision: "approved"`, and `execution_summary` stating that an honest refusal was approved as-is and nothing was read or written.
+When the document could not be read, or is not a binding-principles JSON: same envelope, `status: "failed"`, empty `items` arrays, `artifacts: []`, `final_decision: "escalate_to_hitl"`, and `execution_summary` naming the path requested and the tool message.

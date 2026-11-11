@@ -63,16 +63,20 @@ runtime, not duplicated here).
 - [ ] The document was written back whatever the verdict, with `status`
       `"draft"` and a `review` object whose decision, fixes and unfixed
       findings match the output's evaluation block exactly; nothing else
-      in its structure changed. Only a legitimate INSUFFICIENT_CONTEXT
-      input left nothing to write.
+      in its structure changed. Only a failed read left nothing to write.
+- [ ] The document was read from the exact path
+      `<workflow_execution_id>/{product_name}-binding-principles.json`,
+      with the identifier copied from the PRD; the folder was never listed
+      and no file under another workflow identifier was chosen.
 - [ ] The blob location reported in `artifacts[0].storage.location` was
       built from the writer tool's actual result lines, never assumed; a
       failed write was reported as null with the tool message.
 - [ ] No document text, full rationale or evidence list appears in the
       output JSON; only `items` summaries, ≤150-character patch excerpts
       and the blob location.
-- [ ] A legitimate INSUFFICIENT_CONTEXT (status: failed) input is approved
-      as-is, never "fixed" into fabricated resolutions.
+- [ ] A stored document that is itself an honest INSUFFICIENT_CONTEXT
+      record (empty principles with a stated reason) is approved as-is,
+      never "fixed" into fabricated resolutions.
 
 ## Scores (≥ threshold to pass)
 | Evaluator | ≥ | Checks |

@@ -61,17 +61,20 @@ evaluator's prompt, `kb-L0-target-architecture-template` and
       final document.
 - [ ] The document was published whatever the verdict, as the template
       filled with status Draft and nothing prepended or appended; verdict
-      and findings appear only in the evaluation block. Only a legitimate
-      INSUFFICIENT_CONTEXT input left nothing to publish.
-- [ ] The page id, space key and version in `artifacts[0].storage` were
-      taken from the Confluence writer's actual result, never assumed; the
-      page title carries the document version so a new version never
-      appends to an older page.
+      and findings appear only in the evaluation block. Only a failed read
+      left nothing to publish.
+- [ ] The item identifier and web link in `artifacts[0].storage` were
+      taken from the OneDrive writer's actual result, never assumed; the
+      file name is `{product_name}-target-architecture.md` with no version.
+- [ ] Both blob reads used the exact paths under the workflow identifier
+      copied from the PRD; the folder was never listed and no file under
+      another workflow identifier was chosen.
 - [ ] No document text or narrative appears in the output JSON; only
-      `items` meta points, ≤150-character patch excerpts and the page
+      `items` meta points, ≤150-character patch excerpts and the file
       reference.
-- [ ] A legitimate INSUFFICIENT_CONTEXT (status: failed) input is approved
-      as-is, never "fixed" into a fabricated architecture.
+- [ ] A document that could not be read was reported as
+      INSUFFICIENT_CONTEXT, never reconstructed into a fabricated
+      architecture.
 
 ## Scores (≥ threshold to pass)
 | Evaluator | ≥ | Checks |

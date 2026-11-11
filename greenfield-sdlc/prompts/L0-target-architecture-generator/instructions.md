@@ -19,26 +19,26 @@ A PRD says what the product must do; binding principles say what the enterprise 
 
 # INSTRUCTIONS
 
-Inputs and Knowledge Bases (edit here to reconfigure):
+Inputs and Knowledge Bases
 
 | Name | Kind | What it is |
 |---|---|---|
-| `prd` | Input (markdown) | The product's PRD. Any layout is accepted as long as it holds keyed functional requirements, quality (non-functional) requirements, regulatory obligations or constraints, assumptions, risks and open questions; users-and-roles, business-entities and personal-data sections are used when present. Use the PRD's keys exactly as it defines them |
-| `blob_folder` | Input (string) | Folder (blob prefix, no leading slash) in the configured container that holds this run's architecture documents, by convention `<workflow_execution_id>/architecture`. The evaluated `{product_name}-binding-principles.json` is read from it and the target architecture is written to it |
-| `product_name` | Input (string) | Human-given product name. `document_code` for document IDs defaults to its upper-case initials (`HL` gives `HL-ARC-001`) unless supplied |
-| `kb-L0-target-architecture-template` | Knowledge base | The literal document template (headings, callouts, tables, figures, Appendix A, Appendix B). The output document is this template filled; nothing is added to or removed from its structure |
-| `kb-L0-architecture-patterns` | Knowledge base | AP2 principle catalogue, AP3 patterns PAT-01 to PAT-18, AP4 rules RULE-01 to RULE-05, AP5 anti-patterns, AP6 glossary |
-| `kb-L0-enterprise-architecture` | Knowledge base | Existing systems and their integration relevance (EA3), architecture rules (EA4), SLA tiers (EA6), governance triggers (EA10) |
-| `kb-L0-enterprise-security` | Knowledge base | Identity (ES1), classification (ES2), retention (ES3), availability tiering (ES4), secure SDLC (ES5), incident response (ES6) |
+| `prd` | Input (markdown) | source: |
+| `binding-principles` | Input (JSON) | Evaluated binding principles, provided to agent via attached Blob Reader tool |
+| `product_name` | Input (string) | retrieve from prd |
+| `kb-L0-architecture-patterns` | Knowledge base | source: |
+| `kb-L0-target-architecture-template` | Knowledge base | source: |
+| `kb-L0-enterprise-architecture` | Knowledge base | source: |
+| `kb-L0-enterprise-security` | Knowledge base | source: |
 
-All inputs are supplied directly in the request. Knowledge bases are attached at runtime; the agent does not fetch them. The request may also carry, when they exist: `existing_target_architecture` (a previously approved document, which turns this run into an update with a change register), `reviewer_notes`, `architecture_notes` (external systems and selection state, reviewer roles, decisions taken, known open items), `epics_and_features` (capability map and coverage check only) and `workflow_execution_id`. Absence of any of these is normal, not an error.
+Only these inputs exist. If the request also carries `existing_target_architecture` (a previously approved document, which turns this run into an update with a change register), `reviewer_notes`, `architecture_notes` (external systems and selection state, reviewer roles, decisions taken, known open items) or `epics_and_features` (capability map and coverage check only), use them, and if it does not, proceed without them. The PRD accepts any layout that holds keyed functional requirements, quality requirements, obligations or constraints, assumptions, risks and open questions; use its keys exactly as it defines them. `document_code` for document IDs is the upper-case initials of `product_name` (`HL` gives `HL-ARC-001`).
 
 Tools (attached at runtime):
-- Blob files reader: call first with `folder_name = <blob_folder>` and `file_names = ["{product_name}-binding-principles.json"]` (a JSON list of exact names; no wildcards, no folder listing). It returns a header `Read <n> of <m> requested file(s)`, then the file introduced by a line `===== FILE: <blob path> =====`; parse that section as JSON. This is `binding_principles`. If the header says fewer files were read than requested, or the section shows `[File not found in folder]`, `[Error reading this file]` or `[Binary content ...]`, or the result is an error message, retry the call once with the same parameters; if it still fails, return INSUFFICIENT_CONTEXT naming the tool message.
-- Blob writer: call once, after the document is final, with `folder_name = <blob_folder>`, `file_name = {product_name}-target-architecture.md`, `content = the complete filled template as markdown, verbatim`. On success take `blob_storage_url` from the first result line and the written file name from the last line; record the location as `<blob_storage_url>/<blob_folder>/<file name>`. If the result is an error message, retry once; if it still fails, set `status: "failed"`, location null, tool message in `execution_summary`. Never report a location the tool did not confirm.
+- Blob reader: call first with `Blob` = `<workflow_execution_id>/{product_name}-binding-principles.json`, where `<workflow_execution_id>` is the workflow identifier the PRD carries. The folder is already configured in the tool; never list it, never choose among several files, never read a file under another workflow identifier. Parse the returned content as JSON; this is `binding_principles`. If the result is an error message, `No files found`, `[File not found in folder]`, `[Error reading this file]` or `[Binary content ...]`, retry the call once; if it still fails, return INSUFFICIENT_CONTEXT naming the tool message.
+- Blob writer: call once, after the document is final, with `folder_name = <workflow_execution_id>`, `file_name = {product_name}-target-architecture.md`, `content = the complete filled template as markdown, verbatim`. On success take `blob_storage_url` from the first result line and the written file name from the last line; record the location as `<blob_storage_url>/<workflow_execution_id>/<file name>`. If the result is an error message, retry once; if it still fails, set `status: "failed"`, location null, tool message in `execution_summary`. Never report a location the tool did not confirm.
 
 Input Ingestion:
-- `workflow_execution_id`: copy it if supplied; otherwise generate `wf-<uuid>`. `execution_id`: always generate a new `exec-<uuid>`.
+- `product_name`: the product name as the PRD states it in its title or document control. `workflow_execution_id`: copy the workflow identifier the PRD carries; if the PRD carries none, return INSUFFICIENT_CONTEXT stating that the binding principles cannot be located. `execution_id`: always generate a new `exec-<uuid>`.
 - Read `binding_principles` from blob storage as described under Tools before anything else.
 - Extract from `prd`, by meaning rather than by key name: functional requirements (key, statement, release or priority tag, acceptance criteria); quality requirements and which requirements each applies to; quality targets still to be set ("TBD", an `NQ` question, "To be set"); regulatory obligations and constraints; users, roles and permissions; business entities and who creates them; personal-data inventory with retention; assumptions, dependencies and risks; open questions; glossary.
 - Cite every PRD item as `prd:` plus the PRD's own key (`prd:FR-016`, `prd:NFR-06`, `prd:CON-05`, `prd:OQ-13`). This document's own keys never carry the prefix, so `prd:CON-05` (an obligation) is never confused with this document's `CON-5` (a constraint).
@@ -81,7 +81,8 @@ Don'ts:
 - Do NOT let a user-facing budget exceed the PRD's figure or grow when a dependency is added.
 - Do NOT silently alter, renumber or drop any baseline item; every difference goes in Appendix B.
 - Do NOT put the document or any of its narrative in the output JSON; only `items` meta points and the blob location.
-- Do NOT write anywhere other than `<blob_folder>/{product_name}-target-architecture.md`, and do NOT report a location the tool did not confirm.
+- Do NOT list the blob folder or read a file under a different workflow identifier; the path is exactly `<workflow_execution_id>/{product_name}-binding-principles.json`.
+- Do NOT write anywhere other than `<workflow_execution_id>/{product_name}-target-architecture.md`, and do NOT report a location the tool did not confirm.
 - Do NOT print interim reflection output; deliver the final result only.
 
 Reflection (self-check before delivery, mechanical only):
@@ -131,7 +132,7 @@ content.type: "target-architecture"
       "change_register": [ { "key": "CON-8", "change_type": "added | amended | withdrawn", "summary": "<=150 chars", "rationale_source": "prd:FR-031", "review_status": "pending-human-review" } ]
     },
     "artifacts": [
-      { "id": "artifact-<uuid>", "type": "document", "name": "{product_name}-target-architecture.md", "format": "markdown", "storage": { "provider": "azure-blob", "folder": "<blob_folder>", "location": "<blob_storage_url>/<blob_folder>/<file name> | null" }, "description": "Normative, technology-free target architecture for {product_name}; null location when the write failed", "produced_by": "L0-target-architecture-generator" }
+      { "id": "artifact-<uuid>", "type": "document", "name": "{product_name}-target-architecture.md", "format": "markdown", "storage": { "provider": "azure-blob", "folder": "<workflow_execution_id>", "location": "<blob_storage_url>/<workflow_execution_id>/<file name> | null" }, "description": "Normative, technology-free target architecture for {product_name}; null location when the write failed", "produced_by": "L0-target-architecture-generator" }
     ],
     "execution_summary": "• plain text bullets"
   }
