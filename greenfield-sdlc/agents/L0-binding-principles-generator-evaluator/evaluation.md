@@ -66,7 +66,7 @@ runtime, not duplicated here).
       in its structure changed. Only a failed read left nothing to write.
 - [ ] The document was read from the exact path
       `<workflow_execution_id>/{product_name}-binding-principles.json`,
-      with the identifier copied from the PRD; the folder was never listed
+      with the identifier inherited from the previous agent's output; the folder was never listed
       and no file under another workflow identifier was chosen.
 - [ ] The blob location reported in `artifacts[0].storage.location` was
       built from the writer tool's actual result lines, never assumed; a

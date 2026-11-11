@@ -67,7 +67,7 @@ evaluator's prompt, `kb-L0-target-architecture-template` and
       taken from the OneDrive writer's actual result, never assumed; the
       file name is `{product_name}-target-architecture.md` with no version.
 - [ ] Both blob reads used the exact paths under the workflow identifier
-      copied from the PRD; the folder was never listed and no file under
+      inherited from the previous agent's output; the folder was never listed and no file under
       another workflow identifier was chosen.
 - [ ] No document text or narrative appears in the output JSON; only
       `items` meta points, ≤150-character patch excerpts and the file
