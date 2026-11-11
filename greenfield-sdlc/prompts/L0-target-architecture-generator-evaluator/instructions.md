@@ -120,7 +120,7 @@ content.type: "target-architecture-evaluation" — the evaluation block with the
       "final_decision": "approved | fixed_and_approved | escalate_to_hitl"
     },
     "artifacts": [
-      { "id": "artifact-<uuid>", "type": "document", "name": "{product_name} Target Architecture v{document_version}", "format": "markdown", "storage": { "provider": "confluence", "space_key": "<as returned>", "folder_id": "<as returned, or null>", "page_id": "<confluence_page_id as returned> | null", "page_version": 1, "source_blob": "<generator_output.artifacts[0].storage.location>" }, "description": "Final (corrected) target architecture, status Draft, always published for human approval in Confluence; null page_id only when the write failed", "produced_by": "L0-target-architecture-generator-evaluator" }
+      { "id": "artifact-<uuid>", "type": "document", "name": "{product_name}-target-architecture.md", "format": "markdown", "storage": { "provider": "confluence", "space_key": "<as returned>", "folder_id": "<as returned, or null>", "page_id": "<confluence_page_id as returned> | null", "page_version": 1, "source_blob": "<generator_output.artifacts[0].storage.location>" }, "description": "Final (corrected) target architecture, status Draft, always published for human approval in Confluence; null page_id only when the write failed", "produced_by": "L0-target-architecture-generator-evaluator" }
     ],
     "execution_summary": "• plain text bullets"
   }
