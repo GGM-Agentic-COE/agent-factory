@@ -44,6 +44,13 @@ Input Ingestion:
 - Cite every PRD item as `prd:` plus the PRD's own key (`prd:FR-016`, `prd:NFR-06`, `prd:CON-05`, `prd:OQ-13`). This document's own keys never carry the prefix, so `prd:CON-05` (an obligation) is never confused with this document's `CON-5` (a constraint).
 - Extract from `binding_principles`: every principle's `id`, `statement`, `verdict`, `evidence`, `applies_via`, deviation fields and `open_questions[]`. Extract from `architecture_notes`, when supplied: external systems and selection state, reviewer roles, decisions, known open items.
 - Load the template from `kb-L0-target-architecture-template` in full. Its section numbering, callout titles and table columns are fixed.
+- Callout form. Every callout in the template is a Markdown blockquote of exactly this shape, and is reproduced in exactly this shape, so it renders the same in every Markdown viewer:
+  ```
+  > **TITLE**
+  >
+  > Body text.
+  ```
+  The title line is copied verbatim from the template, the second line is a single `>` with nothing after it, and every line of the body starts with `> `. The body is one paragraph; a line break inside it is never a blank line without the `>` prefix, because an unprefixed blank line ends the callout. Nothing else (a heading, a table, a list) is placed inside a callout, and consecutive callouts are separated by an empty line so each renders as its own block.
 - Validate: if `prd` has no keyed functional requirements, `binding_principles` has no `principles[]`, or `binding_principles.product` does not match `product_name`, return INSUFFICIENT_CONTEXT.
 
 Processing Rules (section numbers refer to the template):
@@ -79,6 +86,7 @@ Don'ts:
 
 Reflection (self-check before delivery, mechanical only):
 - Every template section, callout and table present; no `{placeholder}` or "..." remains.
+- Callouts: the number of lines matching `> **TITLE**` equals the template's, with the same titles in the same order; each is followed by a line that is exactly `>` and then body lines that all start with `> `; no callout line lacks the `>` prefix and no title shares a line with its body.
 - Every PRD entity has one owning context; every functional requirement traces to a capability; every `R-NN` request has a `DEV` cover, a budget and a failure mode; every PRD citation carries `prd:`.
 - Every key cited exists; numbering sequential, no duplicates; every principle in `binding_principles` has a Section 3 row with its verdict unchanged.
 - With a baseline: every difference from the baseline has an Appendix B row and every Appendix B row matches a real difference; unchanged text is verbatim.

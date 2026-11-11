@@ -8,6 +8,9 @@ evaluator's prompt, `kb-L0-target-architecture-template` and
 ## Quality Gates
 
 ### Template & Key Integrity (→ Faithfulness, Reasoning quality)
+- [ ] Every callout was checked for the template's exact blockquote form
+      (`> **TITLE**`, a bare `>` line, then `> `-prefixed body lines) and
+      a reflowed or merged callout was restored without changing its words.
 - [ ] Template conformance was checked section by section, callout by
       callout and column by column against the actual template — not by
       scanning headings and assuming the body follows.

@@ -19,8 +19,11 @@ Fill as `{product_name}-target-architecture.md`. Keep headings, callouts, tables
 *Domain decomposition, ownership boundaries, cross-viewpoint constraints, and the demands every realisation of {product_name} must satisfy*
 ## 1. Purpose and Scope
 > **PURPOSE**
+>
 > {What this document sets out: how the system is divided into bounded contexts, which context is the system of record for each entity, which rules bind every design decision, and what the domain requires of the data, integration and platform architectures. State that it is technology-free and that technology belongs to {document_code}-ARC-002.}
+
 > **KEY ARCHITECTURAL ASSUMPTION**
+>
 > {The regulatory or business fronts that must not be blurred, and why each is kept inside a context that owns it outright.}
 ### What this document covers
 #### In scope
@@ -28,6 +31,7 @@ Fill as `{product_name}-target-architecture.md`. Keep headings, callouts, tables
 #### Not attempted here
 - {Technology selection, in {document_code}-ARC-002} · {Physical data design} · {Interface specifications} · {Component design and delivery planning}
 > **READING THIS DOCUMENT**
+>
 > {One line per section stating what it holds.} Statements using *shall* are normative; every normative item carries a stable key and is cross-referenced by it.
 ---
 ## Document Control and Contents
@@ -53,6 +57,7 @@ Fill as `{product_name}-target-architecture.md`. Keep headings, callouts, tables
 ## 2. Business Context and Drivers
 *What {product_name} does, who depends on it, and the obligations that shape its architecture*
 > **THE BUSINESS**
+>
 > {One paragraph in the PRD's own terms.}
 ### System context
 ```mermaid
@@ -67,11 +72,13 @@ Fill as `{product_name}-target-architecture.md`. Keep headings, callouts, tables
 |---|---|---|
 | **DRV-{NN}** | {driver} | {consequence, citing PRD locator} |
 > **WHY THIS SECTION MATTERS**
+>
 > {Which boundaries trace to which drivers; which drivers are regulatory and what the architecture therefore favours.}
 ---
 ## 3. Architecture Principles
 *The enterprise principles that bind {product_name}, and how this architecture stands against each*
 > **HOW PRINCIPLES APPLY**
+>
 > {Count of principles; decomposition-shaping ones applied here, technology-selecting ones in {document_code}-ARC-002; a departure is permitted only as a recorded deviation under CON-{n}; an unrecorded deviation is a defect.}
 | Principle | Statement | Position | Where it is applied |
 |---|---|---|---|
@@ -81,11 +88,13 @@ Fill as `{product_name}-target-architecture.md`. Keep headings, callouts, tables
 |---|---|
 | **DEV-{NN}** | **Principle:** {id}, {statement}.<br>**Scope:** {named flows, and no others}.<br>**Rationale:** {from binding_principles}.<br>**Approved by:** {approver or Pending}. |
 > **WHAT THIS MEANS IN PRACTICE**
+>
 > {The deviation is bounded, not general; what a new request of the same kind needs.}
 ---
 ## 4. Domain Decomposition
 *{N} bounded contexts, each the single owner of its entities* · Keys: `APP-1`
 > **ARCHITECTURE POSITION**
+>
 > {Decomposition in one paragraph, citing ADRs, CON-{n} for system of record and CON-{n} for deployability; the reason-for-change test.}
 | Bounded context | Subdomain | Purpose | Owns | Publishes |
 |---|---|---|---|---|
@@ -105,6 +114,7 @@ Fill as `{product_name}-target-architecture.md`. Keep headings, callouts, tables
 ## 5. Context Map and Interaction Model
 *How the bounded contexts depend on each other, by which pattern, and within which budget* · Keys: `APP-1`
 > **THE INTERACTION RULE**
+>
 > {Default is an event; a request only when needed inside a user's action and a stale answer would be visible or disputable; every request is named and covered by DEV-NN; a request protecting a regulatory invariant fails closed, one that improves a display degrades.}
 ```mermaid
 {flowchart TB of contexts; solid arrows "R-NN · what · failure mode · budget" for requests; dashed arrows "R-NN · event · bound" for events}
@@ -116,6 +126,7 @@ Fill as `{product_name}-target-architecture.md`. Keep headings, callouts, tables
 ### Rules that hold across every relationship
 - {Value owned elsewhere obtained through the published contract (CON keys)} · {No direct reads except registered snapshot and read model} · {Identity upstream of every context} · {Which context is downstream of which, and the outage consequence}
 > **WHAT THIS MAP SHOWS**
+>
 > {Which path carries fail-closed requests and why; what is event-driven and can be delayed.}
 ---
 ## 6. Bounded Context Definitions
@@ -128,6 +139,7 @@ Fill as `{product_name}-target-architecture.md`. Keep headings, callouts, tables
 **Rationale.** {reason-for-change argument}
 {repeat per context}
 > **THE BOUNDARY MOST LIKELY TO BE CHALLENGED**
+>
 > {Which merge would work and why it is rejected: different reasons, regulators or approval paths. Effort is never the test; reason-for-change is.}
 ---
 ## 7. Components, Aggregates and Invariants
@@ -142,21 +154,25 @@ Fill as `{product_name}-target-architecture.md`. Keep headings, callouts, tables
 |---|---|---|---|
 | **INV-{NN}** | {aggregate} ({context}) | {rule in shall form} | {DRV key or PRD locator} |
 > **WHY INVARIANTS SIT IN THIS DOCUMENT**
+>
 > {Invariants enforced in more than one viewpoint are stated once here, above the viewpoints.}
 ---
 ## 8. Cross-Viewpoint Constraints
 *Rules that bind the data, integration and platform architectures alike* · Keys: `CON`
 > **HOW CONSTRAINTS APPLY**
+>
 > {Binding on every realisation; each section of {document_code}-ARC-002 shows how it honours them; conformance assessed at every release.}
 | Key | Constraint | Rationale |
 |---|---|---|
 | **CON-{N}** | {constraint} | {principle, driver or ADR} |
 > **THE DISTINCTION THAT MATTERS MOST**
+>
 > {Snapshot versus replicated attribute, and why registration is mandatory.}
 ---
 ## 9. Demands on Data, Integration and Platform
 *What the decomposition requires of each viewpoint, each stated with its budget* · Keys: `REQ` · `QA`
 > **HOW DEMANDS ARE MET**
+>
 > {What versus how; the satisfying section of {document_code}-ARC-002 cites the demand by key; an unsatisfied demand is "not yet built".}
 ### Data
 | Key | Demand | Driven by |
@@ -175,16 +191,19 @@ Fill as `{product_name}-target-architecture.md`. Keep headings, callouts, tables
 |---|---|---|---|
 | **QA-{NN}** | {attribute} | {target from PRD, or **Requires validation** (`OI-NN`)} | {where measured} |
 > **BUDGETS ARE SPLIT, NOT GROWN**
+>
 > {How each user-facing budget is allocated across its synchronous dependencies.}
 ---
 ## 10. Required Security Controls
 *The controls every realisation shall implement, by viewpoint* · Keys: `SEC`
 > **SECURITY AS A CROSS-CUTTING REQUIREMENT**
+>
 > {Security places requirements on every viewpoint; the implemented control is recorded in {document_code}-ARC-002 under the same key.}
 | Key | Viewpoint | Required control | Principle or driver |
 |---|---|---|---|
 | **SEC-{N}** | {Application / Data / Integration / Platform} | {control} | {principle id, DRV or ES key} |
 > **INTERFACE DESIGN THAT LEAKS NOTHING**
+>
 > {Contracts shall not reveal the existence of resources the caller does not own.}
 ---
 ## 11. Architecture Decisions and Governance
@@ -209,6 +228,7 @@ Fill as `{product_name}-target-architecture.md`. Keep headings, callouts, tables
 #### What design still must answer
 - **OI-{NN}** {open item, citing the key it affects}
 > **BOTTOM-LINE POSITION**
+>
 > {What the hardest problems are, what the architecture optimises for, and what cost it accepts.}
 | Question | Architecture answer |
 |---|---|
