@@ -1,0 +1,82 @@
+# Agent Specification Document
+spec_version: "1.0"
+artifact_type: agent
+metadata:
+  name: L0-solution-architect-evaluator
+  version: "1.0.0"
+  layer: L0
+  phase: design
+  owner: agentic-ai-coe
+  created: "2026-10-27"
+
+purpose:
+  description: "Independently re-verifies L0-solution-architect's completeness and grounding — every target entity in DAT-1, every APP-2.3 edge in INT-1, every REQ-* in the satisfaction index, every CON-* in the constraint realisation table, every capability class in PLT-6, every SEC-*/TB-* in the security controls — none accepted on the generator's self-check claim alone."
+  input: "L0-solution-architect's JSON output (solution-architecture.md in artifacts[0].content), target-architecture.md and optionally prd.md (each an uploaded file or a Confluence page id), the three KBs (Confluence page ids, the same pages the generator read) and the rubric (GitHub)."
+  output: "Scores, findings, any fixes applied to solution-architecture.md, and a final decision. The corrected document is published to Confluence as '<product>-solution-architecture.md' on every run, including escalate_to_hitl, in chunks of whole sections (one writer call each) so no call times out."
+  business_value: "The generator's own Reflection block covers what the agent thought it did — not whether every target entity, edge, demand, constraint and security control actually made it in. A reversed INT-1 edge direction, a dropped REQ-* in the satisfaction index, or a technology marked DECIDED when EA11 was absent are all schema-valid and undetectable without an independent pass. This agent catches those before the Solution Architect and Platform Lead gates."
+
+prompt:
+  ref: "prompts/L0-solution-architect-evaluator/instructions.md"
+  version: "1.0.0"
+  description: "Scores against L0-solution-architect/evaluation.md (read from GitHub); independently builds entity, edge, REQ-*, CON-*, capability-class and SEC/TB sets from the original target and checks each by set membership against the generator's output — never trusts the generator's self-check counts."
+
+contract:
+  input_schema: "$ref: schemas/agent-input-contract-schema.json"
+  output_schema: "$ref: schemas/agent-output-schema.json"
+
+  input:
+    accepts_from_agents: [L0-solution-architect]
+    accepts_direct_input: true   # L0-solution-architect's JSON output, passed by the workflow
+    accepts_file_upload:
+      enabled: true
+      formats: [".md", ".json", ".html", ".xml"]   # solution-architecture.md, target-architecture.md, prd.md, generator JSON; evaluation.md in a preview without the GitHub reader
+    required_parameters:
+      rubric_repo: { type: string, description: "GitHub repository holding the rubric, e.g. agentic-sdlc-knowledge-bases" }
+      rubric_branch: { type: string, description: "Branch, e.g. main" }
+      solution_architect_rubric_folder: { type: string, description: "Folder holding L0-solution-architect's evaluation.md" }
+      confluence_space_key: { type: string, description: "Space the corrected document is published to. Empty -> ARTIFACT_WRITE_FAILED" }
+      enterprise_architecture_kb_page_id: { type: string, description: "Same page the generator read: approved platform catalogue, regions" }
+      enterprise_security_kb_page_id: { type: string, description: "Same page the generator read: retention, availability tiers, residency" }
+    optional_parameters:
+      target_architecture_page_id: { type: string, description: "Confluence page id of the target (page id only). Used when the target is not uploaded; one of the two is required" }
+      prd_page_id: { type: string, description: "Confluence page id of the PRD (page id only). Optional" }
+      domain_api_patterns_kb_page_id: { type: string, description: "Same page the generator read: sync/async table, event taxonomy" }
+
+  output:
+    $ref: "output_schema.json"
+
+context:
+  # The KBs are READ FROM CONFLUENCE with tool-L0-confluence-reader, page id only, from the SAME
+  # three pages the generator read. Not attached at runtime.
+  knowledge_bases: []
+  knowledge_base_sources:
+    confluence_page_ids: ["{{enterprise_architecture_kb_page_id}}", "{{enterprise_security_kb_page_id}}", "{{domain_api_patterns_kb_page_id}}"]
+    content:
+      - kb-L0-enterprise-architecture   # technology grounding: EA11 catalogue (listed? lifecycle?), EA9 estate mandates, approved regions — can't verify an Approved tag without it
+      - kb-L0-enterprise-security       # number grounding: ES3 retention, ES4 availability tiers, ES9 residency
+      - kb-L0-food-domain-api-patterns  # INT-1 style checks against the sync/async table
+  guardrails:
+    - gr-L0-output-schema-validator
+    - gr-L0-pii-detection
+    - gr-L0-hallucination-check        # no technology, number or region the target or KB doesn't support
+    - gr-L0-consistency-check          # re-checks cross-section consistency independently
+    - gr-L0-architecture-conformance   # fires when THIS evaluator concludes; validates the RESULTANT solution-architecture.md — satisfaction index totality and CON realisation coverage (guardrails/gr-L0-architecture-conformance)
+  tools:
+    - tool-L0-github-reader-using-app  # reads the rubric (evaluation.md) ONLY — one call, repo/branch/folder from input
+    - tool-L0-confluence-reader        # page_id only; reads the three KB pages, and the target / PRD pages when not uploaded
+    - tool-L0-confluence-writer        # publishes the evaluated (corrected) document — title "<product>-solution-architecture.md", XHTML content, space_key from input. Always, including escalate_to_hitl. The ONLY write.
+
+quality:
+  evaluation_ref: "evaluation.md"   # covers THIS evaluator's own meta-quality, not the generator's rubric
+  min_score: 8.0   # evaluators held to a higher bar — a missed edge or dropped REQ is worse than an imprecise section
+  hallucination_check: true
+  consistency_check: true
+
+performance:
+  target_latency_seconds: 300
+  max_token_budget: 32000      # re-emits the corrected document in preview runs; publishing goes in chunks of about 12k chars
+
+versioning:
+  input_version: "1.0"
+  output_version: "1.0"
+  instruction_hash: "sha256:pending"

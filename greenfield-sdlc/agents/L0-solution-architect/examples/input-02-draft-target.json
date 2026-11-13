@@ -1,0 +1,56 @@
+{
+  "_comment": "Edge case: the target is still DRAFT — the Enterprise Architect has not approved it — and allow_draft_target is false. Cycle 0 must not build on an unapproved target: every satisfies link would point at text that may still change.",
+  "confluence_base_url": "https://your-domain.atlassian.net/wiki",
+  "target_architecture_page_id": "524377",
+  "prd_page_id": "",
+  "allow_draft_target": false,
+  "workflow_execution_id": "wf-hl-step1-4b7e21c9",
+  "target_architecture_output": {
+    "agent_id": "L0-design-target-architect",
+    "agent_version": "1.0.0",
+    "execution_id": "exec-ta-7d2e90b4",
+    "workflow_execution_id": "wf-hl-step1-4b7e21c9",
+    "status": "success",
+    "content": {
+      "type": "target_architecture",
+      "schema_version": "1.0",
+      "items": {
+        "document_control": {
+          "document_id": "ta-harvestlink",
+          "version": "1.0",
+          "status": "DRAFT",
+          "mode": "GREENFIELD-CREATE",
+          "approval": {
+            "gate": "Enterprise Architect",
+            "approver": null,
+            "date": null
+          },
+          "regulatory_regimes": [
+            "food-business-operator-registration",
+            "uk-tax-records",
+            "psd2-payments",
+            "uk-gdpr"
+          ],
+          "principles_source": "catalogue-provisional",
+          "gate_ready": true
+        },
+        "_note": "Remaining items identical to input-01; trimmed. Only document_control.status matters for this case."
+      },
+      "artifacts": [
+        {
+          "id": "artifact-ta-7d2e90b4",
+          "type": "document",
+          "name": "target-architecture.md",
+          "format": "markdown",
+          "storage": {
+            "provider": "s3",
+            "location": "s3://adlc-artifacts/harvestlink/wf-hl-step1-4b7e21c9/target-architecture.md"
+          },
+          "description": "HarvestLink target architecture v1.0, APPROVED by the Enterprise Architect 2026-10-22. Full text: L0-design-target-architect/examples/artifacts/target-architecture.md (status line reads DRAFT there; approved copy is identical apart from front matter).",
+          "produced_by": "L0-design-target-architect"
+        }
+      ],
+      "execution_summary": "• Produced target-architecture.md v1.0 (DRAFT, gate_ready: true): 5 contexts, 8 components, 10 edges, 10 aggregates, 8 invariants, 12 constraints, 30 demands (8 DAT, 12 INT, 10 PLT), 7 controls, 3 OPEN triggers.\n• Non-obvious boundaries: FBO registration in Identity rather than Catalogue (different regulator; two consumers); Payouts kept in Billing (same regulator; splitting creates a second financial SoR); Search kept inside Catalogue (no language of its own).\n• Collisions: INV-03 (order keeps price shown) vs CON-03/CON-07 (identifier only) — resolved by CON-09 transactional snapshot, ADR-006 proposed. Request-path needs vs async default — DEV-01 under PREC-02.\n• PENDING budgets: REQ-INT-05 identity latency (OQ-01); REQ-INT-11 supplier-master latency and failure behaviour (OQ-02).\n• Principles: PROVISIONAL from the kb-L0-enterprise-architecture catalogue — binding-principles.json absent. DEV-01 against PRIN-03 (DIRECTIONAL).\n• KBs: kb-L0-enterprise-architecture — PRIN-01..08 hooks, PREC-02, EA2/EA3 (employee-only group identity, no ledger posting, read-only supplier master). kb-L0-enterprise-security — ES1 external identity, ES2 classes, ES3 6-year regulated evidence, ES9 residency, ES10 encryption and attribution.\n• Guardrails: gr-L0-output-schema-validator pass; gr-L0-hallucination-check pass; gr-L0-consistency-check pass; gr-L0-pii-detection pass.\n• Tools: tool-L0-azure-blob-reader (1 call; prd.md found, binding-principles.json and vision.md absent); tool-L0-azure-blob-writer wrote s3://adlc-artifacts/harvestlink/wf-hl-step1-4b7e21c9/target-architecture.md."
+    }
+  }
+}

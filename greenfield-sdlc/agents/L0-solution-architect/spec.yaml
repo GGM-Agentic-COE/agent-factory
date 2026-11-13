@@ -1,0 +1,107 @@
+# Agent Specification Document
+spec_version: "1.0"
+artifact_type: agent
+metadata:
+  name: L0-solution-architect
+  version: "1.0.0"
+  layer: L0
+  phase: design
+  owner: agentic-ai-coe
+  created: "2026-10-15"
+  regime_step: "Cycle 0 — platform and data foundation (greenfield). Architecture in the ADLC § 6"
+  invocation: "foundational (runs once per greenfield project, at Cycle 0). The per-change invocation — editing sections in place on a change branch (Step 2) — is NOT built here. See README."
+  supersedes_when_adopted: [L0-design-data-architect, L0-design-integration-architect, L0-design-platform-architect]   # v2 regime: one file, one agent. See README "Relationship to the three viewpoint architects"
+
+purpose:
+  description: "Writes solution-architecture.md: DAT-1..4 (entity model, event envelope, classification policy, planes), INT-1..4 (protocol decisions per edge, contract rules, event topology, flows), PLT-1..6 (runtime, environments, pipeline and Cycle 0 exit proof, observability, resilience, capability register) and the implemented security controls. Each section carries satisfies/realises links back to the target."
+  input: "target-architecture.md (required, APPROVED) and prd.md (optional). Each arrives as direct input, an uploaded file (.md, .json or a Confluence .html/.xml export), or a Confluence page read by page id with tool-L0-confluence-reader, in that order of precedence. The three KBs are read from Confluence by page id. Technology approval comes from the enterprise architecture KB's approved platform catalogue; principles come from the target's Section 3."
+  output: "solution-architecture.md returned in full in artifacts[0].content (not published — L0-solution-architect-evaluator evaluates it and publishes it to Confluence) as a DRAFT for the Solution Architect and Platform Lead gates, plus structured items: entity ownership, classification, events, per-edge protocol decisions, contracts, topics, technology selections, capability register, satisfaction index, pending decisions and the Cycle 0 exit proof."
+  business_value: "Turns 'did we think about platform?' into a lookup. The capability register is what every later impact assessment checks, and each NOT PRESENT row it hits raises the change to Tier 2 before work is committed rather than mid-build. The satisfaction index is what lets conformance report a target demand as NOT-YET-BUILT instead of silently unmet. Deciding only what Cycle 0 needs, and recording a trigger for the rest, keeps platform decisions from being made under delivery pressure or guessed against requirements that do not exist yet."
+
+prompt:
+  ref: "prompts/L0-solution-architect/instructions.md"
+  version: "1.0.0"
+  description: >
+    Validates that the target is APPROVED, decides only the capabilities
+    Cycle 0 needs (band First, High lead time, exit-proof needs, cross-context
+    policies) and defers the rest as NOT PRESENT. Selects technology in the
+    order estate mandate → EA11 adopt → PROPOSED (lifecycle
+    unverified), never retire. Writes one rule per invariant or constraint
+    that needs a mechanism, one INT-1 decision per APP-2.3 edge, and a
+    satisfaction index covering every target REQ-*. The
+    solution-architecture.md Document Template is read from GitHub
+    (template_repo / template_branch / template_folder), not embedded.
+
+contract:
+  input_schema: "$ref: schemas/agent-input-contract-schema.json"
+  output_schema: "$ref: schemas/agent-output-schema.json"
+
+  input:
+    accepts_from_agents: [L0-design-target-architect, L0-prd-composer]
+    accepts_direct_input: true
+    accepts_file_upload:
+      enabled: true
+      formats: [".md", ".json", ".html", ".xml"]   # .html/.xml = a Confluence page export (storage format)
+      identified_by: "file name (target-architecture.md, prd.md), else content: front matter 'document: target-architecture' or the APP/CON/REQ spine for the target; FRs with NFRs for the PRD"
+    input_precedence: [direct_input, file_upload, confluence_page]   # resolved per input; a page is fetched only when the input did not arrive another way
+    required_parameters:      # the target IS also required, but by any of the three routes: target_architecture_output, an upload, or target_architecture_page_id. None of them -> INSUFFICIENT_CONTEXT
+      template_repo: { type: string, description: "GitHub repository holding the Document Template, e.g. agentic-sdlc-knowledge-bases (or GGM-Agentic-COE/agentic-sdlc-knowledge-bases)" }
+      template_branch: { type: string, description: "Branch of template_repo, e.g. main" }
+      template_folder: { type: string, description: "Folder holding solution-architecture-template.md, e.g. '3. design-and-architecture/solution-architecture/templates'. Unreadable -> REFERENCE_UNAVAILABLE" }
+    optional_parameters:
+      target_architecture_output: { type: object, description: "Route 1 for the target: an upstream agent output or the document text. Must contain APP-1, APP-2, an interaction table (Section 5 R-nn, or the older APP-2.3 E-nn), CON-* and REQ-*, else INSUFFICIENT_CONTEXT, and be approved, else TARGET_NOT_APPROVED (see allow_draft_target)" }
+      target_architecture_page_id: { type: string, description: "Route 3 for the target: numeric Confluence page id (page id only, no base URL). Fetched only when the target was neither passed directly nor uploaded" }
+      enterprise_architecture_kb_page_id: { type: string, description: "Confluence page id of kb-L0-enterprise-architecture (approved platform catalogue, regions, estate rules). Required: unreadable or not supplied -> REFERENCE_UNAVAILABLE" }
+      enterprise_security_kb_page_id: { type: string, description: "Confluence page id of kb-L0-enterprise-security (retention, availability tiers, residency, encryption). Required: unreadable or not supplied -> REFERENCE_UNAVAILABLE" }
+      domain_api_patterns_kb_page_id: { type: string, description: "Confluence page id of kb-L0-food-domain-api-patterns (sync/async table, event taxonomy). Unreadable or not supplied -> degraded run with lowered INT-1 confidence" }
+      example_repo: { type: string, description: "OPTIONAL. GitHub repository holding the reference example solution architecture (style only — voice, density, section layout; never a source of facts). Leave example_repo, example_branch or example_folder empty and no GitHub call is made" }
+      example_branch: { type: string, description: "Branch of example_repo, e.g. main" }
+      example_folder: { type: string, description: "Folder holding the example; the file ending in solution-architecture.md is used. Unreadable -> the run proceeds on the template alone and says so" }
+      prd_output: { type: object, description: "Route 1 for the PRD: an upstream agent output or the document text" }
+      hosting_cloud: { type: string, enum: [azure, aws], description: "Which cloud's kb-L0-enterprise-architecture EA11 rows and regions to select from. Absent → the EA11 group default (Azure). Pass aws for a product already on AWS, e.g. the HarvestLink reference docs" }
+      allow_draft_target: { type: boolean, default: false, description: "Dry-run switch. Builds on a DRAFT target, warns in the document's first line, and forces gate_ready false" }
+      prd_page_id: { type: string, description: "Route 3 for the PRD: numeric Confluence page id (page id only). Fetched only when the PRD was neither passed directly nor uploaded. The PRD is read only for NFR boundary conditions the target did not carry, never overrides a target budget, and its absence is normal" }
+      workflow_execution_id: { type: string, description: "Inherited from the upstream output" }
+
+  output:
+    $ref: "output_schema.json"
+
+context:
+  # The three KBs are READ FROM CONFLUENCE with tool-L0-confluence-reader, one call per page,
+  # page ids passed as input. They are NOT attached at runtime. The agent tells them apart by
+  # content (catalogue / security standards / sync-async table), never by page title.
+  # L0-solution-architect-evaluator reads the SAME three pages.
+  knowledge_bases: []
+  knowledge_base_sources:
+    confluence_page_ids: ["{{enterprise_architecture_kb_page_id}}", "{{enterprise_security_kb_page_id}}", "{{domain_api_patterns_kb_page_id}}"]
+    content:
+      - kb-L0-enterprise-architecture    # EA11 approved platform catalogue (STD-TECH-01) + approved regions; BP8 PRIN-07 lifecycle rule, PRIN-08 operability; EA2 estate, EA3/EA4 integration routes, EA6 SLA tiers, EA9 mandates (API gateway), EA10 governance triggers
+      - kb-L0-enterprise-security        # ES1 external identity, ES3 retention, ES4 availability tiers, ES5 secure SDLC, ES9 residency regions, ES10 encryption and keys
+      - kb-L0-food-domain-api-patterns   # swappable domain half: FD3 event taxonomy, FD4 sync/async decision table, FD5 versioning under regulatory change, FD7 idempotency, FD8 domain observability
+  guardrails:
+    - gr-L0-output-schema-validator
+    - gr-L0-hallucination-check        # no technology, number or region that no source supports
+    - gr-L0-consistency-check          # entity set and edge set match the target; satisfaction index total
+    - gr-L0-pii-detection
+    - gr-L0-secret-scanner             # not built — listed because this document is where connection details tend to leak
+  tools:
+    - tool-L0-confluence-reader        # page_id only; returns storage-format XHTML. Reads the three KB pages every run, and the target / PRD pages only when they arrived neither directly nor as an upload
+    - tool-L0-github-reader-using-app  # the Document Template (required) and, if configured, the reference example (style only, never facts). In Copilot Studio: the GitHub connector's MCP server with only get_file_contents on
+  # No write tool. The document is returned in full in artifacts[0].content;
+  # L0-solution-architect-evaluator evaluates it and publishes it to Confluence.
+
+quality:
+  evaluation_ref: "evaluation.md"
+  min_score: 7.0        # self-check bar. Real gates: Solution Architect (DAT/INT/SEC),
+                        # Platform Lead (PLT and the Cycle 0 exit proof).
+  hallucination_check: true
+  consistency_check: true
+
+performance:
+  target_latency_seconds: 600
+  max_token_budget: 40000      # the reference-style document is ~19k tokens; items add ~8k. One long final answer: raise the platform's execution/response timeouts accordingly
+
+versioning:
+  input_version: "1.0"
+  output_version: "1.0"
+  instruction_hash: "sha256:pending"

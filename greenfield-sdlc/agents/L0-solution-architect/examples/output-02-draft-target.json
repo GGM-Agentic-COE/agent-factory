@@ -1,0 +1,14 @@
+{
+  "agent_id": "L0-solution-architect",
+  "agent_version": "1.0.0",
+  "execution_id": "exec-sa-0b7c4e19",
+  "workflow_execution_id": "wf-hl-cycle0-71aa93c0",
+  "status": "failed",
+  "content": {
+    "type": "solution_architecture",
+    "schema_version": "1.0",
+    "items": {},
+    "artifacts": [],
+    "execution_summary": "• Produced no solution architecture — TARGET_NOT_APPROVED.\n• target-architecture.md was read with status DRAFT (no Enterprise Architect approval) and allow_draft_target was false. Every satisfies link in solution-architecture.md points at target text; building on a draft would tie Cycle 0 decisions to wording that may still change at the gate.\n• Reflection: confirmed nothing was derived or written. Set allow_draft_target: true for a dry run; the document would then carry a warning in its first line and gate_ready false.\n• Knowledge bases consulted: none.\n• Guardrails evaluated: gr-L0-hallucination-check (pass — nothing derived), gr-L0-pii-detection (pass), gr-L0-output-schema-validator (n/a — failed status), gr-L0-consistency-check (n/a).\n• Tools invoked: none — the target was supplied directly as target_architecture_output, so tool-L0-confluence-reader was not called for page 524377. Nothing returned in artifacts.\n• Gaps flagged: obtain Enterprise Architect approval of target-architecture.md, then re-run."
+  }
+}

@@ -1,0 +1,1472 @@
+{
+  "agent_id": "L0-solution-architect",
+  "agent_version": "1.0.0",
+  "execution_id": "exec-sa-5c81d7e2",
+  "workflow_execution_id": "wf-hl-cycle0-6e1f02aa",
+  "status": "success",
+  "content": {
+    "type": "solution_architecture",
+    "schema_version": "1.0",
+    "items": {
+      "document_control": {
+        "document": "solution-architecture",
+        "status": "DRAFT",
+        "satisfies_from": "target-architecture.md@1.0",
+        "target_status_read": "APPROVED",
+        "target_source": "direct",
+        "prd_source": "none",
+        "technology_sources": [
+          "kb-L0-enterprise-architecture EA11 (STD-TECH-01 v1.1, APPROVED)",
+          "kb-L0-enterprise-architecture EA2/EA9"
+        ],
+        "catalogue_status": "APPROVED",
+        "gate_ready": true
+      },
+      "entity_ownership": [
+        {
+          "entity": "Product",
+          "owning_context": "Catalogue",
+          "system_of_record": "Catalogue",
+          "classification": "Public",
+          "retention": "PENDING",
+          "residency": "UK South",
+          "physical_location": "catalogue.product",
+          "status": "planned",
+          "source": "target SEC.2",
+          "pending_ref": "PEND-02"
+        },
+        {
+          "entity": "Listing",
+          "owning_context": "Catalogue",
+          "system_of_record": "Catalogue",
+          "classification": "Public",
+          "retention": "PENDING",
+          "residency": "UK South",
+          "physical_location": "catalogue.listing",
+          "status": "planned",
+          "source": "target SEC.2",
+          "pending_ref": "PEND-02"
+        },
+        {
+          "entity": "ListingImage",
+          "owning_context": "Catalogue",
+          "system_of_record": "Catalogue",
+          "classification": "Public",
+          "retention": "PENDING",
+          "residency": "UK South",
+          "physical_location": "catalogue.listing_image",
+          "status": "planned",
+          "source": "target SEC.2",
+          "pending_ref": "PEND-02"
+        },
+        {
+          "entity": "Category",
+          "owning_context": "Catalogue",
+          "system_of_record": "Catalogue",
+          "classification": "Public",
+          "retention": "PENDING",
+          "residency": "UK South",
+          "physical_location": "catalogue.category",
+          "status": "planned",
+          "source": "target SEC.2",
+          "pending_ref": "PEND-02"
+        },
+        {
+          "entity": "Order",
+          "owning_context": "Orders",
+          "system_of_record": "Orders",
+          "classification": "Internal",
+          "retention": "6 y from placement",
+          "residency": "UK South",
+          "physical_location": "orders.order",
+          "status": "planned",
+          "source": "ES3 business record"
+        },
+        {
+          "entity": "OrderLine",
+          "owning_context": "Orders",
+          "system_of_record": "Orders",
+          "classification": "Internal",
+          "retention": "6 y from placement",
+          "residency": "UK South",
+          "physical_location": "orders.order_line",
+          "status": "planned",
+          "source": "ES3 business record"
+        },
+        {
+          "entity": "Transaction",
+          "owning_context": "Billing",
+          "system_of_record": "Billing",
+          "classification": "Financial",
+          "retention": ">= 10 y",
+          "residency": "UK South — financial-data region",
+          "physical_location": "billing.transaction",
+          "status": "planned",
+          "source": "REQ-DAT-04; ES9"
+        },
+        {
+          "entity": "Fee",
+          "owning_context": "Billing",
+          "system_of_record": "Billing",
+          "classification": "Financial",
+          "retention": ">= 10 y",
+          "residency": "UK South — financial-data region",
+          "physical_location": "billing.fee",
+          "status": "planned",
+          "source": "REQ-DAT-04; ES9"
+        },
+        {
+          "entity": "Payout",
+          "owning_context": "Billing",
+          "system_of_record": "Billing",
+          "classification": "Financial",
+          "retention": ">= 10 y",
+          "residency": "UK South — financial-data region",
+          "physical_location": "billing.payout",
+          "status": "planned",
+          "source": "target SEC.2 Financial; ES9"
+        },
+        {
+          "entity": "Statement",
+          "owning_context": "Billing",
+          "system_of_record": "Billing",
+          "classification": "Financial",
+          "retention": ">= 10 y",
+          "residency": "UK South — financial-data region",
+          "physical_location": "billing.statement",
+          "status": "planned",
+          "source": "target SEC.2 Financial; ES9"
+        },
+        {
+          "entity": "Producer",
+          "owning_context": "Identity",
+          "system_of_record": "Identity",
+          "classification": "PII",
+          "retention": "While account active; erased within 30 d of request except legal retention",
+          "residency": "UK South (ES9: UK)",
+          "physical_location": "identity.producer",
+          "status": "planned",
+          "source": "REQ-DAT-06; ES9"
+        },
+        {
+          "entity": "Buyer",
+          "owning_context": "Identity",
+          "system_of_record": "Identity",
+          "classification": "PII",
+          "retention": "While account active; erased within 30 d of request except legal retention",
+          "residency": "UK South (ES9: UK)",
+          "physical_location": "identity.buyer",
+          "status": "planned",
+          "source": "REQ-DAT-06; ES9"
+        },
+        {
+          "entity": "Session",
+          "owning_context": "Identity",
+          "system_of_record": "Identity",
+          "classification": "PII",
+          "retention": "PENDING",
+          "residency": "UK South (ES9: UK)",
+          "physical_location": "identity.session",
+          "status": "planned",
+          "source": "ES9 residency; retention PEND-03",
+          "pending_ref": "PEND-03"
+        },
+        {
+          "entity": "FboRegistration",
+          "owning_context": "Identity",
+          "system_of_record": "Identity",
+          "classification": "Regulated Evidence",
+          "retention": "6 y from creation",
+          "residency": "UK South (ES9: UK)",
+          "physical_location": "identity.fbo_registration",
+          "status": "planned",
+          "source": "REQ-DAT-07; ES3"
+        }
+      ],
+      "data_rules": [
+        {
+          "id": "DAT-1.a",
+          "rule": "Exactly one system of record per entity, no exceptions",
+          "realises": [
+            "CON-02"
+          ]
+        },
+        {
+          "id": "DAT-1.b",
+          "rule": "References across contexts by id only, except snapshots registered under CON-09",
+          "realises": [
+            "CON-03"
+          ]
+        },
+        {
+          "id": "DAT-1.c",
+          "rule": "Money is a minor-unit integer with explicit currency; listing price checked greater than zero",
+          "realises": [
+            "INV-02"
+          ]
+        },
+        {
+          "id": "DAT-1.d",
+          "rule": "One schema per context; one database role per component granted on its own schema only",
+          "realises": [
+            "CON-04"
+          ]
+        },
+        {
+          "id": "DAT-1.e",
+          "rule": "Snapshot register: every CON-09 copy registered before first use with freezing event and capturing contract",
+          "realises": [
+            "CON-09",
+            "INV-03"
+          ]
+        },
+        {
+          "id": "DAT-1.f",
+          "rule": "Fee and Transaction append-only: no update/delete rights, rejecting trigger, reversal rows, archive at period close",
+          "realises": [
+            "INV-05",
+            "INV-06"
+          ]
+        },
+        {
+          "id": "DAT-1.g",
+          "rule": "FBO validity windows inserted never updated; overlap refused by the store",
+          "realises": [
+            "INV-08"
+          ]
+        },
+        {
+          "id": "DAT-1.h",
+          "rule": "Order unique on (buyer_id, idempotency_key); a repeat returns the existing order",
+          "realises": [
+            "INV-04"
+          ]
+        },
+        {
+          "id": "DAT-1.i",
+          "rule": "A transaction's payout reference is set once at period close and never reassigned",
+          "realises": [
+            "INV-07"
+          ]
+        }
+      ],
+      "snapshot_register": [
+        {
+          "source": "Listing.price_minor_units (Catalogue)",
+          "capturing_column": "orders.order_line.unit_price_minor_units_at_placement",
+          "frozen_by": "order placement",
+          "captured_via": "catalogue.listing-availability (INT-1.01)",
+          "status": "planned"
+        }
+      ],
+      "classification_register": [
+        {
+          "classification": "Public",
+          "retention": "Per entity — PENDING (PEND-02)",
+          "residency": "UK South",
+          "at_rest": "Platform-managed encryption",
+          "erasure": "n/a"
+        },
+        {
+          "classification": "Internal",
+          "retention": "6 y (ES3 business records)",
+          "residency": "UK South",
+          "at_rest": "Platform-managed encryption",
+          "erasure": "n/a"
+        },
+        {
+          "classification": "PII",
+          "retention": "While active; erasure <= 30 d (REQ-DAT-06)",
+          "residency": "UK (ES9) — UK South",
+          "at_rest": "Customer-managed keys in Key Vault (ES10)",
+          "erasure": "honoured subject to legal hold"
+        },
+        {
+          "classification": "Financial",
+          "retention": ">= 10 y (REQ-DAT-04)",
+          "residency": "UK South financial-data region (ES9)",
+          "at_rest": "Customer-managed keys in Key Vault (ES10)",
+          "erasure": "overridden — statutory"
+        },
+        {
+          "classification": "Regulated Evidence",
+          "retention": "6 y from creation (ES3)",
+          "residency": "UK (ES9) — UK South",
+          "at_rest": "Customer-managed keys in Key Vault (ES10)",
+          "erasure": "overridden — statutory"
+        }
+      ],
+      "events": [
+        {
+          "event_type": "orders.order.placed",
+          "version": "1.0.0",
+          "producer": "orders-service",
+          "consumers": [
+            "billing-service",
+            "notification-service"
+          ],
+          "status": "planned"
+        },
+        {
+          "event_type": "billing.payout.scheduled",
+          "version": "1.0.0",
+          "producer": "billing-period-worker",
+          "consumers": [
+            "notification-service"
+          ],
+          "status": "planned"
+        },
+        {
+          "event_type": "platform.echo.emitted",
+          "version": "1.0.0",
+          "producer": "echo-service",
+          "consumers": [
+            "echo-service"
+          ],
+          "status": "planned"
+        }
+      ],
+      "data_planes": [
+        {
+          "plane": "operational",
+          "decision": "DECIDED",
+          "realization": "Azure Database for PostgreSQL - Flexible Server, zone-redundant, UK South; schema per context (DAT-1.d)"
+        },
+        {
+          "plane": "object",
+          "decision": "DECIDED",
+          "realization": "Azure Blob Storage; catalogue image container; separate Billing-owned immutable archive container"
+        },
+        {
+          "plane": "analytical",
+          "decision": "PENDING",
+          "pending_ref": "PEND-01"
+        }
+      ],
+      "flows": [
+        {
+          "id": "INT-1.01",
+          "edge_ref": "E-01",
+          "demand_ref": "REQ-INT-03",
+          "from": "orders-service",
+          "to": "catalogue-service",
+          "style": "sync",
+          "latency_budget": "200 ms p95",
+          "timeout": "200 ms (REQ-INT-03)",
+          "degraded_mode": "Fail-closed: checkout refused, retryable",
+          "permitted_by": "DEV-01",
+          "pending_ref": null
+        },
+        {
+          "id": "INT-1.02",
+          "edge_ref": "E-02",
+          "demand_ref": "REQ-INT-04",
+          "from": "orders-service",
+          "to": "billing-service",
+          "style": "event",
+          "latency_budget": "<= 5 s end to end",
+          "degraded_mode": "Retry with dead-letter; 7-day replay covers a 24 h Billing outage",
+          "pending_ref": null
+        },
+        {
+          "id": "INT-1.03",
+          "edge_ref": "E-03",
+          "demand_ref": "REQ-INT-06",
+          "from": "orders-service",
+          "to": "billing-service",
+          "style": "sync",
+          "latency_budget": "150 ms p95",
+          "timeout": "150 ms (REQ-INT-06)",
+          "degraded_mode": "Confirmation shows 'calculating' (deferral per FD4); never blocks",
+          "permitted_by": "DEV-01",
+          "pending_ref": null
+        },
+        {
+          "id": "INT-1.04",
+          "edge_ref": "E-04",
+          "demand_ref": "REQ-INT-05",
+          "from": "every service",
+          "to": "identity-service",
+          "style": "local_validation",
+          "degraded_mode": "Fail-closed: invalid or unverifiable token returns 401",
+          "pending_ref": null
+        },
+        {
+          "id": "INT-1.05",
+          "edge_ref": "E-05",
+          "demand_ref": "REQ-INT-07",
+          "from": "catalogue-service",
+          "to": "identity-service",
+          "style": "sync",
+          "latency_budget": "100 ms p95",
+          "timeout": "100 ms (same contract as INT-1.06)",
+          "degraded_mode": "Fail-closed: publication refused",
+          "permitted_by": "DEV-01",
+          "pending_ref": null
+        },
+        {
+          "id": "INT-1.06",
+          "edge_ref": "E-06",
+          "demand_ref": "REQ-INT-07",
+          "from": "orders-service",
+          "to": "identity-service",
+          "style": "sync",
+          "latency_budget": "100 ms p95",
+          "timeout": "100 ms allocated: 800 ms checkout - 200 ms (INT-1.01) = 600 ms; 100 ms here leaves 500 ms for Orders",
+          "degraded_mode": "Fail-closed: checkout refused",
+          "permitted_by": "DEV-01",
+          "pending_ref": null
+        },
+        {
+          "id": "INT-1.07",
+          "edge_ref": "E-07",
+          "demand_ref": "REQ-INT-08",
+          "from": "orders-service, billing-period-worker",
+          "to": "notification-service",
+          "style": "event",
+          "latency_budget": "<= 2 min to delivery",
+          "degraded_mode": "Retry with dead-letter",
+          "pending_ref": null
+        },
+        {
+          "id": "INT-1.08",
+          "edge_ref": "E-08",
+          "demand_ref": "REQ-INT-09",
+          "from": "buyer-spa, producer-spa",
+          "to": "owning services via Kong",
+          "style": "sync",
+          "latency_budget": "Per contract (INT-2)",
+          "timeout": "Per contract (INT-2)",
+          "degraded_mode": "As the owning contract's failure mode",
+          "permitted_by": "CON-07",
+          "pending_ref": null
+        },
+        {
+          "id": "INT-1.09",
+          "edge_ref": "E-09",
+          "demand_ref": "REQ-INT-11",
+          "from": "identity-service",
+          "to": "group supplier master",
+          "style": "PENDING",
+          "degraded_mode": "PENDING — target OQ-02",
+          "pending_ref": "PEND-05"
+        },
+        {
+          "id": "INT-1.10",
+          "edge_ref": "E-10",
+          "demand_ref": "REQ-INT-10",
+          "from": "payment provider",
+          "to": "billing-service",
+          "style": "inbound_webhook",
+          "latency_budget": "All settlements for a period before period close",
+          "degraded_mode": "Signature verified at TB-03; dedup on settlement reference; reconciliation pull at period close",
+          "pending_ref": "PEND-06"
+        }
+      ],
+      "contracts": [
+        {
+          "contract": "catalogue.listing-availability",
+          "owner": "catalogue-service",
+          "consumer": "orders-service",
+          "style": "sync",
+          "budget": "<= 200 ms p95",
+          "initial_state": "Planned"
+        },
+        {
+          "contract": "billing.fee-quote",
+          "owner": "billing-service",
+          "consumer": "orders-service",
+          "style": "sync",
+          "budget": "<= 150 ms p95",
+          "initial_state": "Planned"
+        },
+        {
+          "contract": "identity.fbo-validity",
+          "owner": "identity-service",
+          "consumer": "catalogue-service, orders-service",
+          "style": "sync",
+          "budget": "<= 100 ms p95 (allocated)",
+          "initial_state": "Planned"
+        },
+        {
+          "contract": "orders.checkout",
+          "owner": "orders-service",
+          "consumer": "buyer-spa",
+          "style": "sync via Kong",
+          "budget": "<= 800 ms p95",
+          "initial_state": "Planned"
+        },
+        {
+          "contract": "orders.confirmation",
+          "owner": "orders-service",
+          "consumer": "buyer-spa",
+          "style": "sync via Kong",
+          "budget": "<= 400 ms p95",
+          "initial_state": "Planned"
+        }
+      ],
+      "topics": [
+        {
+          "topic": "orders.order.placed",
+          "producer": "orders-service",
+          "consumers": [
+            "billing-service",
+            "notification-service"
+          ],
+          "ordering_key": "order_id",
+          "retention": "7 d",
+          "status": "planned"
+        },
+        {
+          "topic": "billing.payout.scheduled",
+          "producer": "billing-period-worker",
+          "consumers": [
+            "notification-service"
+          ],
+          "ordering_key": "producer_id",
+          "retention": "7 d",
+          "status": "planned"
+        },
+        {
+          "topic": "platform.echo.emitted",
+          "producer": "echo-service",
+          "consumers": [
+            "echo-service"
+          ],
+          "ordering_key": "event_id",
+          "retention": "7 d",
+          "status": "planned"
+        }
+      ],
+      "end_to_end_flows": [
+        {
+          "id": "FLOW-00",
+          "name": "Cycle 0 exit proof",
+          "status": "recorded"
+        }
+      ],
+      "technology_selections": [
+        {
+          "capability_class": "Container hosting",
+          "technology": "Azure Container Apps",
+          "source": "EA11",
+          "lifecycle": "adopt",
+          "decision_status": "DECIDED",
+          "satisfies": [
+            "REQ-PLT-01"
+          ],
+          "rejected_alternatives": [
+            {
+              "technology": "Azure Kubernetes Service",
+              "reason": "EA11 reserves it for workloads needing cluster-level control; no REQ needs that"
+            }
+          ]
+        },
+        {
+          "capability_class": "Experience hosting",
+          "technology": "Azure Blob Storage static sites + Azure Front Door",
+          "source": "EA11",
+          "lifecycle": "adopt",
+          "decision_status": "DECIDED",
+          "satisfies": [
+            "REQ-INT-09"
+          ],
+          "rejected_alternatives": []
+        },
+        {
+          "capability_class": "Relational database",
+          "technology": "Azure Database for PostgreSQL - Flexible Server",
+          "source": "EA11",
+          "lifecycle": "adopt",
+          "decision_status": "DECIDED",
+          "satisfies": [
+            "REQ-DAT-01",
+            "REQ-DAT-07"
+          ],
+          "rejected_alternatives": [
+            {
+              "technology": "Azure SQL Database",
+              "reason": "RULE DAT-1.g (INV-08) needs the store to refuse overlapping validity windows; PostgreSQL does this natively with an exclusion constraint"
+            }
+          ]
+        },
+        {
+          "capability_class": "Event streaming",
+          "technology": "Azure Event Hubs (Standard)",
+          "source": "EA11",
+          "lifecycle": "adopt",
+          "decision_status": "DECIDED",
+          "satisfies": [
+            "REQ-PLT-02"
+          ],
+          "rejected_alternatives": [
+            {
+              "technology": "Azure Service Bus",
+              "reason": "No consumer-independent replay of consumed messages; cannot meet REQ-PLT-02's 24 h replay window"
+            },
+            {
+              "technology": "MuleSoft Anypoint (Group ESB)",
+              "reason": "Lifecycle contain; new digital products publish through the API gateway (EA9)"
+            }
+          ]
+        },
+        {
+          "capability_class": "Object storage and delivery",
+          "technology": "Azure Blob Storage + Azure Front Door",
+          "source": "EA11",
+          "lifecycle": "adopt",
+          "decision_status": "DECIDED",
+          "satisfies": [
+            "REQ-PLT-04"
+          ],
+          "rejected_alternatives": []
+        },
+        {
+          "capability_class": "Immutable long-term retention",
+          "technology": "Azure Blob Storage, locked time-based immutability policy",
+          "source": "EA11",
+          "lifecycle": "adopt",
+          "decision_status": "DECIDED",
+          "satisfies": [
+            "REQ-PLT-03",
+            "REQ-DAT-04"
+          ],
+          "rejected_alternatives": [
+            {
+              "technology": "Database grants and trigger alone",
+              "reason": "Revocable by a DBA, so not demonstrable immutability for an external auditor (REQ-DAT-04)"
+            }
+          ]
+        },
+        {
+          "capability_class": "API gateway",
+          "technology": "Kong Gateway",
+          "source": "EA9",
+          "lifecycle": "adopt",
+          "decision_status": "DECIDED",
+          "satisfies": [
+            "REQ-INT-09"
+          ],
+          "rejected_alternatives": []
+        },
+        {
+          "capability_class": "External-party identity",
+          "technology": "Microsoft Entra External ID",
+          "source": "EA11",
+          "lifecycle": "adopt",
+          "decision_status": "DECIDED",
+          "satisfies": [
+            "REQ-PLT-09"
+          ],
+          "rejected_alternatives": [
+            {
+              "technology": "Azure AD B2C",
+              "reason": "Lifecycle retire in EA11"
+            },
+            {
+              "technology": "Group Azure AD",
+              "reason": "Employees only; must not be extended to external parties (EA2, ES1)"
+            }
+          ]
+        },
+        {
+          "capability_class": "Secrets and workload identity",
+          "technology": "Azure Key Vault + Azure Managed Identity",
+          "source": "EA11",
+          "lifecycle": "adopt",
+          "decision_status": "DECIDED",
+          "satisfies": [
+            "REQ-PLT-10"
+          ],
+          "rejected_alternatives": []
+        },
+        {
+          "capability_class": "Observability",
+          "technology": "Azure Monitor / Application Insights with OpenTelemetry",
+          "source": "EA11",
+          "lifecycle": "adopt",
+          "decision_status": "DECIDED",
+          "satisfies": [
+            "REQ-PLT-07",
+            "REQ-INT-12"
+          ],
+          "rejected_alternatives": []
+        },
+        {
+          "capability_class": "CI/CD and IaC",
+          "technology": "GitHub Actions + Terraform",
+          "source": "EA11",
+          "lifecycle": "adopt",
+          "decision_status": "DECIDED",
+          "satisfies": [],
+          "rejected_alternatives": []
+        },
+        {
+          "capability_class": "Container registry",
+          "technology": "Azure Container Registry",
+          "source": "none",
+          "lifecycle": "unverified",
+          "decision_status": "PROPOSED",
+          "satisfies": [],
+          "rejected_alternatives": []
+        },
+        {
+          "capability_class": "Contract verification",
+          "technology": "Pact broker",
+          "source": "none",
+          "lifecycle": "unverified",
+          "decision_status": "PROPOSED",
+          "satisfies": [
+            "REQ-INT-02"
+          ],
+          "rejected_alternatives": []
+        }
+      ],
+      "capability_register": [
+        {
+          "capability": "HTTP service hosting",
+          "status": "AVAILABLE",
+          "since": "C0",
+          "realization": "Azure Container Apps",
+          "lifecycle_check": "adopt",
+          "satisfies": [
+            "REQ-PLT-01"
+          ]
+        },
+        {
+          "capability": "Relational store",
+          "status": "AVAILABLE",
+          "since": "C0",
+          "realization": "PostgreSQL Flexible Server, schema per context",
+          "lifecycle_check": "adopt",
+          "satisfies": [
+            "REQ-DAT-01"
+          ]
+        },
+        {
+          "capability": "Event transport with replay",
+          "status": "AVAILABLE",
+          "since": "C0",
+          "realization": "Event Hubs Standard, 7-day retention",
+          "lifecycle_check": "adopt",
+          "satisfies": [
+            "REQ-PLT-02"
+          ]
+        },
+        {
+          "capability": "Object storage and delivery",
+          "status": "AVAILABLE",
+          "since": "C0",
+          "realization": "Blob Storage + Front Door",
+          "lifecycle_check": "adopt",
+          "satisfies": [
+            "REQ-PLT-04"
+          ]
+        },
+        {
+          "capability": "Immutable long-term retention",
+          "status": "AVAILABLE",
+          "since": "C0",
+          "realization": "Blob locked immutability policy",
+          "lifecycle_check": "adopt",
+          "satisfies": [
+            "REQ-PLT-03"
+          ],
+          "notes": "Provisioned early: High lead time in target § 4.2"
+        },
+        {
+          "capability": "Secrets and workload identity",
+          "status": "AVAILABLE",
+          "since": "C0",
+          "realization": "Key Vault + Managed Identity",
+          "lifecycle_check": "adopt",
+          "satisfies": [
+            "REQ-PLT-10"
+          ]
+        },
+        {
+          "capability": "Observability",
+          "status": "AVAILABLE",
+          "since": "C0",
+          "realization": "Application Insights + OpenTelemetry",
+          "lifecycle_check": "adopt",
+          "satisfies": [
+            "REQ-PLT-07"
+          ]
+        },
+        {
+          "capability": "API gateway",
+          "status": "AVAILABLE",
+          "since": "estate",
+          "realization": "Kong Gateway",
+          "lifecycle_check": "adopt (EA9 mandate)",
+          "satisfies": [
+            "REQ-INT-09"
+          ]
+        },
+        {
+          "capability": "External-party identity",
+          "status": "PARTIAL",
+          "since": "C0",
+          "realization": "Entra External ID",
+          "lifecycle_check": "adopt",
+          "satisfies": [
+            "REQ-PLT-09"
+          ],
+          "notes": "Non-production only until the ES5 security review"
+        },
+        {
+          "capability": "CI/CD and IaC",
+          "status": "AVAILABLE",
+          "since": "C0",
+          "realization": "GitHub Actions + Terraform",
+          "lifecycle_check": "adopt",
+          "satisfies": []
+        },
+        {
+          "capability": "Container registry",
+          "status": "AVAILABLE",
+          "since": "C0",
+          "realization": "Azure Container Registry",
+          "lifecycle_check": "unverified (PROPOSED) — SQ-01",
+          "satisfies": []
+        },
+        {
+          "capability": "Text search",
+          "status": "NOT_PRESENT",
+          "satisfies": [
+            "REQ-PLT-08"
+          ],
+          "needed_by_band": "Second"
+        },
+        {
+          "capability": "Scheduled jobs",
+          "status": "NOT_PRESENT",
+          "satisfies": [
+            "REQ-PLT-05"
+          ],
+          "needed_by_band": "Second"
+        },
+        {
+          "capability": "Evidenced email delivery",
+          "status": "NOT_PRESENT",
+          "satisfies": [
+            "REQ-PLT-06"
+          ],
+          "needed_by_band": "Third"
+        },
+        {
+          "capability": "Analytical store",
+          "status": "NOT_PRESENT",
+          "satisfies": [
+            "REQ-DAT-05"
+          ],
+          "needed_by_band": "Trigger",
+          "notes": "Decided when PEND-01 (OPEN-01) fires"
+        }
+      ],
+      "resilience": [
+        {
+          "component": "orders-service",
+          "availability_target": "99.9% monthly",
+          "source": "REQ-PLT-01"
+        },
+        {
+          "component": "catalogue-service",
+          "availability_target": "99.9% monthly",
+          "source": "REQ-PLT-01"
+        },
+        {
+          "component": "billing-service",
+          "availability_target": "99.9% monthly (fee quote)",
+          "source": "REQ-PLT-01"
+        },
+        {
+          "component": "identity-service",
+          "availability_target": "99.9% monthly",
+          "source": "REQ-PLT-01; ES4"
+        },
+        {
+          "component": "notification-service",
+          "availability_target": "PENDING (PEND-04)",
+          "source": "none in target; ES4 requires it stated",
+          "rto": "PENDING",
+          "rpo": "PENDING"
+        },
+        {
+          "component": "billing-period-worker",
+          "availability_target": "PENDING (PEND-04)",
+          "source": "none in target",
+          "rto": "PENDING",
+          "rpo": "PENDING"
+        }
+      ],
+      "security_controls": [
+        {
+          "id": "SEC-01",
+          "implemented_by": "One managed identity and database role per component, own schema only",
+          "sections": [
+            "DAT-1",
+            "PLT-1"
+          ]
+        },
+        {
+          "id": "SEC-02",
+          "implemented_by": "Kong validates Entra tokens at TB-01; services validate tokens and caller identities locally",
+          "sections": [
+            "INT-1",
+            "PLT-1"
+          ]
+        },
+        {
+          "id": "SEC-03",
+          "implemented_by": "Customer-managed keys for PII, Financial, Regulated Evidence; TLS everywhere; database audit logging",
+          "sections": [
+            "DAT-3",
+            "PLT-1"
+          ]
+        },
+        {
+          "id": "SEC-04",
+          "implemented_by": "INT-2 rule: every contract declares its authentication",
+          "sections": [
+            "INT-2"
+          ]
+        },
+        {
+          "id": "SEC-05",
+          "implemented_by": "Managed identity everywhere; Key Vault only; pipeline secret scan",
+          "sections": [
+            "PLT-1",
+            "PLT-3"
+          ]
+        },
+        {
+          "id": "SEC-06",
+          "implemented_by": "No production-to-lower copy path; synthetic fixtures",
+          "sections": [
+            "PLT-2"
+          ]
+        },
+        {
+          "id": "SEC-07",
+          "implemented_by": "Provider-hosted card capture; webhooks carry tokens only",
+          "sections": [
+            "INT-1"
+          ]
+        },
+        {
+          "id": "TB-01",
+          "implemented_by": "Kong TLS termination and token validation",
+          "sections": [
+            "PLT-1"
+          ]
+        },
+        {
+          "id": "TB-02",
+          "implemented_by": "Managed-identity tokens validated per contract",
+          "sections": [
+            "INT-1",
+            "PLT-1"
+          ]
+        },
+        {
+          "id": "TB-03",
+          "implemented_by": "Kong webhook signature verification; billing anti-corruption mapping",
+          "sections": [
+            "INT-1"
+          ]
+        },
+        {
+          "id": "TB-04",
+          "implemented_by": "Not yet implemented — access route is PEND-05",
+          "sections": [
+            "INT-1"
+          ]
+        }
+      ],
+      "satisfaction_index": [
+        {
+          "demand_id": "REQ-DAT-01",
+          "satisfied_by": [
+            "DAT-1"
+          ],
+          "status": "SATISFIED"
+        },
+        {
+          "demand_id": "REQ-DAT-02",
+          "satisfied_by": [
+            "DAT-1",
+            "DAT-3"
+          ],
+          "status": "NOT_YET_BUILT",
+          "note": "Retention PENDING for 5 entities (PEND-02, PEND-03)"
+        },
+        {
+          "demand_id": "REQ-DAT-03",
+          "satisfied_by": [
+            "DAT-2"
+          ],
+          "status": "SATISFIED"
+        },
+        {
+          "demand_id": "REQ-DAT-04",
+          "satisfied_by": [
+            "DAT-1",
+            "PLT-5"
+          ],
+          "status": "SATISFIED"
+        },
+        {
+          "demand_id": "REQ-DAT-05",
+          "satisfied_by": [
+            "DAT-4"
+          ],
+          "status": "SATISFIED",
+          "note": "Demand accepts a recorded trigger"
+        },
+        {
+          "demand_id": "REQ-DAT-06",
+          "satisfied_by": [
+            "DAT-1",
+            "DAT-3"
+          ],
+          "status": "SATISFIED"
+        },
+        {
+          "demand_id": "REQ-DAT-07",
+          "satisfied_by": [
+            "DAT-1"
+          ],
+          "status": "SATISFIED"
+        },
+        {
+          "demand_id": "REQ-DAT-08",
+          "satisfied_by": [
+            "DAT-1"
+          ],
+          "status": "SATISFIED"
+        },
+        {
+          "demand_id": "REQ-INT-01",
+          "satisfied_by": [
+            "INT-1"
+          ],
+          "status": "SATISFIED"
+        },
+        {
+          "demand_id": "REQ-INT-02",
+          "satisfied_by": [
+            "INT-2",
+            "INT-3"
+          ],
+          "status": "SATISFIED"
+        },
+        {
+          "demand_id": "REQ-INT-03",
+          "satisfied_by": [
+            "INT-1"
+          ],
+          "status": "SATISFIED"
+        },
+        {
+          "demand_id": "REQ-INT-04",
+          "satisfied_by": [
+            "INT-1",
+            "INT-3"
+          ],
+          "status": "SATISFIED"
+        },
+        {
+          "demand_id": "REQ-INT-05",
+          "satisfied_by": [
+            "INT-1"
+          ],
+          "status": "SATISFIED",
+          "note": "Local validation; no runtime call"
+        },
+        {
+          "demand_id": "REQ-INT-06",
+          "satisfied_by": [
+            "INT-1"
+          ],
+          "status": "SATISFIED"
+        },
+        {
+          "demand_id": "REQ-INT-07",
+          "satisfied_by": [
+            "INT-1"
+          ],
+          "status": "SATISFIED"
+        },
+        {
+          "demand_id": "REQ-INT-08",
+          "satisfied_by": [
+            "INT-1",
+            "INT-3"
+          ],
+          "status": "SATISFIED"
+        },
+        {
+          "demand_id": "REQ-INT-09",
+          "satisfied_by": [
+            "INT-2",
+            "PLT-1"
+          ],
+          "status": "SATISFIED"
+        },
+        {
+          "demand_id": "REQ-INT-10",
+          "satisfied_by": [
+            "INT-1"
+          ],
+          "status": "NOT_YET_BUILT",
+          "note": "Style decided; payment provider PENDING (PEND-06)"
+        },
+        {
+          "demand_id": "REQ-INT-11",
+          "satisfied_by": [],
+          "status": "NOT_YET_BUILT",
+          "note": "Access route PENDING (PEND-05)"
+        },
+        {
+          "demand_id": "REQ-INT-12",
+          "satisfied_by": [
+            "PLT-4"
+          ],
+          "status": "SATISFIED"
+        },
+        {
+          "demand_id": "REQ-PLT-01",
+          "satisfied_by": [
+            "PLT-1"
+          ],
+          "status": "SATISFIED"
+        },
+        {
+          "demand_id": "REQ-PLT-02",
+          "satisfied_by": [
+            "PLT-1"
+          ],
+          "status": "SATISFIED"
+        },
+        {
+          "demand_id": "REQ-PLT-03",
+          "satisfied_by": [
+            "PLT-5"
+          ],
+          "status": "SATISFIED"
+        },
+        {
+          "demand_id": "REQ-PLT-04",
+          "satisfied_by": [
+            "PLT-1"
+          ],
+          "status": "SATISFIED"
+        },
+        {
+          "demand_id": "REQ-PLT-05",
+          "satisfied_by": [],
+          "status": "NOT_YET_BUILT",
+          "note": "Capability deferred to band Second — PLT-6 NOT PRESENT"
+        },
+        {
+          "demand_id": "REQ-PLT-06",
+          "satisfied_by": [],
+          "status": "NOT_YET_BUILT",
+          "note": "Capability deferred to band Third — PLT-6 NOT PRESENT"
+        },
+        {
+          "demand_id": "REQ-PLT-07",
+          "satisfied_by": [
+            "PLT-4"
+          ],
+          "status": "SATISFIED"
+        },
+        {
+          "demand_id": "REQ-PLT-08",
+          "satisfied_by": [],
+          "status": "NOT_YET_BUILT",
+          "note": "Capability deferred to band Second — PLT-6 NOT PRESENT"
+        },
+        {
+          "demand_id": "REQ-PLT-09",
+          "satisfied_by": [
+            "PLT-1"
+          ],
+          "status": "SATISFIED",
+          "note": "PARTIAL in PLT-6 until the ES5 review"
+        },
+        {
+          "demand_id": "REQ-PLT-10",
+          "satisfied_by": [
+            "PLT-1"
+          ],
+          "status": "SATISFIED"
+        }
+      ],
+      "constraint_realisation": [
+        {
+          "constraint_id": "CON-01",
+          "realised_by": [
+            "PLT-1"
+          ]
+        },
+        {
+          "constraint_id": "CON-02",
+          "realised_by": [
+            "DAT-1.a"
+          ]
+        },
+        {
+          "constraint_id": "CON-03",
+          "realised_by": [
+            "DAT-1.b",
+            "DAT-1.e"
+          ]
+        },
+        {
+          "constraint_id": "CON-04",
+          "realised_by": [
+            "DAT-1.d",
+            "SEC-01"
+          ]
+        },
+        {
+          "constraint_id": "CON-05",
+          "realised_by": [
+            "INT-1"
+          ]
+        },
+        {
+          "constraint_id": "CON-06",
+          "realised_by": [
+            "INT-2",
+            "DAT-2"
+          ]
+        },
+        {
+          "constraint_id": "CON-07",
+          "realised_by": [
+            "INT-1",
+            "INT-2"
+          ]
+        },
+        {
+          "constraint_id": "CON-08",
+          "realised_by": [
+            "PLT-1",
+            "INT-1.04"
+          ]
+        },
+        {
+          "constraint_id": "CON-09",
+          "realised_by": [
+            "DAT-1.e"
+          ]
+        },
+        {
+          "constraint_id": "CON-10",
+          "realised_by": [
+            "DAT-3",
+            "DAT-1"
+          ]
+        },
+        {
+          "constraint_id": "CON-11",
+          "realised_by": [
+            "INT-1"
+          ]
+        },
+        {
+          "constraint_id": "CON-12",
+          "realised_by": [
+            "Deviations and exceptions"
+          ]
+        }
+      ],
+      "target_questions": [
+        {
+          "question_id": "OQ-01",
+          "outcome": "answered_by_design",
+          "how": "Identity validated locally (INT-1.04); no runtime call to budget",
+          "pending_ref": null
+        },
+        {
+          "question_id": "OQ-02",
+          "outcome": "carried",
+          "how": "Supplier-master route and behaviour carried as a pending decision",
+          "pending_ref": "PEND-05"
+        },
+        {
+          "question_id": "OQ-03",
+          "outcome": "answered_by_design",
+          "how": "Archive keeps statement figures and the rendered statement together (PLT-5)",
+          "pending_ref": null
+        }
+      ],
+      "pending_decisions": [
+        {
+          "id": "PEND-01",
+          "section": "DAT-4",
+          "decision_summary": "Whether an analytical plane exists, and its owner",
+          "status": "PENDING",
+          "trigger": "First requirement that aggregates over more than one month, joins two contexts, or has a non-interactive read SLA (target OPEN-01)",
+          "owner": "Solution Architect; Enterprise Architect if a CON is amended",
+          "blocks_cycle0_exit": false
+        },
+        {
+          "id": "PEND-02",
+          "section": "DAT-1",
+          "decision_summary": "Retention of Product, Listing, ListingImage, Category after withdrawal",
+          "status": "PENDING",
+          "trigger": "The first requirement to purge or archive catalogue data",
+          "owner": "Product Lead + Solution Architect",
+          "blocks_cycle0_exit": false
+        },
+        {
+          "id": "PEND-03",
+          "section": "DAT-1",
+          "decision_summary": "Retention of Session",
+          "status": "PENDING",
+          "trigger": "Before the first change that persists a Session (EPIC-01); CON-10 requires it before first persistence",
+          "owner": "Product Lead + Security",
+          "blocks_cycle0_exit": false
+        },
+        {
+          "id": "PEND-04",
+          "section": "PLT-5",
+          "decision_summary": "RTO, RPO and availability tier of non-checkout components",
+          "status": "PENDING",
+          "trigger": "A recovery NFR is added to the PRD, or the go-live readiness review starts, whichever comes first",
+          "owner": "Platform Lead",
+          "blocks_cycle0_exit": false
+        },
+        {
+          "id": "PEND-05",
+          "section": "INT-1",
+          "decision_summary": "Access route and failure behaviour for the group supplier master",
+          "status": "PENDING",
+          "trigger": "Target OQ-02 answered and Core IT confirms whether the supplier master exposes an API or is ESB-only",
+          "owner": "Solution Architect",
+          "blocks_cycle0_exit": false
+        },
+        {
+          "id": "PEND-06",
+          "section": "INT-1",
+          "decision_summary": "Payment provider selection",
+          "status": "PENDING",
+          "trigger": "Before the first change in EPIC-04 that records a Transaction",
+          "owner": "Product Lead + Solution Architect",
+          "blocks_cycle0_exit": false
+        },
+        {
+          "id": "PEND-07",
+          "section": "PLT-5",
+          "decision_summary": "Hot-tier window for Financial records",
+          "status": "PENDING",
+          "trigger": "The first requirement to purge or move Financial records out of the operational store",
+          "owner": "Solution Architect",
+          "blocks_cycle0_exit": false
+        }
+      ],
+      "deviations": [
+        {
+          "id": "DEV-01",
+          "realised_in": [
+            "INT-1.01",
+            "INT-1.03",
+            "INT-1.05",
+            "INT-1.06"
+          ],
+          "summary": "Request-path sync calls, each budgeted with a fail-closed or deferring degraded mode"
+        }
+      ],
+      "exceptions_recorded": [],
+      "cycle0_exit_proof": {
+        "criteria": [
+          {
+            "criterion": "Trivial service built and deployed to production through the pipeline",
+            "evidence_required": "Pipeline run id and prod revision of echo-service",
+            "status": "NOT_YET_PROVEN"
+          },
+          {
+            "criterion": "Observed end to end",
+            "evidence_required": "One trace spanning Kong, echo-service and Event Hubs with correlation_id",
+            "status": "NOT_YET_PROVEN"
+          },
+          {
+            "criterion": "Emits and consumes an event",
+            "evidence_required": "platform.echo.emitted produced and consumed; consumer log shows event_id",
+            "status": "NOT_YET_PROVEN"
+          },
+          {
+            "criterion": "Secrets only from Key Vault via managed identity",
+            "evidence_required": "Repository secret scan clean; no app setting holds a secret",
+            "status": "NOT_YET_PROVEN"
+          },
+          {
+            "criterion": "Relational store isolates contexts",
+            "evidence_required": "Role-grant query shows no cross-schema grant",
+            "status": "NOT_YET_PROVEN"
+          },
+          {
+            "criterion": "Immutable archive cannot be shortened",
+            "evidence_required": "Immutability policy locked, >= 10 y",
+            "status": "NOT_YET_PROVEN"
+          },
+          {
+            "criterion": "Object storage and delivery",
+            "evidence_required": "Test image served through Front Door within 300 ms p95",
+            "status": "NOT_YET_PROVEN"
+          },
+          {
+            "criterion": "Edge gateway validates identity",
+            "evidence_required": "Request without token returns 401 through Kong",
+            "status": "NOT_YET_PROVEN"
+          },
+          {
+            "criterion": "External-party identity (non-production)",
+            "evidence_required": "Test buyer signs in through Entra External ID",
+            "status": "NOT_YET_PROVEN"
+          },
+          {
+            "criterion": "Pipeline, IaC and registry",
+            "evidence_required": "Terraform apply succeeded in all four environments",
+            "status": "NOT_YET_PROVEN"
+          }
+        ],
+        "gate": "Platform Lead"
+      },
+      "open_questions": [
+        {
+          "id": "SQ-01",
+          "question": "EA11 lists no container registry or contract-verification tool. Should Azure Container Registry and a Pact broker be added to EA11, or which approved tools replace them?",
+          "origin": "catalogue_gap",
+          "doc_location": "PLT-1; INT-2; PLT-6",
+          "blocks_gate": false
+        }
+      ],
+      "self_check": {
+        "content_boundary": "pass",
+        "completeness": "pass",
+        "grounding": "pass",
+        "quality_findings": [
+          "EA11 has no container registry or contract-verification entry; both are PROPOSED (SQ-01)"
+        ]
+      }
+    },
+    "artifacts": [
+      {
+        "id": "artifact-sa-5c81d7e2",
+        "type": "document",
+        "name": "solution-architecture.md",
+        "format": "markdown",
+        "content": "<the full markdown document, verbatim. Its structure, tone and density follow examples/artifacts/solution-architecture.md, the reference rendering (written for target 4.2, so its ids differ from this input)>",
+        "description": "HarvestLink solution architecture at Cycle 0, DRAFT for the Solution Architect and Platform Lead gates. Not published; L0-confluence-publisher publishes it.",
+        "produced_by": "L0-solution-architect"
+      }
+    ],
+    "execution_summary": "• Produced solution-architecture.md (DRAFT, gate_ready: true): 14 entities, 9 data rules, 1 snapshot, 3 events, 10 edge decisions, 5 contracts, 3 topics, 15 capability rows, 7 PENDs. 24 of 30 demands satisfied; 6 NOT_YET_BUILT.\n• Decided at Cycle 0: hosting, relational store, event transport, object storage and delivery, immutable archive (High lead time), secrets, observability, gateway, external identity (PARTIAL until ES5 review), CI/CD. Deferred: text search and scheduled jobs (band Second), email (band Third), analytical store (OPEN-01 trigger).\n• Technology: 11 DECIDED from EA11 (APPROVED) or EA9; 2 PROPOSED with lifecycle unverified (container registry, pact broker — SQ-01). Rejected on lifecycle: Azure AD B2C (retire), MuleSoft ESB (contain). No exceptions taken.\n• Target questions: OQ-01 answered by design (local token validation); OQ-03 answered by design (archive keeps figures and rendered statement); OQ-02 carried as PEND-05.\n• KBs: kb-L0-enterprise-architecture — EA11 approved platform catalogue and regions, EA9 gateway mandate, EA3/EA4 supplier-master rules, BP8 lifecycle rule. kb-L0-enterprise-security — ES1, ES3, ES4, ES5, ES9, ES10. kb-L0-food-domain-api-patterns — FD4 sync table and degraded modes, FD7 consumer declarations, FD8 signals.\n• Guardrails: gr-L0-output-schema-validator pass; gr-L0-hallucination-check pass; gr-L0-consistency-check pass; gr-L0-pii-detection pass; gr-L0-secret-scanner not built.\n• Inputs: target-architecture.md passed directly, so Confluence page 524301 was not fetched; prd.md was not passed, not uploaded and had no page id, so the run continued without it.\n• Tools: tool-L0-confluence-reader not called — the target was supplied directly and no PRD page id was given. The document is returned in artifacts[0].content; it was not published."
+  }
+}
