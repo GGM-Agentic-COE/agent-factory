@@ -11,7 +11,7 @@ metadata:
 
 purpose:
   description: "Independently re-verifies L0-solution-architect's completeness and grounding — every target entity in DAT-1, every APP-2.3 edge in INT-1, every REQ-* in the satisfaction index, every CON-* in the constraint realisation table, every capability class in PLT-6, every SEC-*/TB-* in the security controls — none accepted on the generator's self-check claim alone."
-  input: "L0-solution-architect's JSON output (solution-architecture.md in artifacts[0].content), target-architecture.md and optionally prd.md (each an uploaded file or a Confluence page id), the three KBs (Confluence page ids, the same pages the generator read) and the rubric (GitHub)."
+  input: "solution-architecture.md, from the first of: S3 (s3_folder_name, or the folder in the generator JSON's artifacts[0].storage), the generator JSON's artifacts[0].content, or an upload, target-architecture.md and optionally prd.md (each an uploaded file or a Confluence page id), the three KBs (Confluence page ids, the same pages the generator read) and the rubric (GitHub)."
   output: "Scores, findings, any fixes applied to solution-architecture.md, and a final decision. The corrected document is published to Confluence as '<product>-solution-architecture.md' on every run, including escalate_to_hitl, in chunks of whole sections (one writer call each) so no call times out."
   business_value: "The generator's own Reflection block covers what the agent thought it did — not whether every target entity, edge, demand, constraint and security control actually made it in. A reversed INT-1 edge direction, a dropped REQ-* in the satisfaction index, or a technology marked DECIDED when EA11 was absent are all schema-valid and undetectable without an independent pass. This agent catches those before the Solution Architect and Platform Lead gates."
 
@@ -38,6 +38,7 @@ contract:
       enterprise_architecture_kb_page_id: { type: string, description: "Same page the generator read: approved platform catalogue, regions" }
       enterprise_security_kb_page_id: { type: string, description: "Same page the generator read: retention, availability tiers, residency" }
     optional_parameters:
+      s3_folder_name: { type: string, description: "S3 folder (key prefix) holding solution-architecture.md, the same value the generator was given, e.g. 'HarvestLink/wf-<id>'. Read with tool-L0-s3-files-reader. Not supplied -> the folder from the generator JSON's artifacts[0].storage; neither -> the generator JSON's content, then an upload" }
       target_architecture_page_id: { type: string, description: "Confluence page id of the target (page id only). Used when the target is not uploaded; one of the two is required" }
       prd_page_id: { type: string, description: "Confluence page id of the PRD (page id only). Optional" }
       domain_api_patterns_kb_page_id: { type: string, description: "Same page the generator read: sync/async table, event taxonomy" }
@@ -64,6 +65,7 @@ context:
   tools:
     - tool-L0-github-reader-using-app  # reads the rubric (evaluation.md) ONLY — one call, repo/branch/folder from input
     - tool-L0-confluence-reader        # page_id only; reads the three KB pages, and the target / PRD pages when not uploaded
+    - tool-L0-s3-files-reader          # ONE call: folder_name = s3_folder_name (or the generator's storage.folder), file_names = ["solution-architecture.md"]. Read-only; the evaluator never writes to S3
     - tool-L0-confluence-writer        # publishes the evaluated (corrected) document — title "<product>-solution-architecture.md", XHTML content, space_key from input. Always, including escalate_to_hitl. The ONLY write.
 
 quality:

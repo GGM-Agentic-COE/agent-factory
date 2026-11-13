@@ -48,8 +48,10 @@ generator JSON (artifacts[0].content) ──► this evaluator (evaluate + fix) 
                      target + KBs from Confluence (page ids) ─┘   rubric from GitHub ─┘
 ```
 
-1. Takes `solution-architecture.md` from the generator's JSON output (an
-   uploaded copy if the JSON is absent or its content is a path or pointer),
+1. Takes `solution-architecture.md` from **S3** with `tool-L0-s3-files-reader`
+   (`s3_folder_name`, or the folder in the generator JSON's
+   `artifacts[0].storage`), else from the generator JSON's
+   `artifacts[0].content`, else from an upload,
    and `target-architecture.md` / `prd.md` from an upload or by Confluence
    page id
 2. Reads the three KBs from **Confluence** by page id (the same pages the
@@ -77,13 +79,14 @@ generator JSON (artifacts[0].content) ──► this evaluator (evaluate + fix) 
 
 ## Input
 
-- **Source:** `L0-solution-architect`'s JSON output, passed by the
-  workflow (`solution-architecture.md` in `artifacts[0].content`)
+- **Source:** `solution-architecture.md` from S3 (`s3_folder_name`, the
+  same folder the generator saved to), else `L0-solution-architect`'s JSON
+  output (`artifacts[0].content`), else an upload
 - **Required:** `rubric_repo`, `rubric_branch`,
   `solution_architect_rubric_folder`, `confluence_space_key`,
   `enterprise_architecture_kb_page_id`, `enterprise_security_kb_page_id`,
   and the target as an upload or `target_architecture_page_id`
-- **Optional:** `prd_page_id`, `domain_api_patterns_kb_page_id`
+- **Optional:** `s3_folder_name`, `prd_page_id`, `domain_api_patterns_kb_page_id`
 
 ## Output
 

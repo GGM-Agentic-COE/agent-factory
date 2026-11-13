@@ -148,10 +148,18 @@ prompt tells the agent to read headings and tables and match section ids in
 their text. A copy supplied directly (`target_architecture_output`) or
 uploaded takes precedence and skips the target call.
 
-**Output.** The full document is returned in `artifacts[0].content`, the
-pattern `L0-vision-statement-generator` uses, never as a file path. No write
-tool is attached: `L0-solution-architect-evaluator` evaluates it,
-corrects it and publishes it to Confluence as
+**Output.** The full document is saved to S3 with `tool-L0-s3-writer`
+(one call: `folder_name = s3_folder_name`, `file_name =
+solution-architecture.md`), and the final JSON carries the S3 location in
+`artifacts[0].storage` (`bucket`, `key`, `write_mode: saved`) with an empty
+`content`. The document is written once, into the tool call, so the long
+output is split over two model turns (document ~20k tokens, then items
+~8k) instead of one ~27k-token answer. When the S3 writer is not
+attached, `s3_folder_name` is not supplied, or the save fails after one
+retry, the full document is returned in `artifacts[0].content` instead
+(`write_mode: not_saved | failed`), never as a file path.
+`L0-solution-architect-evaluator` reads it from S3 (or from the JSON),
+evaluates it, corrects it and publishes it to Confluence as
 `<product>-solution-architecture.md`.
 
 ## Composition
@@ -193,7 +201,8 @@ with the approval applied, so the two agents' examples chain exactly.
    `L0-solution-architect-evaluator` (which publishes to Confluence),
    then the Solution Architect and Platform Lead HITL gates, then
    `L0-arch-baseline-generator`. The workflow must pass the target page id
-   (unless the target is uploaded), the three KB page ids, the rubric repo,
+   (unless the target is uploaded), the three KB page ids, the S3 folder
+   (`s3_folder_name`, the same for both agents), the rubric repo,
    branch and folder, and the Confluence space key. Page ids only, no base
    URL.
 9. **The target architect still writes to blob** and still reads

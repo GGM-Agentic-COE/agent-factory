@@ -15,7 +15,7 @@ metadata:
 purpose:
   description: "Writes solution-architecture.md: DAT-1..4 (entity model, event envelope, classification policy, planes), INT-1..4 (protocol decisions per edge, contract rules, event topology, flows), PLT-1..6 (runtime, environments, pipeline and Cycle 0 exit proof, observability, resilience, capability register) and the implemented security controls. Each section carries satisfies/realises links back to the target."
   input: "target-architecture.md (required, APPROVED) and prd.md (optional). Each arrives as direct input, an uploaded file (.md, .json or a Confluence .html/.xml export), or a Confluence page read by page id with tool-L0-confluence-reader, in that order of precedence. The three KBs are read from Confluence by page id. Technology approval comes from the enterprise architecture KB's approved platform catalogue; principles come from the target's Section 3."
-  output: "solution-architecture.md returned in full in artifacts[0].content (not published — L0-solution-architect-evaluator evaluates it and publishes it to Confluence) as a DRAFT for the Solution Architect and Platform Lead gates, plus structured items: entity ownership, classification, events, per-edge protocol decisions, contracts, topics, technology selections, capability register, satisfaction index, pending decisions and the Cycle 0 exit proof."
+  output: "solution-architecture.md saved to S3 at <s3_folder_name>/solution-architecture.md, with the S3 key in artifacts[0].storage (returned in artifacts[0].content only when it could not be saved; not published — L0-solution-architect-evaluator reads it from S3, evaluates it and publishes it to Confluence) as a DRAFT for the Solution Architect and Platform Lead gates, plus structured items: entity ownership, classification, events, per-edge protocol decisions, contracts, topics, technology selections, capability register, satisfaction index, pending decisions and the Cycle 0 exit proof."
   business_value: "Turns 'did we think about platform?' into a lookup. The capability register is what every later impact assessment checks, and each NOT PRESENT row it hits raises the change to Tier 2 before work is committed rather than mid-build. The satisfaction index is what lets conformance report a target demand as NOT-YET-BUILT instead of silently unmet. Deciding only what Cycle 0 needs, and recording a trigger for the rest, keeps platform decisions from being made under delivery pressure or guessed against requirements that do not exist yet."
 
 prompt:
@@ -48,6 +48,7 @@ contract:
       template_repo: { type: string, description: "GitHub repository holding the Document Template, e.g. agentic-sdlc-knowledge-bases (or GGM-Agentic-COE/agentic-sdlc-knowledge-bases)" }
       template_branch: { type: string, description: "Branch of template_repo, e.g. main" }
       template_folder: { type: string, description: "Folder holding solution-architecture-template.md, e.g. '3. design-and-architecture/solution-architecture/templates'. Unreadable -> REFERENCE_UNAVAILABLE" }
+      s3_folder_name: { type: string, description: "Folder (key prefix) in the S3 bucket where solution-architecture.md is saved with tool-L0-s3-writer, e.g. 'HarvestLink/wf-<id>'. The evaluator reads it from the same folder. Not supplied, or no S3 writer attached -> the document is returned in artifacts[0].content instead (write_mode not_saved)" }
     optional_parameters:
       target_architecture_output: { type: object, description: "Route 1 for the target: an upstream agent output or the document text. Must contain APP-1, APP-2, an interaction table (Section 5 R-nn, or the older APP-2.3 E-nn), CON-* and REQ-*, else INSUFFICIENT_CONTEXT, and be approved, else TARGET_NOT_APPROVED (see allow_draft_target)" }
       target_architecture_page_id: { type: string, description: "Route 3 for the target: numeric Confluence page id (page id only, no base URL). Fetched only when the target was neither passed directly nor uploaded" }
@@ -87,8 +88,10 @@ context:
   tools:
     - tool-L0-confluence-reader        # page_id only; returns storage-format XHTML. Reads the three KB pages every run, and the target / PRD pages only when they arrived neither directly nor as an upload
     - tool-L0-github-reader-using-app  # the Document Template (required) and, if configured, the reference example (style only, never facts). In Copilot Studio: the GitHub connector's MCP server with only get_file_contents on
-  # No write tool. The document is returned in full in artifacts[0].content;
-  # L0-solution-architect-evaluator evaluates it and publishes it to Confluence.
+    - tool-L0-s3-writer                # ONE call: saves solution-architecture.md to <s3_folder_name>/solution-architecture.md (bucket fixed in the tool, 1 MB max, overwrites). The final JSON then carries only the S3 key, not a second copy of the document
+  # The only write is the S3 save. The final JSON carries the S3 location in artifacts[0].storage
+  # (the document itself only when it was not saved). L0-solution-architect-evaluator reads it
+  # from S3, evaluates it and publishes it to Confluence.
 
 quality:
   evaluation_ref: "evaluation.md"
