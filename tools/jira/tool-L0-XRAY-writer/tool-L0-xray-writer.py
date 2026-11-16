@@ -30,12 +30,12 @@ class AWSSecretReaderPodIdentity(BaseTool):
 
     # Review every line tagged "SETUP-REQUIRED:" below before deploying this tool to a new environment or client.
     # SETUP-REQUIRED: must match the secret name created in your AWS Secrets Manager
-    SECRET_NAME: str = "<name-of-secret-in-aws-secrets-manager>"
+    SECRET_NAME: str = "aava-secret-manager-sfi-credentials"
 
     def _run(self) -> Dict[str, Any]:
         try:
             # SETUP-REQUIRED: AWS region where that secret lives (us-east-1 or us-east-2 depending on deployment)
-            client = boto3.client('secretsmanager', region_name='us-east-1')
+            client = boto3.client('secretsmanager', region_name='us-east-2')
             get_secret_value_response = client.get_secret_value(SecretId=self.SECRET_NAME)
             secret_string = get_secret_value_response.get('SecretString', '{}')
             secret_dict = json.loads(secret_string)
@@ -163,7 +163,7 @@ class _XrayTestFormatter:
                 continue
 
             action = step.get("action", "")
-            data = step.get("data", "")
+            data = step.get("data") or step.get("test_data", "")
             result = step.get("expected_result", step.get("result", ""))
 
             if action or data or result:
@@ -195,6 +195,36 @@ class _XrayTestFormatter:
         return formatted_steps
 
     @staticmethod
+    def extract_precondition(test: Dict[str, Any]) -> Optional[Dict[str, str]]:
+        """Extracts precondition summary and definition if present in test."""
+        raw_precond = test.get("pre_condition") or test.get("precondition") or test.get("preconditions")
+        if not raw_precond:
+            return None
+
+        if isinstance(raw_precond, dict):
+            summary = raw_precond.get("summary") or raw_precond.get("title")
+            definition = raw_precond.get("definition") or raw_precond.get("description") or str(raw_precond)
+            if not summary:
+                summary = f"Precondition: {str(definition)[:60]}"
+            return {"summary": str(summary).strip(), "definition": str(definition).strip()}
+
+        if isinstance(raw_precond, list):
+            definition = "\n".join(str(p) for p in raw_precond).strip()
+        else:
+            definition = str(raw_precond).strip()
+
+        if not definition:
+            return None
+
+        first_line = definition.split("\n")[0].strip()
+        if len(first_line) <= 80:
+            summary = f"Precondition: {first_line}"
+        else:
+            summary = f"Precondition: {first_line[:77]}..."
+
+        return {"summary": summary, "definition": definition}
+
+    @staticmethod
     def format_description(test: Dict[str, Any]) -> str:
         """Extracts and formats description with manual steps reference if present."""
         if not isinstance(test, dict):
@@ -203,8 +233,6 @@ class _XrayTestFormatter:
         # Add Manual Steps to Test description (legacy fallback)
         if "manualsteps" in test:
             test_desc += "\n\n*Manual Steps Reference:*\n" + str(test["manualsteps"])
-        if "pre_condition" in test and test["pre_condition"]:
-            test_desc += f"\n\n*Pre-conditions:*\n{test['pre_condition']}"
         return test_desc.strip()
 
 
@@ -241,6 +269,18 @@ class XrayJiraCompleteTraceabilityTool(BaseTool):
         else:
             return f"⚠️ Work item link failed (HTTP {res.status_code}): {res.text}"
 
+    def _post_graphql_with_retry(self, gql_url: str, payload: Dict[str, Any], headers: Dict[str, str], max_retries: int = 3) -> requests.Response:
+        """Sends GraphQL request to Xray with automatic retry on transient gateway errors (502, 503, 504, 429)."""
+        import time
+        resp = None
+        for attempt in range(max_retries):
+            resp = requests.post(gql_url, json=payload, headers=headers, verify=False)
+            if resp.status_code not in (502, 503, 504, 429):
+                return resp
+            # Wait with backoff before retrying transient gateway hiccup
+            time.sleep(1.5 * (attempt + 1))
+        return resp
+
     def _run(self, project_key: str, story_key: str, tests_json: Any) -> str:
         try:
             xray_token = self.get_xray_token(xray_client_id, xray_client_secret)
@@ -253,6 +293,50 @@ class XrayJiraCompleteTraceabilityTool(BaseTool):
                 return "❌ No valid tests found in input."
 
             results = []
+            precondition_cache: Dict[str, Dict[str, str]] = {}
+
+            # GraphQL Mutations for Xray Cloud
+            test_mutation = """
+            mutation CreateTestIssue($projectKey: String!, $summary: String!, $desc: String!, $testType: String!, $steps: [CreateStepInput]!) {
+              createTest(
+                testType: { name: $testType },
+                steps: $steps,
+                jira: { fields: { project: { key: $projectKey }, summary: $summary, description: $desc } }
+              ) {
+                test {
+                  issueId
+                  jira(fields: ["key", "id"])
+                }
+              }
+            }
+            """
+
+            precond_mutation = """
+            mutation CreatePreconditionIssue($projectKey: String!, $summary: String!, $desc: String!, $precondType: String!, $definition: String!) {
+              createPrecondition(
+                preconditionType: { name: $precondType },
+                definition: $definition,
+                jira: { fields: { project: { key: $projectKey }, summary: $summary, description: $desc } }
+              ) {
+                precondition {
+                  issueId
+                  jira(fields: ["key", "id"])
+                }
+              }
+            }
+            """
+
+            link_precond_mutation = """
+            mutation LinkPreconditionToTest($testIssueId: String!, $precondIssueIds: [String]!) {
+              addPreconditionsToTest(
+                issueId: $testIssueId,
+                preconditionIssueIds: $precondIssueIds
+              ) {
+                addedPreconditions
+                warning
+              }
+            }
+            """
 
             for test in tests:
                 # ---------------------------------------------------------
@@ -270,30 +354,64 @@ class XrayJiraCompleteTraceabilityTool(BaseTool):
                 raw_type = test.get("test_type", "Manual")
                 test_type = "Manual" if str(raw_type).strip().lower() in ("functional", "manual", "") else str(raw_type)
 
+                target_project = project_key or test.get("project") or test.get("project_key") or ""
+                target_story = story_key or test.get("parent_feature_key") or test.get("story_key") or ""
+
                 formatted_steps = _XrayTestFormatter.format_steps(test.get("steps", []), test=test)
 
                 # ==========================================
-                # 1. CREATE TEST WITH STEPS (GraphQL)
+                # 1. CREATE PRECONDITION IN XRAY (if present)
                 # ==========================================
-                test_mutation = """
-                mutation CreateTestIssue($projectKey: String!, $summary: String!, $desc: String!, $testType: String!, $steps: [CreateStepInput]!) {
-                  createTest(
-                    testType: { name: $testType },
-                    steps: $steps,
-                    jira: { fields: { project: { key: $projectKey }, summary: $summary, description: $desc } }
-                  ) {
-                    test { jira(fields: ["key", "id"]) }
-                  }
-                }
-                """
+                precond_info = _XrayTestFormatter.extract_precondition(test)
+                precond_key = None
+                precond_id = None
+
+                if precond_info:
+                    p_def = precond_info["definition"]
+                    p_sum = precond_info["summary"]
+
+                    # Deduplicate across test cases
+                    if p_def in precondition_cache:
+                        cached = precondition_cache[p_def]
+                        precond_key = cached.get("key")
+                        precond_id = cached.get("id")
+                    else:
+                        p_vars = {
+                            "projectKey": target_project,
+                            "summary": p_sum,
+                            "desc": p_def,
+                            "precondType": "Manual",
+                            "definition": p_def
+                        }
+                        p_resp = self._post_graphql_with_retry(gql_url, {"query": precond_mutation, "variables": p_vars}, headers=headers)
+                        if p_resp.status_code == 200:
+                            try:
+                                p_json = p_resp.json()
+                                if "errors" in p_json:
+                                    results.append(f"⚠️ Error creating Precondition: {json.dumps(p_json['errors'])}")
+                                else:
+                                    p_data = p_json.get("data", {}).get("createPrecondition", {}).get("precondition", {})
+                                    if p_data and "jira" in p_data:
+                                        precond_key = p_data["jira"]["key"]
+                                        precond_id = p_data.get("issueId") or p_data["jira"].get("id")
+                                        precondition_cache[p_def] = {"key": precond_key, "id": precond_id}
+                                        results.append(f"✅ Created Xray Precondition {precond_key}: {p_sum}")
+                            except Exception as ex:
+                                results.append(f"⚠️ Failed to parse Precondition response: {str(ex)}")
+                        else:
+                            results.append(f"⚠️ HTTP {p_resp.status_code} creating Precondition: {p_resp.text}")
+
+                # ==========================================
+                # 2. CREATE TEST WITH STEPS (GraphQL)
+                # ==========================================
                 t_vars = {
-                    "projectKey": project_key,
+                    "projectKey": target_project,
                     "summary": raw_summary,
                     "desc": test_desc,
                     "testType": test_type,
                     "steps": formatted_steps
                 }
-                t_resp = requests.post(gql_url, json={"query": test_mutation, "variables": t_vars}, headers=headers, verify=False)
+                t_resp = self._post_graphql_with_retry(gql_url, {"query": test_mutation, "variables": t_vars}, headers=headers)
 
                 if t_resp.status_code != 200:
                     results.append(f"❌ HTTP {t_resp.status_code} creating Test: {t_resp.text}")
@@ -315,22 +433,50 @@ class XrayJiraCompleteTraceabilityTool(BaseTool):
                     continue
 
                 test_key = t_data["jira"]["key"]
+                test_id = t_data.get("issueId") or t_data["jira"].get("id")
 
                 # ==========================================
-                # 2. LINK USER STORY TO TESTS (Jira Native REST)
+                # 3. LINK PRECONDITION TO TEST (GraphQL)
                 # ==========================================
-                link_url = f"{jira_base_url}/rest/api/2/issueLink"
-                link_payload = {
-                    "type": {"name": "Relates"},
-                    "inwardIssue": {"key": test_key},
-                    "outwardIssue": {"key": story_key}
-                }
-                link_res = requests.post(link_url, json=link_payload, auth=jira_auth, verify=False)
+                if precond_key and (precond_id or precond_key) and (test_id or test_key):
+                    target_test_id = str(test_id) if test_id else str(test_key)
+                    target_precond_id = str(precond_id) if precond_id else str(precond_key)
 
-                if link_res.status_code == 201:
-                    results.append(f"✅ Created Test {test_key} (Type: {test_type}). Linked successfully to Story {story_key}.")
+                    link_vars = {
+                        "testIssueId": target_test_id,
+                        "precondIssueIds": [target_precond_id]
+                    }
+                    l_resp = self._post_graphql_with_retry(gql_url, {"query": link_precond_mutation, "variables": link_vars}, headers=headers)
+                    if l_resp.status_code == 200:
+                        try:
+                            l_json = l_resp.json()
+                            if "errors" in l_json:
+                                results.append(f"⚠️ Failed to link Precondition {precond_key} to Test {test_key}: {json.dumps(l_json['errors'])}")
+                            else:
+                                results.append(f"🔗 Associated Precondition {precond_key} -> Test {test_key}")
+                        except Exception:
+                            results.append(f"🔗 Associated Precondition {precond_key} -> Test {test_key}")
+                    else:
+                        results.append(f"⚠️ HTTP {l_resp.status_code} linking Precondition {precond_key} to Test {test_key}: {l_resp.text}")
+
+                # ==========================================
+                # 4. LINK USER STORY TO TESTS (Jira Native REST)
+                # ==========================================
+                if target_story:
+                    link_url = f"{jira_base_url}/rest/api/2/issueLink"
+                    link_payload = {
+                        "type": {"name": "Relates"},
+                        "inwardIssue": {"key": test_key},
+                        "outwardIssue": {"key": target_story}
+                    }
+                    link_res = requests.post(link_url, json=link_payload, auth=jira_auth, verify=False)
+
+                    if link_res.status_code == 201:
+                        results.append(f"✅ Created Test {test_key} (Type: {test_type}). Linked successfully to Story {target_story}.")
+                    else:
+                        results.append(f"✅ Created Test {test_key} (Type: {test_type}), but Story Link failed (HTTP {link_res.status_code}): {link_res.text}")
                 else:
-                    results.append(f"✅ Created Test {test_key} (Type: {test_type}), but Story Link failed (HTTP {link_res.status_code}): {link_res.text}")
+                    results.append(f"✅ Created Test {test_key} (Type: {test_type}).")
 
             return "\n".join(results)
         except Exception as e:
