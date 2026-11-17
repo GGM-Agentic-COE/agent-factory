@@ -1,0 +1,67 @@
+# Agent Specification Document
+spec_version: "1.0"
+artifact_type: agent
+metadata:
+  name: L1-inception-task-generator
+  version: "1.0.0"
+  layer: L1
+  phase: inception
+  owner: agentic-ai-coe
+  created: "2026-08-13"
+
+purpose:
+  description: "Decomposes features into atomic engineering tasks (work units) — frontend, backend, QA, infra, data, or design — each independently completable and assignable."
+  input: "A feature set (id, name, description, acceptance criteria if available)."
+  output: "tasks.json — task work units per feature, with type, effort estimate, and task-level dependencies; plus a rendered task-breakdown.md."
+  business_value: "Turns feature-level scope into assignable, estimable work units so sprint planning and engineering execution can begin without a manual breakdown pass."
+
+prompt:
+  ref: "prompts/L1-inception-task-generator/instructions.md"
+  version: "1.0.0"
+  description: "Decomposes each input feature into typed, estimated tasks with intra-feature and cross-feature task dependencies, and produces a task breakdown document plus per-task items."
+
+contract:
+  input_schema: "$ref: schemas/agent-input-contract-schema.json"
+  output_schema: "$ref: schemas/agent-output-schema.json"
+
+  input:
+    accepts_from_agents: [L1-design-feature-decomposer, L1-design-story-generator]
+    accepts_direct_input: true
+    accepts_file_upload:
+      enabled: true
+      formats: [".json", ".md"]
+    required_parameters:
+      features: {type: array, description: "Feature list from L1-design-feature-decomposer's features.json (id, name, description)."}
+    optional_parameters:
+      acceptance_criteria: {type: array, description: "Per-feature acceptance criteria from L1-design-story-generator, used to size and scope tasks more precisely when available."}
+      task_types: {type: array, default: "[frontend, backend, qa, infra, data, design]", description: "Which task categories to consider when decomposing a feature."}
+      max_task_effort_hours: {type: number, default: 16, description: "Any single task estimated above this ceiling must be split further."}
+      adjacent_backlog_check: {type: boolean, default: false, description: "If true, cross-check generated tasks against an adjacent Jira backlog via tool-L1-jira-fetch-issue to flag possible duplicates."}
+
+  output:
+    $ref: "output_schema.json"
+
+context:
+  knowledge_bases:
+    - kb-L1-sdlc-templates
+  guardrails:
+    - gr-L1-output-schema-validator
+    - gr-L1-pii-detection
+    - gr-L3-hallucination-detector
+    - gr-L3-citation-validator
+    - gr-L3-consistency-checker
+    - gr-L2-tool-permissions
+    - gr-L3-agent-rate-limit
+  tools:
+    - tool-L1-jira-fetch-issue   # read-only — checks an adjacent backlog for existing/duplicate tasks; never writes
+
+quality:
+  evaluation_ref: "evaluation.md"
+  min_score: 7.0
+  hallucination_check: true
+  consistency_check: true
+
+versioning:
+  input_version: "1.0"
+  output_version: "1.0"
+  instruction_hash: "sha256:pending"
