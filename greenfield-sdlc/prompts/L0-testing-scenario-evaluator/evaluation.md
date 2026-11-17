@@ -1,7 +1,7 @@
 ## L0 Test Scenario — Evaluation Criteria
 
-**Knowledge Base:** kb-L0-test-scenario-eval
-**Consumed by:** L0-test-scenario-evaluator
+**Knowledge Base:** kb-L0-test-scenario-eval  
+**Consumed by:** L0-test-scenario-evaluator  
 **Purpose:** Rubric for independently evaluating Test Scenarios produced by
 L0-test-scenario-writer. Every criterion is binary pass/fail. The evaluator must
 re-derive results from freshly-fetched Jira and Confluence data — never trust the
@@ -17,8 +17,10 @@ to be tested. Positive/negative path expansion belongs to the downstream Test Ca
 Generator and is out of scope for the writer and the evaluator.
 
 **Scenario template (exactly these fields):** test_scenario_id, feature_key,
-acceptance_criteria_id, testing_level, summary, description (Pre-condition, Test Data,
+acceptance_criteria_id, testing_level, issueType, summary, description (Pre-condition, Test Data,
 Navigable Path, Expected Result), label, parentKey.
+
+`issueType` must always be exactly `Task`.
 
 ### Evaluation Gates
 
@@ -107,12 +109,13 @@ Navigable Path, Expected Result), label, parentKey.
 | Criterion | Pass | Fail |
 |---|---|---|
 | Template exact | Exactly the template fields; description has exactly the 4 keys; all non-empty; no scenario_type, jira_key, or publish_action | Missing, extra, or empty fields |
+| Issue type exact | issueType is exactly `Task` | Missing issueType or any value other than `Task` |
 | Summary format | summary starts with `[TS-XXX] Verify that` using the scenario's own test_scenario_id | Missing or mismatched prefix |
 | Label exact | label = ["ai-generated", "L0-test-scenario-writer", level label, fingerprint]; label[3] = `[feature_key]-[acceptance_criteria_id]-[test_scenario_id]` | Missing, reordered, or mismatched label |
 | TS-ID ordering | TS-001… sequential per Feature; Features in ascending key order; ACs in source order; behaviours in AC order | Gaps, duplicates, or non-deterministic order |
 | Blob file valid | test_scenarios.json parses as JSON and contains only scenario objects | Malformed or unparseable file |
 
-**Evaluation method:** Schema-check every scenario. Recompute expected TS-ID order, labels, and fingerprints and diff.
+**Evaluation method:** Schema-check every scenario. Verify `issueType = Task`. Recompute expected TS-ID order, labels, and fingerprints and diff.
 
 ### Scoring Model
 
@@ -173,6 +176,7 @@ The evaluator MAY fix the following WITHOUT escalation:
 - Renumber TS-IDs to the deterministic order, and update the summary prefix and label[3] fingerprint to match
 - Correct testing_level casing/spelling to the verbatim Test Levels name, and update label[2] to match
 - Re-level a scenario when TP-04 gives one unambiguous answer from AC text
+- Correct `issueType` to `Task`
 - Correct label[0], label[1], or parentKey when the correct value is certain from the scenario's own fields
 - Remove scenarios that are out of scope (path expansions or variants) when the AC remains covered by another scenario
 - Merge exact or near-duplicate scenarios for the same AC

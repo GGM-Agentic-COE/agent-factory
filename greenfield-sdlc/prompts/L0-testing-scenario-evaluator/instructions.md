@@ -21,7 +21,7 @@ Domain context:
 - Positive/negative path expansion is owned by the downstream Test Case Generator. The writer must NOT produce it; the evaluator must NOT add it.
 - This agent does NOT generate scenarios. It evaluates, applies mechanical fixes, and publishes.
 
-> Issue type is fixed as **Sub-task**. All Test Scenario issues are created as Sub-tasks under their parent Feature.
+> Issue type is fixed as **Task**. All Test Scenario issues are published to Jira as Tasks.
 
 ## INSTRUCTIONS
 INPUT PROTOCOL
@@ -69,7 +69,7 @@ G4: AC fidelity & grounding — summary, Pre-condition, Expected Result faithful
 G5: Scenario scope — no positive/negative expansion, variants, near-duplicates, or test-case detail.
 G6: Testing level — one allowed level, verbatim, chosen per TP-04.
 G7: Abstraction & data safety — business-level Navigable Path, safe mock Test Data.
-G8: Format & determinism — exact SCENARIO JSON TEMPLATE, summary prefix, labels, TS-ID ordering, valid blob file.
+G8: Format & determinism — exact SCENARIO JSON TEMPLATE, issueType = "Task", summary prefix, labels, TS-ID ordering, valid blob file.
 
 # FIX
 
@@ -92,7 +92,7 @@ If final_decision = escalate_to_hitl -> publish nothing; return findings.
 ```
 inputJSON = {
   "projectKey": "<project_key>",
-  "issueType": "Sub-task",
+  "issueType": "Task",
   "issues": <approved_scenarios>
 }
 ```
@@ -100,6 +100,7 @@ inputJSON = {
 Each issue in approved_scenarios is copied verbatim from the evaluated scenario object:
 ```json
 {
+  "issueType": "Task",
   "summary": "[TS-XXX] Verify that ...",
   "description": {
     "Pre-condition": "...",
@@ -115,13 +116,13 @@ Each issue in approved_scenarios is copied verbatim from the evaluated scenario 
 3. Field values are copied verbatim from the evaluated scenario. Do not reword, summarise, or add content.
 4. Tool Response & Issue Key Extraction:
    Parse the return of the Jira Writer tool line-by-line (returned in the exact order of `issues` submitted):
-   - Success pattern: `Sub-task created: <KEY>` (e.g. `Sub-task created: HL-101`).
+   - Success pattern: `Task created: <KEY>` (e.g. `Task created: HL-101`).
      Extract `<KEY>` as the literal `jira_key` and map it to its corresponding scenario (`test_scenario_id`, `parentKey`, and `summary`).
    - Failure pattern: `Failed: <summary> → ... | Detail: ...`
      Count as failed. On failure or error, retry once; if still failing, count as failed and record in `findings`.
    - Never fabricate or guess `jira_key` — use only the literal key returned by the tool.
-5. Record Created Sub-tasks:
-   Explicitly output all created sub-tasks with their literal Jira issue keys in `content.created_subtasks`.
+5. Record Created Tasks:
+   Explicitly output all created Tasks with their literal Jira issue keys in `content.created_tasks`.
 6. Never modify, transition, or delete the parent Feature or any existing issue.
 
 # RULES
@@ -185,7 +186,7 @@ Format: JSON (AgentOutput standard), `content.type: "evaluation_result"`. Do NOT
       {"id": "FIX-01", "finding_id": "FND-01", "reasoning": "<short reason>", "before": "L4 Integration", "after": "L2 Service"}
     ],
     "escalations": [],
-    "created_subtasks": [
+    "created_tasks": [
       {
         "test_scenario_id": "TS-001",
         "jira_key": "HL-101",

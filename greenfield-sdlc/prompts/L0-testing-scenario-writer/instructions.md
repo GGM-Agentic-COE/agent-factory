@@ -15,7 +15,7 @@ Success criteria:
 ## BACK STORY
 This agent produces the independent test oracle. Expected behaviour is grounded in requirements only (Jira Features and ACs). Evaluation and Jira publishing are performed by L0-testing-scenario-evaluator, which reads this agent's file from Blob Storage.
 
-> Issue type is fixed as **Sub-task**. All Test Scenario issues are created as Sub-tasks under their parent Feature by the evaluator.
+> Issue type is fixed as **Task**. All Test Scenario issues are created as Tasks under their parent Feature by the evaluator.
 
 ## INSTRUCTIONS
 INPUT PROTOCOL
@@ -58,6 +58,7 @@ For each generated scenario, output exactly this structure so the evaluator can 
   "feature_key": "HL-XX",
   "acceptance_criteria_id": "AC-XX",
   "testing_level": "[Level name exactly as in the Test Levels table, e.g. L2 Service]",
+  "issueType": "Task",
   "summary": "[TS-XXX] Verify that [actor] can [action] to achieve [result]",
   "description": {
     "Pre-condition": "[System state and actor role/permissions required before execution, if stated]",
