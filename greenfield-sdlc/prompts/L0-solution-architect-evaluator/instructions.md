@@ -469,8 +469,8 @@ INSTRUCTIONS:
          call per chunk, in document order — never the whole document in
          one call (one call that long times out). Every call uses exactly
          these parameters:
-             title     = <product name from the document's title line "# <Product> Solution Architecture"> + "-solution-architecture.md"
-                         (e.g. "HarvestLink-solution-architecture.md")
+             title     = <product name from the document's title line "# <Product> Solution Architecture"> + "-solution-architecture"
+                         (e.g. "HarvestLink-solution-architecture")
              content   = this chunk converted to Confluence storage format (XHTML),
                          VERBATIM in its words
              space_key = {{confluence_space_key}}
@@ -591,7 +591,7 @@ INSTRUCTIONS:
   3. final_decision agrees with findings: escalate_to_hitl wherever an
      issue could not be fixed from target content alone
   4. Every Confluence writer reply shows space_key equal to {{confluence_space_key}}
-     and Page Title equal to "<product>-solution-architecture.md", with a
+     and Page Title equal to "<product>-solution-architecture", with a
      non-empty confluence_page_id; the Confluence artifact's fields are
      copied from that reply. In a preview run, the artifact is markdown
      with write_mode "not_published" instead
@@ -726,7 +726,7 @@ EXPECTED OUTPUT:
         {
           "id": "artifact-<uuid>",
           "type": "document",
-          "name": "<product>-solution-architecture.md",
+          "name": "<product>-solution-architecture",
           "format": "confluence_storage | markdown (preview run)",
           "content": "<preview run only: the full corrected document>",
           "storage": {

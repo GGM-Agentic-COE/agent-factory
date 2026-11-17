@@ -44,7 +44,7 @@ generator read) and the rubric (GitHub), and produces:
 ## How does it work?
 
 ```
-generator JSON (artifacts[0].content) ──► this evaluator (evaluate + fix) ──► Confluence: <product>-solution-architecture.md
+generator JSON (artifacts[0].content) ──► this evaluator (evaluate + fix) ──► Confluence: <product>-solution-architecture
                      target + KBs from Confluence (page ids) ─┘   rubric from GitHub ─┘
 ```
 
@@ -73,7 +73,7 @@ generator JSON (artifacts[0].content) ──► this evaluator (evaluate + fix) 
    where EA11 was absent). Never invents a technology, entity or constraint
    not grounded in the target
 8. **Publishes** the corrected document to Confluence with
-   `tool-L0-confluence-writer` — `title = <product>-solution-architecture.md`,
+   `tool-L0-confluence-writer` — `title = <product>-solution-architecture`,
    content converted to XHTML, `space_key` from the request — for **every**
    final_decision. Issues that could not be fixed are in findings
 
@@ -95,7 +95,7 @@ generator JSON (artifacts[0].content) ──► this evaluator (evaluate + fix) 
 - **Items:** the generator's full item sections, plus `evaluation` carrying
   `scores`, `overall_score`, `findings[]`, `fixes_applied[]`,
   `coverage_check`, `final_decision` — see `output_schema.json`
-- **Artifacts:** the Confluence page `<product>-solution-architecture.md`,
+- **Artifacts:** the Confluence page `<product>-solution-architecture`,
   always published, in chunks of whole sections (one writer call each, about
   12,000 characters of markdown) so no single call times out
 - **Summary:** overall score, completeness check results per dimension,

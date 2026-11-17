@@ -160,7 +160,7 @@ retry, the full document is returned in `artifacts[0].content` instead
 (`write_mode: not_saved | failed`), never as a file path.
 `L0-solution-architect-evaluator` reads it from S3 (or from the JSON),
 evaluates it, corrects it and publishes it to Confluence as
-`<product>-solution-architecture.md`.
+`<product>-solution-architecture`.
 
 ## Composition
 
