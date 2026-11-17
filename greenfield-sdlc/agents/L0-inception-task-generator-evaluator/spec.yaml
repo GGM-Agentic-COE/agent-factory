@@ -1,0 +1,67 @@
+# Agent Specification Document
+spec_version: "1.0"
+artifact_type: agent
+metadata:
+  name: L1-inception-task-generator-evaluator
+  version: "1.0.0"
+  layer: L1
+  phase: inception
+  owner: agentic-ai-coe
+  created: "2026-08-20"
+
+purpose:
+  description: "Independently re-derives and verifies L1-inception-task-generator's task type selections, effort estimates/splits, dependency links, and gap decisions — never trusting the generator's own self-check — and pushes corrections back into both the items and the task-breakdown.md artifact when it finds an error."
+  input: "The generator's full AgentOutput (generator_output) plus the SAME source inputs the generator received (features, acceptance_criteria, max_task_effort_hours, task_types), so every task can be re-judged independently rather than compared only against the generator's own claims."
+  output: "A verification verdict (approved | fixed_and_approved | rejected) with per-task findings, per-feature coverage checks, any fixes applied, and — if the document itself needed correction — a re-uploaded task-breakdown.md at the same artifact location."
+  business_value: "Catches silently-dropped features, effort-ceiling violations, and wrong task-type/dependency inferences before a flawed task breakdown reaches sprint planning; oversized or missing tasks are expensive to discover mid-sprint."
+
+prompt:
+  ref: "prompts/L1-inception-task-generator-evaluator/instructions.md"
+  version: "1.0.0"
+  description: "Re-derives whether each task's type, effort, and dependencies are justified per kb-L1-task-decomposition-best-practices, checks every input feature is covered by tasks or a legitimate gap, re-verifies any duplicate_flag claims, and reports a verdict with fixes."
+
+contract:
+  input_schema: "$ref: schemas/agent-input-contract-schema.json"
+  output_schema: "$ref: output_schema.json"   # validates the full AgentOutput envelope (agent_id..status..content), not just content
+
+  input:
+    accepts_from_agents: [L1-inception-task-generator]
+    accepts_direct_input: true
+    accepts_file_upload:
+      enabled: false
+    required_parameters:
+      generator_output: {type: object, description: "Full AgentOutput from L1-inception-task-generator for this workflow_execution_id."}
+      features: {type: array, description: "The same feature list originally given to the generator — needed to independently re-judge task decomposition."}
+    optional_parameters:
+      acceptance_criteria: {type: array, description: "The same acceptance criteria originally given to the generator, if any were supplied."}
+      max_task_effort_hours: {type: number, default: 16, description: "The same effort ceiling originally given to the generator."}
+      adjacent_backlog_check: {type: boolean, default: false, description: "If the generator set any duplicate_flag values, re-verify them independently via tool-L1-jira-fetch-issue rather than trusting the generator's claim."}
+
+  output:
+    $ref: "output_schema.json"
+
+context:
+  knowledge_bases:
+    - ref: "../L1-inception-task-generator/evaluation.md"                  # source of truth for quality gates — never duplicated into this agent's own prompt
+    - kb-L1-task-decomposition-best-practices                              # same taxonomy/split/dependency rules the generator uses — re-applied independently, not read from generator_output
+  guardrails:
+    - gr-L1-output-schema-validator
+    - gr-L1-pii-detection
+    # Re-check, independently, the BLOCKER-relevant guardrails the generator owns —
+    # never by trusting the generator's own pass/fail claim:
+    - gr-L3-hallucination-detector
+    - gr-L3-citation-validator
+    - gr-L3-consistency-checker
+  tools:
+    - tool-L1-jira-fetch-issue   # read-only — independently re-verifies any duplicate_flag the generator claimed
+
+quality:
+  evaluation_ref: "evaluation.md"   # THIS agent's own meta-quality bar: are ITS findings and fixes correct — never a restatement of the generator's rubric
+  min_score: 8.0   # evaluators are held to a higher bar than generators — a wrong finding is worse than a wrong task
+  hallucination_check: true
+  consistency_check: true
+
+versioning:
+  input_version: "1.0"
+  output_version: "1.0"
+  instruction_hash: "sha256:pending"
