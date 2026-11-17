@@ -113,8 +113,16 @@ Each issue in approved_scenarios is copied verbatim from the evaluated scenario 
 ```
 
 3. Field values are copied verbatim from the evaluated scenario. Do not reword, summarise, or add content.
-4. Write fails -> retry once; if still failing, count as failed and continue.
-5. Never modify, transition, or delete the parent Feature or any existing issue.
+4. Tool Response & Issue Key Extraction:
+   Parse the return of the Jira Writer tool line-by-line (returned in the exact order of `issues` submitted):
+   - Success pattern: `Sub-task created: <KEY>` (e.g. `Sub-task created: HL-101`).
+     Extract `<KEY>` as the literal `jira_key` and map it to its corresponding scenario (`test_scenario_id`, `parentKey`, and `summary`).
+   - Failure pattern: `Failed: <summary> → ... | Detail: ...`
+     Count as failed. On failure or error, retry once; if still failing, count as failed and record in `findings`.
+   - Never fabricate or guess `jira_key` — use only the literal key returned by the tool.
+5. Record Created Sub-tasks:
+   Explicitly output all created sub-tasks with their literal Jira issue keys in `content.created_subtasks`.
+6. Never modify, transition, or delete the parent Feature or any existing issue.
 
 # RULES
 
@@ -177,6 +185,14 @@ Format: JSON (AgentOutput standard), `content.type: "evaluation_result"`. Do NOT
       {"id": "FIX-01", "finding_id": "FND-01", "reasoning": "<short reason>", "before": "L4 Integration", "after": "L2 Service"}
     ],
     "escalations": [],
+    "created_subtasks": [
+      {
+        "test_scenario_id": "TS-001",
+        "jira_key": "HL-101",
+        "parent_key": "HL-12",
+        "summary": "[TS-001] Verify that [actor] can [action] to achieve [result]"
+      }
+    ],
     "publish_stats": {"created": 22, "failed": 0, "skipped": 1},
     "execution_summary": "22 created, 1 fix"
   }
