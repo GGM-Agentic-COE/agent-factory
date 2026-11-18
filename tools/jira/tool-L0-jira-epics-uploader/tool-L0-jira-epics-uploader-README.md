@@ -30,6 +30,7 @@ You give the tool one JSON payload with a Jira project key and an ordered list o
       "issueType": "Epic",
       "label": ["EP-01"],
       "customfield_10244": {"value": "Functional"},
+      "customfield_10238": {"value": "Store to Move"},
       "description": {
         "description": "Technical foundation for the customer portal.",
         "scope_in": ["User registration", "Consent capture flow"]
@@ -40,7 +41,7 @@ You give the tool one JSON payload with a Jira project key and an ordered list o
       "issueType": "Story",
       "label": ["F-01.1"],
       "parentKey": "EP-01",
-      "customfield_10244": {"value": "Functional"},
+      "customfield_10238": {"value": "Store to Move"},
       "description": {
         "description": "Allow new users to register. Relates to EP-01.",
         "requirements_covered": ["FR-12", "NFR-03"]
