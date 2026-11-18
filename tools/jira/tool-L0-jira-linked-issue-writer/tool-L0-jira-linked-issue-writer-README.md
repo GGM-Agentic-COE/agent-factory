@@ -14,6 +14,8 @@ You give the tool a Jira project key, an issue type, a source issue key (SourceI
 ### 2.1 Calling the tool in aava
 
 _These are sample values. Enter actual values to run tool in AAVA_
+
+
 **inputJSON**
 ```json
 {
