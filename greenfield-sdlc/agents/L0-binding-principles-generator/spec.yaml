@@ -1,0 +1,70 @@
+# Agent Specification Document
+spec_version: "1.0"
+artifact_type: agent
+metadata:
+  name: L0-binding-principles-generator
+  version: "1.0.0"
+  layer: L0
+  phase: design
+  owner: agentic-ai-coe
+  created: "2026-11-18"
+
+purpose:
+  description: "Resolves every principle in the enterprise architecture catalogue (kb-L0-architecture-patterns AP2) against the product's PRD, giving each a RULE-04 verdict, cited evidence, the patterns that realise it and, where needed, a bounded deviation record, and writes the result to S3 as {product_name}-binding-principles.json."
+  input: "The PRD (read from Confluence by page ID), the architecture-patterns, enterprise-architecture and enterprise-security knowledge bases (read from Confluence), and optionally an existing approved binding-principles document and reviewer notes."
+  output: "{product_name}-binding-principles.json written to S3 under <workflow_execution_id>/, plus items restating each principle's structural fields with a <=150 char rationale_summary, open questions (BPQ-NN), the delta register, and the S3 location in artifacts[0].storage."
+  business_value: "Enterprise principles are written for every product and a PRD is written without them in mind. This document is the governance baseline the target architecture must honour and that conformance is assessed against at every release, so it must exist, and be correct, before any architecture is drawn."
+
+prompt:
+  ref: "prompts/L0-binding-principles-generator/instructions.md"
+  version: "1.0.0"
+  description: "Builds a PRD index and the AP2 catalogue, resolves each principle under RULE-04 (satisfied | deviation-required | applied-in-solution-architecture | at-risk | not-applicable) with prd:/KB-keyed evidence, applies the stricter value on PRD/KB conflicts and raises an open question, carries an approved baseline verbatim with every change in delta[], fills the embedded JSON document template (S4) and writes it to S3."
+
+contract:
+  input_schema: "$ref: schemas/agent-input-contract-schema.json"
+  output_schema: "$ref: schemas/agent-output-schema.json"
+
+  input:
+    accepts_from_agents: []   # first step of its workflow — generates the workflow_execution_id; the PRD (published by L0-prd-composer-evaluator) is read from Confluence by page ID
+    accepts_direct_input: true
+    accepts_file_upload:
+      enabled: false
+    required_parameters:
+      prd-confluence-page-id: { type: string, description: "Confluence page ID of the published PRD; product_name is read from the PRD's title or document control" }
+      architecture-patterns-confluence-page-id: { type: string, description: "Confluence page ID of kb-L0-architecture-patterns (AP2 catalogue, AP2.1 carried rules, AP3 patterns, AP4 RULE-01 to RULE-05)" }
+      enterprise-architecture-confluence-page-id: { type: string, description: "Confluence page ID of kb-L0-enterprise-architecture" }
+      enterprise-security-confluence-page-id: { type: string, description: "Confluence page ID of kb-L0-enterprise-security" }
+    optional_parameters:
+      existing_binding_principles: { type: object, default: null, description: "A previously approved binding-principles document; turns the run into an update with a delta register. Ignored (with a gap recorded) if it is not valid JSON with principles[]" }
+      reviewer_notes: { type: string, default: null, description: "Human decisions to honour, including deviation approvers and authorised changes to approved deviations" }
+
+  output:
+    $ref: "output_schema.json"   # content.type: "binding-principles" with items + artifacts[].storage (provider: s3) — schema file not yet created
+
+context:
+  knowledge_bases:
+    - kb-L0-architecture-patterns      # AP2 principle catalogue (the source of truth for principle IDs), AP2.1, AP3 pattern keys, AP4 rules
+    - kb-L0-enterprise-architecture    # EA section keys cited as evidence
+    - kb-L0-enterprise-security        # ES section keys cited as evidence; floors for retention/classification
+  guardrails:
+    - gr-L0-output-schema-validator
+    - gr-L0-pii-detection
+    - gr-L3-hallucination-detector
+    - gr-L3-citation-validator         # every evidence locator must be a real prd: key or KB section key
+    - gr-L3-consistency-checker        # items must agree with the document written to S3
+    - gr-L1-tool-permissions           # holds a write tool — writes only <workflow_execution_id>/{product_name}-binding-principles.json
+    - gr-L3-agent-rate-limit
+  tools:
+    - tool-L0-confluence-reader        # reads the PRD and the three KBs by page ID
+    - tool-L0-s3-writer                # writes the document once, after it is final
+
+quality:
+  evaluation_ref: "evaluation.md"   # generator rubric loaded by L0-binding-principles-generator-evaluator (S6) — not yet present in this folder
+  min_score: 7.0
+  hallucination_check: true
+  consistency_check: true
+
+versioning:
+  input_version: "1.0"
+  output_version: "1.0"
+  instruction_hash: "sha256:pending"

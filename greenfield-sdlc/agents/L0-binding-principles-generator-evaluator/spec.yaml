@@ -1,0 +1,77 @@
+# Agent Specification Document
+spec_version: "1.0"
+artifact_type: agent
+metadata:
+  name: L0-binding-principles-generator-evaluator
+  version: "1.0.0"
+  layer: L0
+  phase: design
+  owner: agentic-ai-coe
+  created: "2026-11-18"
+
+purpose:
+  description: "Independently re-derives L0-binding-principles-generator's resolution against the AP2 catalogue, the PRD and the enterprise standards: checks catalogue completeness, statement/kind fidelity, evidence integrity, verdicts, deviation bounds, conflict surfacing and baseline fidelity, fixes what is mechanically recoverable, escalates the rest, and writes the corrected document back to S3 with a review object."
+  input: "{product_name}-binding-principles.json read from S3 under the inherited <workflow_execution_id>, the PRD and three knowledge bases from Confluence, this evaluator's evaluation.md from GitHub, and optionally the baseline document and reviewer notes."
+  output: "Corrected items in the generator's structure, an evaluation block (scores, overall_score, pass, findings, fixes_applied with <=150 char before/after excerpts, final_decision), and an artifact pointing to the corrected document written back to the same S3 path."
+  business_value: "A wrong verdict, an unbounded deviation or a silently-resolved PRD/KB conflict propagates into every design written against the binding principles. This agent re-asks each principle's question independently rather than re-reading the generator's answer, so the target architecture is built on a verified baseline."
+
+prompt:
+  ref: "prompts/L0-binding-principles-generator-evaluator/instructions.md"
+  version: "1.0.0"
+  description: "Compares AP2 and document principle IDs by set membership, diffs statement/kind verbatim, dereferences every evidence locator, re-derives each verdict, checks deviation records against RULE-03/RULE-04, confirms conflicts were surfaced and baselines carried faithfully, applies grounded fixes to document and items together, and always writes the evaluated document back to S3 with a review object."
+
+contract:
+  input_schema: "$ref: schemas/agent-input-contract-schema.json"
+  output_schema: "$ref: schemas/agent-output-schema.json"
+
+  input:
+    accepts_from_agents: [L0-binding-principles-generator]   # inherits workflow_execution_id; the document itself is read from S3, not from the generator's JSON
+    accepts_direct_input: false
+    accepts_file_upload:
+      enabled: false
+    required_parameters:
+      workflow_execution_id: { type: string, description: "Inherited from L0-binding-principles-generator's output; names the S3 folder the document is read from and written back to" }
+      prd-confluence-page-id: { type: string, description: "Confluence page ID of the PRD; product_name is read from it" }
+      architecture-patterns-confluence-page-id: { type: string, description: "Confluence page ID of kb-L0-architecture-patterns (the AP2 catalogue the document is checked against)" }
+      enterprise-architecture-confluence-page-id: { type: string, description: "Confluence page ID of kb-L0-enterprise-architecture" }
+      enterprise-security-confluence-page-id: { type: string, description: "Confluence page ID of kb-L0-enterprise-security" }
+      binding-principles-eval-github-folder-location: { type: string, description: "GitHub folder holding this evaluator's evaluation.md" }
+      agent-github-repo-name: { type: string, description: "GitHub repository holding the evaluation file" }
+      agent-github-repo-branch: { type: string, description: "GitHub branch holding the evaluation file" }
+    optional_parameters:
+      existing_binding_principles: { type: object, default: null, description: "The baseline the document was updated from; enables the baseline-fidelity check" }
+      reviewer_notes: { type: string, default: null, description: "Human decisions the document was told to honour" }
+
+  output:
+    $ref: "output_schema.json"   # content.type: "binding-principles" + evaluation block + artifacts[].storage (provider: s3) — schema file not yet created
+
+context:
+  knowledge_bases:
+    - ref: "evaluation.md"               # THIS evaluator's meta-quality bar, retrieved from GitHub at runtime
+    - kb-L0-architecture-patterns        # AP2 catalogue, RULE-03 approver roles, RULE-04 verdicts — source of truth for the checks
+    - kb-L0-enterprise-architecture      # EA section keys for dereferencing evidence
+    - kb-L0-enterprise-security          # ES section keys and floors for conflict surfacing
+  guardrails:
+    - gr-L0-output-schema-validator
+    - gr-L0-pii-detection
+    - gr-L3-hallucination-detector       # no fix may invent a principle, locator, value, pattern or approver
+    - gr-L3-citation-validator           # re-checked independently, not by trusting the generator's own claim
+    - gr-L3-consistency-checker          # corrected document and items must agree before write-back
+    - gr-L1-tool-permissions             # holds a write tool — writes only <workflow_execution_id>/{product_name}-binding-principles.json
+    - gr-L3-agent-rate-limit
+  tools:
+    - tool-L0-s3-files-reader            # reads <workflow_execution_id>/{product_name}-binding-principles.json — never lists the folder
+    - tool-L0-confluence-reader          # reads the PRD and the three KBs
+    - tool-L0-github-reader-using-app    # reads evaluation.md; tool-L0-github-reader-using-PAT takes the same parameters if that variant is deployed instead
+    - tool-L0-s3-writer                  # writes the corrected document back to the same path, whatever final_decision is
+
+quality:
+  evaluation_ref: "evaluation.md"   # THIS evaluator's own meta-quality bar, not the generator's rubric
+  min_score: 8.0   # evaluators are held to a higher bar than generators — a wrong finding is worse than a wrong verdict
+  hallucination_check: true
+  consistency_check: true
+
+versioning:
+  input_version: "1.0"
+  output_version: "1.0"
+  instruction_hash: "sha256:pending"
