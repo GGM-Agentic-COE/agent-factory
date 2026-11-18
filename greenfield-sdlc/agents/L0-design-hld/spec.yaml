@@ -1,0 +1,61 @@
+# Agent Specification Document
+spec_version: "1.0"
+artifact_type: agent
+metadata:
+  name: L1-design-hld
+  version: "2.0.0"   # v2: single-document input (Requirements.md) replaces the four-structured-input v1 contract
+  layer: L1
+  phase: design
+  owner: agentic-ai-coe
+  created: "2026-08-20"
+  updated: "2026-08-27"
+
+purpose:
+  description: "Generates the High-Level Design: C4 Context/Container diagrams, components, data flow, and integrations — parsed directly from a single Requirements.md document rather than four separate structured inputs."
+  input: "Requirements.md — a requirements/PRD-style markdown document containing functional requirements, NFR-relevant language, existing-system/dependency impact, and integration needs. May or may not be pre-tagged with FR-{seq}/NFR-{seq} ids."
+  output: "hld.md — C4 diagrams, component list, data flow list, integration list, and NFR-to-design mapping, with full traceability back to the source document."
+  business_value: "Turns a single requirements/impact-assessment document into a coherent architecture view before construction starts, without requiring four separate upstream agents to have already run — every requirement and NFR-relevant statement in the document gets a traceable design decision."
+
+prompt:
+  ref: "prompts/L1-design-hld/instructions.md"
+  version: "2.0.0"
+  description: "Parses Requirements.md into FRs and NFR-relevant statements (using explicit tags where present, assigning sequential ids where absent), groups requirements into logical components, maps NFRs to architectural approaches, derives integrations/dependencies from the document's own existing-system and integration language, and renders C4 diagrams plus a full HLD document."
+
+contract:
+  input_schema: "$ref: schemas/agent-input-contract-schema.json"
+  output_schema: "$ref: output_schema.json"   # validates the full AgentOutput envelope (agent_id..status..content), not just content
+
+  input:
+    accepts_from_agents: []   # no longer depends on requirements-elicitor/nfr-classifier/dependency-mapper/api-spec-generator having run first
+    accepts_direct_input: true
+    accepts_file_upload:
+      enabled: true
+      formats: [".md", ".txt"]
+    required_parameters:
+      requirements_document: {type: string, description: "Full text of Requirements.md. A requirements/PRD-style or impact-assessment-style markdown document. Functional requirements may be explicitly tagged FR-{seq}; if not, the agent assigns FR-{seq} sequentially in document order. NFR-relevant language (availability/SLA, security, compliance/retention, performance/scalability) may appear in prose rather than as tagged NFR-{seq} items."}
+    optional_parameters:
+      system_name: {type: string, default: "the system", description: "Display name used in the C4 diagram titles. Inferred from the document title if not supplied."}
+
+  output:
+    $ref: "output_schema.json"
+
+context:
+  knowledge_bases:
+    - kb-L1-enterprise-architecture
+  guardrails:
+    - gr-L1-output-schema-validator
+    - gr-L1-pii-detection
+    - gr-L1-consistency-check
+    - gr-L1-hallucination-check
+  tools: []   # pure design synthesis from a single document — no external calls needed; a blob-storage reader tool may be attached for retrieval only (see prompt's INPUT PROTOCOL), never for lookup/search
+
+quality:
+  evaluation_ref: "evaluation.md"
+  min_score: 7.0
+  hallucination_check: true
+  consistency_check: true
+
+versioning:
+  input_version: "2.0"
+  output_version: "1.0"   # output shape (components/integrations/data_flows/nfr_mappings/gaps + hld.md) is unchanged from v1
+  instruction_hash: "sha256:pending"
