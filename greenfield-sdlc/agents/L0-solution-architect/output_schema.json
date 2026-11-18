@@ -1,0 +1,1338 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "L0-solution-architect-output-schema-v1.0",
+  "title": "SolutionArchitectureItems",
+  "description": "Shape of content.items for L0-solution-architect. solution-architecture.md is the artifact of record; items restates it so L0-arch-baseline-generator, L0-impact-assessor, the testing seed agents and gr-L0-architecture-conformance can read it without parsing markdown. Key names entity_ownership, classification_register, events, data_planes, flows, contracts, capability_register, pending_decisions, exceptions_recorded, deviations and cycle0_exit_proof match the keys L0-arch-baseline-generator already reads from the three viewpoint architects, so one output from this agent can stand in for all three. Rules enforced by the schema rather than by prose: (1) no invented value — PENDING retention, residency or style needs a pending_ref; (2) no blurred approval — lifecycle 'unverified' forces decision_status PROPOSED, an EA11 product cannot be DECIDED unless the EA11 catalogue status is APPROVED, a 'contain' product needs an exception_ref, and a selected technology can never be 'retire'; (3) no silent gap — a SATISFIED demand names its sections, and a NOT_YET_BUILT one says why; (4) the agent never certifies Cycle 0 — every exit-proof criterion is NOT_YET_PROVEN. Items keep machine values; the document prints display tags: DECIDED = Approved (or Ratified where an ADR records it), PROPOSED = Requires validation, NOT_YET_BUILT = Not yet built, SATISFIED = Met, AVAILABLE = Available, NOT_PRESENT = Not present. The gate result and self-check live only here, never in the document.",
+  "type": "object",
+  "required": [
+    "document_control",
+    "entity_ownership",
+    "data_rules",
+    "classification_register",
+    "events",
+    "data_planes",
+    "flows",
+    "contracts",
+    "topics",
+    "technology_selections",
+    "capability_register",
+    "security_controls",
+    "satisfaction_index",
+    "constraint_realisation",
+    "pending_decisions",
+    "cycle0_exit_proof",
+    "components",
+    "solution_decisions",
+    "self_check"
+  ],
+  "properties": {
+    "document_control": {
+      "type": "object",
+      "required": [
+        "document",
+        "status",
+        "satisfies_from",
+        "target_status_read",
+        "target_source",
+        "technology_sources",
+        "catalogue_status",
+        "gate_ready"
+      ],
+      "properties": {
+        "document": {
+          "const": "solution-architecture"
+        },
+        "status": {
+          "const": "DRAFT"
+        },
+        "satisfies_from": {
+          "type": "string",
+          "pattern": "^target-architecture\\.md@[0-9]+\\.[0-9]+$"
+        },
+        "target_status_read": {
+          "enum": [
+            "APPROVED",
+            "DRAFT"
+          ]
+        },
+        "technology_sources": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string"
+          }
+        },
+        "gate_ready": {
+          "type": "boolean"
+        },
+        "catalogue_status": {
+          "enum": [
+            "APPROVED",
+            "DRAFT",
+            "absent"
+          ],
+          "description": "kb-L0-enterprise-architecture EA11 'Catalogue status' as read this run."
+        },
+        "target_source": {
+          "type": "string",
+          "pattern": "^(direct|upload:.+|confluence:[0-9]+)$",
+          "description": "How the target arrived: passed directly, uploaded (with file name), or fetched from a Confluence page."
+        },
+        "prd_source": {
+          "type": "string",
+          "pattern": "^(direct|upload:.+|confluence:[0-9]+|none)$",
+          "description": "How the PRD arrived, or none."
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "target_status_read": {
+                "const": "DRAFT"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "gate_ready": {
+                "const": false
+              }
+            }
+          }
+        }
+      ]
+    },
+    "entity_ownership": {
+      "type": "array",
+      "minItems": 1,
+      "description": "DAT-1. Every target APP-3 entity exactly once, same names, same order.",
+      "items": {
+        "type": "object",
+        "required": [
+          "entity",
+          "owning_context",
+          "system_of_record",
+          "classification",
+          "personal_data",
+          "retention",
+          "residency",
+          "physical_location",
+          "status",
+          "source"
+        ],
+        "properties": {
+          "entity": {
+            "type": "string",
+            "minLength": 2
+          },
+          "owning_context": {
+            "type": "string",
+            "minLength": 2
+          },
+          "system_of_record": {
+            "type": "string",
+            "minLength": 2
+          },
+          "classification": {
+            "type": "string",
+            "minLength": 3,
+            "description": "The target's SEC.2 class name, verbatim."
+          },
+          "personal_data": {
+            "type": "boolean",
+            "description": "DAT-1 Personal data column. True when the entity names or describes a person, references a buyer or producer, or holds an address or destination. Residency follows from it"
+          },
+          "retention": {
+            "type": "string",
+            "minLength": 4
+          },
+          "residency": {
+            "type": "string",
+            "minLength": 2
+          },
+          "physical_location": {
+            "type": "string",
+            "pattern": "^[a-z_]+\\.[a-z_]+$"
+          },
+          "status": {
+            "enum": [
+              "planned",
+              "realised"
+            ]
+          },
+          "source": {
+            "type": "string",
+            "minLength": 4,
+            "description": "Where retention and residency come from: REQ-DAT id, SEC.2, ES3, ES9."
+          },
+          "pending_ref": {
+            "type": "string",
+            "pattern": "^PEND-[0-9]{2}$"
+          }
+        },
+        "allOf": [
+          {
+            "if": {
+              "anyOf": [
+                {
+                  "properties": {
+                    "retention": {
+                      "pattern": "PENDING"
+                    }
+                  }
+                },
+                {
+                  "properties": {
+                    "residency": {
+                      "pattern": "PENDING"
+                    }
+                  }
+                }
+              ]
+            },
+            "then": {
+              "required": [
+                "pending_ref"
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "data_rules": {
+      "type": "array",
+      "minItems": 2,
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "rule",
+          "realises"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^DAT-1\\.[a-z]$"
+          },
+          "rule": {
+            "type": "string",
+            "minLength": 15
+          },
+          "realises": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string",
+              "pattern": "^(CON|INV)-[0-9]{1,2}$"
+            }
+          }
+        }
+      }
+    },
+    "snapshot_register": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "key",
+          "source",
+          "capturing_column",
+          "frozen_by",
+          "captured_via",
+          "status"
+        ],
+        "properties": {
+          "key": {
+            "type": "string",
+            "pattern": "^SN-[0-9]{2}$"
+          },
+          "source": {
+            "type": "string"
+          },
+          "capturing_column": {
+            "type": "string",
+            "pattern": "_at_[a-z_]+$",
+            "description": "Name shows snapshot meaning."
+          },
+          "frozen_by": {
+            "type": "string"
+          },
+          "captured_via": {
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "planned",
+              "realised"
+            ]
+          }
+        }
+      }
+    },
+    "classification_register": {
+      "type": "array",
+      "minItems": 1,
+      "description": "DAT-3, one row per target SEC.2 class.",
+      "items": {
+        "type": "object",
+        "required": [
+          "classification",
+          "retention",
+          "residency",
+          "at_rest",
+          "erasure"
+        ],
+        "properties": {
+          "classification": {
+            "type": "string"
+          },
+          "retention": {
+            "type": "string"
+          },
+          "residency": {
+            "type": "string"
+          },
+          "at_rest": {
+            "type": "string"
+          },
+          "erasure": {
+            "enum": [
+              "n/a",
+              "honoured",
+              "honoured subject to legal hold",
+              "overridden — statutory"
+            ]
+          }
+        }
+      }
+    },
+    "events": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "event_type",
+          "version",
+          "producer",
+          "consumers",
+          "status"
+        ],
+        "properties": {
+          "event_type": {
+            "type": "string",
+            "pattern": "^[a-z0-9-]+\\.[a-z0-9-]+\\.[a-z0-9-]+$"
+          },
+          "version": {
+            "type": "string",
+            "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+          },
+          "producer": {
+            "type": "string"
+          },
+          "consumers": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "status": {
+            "enum": [
+              "planned",
+              "registered"
+            ]
+          }
+        }
+      }
+    },
+    "data_planes": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "plane",
+          "decision"
+        ],
+        "properties": {
+          "plane": {
+            "enum": [
+              "operational",
+              "object",
+              "analytical"
+            ]
+          },
+          "decision": {
+            "enum": [
+              "DECIDED",
+              "PENDING"
+            ]
+          },
+          "realization": {
+            "type": "string"
+          },
+          "pending_ref": {
+            "type": "string",
+            "pattern": "^PEND-[0-9]{2}$"
+          }
+        },
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "decision": {
+                  "const": "DECIDED"
+                }
+              }
+            },
+            "then": {
+              "required": [
+                "realization"
+              ]
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "decision": {
+                  "const": "PENDING"
+                }
+              }
+            },
+            "then": {
+              "required": [
+                "pending_ref"
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "flows": {
+      "type": "array",
+      "minItems": 1,
+      "description": "INT-1 decisions on record — one per target APP-2.3 edge, no edge missing. Named 'flows' for L0-arch-baseline-generator compatibility; the end-to-end INT-4 register is end_to_end_flows.",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "edge_ref",
+          "demand_ref",
+          "from",
+          "to",
+          "style",
+          "degraded_mode"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^INT-1\\.[0-9]{2}$"
+          },
+          "edge_ref": {
+            "type": "string",
+            "pattern": "^(R|E)-[0-9]{2}$",
+            "description": "The target's interaction key: R-nn in the current target template, E-nn in the older APP-2.3 layout"
+          },
+          "demand_ref": {
+            "type": "string",
+            "pattern": "^REQ-INT-[0-9]{2}$"
+          },
+          "from": {
+            "type": "string"
+          },
+          "to": {
+            "type": "string"
+          },
+          "style": {
+            "enum": [
+              "sync",
+              "event",
+              "inbound_webhook",
+              "local_validation",
+              "PENDING"
+            ]
+          },
+          "latency_budget": {
+            "type": "string"
+          },
+          "timeout": {
+            "type": "string",
+            "description": "The REQ-INT budget, an allocation with arithmetic, or PENDING."
+          },
+          "degraded_mode": {
+            "type": "string",
+            "minLength": 4
+          },
+          "permitted_by": {
+            "type": "string",
+            "pattern": "^(DEV|CON)-[0-9]{1,2}$",
+            "description": "The target DEV or CON exception that permits a sync style."
+          },
+          "pending_ref": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "pattern": "^PEND-[0-9]{2}$"
+          }
+        },
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "style": {
+                  "const": "sync"
+                }
+              }
+            },
+            "then": {
+              "required": [
+                "permitted_by",
+                "timeout"
+              ]
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "style": {
+                  "const": "PENDING"
+                }
+              }
+            },
+            "then": {
+              "required": [
+                "pending_ref"
+              ],
+              "properties": {
+                "pending_ref": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    "contracts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "contract",
+          "owner",
+          "consumer",
+          "style",
+          "budget",
+          "initial_state"
+        ],
+        "properties": {
+          "contract": {
+            "type": "string",
+            "pattern": "^[a-z0-9-]+\\.[a-z0-9-]+$",
+            "description": "Logical name, never a path."
+          },
+          "owner": {
+            "type": "string"
+          },
+          "consumer": {
+            "type": "string"
+          },
+          "style": {
+            "type": "string"
+          },
+          "budget": {
+            "type": "string"
+          },
+          "initial_state": {
+            "const": "Planned"
+          }
+        }
+      }
+    },
+    "topics": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "topic",
+          "producer",
+          "consumers",
+          "retention",
+          "status"
+        ],
+        "properties": {
+          "topic": {
+            "type": "string",
+            "pattern": "^[a-z0-9-]+\\.[a-z0-9-]+\\.[a-z0-9-]+$"
+          },
+          "producer": {
+            "type": "string"
+          },
+          "consumers": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "ordering_key": {
+            "type": "string"
+          },
+          "retention": {
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "planned",
+              "live"
+            ]
+          }
+        }
+      }
+    },
+    "end_to_end_flows": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "status"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^FLOW-[0-9]{2}$"
+          },
+          "name": {
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "planned",
+              "recorded"
+            ]
+          }
+        }
+      }
+    },
+    "technology_selections": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "capability_class",
+          "technology",
+          "source",
+          "lifecycle",
+          "decision_status",
+          "satisfies",
+          "rejected_alternatives"
+        ],
+        "properties": {
+          "capability_class": {
+            "type": "string"
+          },
+          "technology": {
+            "type": "string"
+          },
+          "source": {
+            "enum": [
+              "EA11",
+              "EA2",
+              "EA9",
+              "none"
+            ],
+            "description": "EA11 approved platform catalogue; EA2 estate; EA9 estate mandate; none = not catalogued."
+          },
+          "lifecycle": {
+            "enum": [
+              "adopt",
+              "contain",
+              "unverified"
+            ],
+            "description": "'retire' is not selectable."
+          },
+          "decision_status": {
+            "enum": [
+              "DECIDED",
+              "PROPOSED"
+            ]
+          },
+          "exception_ref": {
+            "type": "string"
+          },
+          "satisfies": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "rejected_alternatives": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "technology",
+                "reason"
+              ],
+              "properties": {
+                "technology": {
+                  "type": "string"
+                },
+                "reason": {
+                  "type": "string",
+                  "minLength": 15
+                }
+              }
+            }
+          }
+        },
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "lifecycle": {
+                  "const": "unverified"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "decision_status": {
+                  "const": "PROPOSED"
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "source": {
+                  "const": "none"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "lifecycle": {
+                  "const": "unverified"
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "lifecycle": {
+                  "const": "contain"
+                }
+              }
+            },
+            "then": {
+              "required": [
+                "exception_ref"
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "capability_register": {
+      "type": "array",
+      "minItems": 1,
+      "description": "PLT-6. Status is the state at Cycle 0 exit, which the exit proof must evidence.",
+      "items": {
+        "type": "object",
+        "required": [
+          "capability",
+          "status",
+          "satisfies"
+        ],
+        "properties": {
+          "capability": {
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "AVAILABLE",
+              "PARTIAL",
+              "NOT_PRESENT"
+            ]
+          },
+          "since": {
+            "type": "string"
+          },
+          "realization": {
+            "type": "string"
+          },
+          "lifecycle_check": {
+            "type": "string"
+          },
+          "satisfies": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "needed_by_band": {
+            "enum": [
+              "First",
+              "Second",
+              "Third",
+              "Trigger",
+              "First change that needs it"
+            ]
+          },
+          "cycle0_reason": {
+            "type": ["string", "null"],
+            "enum": ["exit_proof", "high_lead_time", "cross_context_policy", "band_first", null],
+            "description": "Why an AVAILABLE capability was decided at Cycle 0. Required for AVAILABLE rows; null for NOT_PRESENT rows. exit_proof means the fixed exit-proof list (runtime, pipeline, environments, observability, secrets and workload identity, network and edge, event transport), never a criterion the document added"
+          },
+          "notes": {
+            "type": "string"
+          }
+        },
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "status": {
+                  "const": "NOT_PRESENT"
+                }
+              }
+            },
+            "then": {
+              "required": [
+                "needed_by_band"
+              ]
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "status": {
+                  "enum": [
+                    "AVAILABLE",
+                    "PARTIAL"
+                  ]
+                }
+              }
+            },
+            "then": {
+              "required": [
+                "realization",
+                "lifecycle_check",
+                "since"
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "resilience": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "component",
+          "availability_target",
+          "source"
+        ],
+        "properties": {
+          "component": {
+            "type": "string"
+          },
+          "availability_target": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          },
+          "rto": {
+            "type": "string"
+          },
+          "rpo": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "security_controls": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "implemented_by",
+          "sections"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^(SEC|TB)-[0-9]{1,2}$"
+          },
+          "implemented_by": {
+            "type": "string",
+            "minLength": 10
+          },
+          "sections": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "satisfaction_index": {
+      "type": "array",
+      "minItems": 1,
+      "description": "Every target REQ-* exactly once. The join conformance reads.",
+      "items": {
+        "type": "object",
+        "required": [
+          "demand_id",
+          "satisfied_by",
+          "status"
+        ],
+        "properties": {
+          "demand_id": {
+            "type": "string",
+            "pattern": "^REQ-(DAT|INT|PLT)-[0-9]{2}$"
+          },
+          "satisfied_by": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "status": {
+            "enum": [
+              "SATISFIED",
+              "NOT_YET_BUILT"
+            ]
+          },
+          "note": {
+            "type": "string"
+          }
+        },
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "status": {
+                  "const": "SATISFIED"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "satisfied_by": {
+                  "minItems": 1
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "status": {
+                  "const": "NOT_YET_BUILT"
+                }
+              }
+            },
+            "then": {
+              "required": [
+                "note"
+              ],
+              "properties": {
+                "note": {
+                  "minLength": 15
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    "constraint_realisation": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "constraint_id",
+          "realised_by"
+        ],
+        "properties": {
+          "constraint_id": {
+            "type": "string",
+            "pattern": "^CON-[0-9]{1,2}$"
+          },
+          "realised_by": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "target_questions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "question_id",
+          "outcome",
+          "how"
+        ],
+        "properties": {
+          "question_id": {
+            "type": "string",
+            "pattern": "^(OI|OQ|OPEN)-[0-9]{1,2}$"
+          },
+          "outcome": {
+            "enum": [
+              "answered_by_design",
+              "carried"
+            ]
+          },
+          "how": {
+            "type": "string"
+          },
+          "pending_ref": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      }
+    },
+    "pending_decisions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "section",
+          "decision_summary",
+          "status",
+          "trigger",
+          "owner",
+          "blocks_cycle0_exit",
+          "blocks_approval"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^PEND-[0-9]{2}$"
+          },
+          "section": {
+            "type": "string"
+          },
+          "decision_summary": {
+            "type": "string",
+            "minLength": 10,
+            "maxLength": 200
+          },
+          "status": {
+            "const": "PENDING"
+          },
+          "trigger": {
+            "type": "string",
+            "minLength": 15,
+            "description": "A condition, never a date."
+          },
+          "owner": {
+            "type": "string"
+          },
+          "blocks_cycle0_exit": {
+            "type": "boolean"
+          },
+          "blocks_approval": {
+            "type": "boolean",
+            "description": "True when the document cannot be approved until this is resolved (for example a target open question marked 'Blocks approval: yes')"
+          },
+          "target_ref": {
+            "type": ["string", "null"],
+            "description": "The target open item this row carries (OI-nn, or OQ-nn / OPEN-nn in the older layout), or null"
+          }
+        }
+      }
+    },
+    "deviations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "realised_in",
+          "summary"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^DEV-[0-9]{1,2}$"
+          },
+          "realised_in": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "summary": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "exceptions_recorded": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "cycle0_exit_proof": {
+      "type": "object",
+      "required": [
+        "criteria",
+        "gate"
+      ],
+      "properties": {
+        "criteria": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": [
+              "criterion",
+              "evidence_required",
+              "status"
+            ],
+            "properties": {
+              "criterion": {
+                "type": "string"
+              },
+              "evidence_required": {
+                "type": "string"
+              },
+              "status": {
+                "const": "NOT_YET_PROVEN"
+              }
+            }
+          }
+        },
+        "gate": {
+          "const": "Platform Lead"
+        }
+      }
+    },
+    "open_questions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "question",
+          "origin",
+          "doc_location",
+          "blocks_gate"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^SQ-[0-9]{2}$"
+          },
+          "question": {
+            "type": "string",
+            "minLength": 15
+          },
+          "origin": {
+            "enum": [
+              "target_gap",
+              "catalogue_gap",
+              "estate_gap"
+            ]
+          },
+          "doc_location": {
+            "type": "string"
+          },
+          "blocks_gate": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    "components": {
+      "type": "array",
+      "description": "APL-1: every APP-2 component plus any platform component the target names",
+      "items": {
+        "type": "object",
+        "required": ["component", "kind", "context", "owns_schema", "status", "realises"],
+        "properties": {
+          "component": { "type": "string" },
+          "kind": { "enum": ["service", "experience", "platform"] },
+          "context": { "type": ["string", "null"] },
+          "owns_schema": { "type": ["string", "null"] },
+          "status": { "enum": ["planned", "not_yet_built", "built"] },
+          "realises": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    },
+    "read_model_register": {
+      "type": "array",
+      "description": "DAT-4 registered analytical read models, by the target's key. Empty when the target registers none",
+      "items": {
+        "type": "object",
+        "required": ["key", "read_model", "owner", "joins", "freshness", "status"],
+        "properties": {
+          "key": { "type": "string", "pattern": "^(R|E)-[0-9]{2}$" },
+          "read_model": { "type": "string" },
+          "owner": { "type": "string" },
+          "joins": { "type": "array", "items": { "type": "string" } },
+          "freshness": { "type": "string", "description": "The target's figure, e.g. 24 h" },
+          "status": { "enum": ["planned", "not_yet_built"] }
+        }
+      }
+    },
+    "quality_attributes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "attribute", "source", "mechanism"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^(QA-[0-9]{2}|REQ-(DAT|INT|PLT)-[0-9]{2})$", "description": "The target's own QA-nn when it defines them (never re-minted), else a REQ id or a QA-nn minted here" },
+          "attribute": { "type": "string" },
+          "source": { "type": "string", "description": "The REQ-* budget or KB section the figure comes from" },
+          "mechanism": { "type": "string" }
+        }
+      }
+    },
+    "solution_decisions": {
+      "type": "array",
+      "description": "Section 12 decision summary. display_status is the tag printed in the document",
+      "items": {
+        "type": "object",
+        "required": ["id", "decision", "basis", "display_status"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^SD-[0-9]{2}$" },
+          "decision": { "type": "string" },
+          "basis": { "type": "string" },
+          "display_status": { "enum": ["Ratified", "Approved", "Requires validation", "Not yet built"] },
+          "pending_ref": { "type": ["string", "null"] }
+        }
+      }
+    },
+    "risks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "risk", "rating", "mitigation"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^RK-[0-9]{2}$" },
+          "risk": { "type": "string" },
+          "rating": { "enum": ["High", "Medium", "Low"] },
+          "mitigation": { "type": "string" }
+        }
+      }
+    },
+    "assumptions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "assumption"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^AS-[0-9]{2}$" },
+          "assumption": { "type": "string" }
+        }
+      }
+    },
+    "self_check": {
+      "type": "object",
+      "required": [
+        "content_boundary",
+        "completeness",
+        "grounding",
+        "quality_findings"
+      ],
+      "properties": {
+        "content_boundary": {
+          "enum": [
+            "pass",
+            "fail"
+          ]
+        },
+        "completeness": {
+          "enum": [
+            "pass",
+            "fail"
+          ]
+        },
+        "grounding": {
+          "enum": [
+            "pass",
+            "fail"
+          ]
+        },
+        "style": {
+          "enum": [
+            "pass",
+            "fail"
+          ],
+          "description": "Reflection checks 11-12: no agent narration, no KB codes in the document, fixed headings, Mermaid figures with captions, gap-free PEND ids"
+        },
+        "quality_findings": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "document_control": {
+            "properties": {
+              "catalogue_status": {
+                "not": {
+                  "const": "APPROVED"
+                }
+              }
+            }
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "technology_selections": {
+            "items": {
+              "if": {
+                "properties": {
+                  "source": {
+                    "const": "EA11"
+                  }
+                }
+              },
+              "then": {
+                "properties": {
+                  "decision_status": {
+                    "const": "PROPOSED"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}

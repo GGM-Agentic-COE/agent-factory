@@ -1,0 +1,2038 @@
+{
+  "_comment": "Input to L0-solution-architect at Cycle 0, HarvestLink marketplace. The target architecture is a Confluence page; here a copy is supplied directly as target_architecture_output (shown as L0-design-target-architect's examples/output-01 with the Enterprise Architect's approval applied), which takes precedence over fetching the page, so no reader call is made for it. At runtime without a direct copy, tool-L0-confluence-reader returns the page in storage-format XHTML. prd_page_id is empty: the target carries every budget used. Technology approval comes from kb-L0-enterprise-architecture EA11, not an input file.",
+  "confluence_base_url": "https://your-domain.atlassian.net/wiki",
+  "target_architecture_page_id": "524301",
+  "prd_page_id": "",
+  "allow_draft_target": false,
+  "workflow_execution_id": "wf-hl-step1-4b7e21c9",
+  "target_architecture_output": {
+    "agent_id": "L0-design-target-architect",
+    "agent_version": "1.0.0",
+    "execution_id": "exec-ta-7d2e90b4",
+    "workflow_execution_id": "wf-hl-step1-4b7e21c9",
+    "status": "success",
+    "content": {
+      "type": "target_architecture",
+      "schema_version": "1.0",
+      "items": {
+        "document_control": {
+          "document_id": "ta-harvestlink",
+          "version": "1.0",
+          "status": "APPROVED",
+          "mode": "GREENFIELD-CREATE",
+          "approval": {
+            "gate": "Enterprise Architect",
+            "approver": "Enterprise Architect (HarvestLink)",
+            "date": "2026-10-22"
+          },
+          "regulatory_regimes": [
+            "food-business-operator-registration",
+            "uk-tax-records",
+            "psd2-payments",
+            "uk-gdpr"
+          ],
+          "principles_source": "catalogue-provisional",
+          "gate_ready": true
+        },
+        "requirement_coverage": [
+          {
+            "requirement_id": "FR-001",
+            "owning_context": "APP-1.04",
+            "participating_contexts": [],
+            "nfr_classes": [
+              "Compliance",
+              "Security"
+            ]
+          },
+          {
+            "requirement_id": "FR-002",
+            "owning_context": "APP-1.01",
+            "participating_contexts": [],
+            "nfr_classes": [
+              "Performance",
+              "Data integrity"
+            ]
+          },
+          {
+            "requirement_id": "FR-003",
+            "owning_context": "APP-1.01",
+            "participating_contexts": [
+              "APP-1.04",
+              "APP-1.02"
+            ],
+            "nfr_classes": [
+              "Compliance"
+            ]
+          },
+          {
+            "requirement_id": "FR-004",
+            "owning_context": "APP-1.01",
+            "participating_contexts": [],
+            "nfr_classes": [
+              "Performance"
+            ]
+          },
+          {
+            "requirement_id": "FR-005",
+            "owning_context": "APP-1.02",
+            "participating_contexts": [
+              "APP-1.01",
+              "APP-1.04"
+            ],
+            "nfr_classes": [
+              "Performance",
+              "Data integrity",
+              "Availability"
+            ]
+          },
+          {
+            "requirement_id": "FR-006",
+            "owning_context": "APP-1.02",
+            "participating_contexts": [
+              "APP-1.03"
+            ],
+            "nfr_classes": [
+              "Performance",
+              "Resilience"
+            ]
+          },
+          {
+            "requirement_id": "FR-007",
+            "owning_context": "APP-1.03",
+            "participating_contexts": [
+              "APP-1.02"
+            ],
+            "nfr_classes": [
+              "Compliance",
+              "Performance",
+              "Resilience"
+            ]
+          },
+          {
+            "requirement_id": "FR-008",
+            "owning_context": "APP-1.03",
+            "participating_contexts": [],
+            "nfr_classes": [
+              "Timeliness"
+            ]
+          },
+          {
+            "requirement_id": "FR-009",
+            "owning_context": "APP-1.05",
+            "participating_contexts": [
+              "APP-1.02",
+              "APP-1.03"
+            ],
+            "nfr_classes": [
+              "Timeliness"
+            ]
+          },
+          {
+            "requirement_id": "FR-010",
+            "owning_context": "APP-1.04",
+            "participating_contexts": [
+              "APP-1.01",
+              "APP-1.02",
+              "APP-1.03",
+              "APP-1.05"
+            ],
+            "nfr_classes": [
+              "Compliance",
+              "Security"
+            ]
+          }
+        ],
+        "bounded_contexts": [
+          {
+            "id": "APP-1.01",
+            "name": "Catalogue",
+            "type": "Core",
+            "owns": [
+              "Product",
+              "Listing",
+              "ListingImage",
+              "Category"
+            ],
+            "does_not_own": [
+              "Price actually paid (Orders)",
+              "Producer identity and FBO registration (Identity)"
+            ],
+            "upstream_of": [
+              "Orders"
+            ],
+            "downstream_of": [
+              "Identity"
+            ],
+            "status": "INTENDED",
+            "boundary_heuristics": [
+              "different_clock"
+            ],
+            "rationale_summary": "Listing lifecycle is editorial and runs on the producer's clock. Merged with Orders, every listing edit would release the checkout path and order state would leak into a producer-owned model.",
+            "requirements_claimed": [
+              "FR-002",
+              "FR-003",
+              "FR-004"
+            ]
+          },
+          {
+            "id": "APP-1.02",
+            "name": "Orders",
+            "type": "Core",
+            "owns": [
+              "Order",
+              "OrderLine"
+            ],
+            "does_not_own": [
+              "Fee (Billing)",
+              "Listing price (Catalogue — captured at placement only)"
+            ],
+            "upstream_of": [
+              "Billing",
+              "Notifications"
+            ],
+            "downstream_of": [
+              "Catalogue",
+              "Identity",
+              "Billing"
+            ],
+            "status": "INTENDED",
+            "boundary_heuristics": [
+              "different_clock",
+              "different_regulator"
+            ],
+            "rationale_summary": "The order lifecycle is operational and changes weekly under Product; fee policy changes quarterly under Finance and fee records are tax records. Merged with Billing, every fee change redeploys checkout and financial records inherit operational retention.",
+            "requirements_claimed": [
+              "FR-005",
+              "FR-006"
+            ]
+          },
+          {
+            "id": "APP-1.03",
+            "name": "Billing",
+            "type": "Core",
+            "owns": [
+              "Transaction",
+              "Fee",
+              "Payout",
+              "Statement"
+            ],
+            "does_not_own": [
+              "Order state (Orders)",
+              "Producer identity (Identity)",
+              "Tax policy beyond one rate card (OPEN-02)"
+            ],
+            "upstream_of": [
+              "Orders",
+              "Notifications"
+            ],
+            "downstream_of": [
+              "Orders",
+              "Identity"
+            ],
+            "status": "INTENDED",
+            "boundary_heuristics": [
+              "different_clock",
+              "different_regulator"
+            ],
+            "rationale_summary": "Fee calculation is commercial policy under Finance approval and fee records fall under 10-year tax retention. Payouts stay here because they derive from Billing's transactions under the same regulator; splitting them creates a second financial system of record.",
+            "requirements_claimed": [
+              "FR-007",
+              "FR-008"
+            ]
+          },
+          {
+            "id": "APP-1.04",
+            "name": "Identity",
+            "type": "Generic",
+            "owns": [
+              "Producer",
+              "Buyer",
+              "Session",
+              "FboRegistration"
+            ],
+            "does_not_own": [
+              "Whether a listing may be published (Catalogue)",
+              "Group wholesale supplier records (group supplier master)"
+            ],
+            "upstream_of": [
+              "Catalogue",
+              "Orders",
+              "Billing"
+            ],
+            "downstream_of": [],
+            "status": "INTENDED",
+            "boundary_heuristics": [
+              "different_regulator",
+              "different_language"
+            ],
+            "rationale_summary": "FBO registration is a regulated fact about the producer with a validity window, needed by both Catalogue and Orders, so it sits upstream of both. Merged with Catalogue, Orders would depend on Catalogue for a regulated identity fact.",
+            "requirements_claimed": [
+              "FR-001",
+              "FR-010"
+            ]
+          },
+          {
+            "id": "APP-1.05",
+            "name": "Notifications",
+            "type": "Supporting",
+            "owns": [],
+            "does_not_own": [
+              "Deciding an event matters (emitting context)",
+              "Recipient contact details (Identity)"
+            ],
+            "upstream_of": [],
+            "downstream_of": [
+              "Orders",
+              "Billing"
+            ],
+            "status": "INTENDED",
+            "boundary_heuristics": [
+              "different_consistency"
+            ],
+            "rationale_summary": "Stateless: delivery must be retryable and replaceable without touching a source of truth, and a context with no entities cannot drift. Merged into Orders, Billing's payout events would flow through Orders.",
+            "requirements_claimed": [
+              "FR-009"
+            ]
+          }
+        ],
+        "components": [
+          {
+            "id": "APP-2.01",
+            "name": "catalogue-service",
+            "kind": "service",
+            "context": "Catalogue",
+            "responsibility_summary": "Listing lifecycle, publication eligibility, browse and search",
+            "not_responsible_for": "Pricing policy; fee calculation",
+            "owns_data_for": [
+              "Product",
+              "Listing",
+              "ListingImage",
+              "Category"
+            ]
+          },
+          {
+            "id": "APP-2.02",
+            "name": "orders-service",
+            "kind": "service",
+            "context": "Orders",
+            "responsibility_summary": "Order lifecycle and checkout",
+            "not_responsible_for": "Computing anything financial",
+            "owns_data_for": [
+              "Order",
+              "OrderLine"
+            ]
+          },
+          {
+            "id": "APP-2.03",
+            "name": "billing-service",
+            "kind": "service",
+            "context": "Billing",
+            "responsibility_summary": "Transactions, fee calculation and the fee display contract",
+            "not_responsible_for": "Order state",
+            "owns_data_for": [
+              "Transaction",
+              "Fee"
+            ]
+          },
+          {
+            "id": "APP-2.04",
+            "name": "billing-period-worker",
+            "kind": "worker",
+            "context": "Billing",
+            "responsibility_summary": "Period close: payouts and statements",
+            "not_responsible_for": "Any request-path responsibility",
+            "owns_data_for": [
+              "Payout",
+              "Statement"
+            ]
+          },
+          {
+            "id": "APP-2.05",
+            "name": "identity-service",
+            "kind": "service",
+            "context": "Identity",
+            "responsibility_summary": "Authentication, profiles, FBO validity and erasure",
+            "not_responsible_for": "Business authorisation rules of other contexts",
+            "owns_data_for": [
+              "Producer",
+              "Buyer",
+              "Session",
+              "FboRegistration"
+            ]
+          },
+          {
+            "id": "APP-2.06",
+            "name": "notification-service",
+            "kind": "service",
+            "context": "Notifications",
+            "responsibility_summary": "Event-driven delivery of notices",
+            "not_responsible_for": "Deciding whether something is noteworthy",
+            "owns_data_for": []
+          },
+          {
+            "id": "APP-2.07",
+            "name": "buyer-spa",
+            "kind": "experience",
+            "context": "—",
+            "responsibility_summary": "Buyer browsing, ordering and confirmation",
+            "not_responsible_for": "Any business rule not enforced server-side",
+            "owns_data_for": []
+          },
+          {
+            "id": "APP-2.08",
+            "name": "producer-spa",
+            "kind": "experience",
+            "context": "—",
+            "responsibility_summary": "Producer listings, payouts and statements",
+            "not_responsible_for": "Any business rule not enforced server-side",
+            "owns_data_for": []
+          }
+        ],
+        "interaction_edges": [
+          {
+            "id": "E-01",
+            "from": "orders-service",
+            "to": "catalogue-service",
+            "purpose": "Availability and current price of the listings in a basket",
+            "needed_when": "request_path",
+            "failure_tolerance": "must_succeed",
+            "demand_ref": "REQ-INT-03"
+          },
+          {
+            "id": "E-02",
+            "from": "billing-service",
+            "to": "orders-service",
+            "purpose": "Notice that an order was placed, with lines and amounts",
+            "needed_when": "after_the_fact",
+            "failure_tolerance": "may_be_delayed",
+            "demand_ref": "REQ-INT-04"
+          },
+          {
+            "id": "E-03",
+            "from": "orders-service",
+            "to": "billing-service",
+            "purpose": "The exact fee for an order, for the confirmation",
+            "needed_when": "request_path",
+            "failure_tolerance": "may_degrade",
+            "demand_ref": "REQ-INT-06"
+          },
+          {
+            "id": "E-04",
+            "from": "every service",
+            "to": "identity-service",
+            "purpose": "Who the caller is and what they may do",
+            "needed_when": "request_path",
+            "failure_tolerance": "must_succeed",
+            "demand_ref": "REQ-INT-05"
+          },
+          {
+            "id": "E-05",
+            "from": "catalogue-service",
+            "to": "identity-service",
+            "purpose": "Producer's FBO registration validity at publication",
+            "needed_when": "request_path",
+            "failure_tolerance": "must_succeed",
+            "demand_ref": "REQ-INT-07"
+          },
+          {
+            "id": "E-06",
+            "from": "orders-service",
+            "to": "identity-service",
+            "purpose": "FBO registration validity of each line's producer at checkout",
+            "needed_when": "request_path",
+            "failure_tolerance": "must_succeed",
+            "demand_ref": "REQ-INT-07"
+          },
+          {
+            "id": "E-07",
+            "from": "notification-service",
+            "to": "orders-service, billing-service",
+            "purpose": "Notice of order placed and payout scheduled",
+            "needed_when": "after_the_fact",
+            "failure_tolerance": "may_be_delayed",
+            "demand_ref": "REQ-INT-08"
+          },
+          {
+            "id": "E-08",
+            "from": "buyer-spa, producer-spa",
+            "to": "owning services",
+            "purpose": "Every read and command, through the owner's contract",
+            "needed_when": "request_path",
+            "failure_tolerance": "must_succeed",
+            "demand_ref": "REQ-INT-09"
+          },
+          {
+            "id": "E-09",
+            "from": "identity-service",
+            "to": "group supplier master (EA3, read-only)",
+            "purpose": "Whether a registering producer already exists as a group supplier",
+            "needed_when": "request_path",
+            "failure_tolerance": "may_degrade",
+            "demand_ref": "REQ-INT-11"
+          },
+          {
+            "id": "E-10",
+            "from": "billing-service",
+            "to": "external payment provider",
+            "purpose": "Settlement status of each transaction",
+            "needed_when": "after_the_fact",
+            "failure_tolerance": "may_be_delayed",
+            "demand_ref": "REQ-INT-10"
+          }
+        ],
+        "aggregates": [
+          {
+            "id": "AGG-01",
+            "root": "Listing",
+            "context": "APP-1.01",
+            "entities_inside": [
+              "ListingImage"
+            ],
+            "referenced_by_id": [
+              "Product",
+              "Category",
+              "Producer"
+            ]
+          },
+          {
+            "id": "AGG-02",
+            "root": "Product",
+            "context": "APP-1.01",
+            "entities_inside": [],
+            "referenced_by_id": [
+              "Producer"
+            ]
+          },
+          {
+            "id": "AGG-03",
+            "root": "Category",
+            "context": "APP-1.01",
+            "entities_inside": [],
+            "referenced_by_id": []
+          },
+          {
+            "id": "AGG-04",
+            "root": "Order",
+            "context": "APP-1.02",
+            "entities_inside": [
+              "OrderLine"
+            ],
+            "referenced_by_id": [
+              "Listing",
+              "Buyer"
+            ]
+          },
+          {
+            "id": "AGG-05",
+            "root": "Transaction",
+            "context": "APP-1.03",
+            "entities_inside": [
+              "Fee"
+            ],
+            "referenced_by_id": [
+              "Order"
+            ]
+          },
+          {
+            "id": "AGG-06",
+            "root": "Payout",
+            "context": "APP-1.03",
+            "entities_inside": [],
+            "referenced_by_id": [
+              "Producer",
+              "Transaction"
+            ]
+          },
+          {
+            "id": "AGG-07",
+            "root": "Statement",
+            "context": "APP-1.03",
+            "entities_inside": [],
+            "referenced_by_id": [
+              "Payout"
+            ]
+          },
+          {
+            "id": "AGG-08",
+            "root": "Producer",
+            "context": "APP-1.04",
+            "entities_inside": [
+              "FboRegistration"
+            ],
+            "referenced_by_id": []
+          },
+          {
+            "id": "AGG-09",
+            "root": "Buyer",
+            "context": "APP-1.04",
+            "entities_inside": [],
+            "referenced_by_id": []
+          },
+          {
+            "id": "AGG-10",
+            "root": "Session",
+            "context": "APP-1.04",
+            "entities_inside": [],
+            "referenced_by_id": [
+              "Producer",
+              "Buyer"
+            ]
+          }
+        ],
+        "invariants": [
+          {
+            "id": "INV-01",
+            "rule": "A Listing may not be published while its producer's FBO registration is not valid; the check is repeated at checkout",
+            "aggregate": "AGG-01",
+            "driven_by": [
+              "FR-003",
+              "food-business-operator-registration"
+            ],
+            "violation_looks_like": "A buyer completes an order for a producer whose registration had expired"
+          },
+          {
+            "id": "INV-02",
+            "rule": "A Listing price is a positive, exact amount in the smallest currency unit; it is never rounded",
+            "aggregate": "AGG-01",
+            "driven_by": [
+              "FR-002"
+            ],
+            "violation_looks_like": "A listing with a zero, negative or fractional-penny price exists"
+          },
+          {
+            "id": "INV-03",
+            "rule": "An Order captures each line's price at placement and is never re-priced; the buyer pays what they saw",
+            "aggregate": "AGG-04",
+            "driven_by": [
+              "FR-005"
+            ],
+            "violation_looks_like": "An order total differs from the confirmation the buyer received"
+          },
+          {
+            "id": "INV-04",
+            "rule": "Submitting the same order request twice yields one Order",
+            "aggregate": "AGG-04",
+            "driven_by": [
+              "FR-005"
+            ],
+            "violation_looks_like": "Two orders exist for one buyer request"
+          },
+          {
+            "id": "INV-05",
+            "rule": "A Fee has no life independent of the Transaction that produced it",
+            "aggregate": "AGG-05",
+            "driven_by": [
+              "FR-007"
+            ],
+            "violation_looks_like": "A fee exists with no transaction"
+          },
+          {
+            "id": "INV-06",
+            "rule": "A Fee is immutable once written; corrections are new compensating entries, never updates",
+            "aggregate": "AGG-05",
+            "driven_by": [
+              "FR-007",
+              "uk-tax-records"
+            ],
+            "violation_looks_like": "An auditor finds a fee whose value changed after it was written"
+          },
+          {
+            "id": "INV-07",
+            "rule": "A Payout includes each settled Transaction of its producer and period exactly once",
+            "aggregate": "AGG-06",
+            "driven_by": [
+              "FR-008"
+            ],
+            "violation_looks_like": "A transaction is paid out twice, or a settled transaction is never paid out"
+          },
+          {
+            "id": "INV-08",
+            "rule": "A Producer's FBO registration validity windows are kept as history; a window is never overwritten",
+            "aggregate": "AGG-08",
+            "driven_by": [
+              "FR-001",
+              "food-business-operator-registration"
+            ],
+            "violation_looks_like": "Validity at a past date cannot be reconstructed"
+          }
+        ],
+        "constraints": [
+          {
+            "id": "CON-01",
+            "rule": "Every bounded context is realised by at least one independently deployable component; no component spans two contexts",
+            "binds_viewpoints": [
+              "APP",
+              "PLT"
+            ],
+            "rationale_summary": "Independent deployability makes a boundary real (PRIN-04).",
+            "observable_violation": "A component writing entities owned by two contexts",
+            "sanctioned_exceptions": [],
+            "adr": "ADR-001"
+          },
+          {
+            "id": "CON-02",
+            "rule": "Exactly one system of record per entity",
+            "binds_viewpoints": [
+              "DAT"
+            ],
+            "rationale_summary": "Two sources of truth leave no correct value to restore (PRIN-02).",
+            "observable_violation": "An entity with two writers",
+            "sanctioned_exceptions": [],
+            "adr": "ADR-001"
+          },
+          {
+            "id": "CON-03",
+            "rule": "Non-owning contexts hold references by identifier only; a replicated attribute only in a registered read model with a staleness budget",
+            "binds_viewpoints": [
+              "DAT"
+            ],
+            "rationale_summary": "Unregistered copies become second systems of record (PRIN-02).",
+            "observable_violation": "A field mirroring another context's attribute with no registration",
+            "sanctioned_exceptions": [
+              "Transactional snapshots declared under CON-09"
+            ],
+            "adr": "ADR-003"
+          },
+          {
+            "id": "CON-04",
+            "rule": "No context reads or writes another context's persistent state directly",
+            "binds_viewpoints": [
+              "DAT",
+              "INT",
+              "PLT"
+            ],
+            "rationale_summary": "Direct reads couple contexts at the storage level (PRIN-03).",
+            "observable_violation": "A cross-context query or shared store",
+            "sanctioned_exceptions": [],
+            "adr": "ADR-003"
+          },
+          {
+            "id": "CON-05",
+            "rule": "Every cross-context interaction is asynchronous unless a REQ-INT demand states a synchronous need with a latency budget and a degraded-mode behaviour",
+            "binds_viewpoints": [
+              "INT"
+            ],
+            "rationale_summary": "Synchronous dependencies couple availability (PRIN-03).",
+            "observable_violation": "A synchronous cross-context call with no matching REQ-INT budget",
+            "sanctioned_exceptions": [
+              "REQ-INT-03",
+              "REQ-INT-06",
+              "REQ-INT-07"
+            ],
+            "adr": "ADR-002"
+          },
+          {
+            "id": "CON-06",
+            "rule": "All inter-context communication uses a published, versioned contract",
+            "binds_viewpoints": [
+              "INT"
+            ],
+            "rationale_summary": "Unversioned interfaces cannot change safely (PRIN-03).",
+            "observable_violation": "A consumer relying on an undocumented interface",
+            "sanctioned_exceptions": [],
+            "adr": "ADR-004"
+          },
+          {
+            "id": "CON-07",
+            "rule": "A value displayed by one context but owned by another is obtained through that context's contract, never inferred or recomputed",
+            "binds_viewpoints": [
+              "INT",
+              "APP"
+            ],
+            "rationale_summary": "A recomputed value drifts from the owner's rule (FR-006).",
+            "observable_violation": "Two contexts producing different values for the same business fact",
+            "sanctioned_exceptions": [],
+            "adr": "ADR-004"
+          },
+          {
+            "id": "CON-08",
+            "rule": "Identity is upstream of every context; no context implements its own authentication",
+            "binds_viewpoints": [
+              "APP",
+              "INT",
+              "PLT"
+            ],
+            "rationale_summary": "One authority on who a caller is (ES1).",
+            "observable_violation": "A component that authenticates users itself",
+            "sanctioned_exceptions": []
+          },
+          {
+            "id": "CON-09",
+            "rule": "A context may hold a transactional snapshot of another context's value only as part of an immutable record of an event: captured once through the owner's contract, declared, never reconciled",
+            "binds_viewpoints": [
+              "DAT",
+              "APP"
+            ],
+            "rationale_summary": "Physically identical to a replicated attribute, semantically opposite; without the rule a snapshot gets 'fixed' and INV-03 breaks.",
+            "observable_violation": "An undeclared copy, or a declared snapshot being synchronised",
+            "sanctioned_exceptions": [],
+            "adr": "ADR-006"
+          },
+          {
+            "id": "CON-10",
+            "rule": "Every entity classified PII, Financial or Regulated Evidence carries a retention and residency policy before it is first persisted",
+            "binds_viewpoints": [
+              "DAT",
+              "PLT"
+            ],
+            "rationale_summary": "Retention decided after data exists is decided under pressure (PRIN-06).",
+            "observable_violation": "A classified entity persisted with no retention or residency decision",
+            "sanctioned_exceptions": []
+          },
+          {
+            "id": "CON-11",
+            "rule": "No context posts to an enterprise financial ledger; the platform's financial records are held only in Billing",
+            "binds_viewpoints": [
+              "DAT",
+              "INT"
+            ],
+            "rationale_summary": "HarvestLink is not a transacting party in the group ledger (EA3).",
+            "observable_violation": "Any interface from a HarvestLink component to the group ledger",
+            "sanctioned_exceptions": []
+          },
+          {
+            "id": "CON-12",
+            "rule": "Any deviation from a binding principle is recorded with a rationale, or it is a defect",
+            "binds_viewpoints": [
+              "APP",
+              "DAT",
+              "INT",
+              "PLT"
+            ],
+            "rationale_summary": "An unrecorded deviation cannot be reviewed or reversed.",
+            "observable_violation": "A design that breaks a principle with no DEV or EXC record",
+            "sanctioned_exceptions": []
+          }
+        ],
+        "demands": [
+          {
+            "id": "REQ-DAT-01",
+            "viewpoint": "DAT",
+            "demanding_context": "All",
+            "demand": "Every APP-3.1 entity has exactly one system of record, in a lookup-able register",
+            "budget": "100% of 14 entities; before the first feature cycle",
+            "driven_by": [
+              "CON-02",
+              "PRIN-02"
+            ],
+            "viewpoint_decides": "The register's form and location",
+            "satisfied_by": null
+          },
+          {
+            "id": "REQ-DAT-02",
+            "viewpoint": "DAT",
+            "demanding_context": "All",
+            "demand": "A classification, retention and residency policy per entity",
+            "budget": "100% of entities; Regulated Evidence 6 y (ES3); residency per ES9",
+            "driven_by": [
+              "CON-10",
+              "PRIN-06"
+            ],
+            "viewpoint_decides": "Policy per entity",
+            "satisfied_by": null
+          },
+          {
+            "id": "REQ-DAT-03",
+            "viewpoint": "DAT",
+            "demanding_context": "All",
+            "demand": "A versioned event envelope standard usable by every context",
+            "budget": "Every cross-context event; no consumer broken by a producer version change",
+            "driven_by": [
+              "CON-06"
+            ],
+            "viewpoint_decides": "Envelope fields and versioning",
+            "satisfied_by": null
+          },
+          {
+            "id": "REQ-DAT-04",
+            "viewpoint": "DAT",
+            "demanding_context": "Billing",
+            "demand": "Durable, immutable, long-retention storage for Transaction and Fee",
+            "budget": ">= 10 years; Financial (Restricted); immutability demonstrable to an external auditor",
+            "driven_by": [
+              "FR-007",
+              "INV-06",
+              "uk-tax-records"
+            ],
+            "viewpoint_decides": "Where and how it is stored; how immutability is evidenced",
+            "satisfied_by": null
+          },
+          {
+            "id": "REQ-DAT-05",
+            "viewpoint": "DAT",
+            "demanding_context": "All",
+            "demand": "A decision on whether an analytical plane exists, or the trigger that will force it",
+            "budget": "Decision or trigger before the first feature cycle",
+            "driven_by": [
+              "CON-04",
+              "OPEN-01"
+            ],
+            "viewpoint_decides": "Planes and their ownership",
+            "satisfied_by": null
+          },
+          {
+            "id": "REQ-DAT-06",
+            "viewpoint": "DAT",
+            "demanding_context": "Identity",
+            "demand": "Storage of Producer, Buyer and Session personal data with erasure",
+            "budget": "Erasure within 30 days except legal retention (ES3); residency UK or adequacy (ES9)",
+            "driven_by": [
+              "FR-010",
+              "uk-gdpr"
+            ],
+            "viewpoint_decides": "Erasure mechanism; legal-hold exceptions",
+            "satisfied_by": null
+          },
+          {
+            "id": "REQ-DAT-07",
+            "viewpoint": "DAT",
+            "demanding_context": "Identity",
+            "demand": "FBO registration validity history kept as regulated evidence",
+            "budget": "6 years from creation (ES3); no window overwritten",
+            "driven_by": [
+              "FR-001",
+              "INV-08"
+            ],
+            "viewpoint_decides": "How history is kept and evidenced",
+            "satisfied_by": null
+          },
+          {
+            "id": "REQ-DAT-08",
+            "viewpoint": "DAT",
+            "demanding_context": "Orders",
+            "demand": "A snapshot register distinguishing transactional snapshots from replicated attributes",
+            "budget": "100% of snapshots declared before first use",
+            "driven_by": [
+              "CON-09"
+            ],
+            "viewpoint_decides": "The register's form; how a snapshot is marked",
+            "satisfied_by": null
+          },
+          {
+            "id": "REQ-INT-01",
+            "viewpoint": "INT",
+            "demanding_context": "All",
+            "demand": "Decision rules for synchronous versus event-driven cross-context communication",
+            "budget": "A rule covering 100% of APP-2.3 edges",
+            "driven_by": [
+              "CON-05"
+            ],
+            "viewpoint_decides": "The sync-versus-async rule set",
+            "edge_refs": [
+              "E-01",
+              "E-02",
+              "E-03",
+              "E-04",
+              "E-05",
+              "E-06",
+              "E-07",
+              "E-08",
+              "E-09",
+              "E-10"
+            ],
+            "satisfied_by": null
+          },
+          {
+            "id": "REQ-INT-02",
+            "viewpoint": "INT",
+            "demanding_context": "All",
+            "demand": "Contracts are versioned; a breaking change follows an expand-and-contract path",
+            "budget": "Zero consumers broken by a provider release",
+            "driven_by": [
+              "CON-06",
+              "PRIN-03"
+            ],
+            "viewpoint_decides": "Versioning scheme, deprecation window, verification approach",
+            "edge_refs": [
+              "E-01",
+              "E-02",
+              "E-03",
+              "E-04",
+              "E-05",
+              "E-06",
+              "E-07",
+              "E-08",
+              "E-09",
+              "E-10"
+            ],
+            "satisfied_by": null
+          },
+          {
+            "id": "REQ-INT-03",
+            "viewpoint": "INT",
+            "demanding_context": "Orders",
+            "demand": "Listing availability and price at checkout",
+            "budget": "<= 200 ms p95 inside 800 ms checkout; withdrawal effective within 5 s",
+            "driven_by": [
+              "FR-005",
+              "INV-03"
+            ],
+            "viewpoint_decides": "Synchronous read or a local model meeting the 5 s staleness budget",
+            "edge_refs": [
+              "E-01"
+            ],
+            "satisfied_by": null
+          },
+          {
+            "id": "REQ-INT-04",
+            "viewpoint": "INT",
+            "demanding_context": "Billing",
+            "demand": "Notice that an order was placed",
+            "budget": "<= 5 s end to end; at-least-once; a 24 h Billing outage loses nothing",
+            "driven_by": [
+              "FR-007"
+            ],
+            "viewpoint_decides": "Event shape, ordering and replay",
+            "edge_refs": [
+              "E-02"
+            ],
+            "satisfied_by": null
+          },
+          {
+            "id": "REQ-INT-05",
+            "viewpoint": "INT",
+            "demanding_context": "All",
+            "demand": "Every request carries an identity re-established at TB-01 and TB-02",
+            "budget": "100% of requests; latency PENDING",
+            "driven_by": [
+              "CON-08",
+              "FR-010"
+            ],
+            "viewpoint_decides": "Whether establishing identity needs a runtime call; if so CON-05 requires a budget",
+            "edge_refs": [
+              "E-04"
+            ],
+            "pending_ref": "OQ-01",
+            "satisfied_by": null
+          },
+          {
+            "id": "REQ-INT-06",
+            "viewpoint": "INT",
+            "demanding_context": "Orders",
+            "demand": "The exact fee for an order at confirmation",
+            "budget": "<= 150 ms p95 inside 400 ms confirmation; 'calculating' and never blocks when unavailable",
+            "driven_by": [
+              "FR-006",
+              "CON-07",
+              "DEV-01"
+            ],
+            "viewpoint_decides": "Synchronous or asynchronous; how 'calculating' resolves",
+            "edge_refs": [
+              "E-03"
+            ],
+            "satisfied_by": null
+          },
+          {
+            "id": "REQ-INT-07",
+            "viewpoint": "INT",
+            "demanding_context": "Catalogue, Orders",
+            "demand": "The producer's FBO validity at publication and at checkout",
+            "budget": "Zero staleness; inside the 800 ms checkout budget",
+            "driven_by": [
+              "INV-01",
+              "FR-003"
+            ],
+            "viewpoint_decides": "How validity is obtained without a copy",
+            "edge_refs": [
+              "E-05",
+              "E-06"
+            ],
+            "satisfied_by": null
+          },
+          {
+            "id": "REQ-INT-08",
+            "viewpoint": "INT",
+            "demanding_context": "Notifications",
+            "demand": "Notice of order placed and payout scheduled",
+            "budget": "Delivered <= 2 min after the event; at-least-once",
+            "driven_by": [
+              "FR-009"
+            ],
+            "viewpoint_decides": "Event shape; reuse of REQ-INT-04 events",
+            "edge_refs": [
+              "E-07"
+            ],
+            "satisfied_by": null
+          },
+          {
+            "id": "REQ-INT-09",
+            "viewpoint": "INT",
+            "demanding_context": "Experience components",
+            "demand": "Every value obtained through the owning service's contract",
+            "budget": "Search results <= 1 s p95; checkout and confirmation as REQ-INT-03/06",
+            "driven_by": [
+              "CON-07",
+              "FR-004"
+            ],
+            "viewpoint_decides": "The experience-facing contract shape",
+            "edge_refs": [
+              "E-08"
+            ],
+            "satisfied_by": null
+          },
+          {
+            "id": "REQ-INT-10",
+            "viewpoint": "INT",
+            "demanding_context": "Billing",
+            "demand": "Settlement status of each transaction from the external payment provider",
+            "budget": "At-least-once; all settlements for a period received before its close",
+            "driven_by": [
+              "INV-07",
+              "FR-008"
+            ],
+            "viewpoint_decides": "Anti-corruption mapping; reconciliation",
+            "edge_refs": [
+              "E-10"
+            ],
+            "satisfied_by": null
+          },
+          {
+            "id": "REQ-INT-11",
+            "viewpoint": "INT",
+            "demanding_context": "Identity",
+            "demand": "Whether a registering producer already exists as a group supplier",
+            "budget": "Read-only (EA3); latency and failure behaviour PENDING",
+            "driven_by": [
+              "FR-001",
+              "EA3"
+            ],
+            "viewpoint_decides": "Access route to the group supplier master",
+            "edge_refs": [
+              "E-09"
+            ],
+            "pending_ref": "OQ-02",
+            "satisfied_by": null
+          },
+          {
+            "id": "REQ-INT-12",
+            "viewpoint": "INT",
+            "demanding_context": "All",
+            "demand": "Every integration observable by correlation id, trace id and contract version",
+            "budget": "100% of APP-2.3 edges",
+            "driven_by": [
+              "PRIN-08"
+            ],
+            "viewpoint_decides": "Propagation standard",
+            "edge_refs": [
+              "E-01",
+              "E-02",
+              "E-03",
+              "E-04",
+              "E-05",
+              "E-06",
+              "E-07",
+              "E-08",
+              "E-09",
+              "E-10"
+            ],
+            "satisfied_by": null
+          },
+          {
+            "id": "REQ-PLT-01",
+            "viewpoint": "PLT",
+            "demanding_context": "All",
+            "demand": "Independently deployable runtime, one deployment unit per APP-2 component",
+            "budget": "No component redeploys another; checkout path 99.9% monthly",
+            "driven_by": [
+              "CON-01",
+              "FR-005"
+            ],
+            "viewpoint_decides": "Runtime, environment model",
+            "capability_class": "Independently deployable runtime",
+            "satisfied_by": null
+          },
+          {
+            "id": "REQ-PLT-02",
+            "viewpoint": "PLT",
+            "demanding_context": "All",
+            "demand": "Durable asynchronous messaging with replay",
+            "budget": "At-least-once; replay window >= 24 h",
+            "driven_by": [
+              "REQ-INT-04",
+              "REQ-INT-08"
+            ],
+            "viewpoint_decides": "Messaging capability and topology",
+            "capability_class": "Asynchronous messaging with replay",
+            "satisfied_by": null
+          },
+          {
+            "id": "REQ-PLT-03",
+            "viewpoint": "PLT",
+            "demanding_context": "Billing",
+            "demand": "Long-term immutable retention tier suitable for tax audit",
+            "budget": ">= 10 years; not shortenable by any operator role",
+            "driven_by": [
+              "REQ-DAT-04",
+              "INV-06"
+            ],
+            "viewpoint_decides": "Storage tier; how the guarantee is evidenced",
+            "capability_class": "Immutable long-term retention",
+            "satisfied_by": null
+          },
+          {
+            "id": "REQ-PLT-04",
+            "viewpoint": "PLT",
+            "demanding_context": "Catalogue",
+            "demand": "Large binary object storage and delivery",
+            "budget": "<= 10 MB per object; served <= 300 ms p95",
+            "driven_by": [
+              "FR-002",
+              "FR-004"
+            ],
+            "viewpoint_decides": "Object storage and delivery",
+            "capability_class": "Object storage and delivery",
+            "satisfied_by": null
+          },
+          {
+            "id": "REQ-PLT-05",
+            "viewpoint": "PLT",
+            "demanding_context": "Billing",
+            "demand": "Scheduled, non-interactive job execution",
+            "budget": "Monthly period close; statement within 1 business day",
+            "driven_by": [
+              "FR-008"
+            ],
+            "viewpoint_decides": "Scheduler and worker runtime",
+            "capability_class": "Scheduled jobs",
+            "satisfied_by": null
+          },
+          {
+            "id": "REQ-PLT-06",
+            "viewpoint": "PLT",
+            "demanding_context": "Notifications",
+            "demand": "Evidenced outbound email delivery",
+            "budget": "<= 2 min; delivery outcome recorded",
+            "driven_by": [
+              "FR-009"
+            ],
+            "viewpoint_decides": "Delivery capability",
+            "capability_class": "Evidenced email delivery",
+            "satisfied_by": null
+          },
+          {
+            "id": "REQ-PLT-07",
+            "viewpoint": "PLT",
+            "demanding_context": "All",
+            "demand": "Central logging, metrics, tracing and alerting for every workload",
+            "budget": "Before the first feature cycle; any latency breach attributable to one component",
+            "driven_by": [
+              "PRIN-08"
+            ],
+            "viewpoint_decides": "Observability capability",
+            "capability_class": "Observability",
+            "satisfied_by": null
+          },
+          {
+            "id": "REQ-PLT-08",
+            "viewpoint": "PLT",
+            "demanding_context": "Catalogue",
+            "demand": "Text search over published listings",
+            "budget": "<= 1 s p95",
+            "driven_by": [
+              "FR-004"
+            ],
+            "viewpoint_decides": "Search capability",
+            "capability_class": "Text search",
+            "satisfied_by": null
+          },
+          {
+            "id": "REQ-PLT-09",
+            "viewpoint": "PLT",
+            "demanding_context": "Identity",
+            "demand": "Group-approved external-party identity capability",
+            "budget": "100% of buyer and producer sign-ins; no anonymous access",
+            "driven_by": [
+              "ES1",
+              "FR-010",
+              "CON-08"
+            ],
+            "viewpoint_decides": "Which approved capability; how Identity consumes it",
+            "capability_class": "External-party identity",
+            "satisfied_by": null
+          },
+          {
+            "id": "REQ-PLT-10",
+            "viewpoint": "PLT",
+            "demanding_context": "All",
+            "demand": "Managed key and secret capability with per-component workload identity",
+            "budget": "Rotation without redeploying unrelated components; zero shared credentials",
+            "driven_by": [
+              "ES10",
+              "SEC-05"
+            ],
+            "viewpoint_decides": "Key and secret management",
+            "capability_class": "Key and secret management",
+            "satisfied_by": null
+          }
+        ],
+        "security": {
+          "trust_boundaries": [
+            {
+              "id": "TB-01",
+              "boundary": "Public edge",
+              "between": "buyer-spa / producer-spa and any service",
+              "re_established": "Caller identity and session validity; request integrity",
+              "driven_by": "FR-010; ES1"
+            },
+            {
+              "id": "TB-02",
+              "boundary": "Inter-context",
+              "between": "any service and any other service",
+              "re_established": "Calling component identity; permission for the contract invoked",
+              "driven_by": "CON-04; CON-07"
+            },
+            {
+              "id": "TB-03",
+              "boundary": "Payment boundary",
+              "between": "billing-service and external payment provider",
+              "re_established": "Regulated-scope separation; no cardholder data enters any context",
+              "driven_by": "psd2-payments; ASM-01"
+            },
+            {
+              "id": "TB-04",
+              "boundary": "Enterprise boundary",
+              "between": "identity-service and group supplier master",
+              "re_established": "Read-only access; nothing written back",
+              "driven_by": "EA3"
+            }
+          ],
+          "classification_scheme": [
+            {
+              "class": "Public",
+              "es2_base_class": "Public",
+              "obligations": "Integrity protected",
+              "entities": [
+                "Category",
+                "Product",
+                "Listing",
+                "ListingImage"
+              ]
+            },
+            {
+              "class": "Internal",
+              "es2_base_class": "Internal",
+              "obligations": "Access limited to authenticated principals",
+              "entities": [
+                "Order",
+                "OrderLine"
+              ]
+            },
+            {
+              "class": "PII",
+              "es2_base_class": "Confidential",
+              "obligations": "Purpose limitation; erasure or legal hold; residency UK or adequacy; attributable access",
+              "entities": [
+                "Producer",
+                "Buyer",
+                "Session"
+              ]
+            },
+            {
+              "class": "Financial",
+              "es2_base_class": "Restricted",
+              "obligations": "Immutability; >= 10 y retention; financial-data region; attributable access",
+              "entities": [
+                "Transaction",
+                "Fee",
+                "Payout",
+                "Statement"
+              ]
+            },
+            {
+              "class": "Regulated Evidence",
+              "es2_base_class": "Confidential",
+              "obligations": "6-year retention; history demonstrable to a regulator",
+              "entities": [
+                "FboRegistration"
+              ]
+            }
+          ],
+          "controls": [
+            {
+              "id": "SEC-01",
+              "viewpoint": "APP",
+              "control": "No component holds credentials to another context's persistent store",
+              "budget": "100% of components",
+              "driven_by": "CON-04"
+            },
+            {
+              "id": "SEC-02",
+              "viewpoint": "APP",
+              "control": "No service accepts an identity claim it has not re-established at TB-01 or TB-02",
+              "budget": "100% of edges",
+              "driven_by": "CON-08; ES1"
+            },
+            {
+              "id": "SEC-03",
+              "viewpoint": "DAT",
+              "control": "Every PII, Financial and Regulated Evidence entity is encrypted at rest and in transit with attributable access",
+              "budget": "100% of classified entities",
+              "driven_by": "PRIN-06; ES10"
+            },
+            {
+              "id": "SEC-04",
+              "viewpoint": "INT",
+              "control": "Every contract declares its authentication requirement and authorises per contract",
+              "budget": "100% of APP-2.3 edges",
+              "driven_by": "TB-02"
+            },
+            {
+              "id": "SEC-05",
+              "viewpoint": "PLT",
+              "control": "No long-lived credentials; one workload identity per component",
+              "budget": "Zero shared credentials across contexts",
+              "driven_by": "ES10; PRIN-06"
+            },
+            {
+              "id": "SEC-06",
+              "viewpoint": "PLT",
+              "control": "Production PII and Financial data never leaves the production trust zone unmasked",
+              "budget": "0 occurrences",
+              "driven_by": "uk-gdpr"
+            },
+            {
+              "id": "SEC-07",
+              "viewpoint": "DAT",
+              "control": "No cardholder data enters any context",
+              "budget": "0 occurrences",
+              "driven_by": "psd2-payments; TB-03"
+            }
+          ],
+          "regulatory_trace": [
+            {
+              "regime": "food-business-operator-registration",
+              "obligation": "No sale from an unregistered producer; validity history reconstructable",
+              "landed_as": [
+                "INV-01",
+                "INV-08",
+                "REQ-INT-07",
+                "REQ-DAT-07",
+                "APP-1.04"
+              ]
+            },
+            {
+              "regime": "uk-tax-records",
+              "obligation": "Fee and transaction records retained 10 years, demonstrably unaltered",
+              "landed_as": [
+                "INV-06",
+                "REQ-DAT-04",
+                "REQ-PLT-03"
+              ]
+            },
+            {
+              "regime": "psd2-payments",
+              "obligation": "Card handling stays with the external regulated provider",
+              "landed_as": [
+                "TB-03",
+                "SEC-07",
+                "APP-1.3"
+              ]
+            },
+            {
+              "regime": "uk-gdpr",
+              "obligation": "Personal data protected, resident in UK or adequacy jurisdiction, erasable",
+              "landed_as": [
+                "REQ-DAT-06",
+                "SEC-03",
+                "SEC-06"
+              ]
+            }
+          ]
+        },
+        "open_structural_decisions": [
+          {
+            "id": "OPEN-01",
+            "decision": "Whether an analytical plane exists, and which context owns it",
+            "why_not_now": "No committed requirement aggregates across time or contexts",
+            "trigger": "(a) aggregates over more than one month of history, OR (b) joins data across two bounded contexts, OR (c) has a non-interactive read SLA",
+            "trigger_clauses": [
+              "aggregates over more than one month of history",
+              "joins data across two bounded contexts",
+              "has a non-interactive read SLA"
+            ],
+            "options_in_view": [
+              "Two-plane model with a registered analytical read model owned by one context",
+              "A reporting context",
+              "No analytical plane"
+            ],
+            "owner_when_fired": "Solution Architect; Enterprise Architect if a CON is amended",
+            "status": "PENDING"
+          },
+          {
+            "id": "OPEN-02",
+            "decision": "Whether tax rules and their effective dates become a bounded context",
+            "why_not_now": "Single jurisdiction at launch (ASM-02)",
+            "trigger": "(a) tax treatment varies by jurisdiction, OR (b) a rate must change on a legislated effective date without redeploying Billing, OR (c) a tax-authority-facing document is required",
+            "trigger_clauses": [
+              "tax treatment varies by jurisdiction",
+              "a rate must change on a legislated effective date without redeploying Billing",
+              "a tax-authority-facing document (invoice, return) is required"
+            ],
+            "options_in_view": [
+              "New Tax & Compliance context (structural, ADR)",
+              "Extend Billing's rate card only if none of (a)-(c) hold"
+            ],
+            "owner_when_fired": "Enterprise Architect",
+            "status": "PENDING"
+          },
+          {
+            "id": "OPEN-03",
+            "decision": "Whether Notifications stays stateless or gains entities",
+            "why_not_now": "No requirement for per-recipient preferences or history",
+            "trigger": "(a) per-recipient delivery preferences must be stored, OR (b) a recipient must query their delivery history",
+            "trigger_clauses": [
+              "per-recipient delivery preferences must be stored",
+              "a recipient must query their delivery history"
+            ],
+            "options_in_view": [
+              "Notifications gains entities (structural)",
+              "Preferences live in Identity"
+            ],
+            "owner_when_fired": "Solution Architect",
+            "status": "PENDING"
+          }
+        ],
+        "principles_applied": [
+          "PRIN-01",
+          "PRIN-02",
+          "PRIN-03",
+          "PRIN-04",
+          "PRIN-05",
+          "PRIN-06",
+          "PRIN-08"
+        ],
+        "principle_resolution": [
+          {
+            "id": "PRIN-01",
+            "applicability": "APPLIES",
+            "binding_level": "DIRECTIONAL",
+            "hooks_realised_in": [
+              "OPEN-01",
+              "OPEN-02",
+              "OPEN-03"
+            ],
+            "deviation_ref": null
+          },
+          {
+            "id": "PRIN-02",
+            "applicability": "APPLIES",
+            "binding_level": "MANDATORY",
+            "hooks_realised_in": [
+              "CON-02",
+              "CON-03",
+              "REQ-DAT-01"
+            ],
+            "deviation_ref": null
+          },
+          {
+            "id": "PRIN-03",
+            "applicability": "APPLIES",
+            "binding_level": "DIRECTIONAL",
+            "hooks_realised_in": [
+              "CON-04",
+              "CON-05",
+              "REQ-INT-02"
+            ],
+            "deviation_ref": "DEV-01"
+          },
+          {
+            "id": "PRIN-04",
+            "applicability": "APPLIES",
+            "binding_level": "MANDATORY",
+            "hooks_realised_in": [
+              "APP-1",
+              "CON-01"
+            ],
+            "deviation_ref": null
+          },
+          {
+            "id": "PRIN-05",
+            "applicability": "PARTIAL",
+            "binding_level": "DIRECTIONAL",
+            "hooks_realised_in": [
+              "APP-1.04"
+            ],
+            "deviation_ref": null
+          },
+          {
+            "id": "PRIN-06",
+            "applicability": "APPLIES",
+            "binding_level": "MANDATORY",
+            "hooks_realised_in": [
+              "SEC-03",
+              "CON-10"
+            ],
+            "deviation_ref": null
+          },
+          {
+            "id": "PRIN-07",
+            "applicability": "NOT_APPLICABLE",
+            "binding_level": "MANDATORY",
+            "hooks_realised_in": [
+              "REQ-PLT-01"
+            ],
+            "binds_viewpoint_instead": [
+              "DAT",
+              "PLT"
+            ],
+            "deviation_ref": null
+          },
+          {
+            "id": "PRIN-08",
+            "applicability": "APPLIES",
+            "binding_level": "DIRECTIONAL",
+            "hooks_realised_in": [
+              "REQ-PLT-07",
+              "REQ-INT-12"
+            ],
+            "deviation_ref": null
+          }
+        ],
+        "deviations": [
+          {
+            "id": "DEV-01",
+            "principle": "PRIN-03",
+            "where": "REQ-INT-03, REQ-INT-06, REQ-INT-07",
+            "why_summary": "Availability, fee and FBO validity are checked or shown in the buyer's request path, where staleness is visible and disputable.",
+            "accepted_cost": "Orders depends at runtime on Catalogue, Billing and Identity; Catalogue on Identity",
+            "review_trigger": "Confirmation-time fee changes become impossible by policy",
+            "precedence_rule": "PREC-02"
+          }
+        ],
+        "collisions": [
+          {
+            "rules": [
+              "INV-03",
+              "CON-03",
+              "CON-07"
+            ],
+            "resolution_summary": "Introduce the transactional snapshot: captured once through Catalogue's contract at placement, declared, never reconciled.",
+            "resulting_change": "CON-09 added; CON-03 exception names it; REQ-DAT-08 added",
+            "adr": "ADR-006"
+          },
+          {
+            "rules": [
+              "CON-05",
+              "REQ-INT-03",
+              "REQ-INT-06",
+              "REQ-INT-07"
+            ],
+            "resolution_summary": "PREC-02: a stated request-path budget with degraded-mode behaviour prevails over the async default.",
+            "resulting_change": "DEV-01; CON-05 exception list",
+            "adr": "ADR-002"
+          }
+        ],
+        "epic_seed": [
+          {
+            "epic": "EPIC-01 Identity",
+            "derived_from": "APP-1.04",
+            "blocks": [
+              "all other epics"
+            ],
+            "enabled_by": [],
+            "band": "First"
+          },
+          {
+            "epic": "EPIC-02 Catalogue",
+            "derived_from": "APP-1.01",
+            "blocks": [
+              "EPIC-03"
+            ],
+            "enabled_by": [
+              "EPIC-01"
+            ],
+            "band": "First"
+          },
+          {
+            "epic": "EPIC-03 Orders",
+            "derived_from": "APP-1.02",
+            "blocks": [
+              "EPIC-04"
+            ],
+            "enabled_by": [
+              "EPIC-01",
+              "EPIC-02"
+            ],
+            "band": "Second"
+          },
+          {
+            "epic": "EPIC-04 Billing",
+            "derived_from": "APP-1.03",
+            "blocks": [
+              "EPIC-07 payout views"
+            ],
+            "enabled_by": [
+              "EPIC-03"
+            ],
+            "band": "Second"
+          },
+          {
+            "epic": "EPIC-05 Notifications",
+            "derived_from": "APP-1.05",
+            "blocks": [],
+            "enabled_by": [
+              "EPIC-03",
+              "EPIC-04"
+            ],
+            "band": "Third"
+          },
+          {
+            "epic": "EPIC-06 Buyer experience",
+            "derived_from": "APP-2.07",
+            "blocks": [],
+            "enabled_by": [
+              "EPIC-02",
+              "EPIC-03"
+            ],
+            "band": "Second"
+          },
+          {
+            "epic": "EPIC-07 Producer experience",
+            "derived_from": "APP-2.08",
+            "blocks": [],
+            "enabled_by": [
+              "EPIC-02",
+              "EPIC-04"
+            ],
+            "band": "Second"
+          }
+        ],
+        "dependency_seed": [
+          {
+            "from": "identity-service",
+            "relationship": "blocks",
+            "to": "every other service",
+            "derived_from": "E-04"
+          },
+          {
+            "from": "identity-service",
+            "relationship": "blocks",
+            "to": "catalogue-service",
+            "derived_from": "E-05"
+          },
+          {
+            "from": "catalogue-service",
+            "relationship": "blocks",
+            "to": "orders-service",
+            "derived_from": "E-01"
+          },
+          {
+            "from": "orders-service",
+            "relationship": "blocks",
+            "to": "billing-service",
+            "derived_from": "E-02"
+          },
+          {
+            "from": "billing-service",
+            "relationship": "enables",
+            "to": "orders-service",
+            "derived_from": "E-03"
+          },
+          {
+            "from": "orders-service, billing-service",
+            "relationship": "enables",
+            "to": "notification-service",
+            "derived_from": "E-07"
+          },
+          {
+            "from": "billing-service",
+            "relationship": "blocks",
+            "to": "producer-spa",
+            "derived_from": "APP-2.1"
+          },
+          {
+            "from": "catalogue-service",
+            "relationship": "enables",
+            "to": "buyer-spa",
+            "derived_from": "E-08"
+          }
+        ],
+        "capability_classes": [
+          {
+            "capability_class": "Independently deployable runtime",
+            "req_plt_ref": "REQ-PLT-01",
+            "first_needed_by_band": "First",
+            "lead_time_risk": "Low"
+          },
+          {
+            "capability_class": "External-party identity",
+            "req_plt_ref": "REQ-PLT-09",
+            "first_needed_by_band": "First",
+            "lead_time_risk": "Medium"
+          },
+          {
+            "capability_class": "Key and secret management",
+            "req_plt_ref": "REQ-PLT-10",
+            "first_needed_by_band": "First",
+            "lead_time_risk": "Low"
+          },
+          {
+            "capability_class": "Observability",
+            "req_plt_ref": "REQ-PLT-07",
+            "first_needed_by_band": "First",
+            "lead_time_risk": "Low"
+          },
+          {
+            "capability_class": "Object storage and delivery",
+            "req_plt_ref": "REQ-PLT-04",
+            "first_needed_by_band": "First",
+            "lead_time_risk": "Low"
+          },
+          {
+            "capability_class": "Text search",
+            "req_plt_ref": "REQ-PLT-08",
+            "first_needed_by_band": "Second",
+            "lead_time_risk": "Medium"
+          },
+          {
+            "capability_class": "Asynchronous messaging with replay",
+            "req_plt_ref": "REQ-PLT-02",
+            "first_needed_by_band": "Second",
+            "lead_time_risk": "Medium"
+          },
+          {
+            "capability_class": "Immutable long-term retention",
+            "req_plt_ref": "REQ-PLT-03",
+            "first_needed_by_band": "Second",
+            "lead_time_risk": "High"
+          },
+          {
+            "capability_class": "Scheduled jobs",
+            "req_plt_ref": "REQ-PLT-05",
+            "first_needed_by_band": "Second",
+            "lead_time_risk": "Medium"
+          },
+          {
+            "capability_class": "Evidenced email delivery",
+            "req_plt_ref": "REQ-PLT-06",
+            "first_needed_by_band": "Third",
+            "lead_time_risk": "Medium"
+          }
+        ],
+        "options_rejected": [
+          {
+            "id": "OPT-01",
+            "decision": "Fee ownership",
+            "chosen": "Billing owns Fee",
+            "rejected": "Orders computes and stores the fee",
+            "why_rejected_summary": "Couples Finance-approved policy to the order lifecycle; fee records would inherit Orders' retention instead of 10-year tax retention.",
+            "reopen_condition": "Fee fixed by law rather than commercial decision"
+          },
+          {
+            "id": "OPT-02",
+            "decision": "FBO registration",
+            "chosen": "Identity owns FboRegistration",
+            "rejected": "Catalogue owns it",
+            "why_rejected_summary": "A fact about the producer that Orders must also check; two consumers put it upstream of both.",
+            "reopen_condition": "None foreseen"
+          },
+          {
+            "id": "OPT-03",
+            "decision": "Context count",
+            "chosen": "Five",
+            "rejected": "Three (Notifications in Orders; Identity as shared kernel)",
+            "why_rejected_summary": "A shared kernel couples every context to one schema; Notifications in Orders routes Billing events through Orders.",
+            "reopen_condition": "OPEN-03 never fires and event volume stays trivial"
+          },
+          {
+            "id": "OPT-04",
+            "decision": "Identity realisation",
+            "chosen": "Build Identity over a group-approved external identity capability",
+            "rejected": "Reuse the group employee identity",
+            "why_rejected_summary": "Group identity is employees-only and must not be extended to external parties (EA2, ES1).",
+            "reopen_condition": "The group launches an external-party identity tier"
+          },
+          {
+            "id": "OPT-05",
+            "decision": "Search",
+            "chosen": "Component inside Catalogue",
+            "rejected": "A Search context",
+            "why_rejected_summary": "An access pattern over Catalogue data with no language of its own.",
+            "reopen_condition": "Ranking becomes a business policy with its own owner"
+          },
+          {
+            "id": "OPT-06",
+            "decision": "Payouts",
+            "chosen": "Inside Billing",
+            "rejected": "A separate Payouts context",
+            "why_rejected_summary": "Derived from Billing's transactions under the same regulator; splitting creates a second financial system of record.",
+            "reopen_condition": "Payouts across several payment rails with their own regimes"
+          },
+          {
+            "id": "OPT-07",
+            "decision": "Experience components",
+            "chosen": "Two SPAs",
+            "rejected": "One SPA with role switching",
+            "why_rejected_summary": "Disjoint journeys and release cadences.",
+            "reopen_condition": "A single persona routinely needs both roles"
+          }
+        ],
+        "adr_seeds": [
+          {
+            "id": "ADR-001",
+            "title": "DDD bounded contexts as the unit of decomposition",
+            "decision_summary": "One context per business capability; one epic per context",
+            "governs": [
+              "APP-1",
+              "CON-01",
+              "CON-02"
+            ],
+            "status": "PROPOSED"
+          },
+          {
+            "id": "ADR-002",
+            "title": "Asynchronous by default",
+            "decision_summary": "Async unless a budgeted REQ-INT says otherwise",
+            "governs": [
+              "CON-05",
+              "DEV-01"
+            ],
+            "status": "PROPOSED"
+          },
+          {
+            "id": "ADR-003",
+            "title": "No cross-context data access",
+            "decision_summary": "Contracts only; identifier-only references",
+            "governs": [
+              "CON-03",
+              "CON-04",
+              "SEC-01"
+            ],
+            "status": "PROPOSED"
+          },
+          {
+            "id": "ADR-004",
+            "title": "Published, versioned contracts",
+            "decision_summary": "Every integration is a versioned contract; displayed values come through it",
+            "governs": [
+              "CON-06",
+              "CON-07",
+              "REQ-INT-02"
+            ],
+            "status": "PROPOSED"
+          },
+          {
+            "id": "ADR-005",
+            "title": "Fee immutability",
+            "decision_summary": "Fees never updated; corrections are compensating entries",
+            "governs": [
+              "INV-06",
+              "REQ-DAT-04",
+              "REQ-PLT-03"
+            ],
+            "status": "PROPOSED"
+          },
+          {
+            "id": "ADR-006",
+            "title": "Transactional snapshots",
+            "decision_summary": "Snapshots declared, captured once, never reconciled",
+            "governs": [
+              "CON-09",
+              "INV-03",
+              "REQ-DAT-08"
+            ],
+            "status": "PROPOSED"
+          }
+        ],
+        "assumptions": [
+          {
+            "id": "ASM-01",
+            "assumption": "Card capture and settlement are done by an external regulated provider",
+            "sections": [
+              "TB-03",
+              "SEC-07",
+              "APP-1.3"
+            ],
+            "if_false": "Billing enters regulated payment scope",
+            "owner": "Product Lead"
+          },
+          {
+            "id": "ASM-02",
+            "assumption": "One tax jurisdiction at launch",
+            "sections": [
+              "OPEN-02",
+              "APP-1.03"
+            ],
+            "if_false": "OPEN-02 fires at launch",
+            "owner": "Product Lead"
+          }
+        ],
+        "risks": [
+          {
+            "id": "RSK-01",
+            "risk": "Delivery pressure copies owned data (e.g. payout totals into Orders)",
+            "boundary_at_risk": "Orders / Billing",
+            "likelihood": "High",
+            "impact": "Medium",
+            "mitigation": "CON-02 and CON-03 make the copy detectable drift"
+          },
+          {
+            "id": "RSK-02",
+            "risk": "Reporting pulls cross-context joins into the request path",
+            "boundary_at_risk": "Orders / Billing / Identity",
+            "likelihood": "Medium",
+            "impact": "High",
+            "mitigation": "OPEN-01 trigger"
+          },
+          {
+            "id": "RSK-03",
+            "risk": "Expansion beyond one jurisdiction puts tax policy into Billing",
+            "boundary_at_risk": "Billing",
+            "likelihood": "Medium",
+            "impact": "High",
+            "mitigation": "OPEN-02 trigger"
+          }
+        ],
+        "open_questions": [
+          {
+            "id": "OQ-01",
+            "question": "What latency budget applies to establishing caller identity, if a runtime call is needed?",
+            "origin": "budget_gap",
+            "doc_location": "REQ-INT-05",
+            "asked_of": "Product Lead; Security",
+            "blocks_gate": false
+          },
+          {
+            "id": "OQ-02",
+            "question": "Should onboarding hold a registration for review or proceed and flag when the supplier-master check is unavailable, and within what latency?",
+            "origin": "budget_gap",
+            "doc_location": "REQ-INT-11; APP-2.3 E-09",
+            "asked_of": "Product Lead",
+            "blocks_gate": false
+          },
+          {
+            "id": "OQ-03",
+            "question": "Must a producer statement be reproducible byte for byte years later, or only its figures?",
+            "origin": "prd_gap",
+            "doc_location": "REQ-DAT-04; REQ-PLT-03",
+            "asked_of": "Finance",
+            "blocks_gate": false
+          }
+        ],
+        "self_check": {
+          "content_boundary": "pass",
+          "completeness": "pass",
+          "consistency": "pass",
+          "quality_findings": [
+            "§ 3 is PROVISIONAL — no resolution file; the Enterprise Architect must confirm applicability and binding levels"
+          ]
+        }
+      },
+      "artifacts": [
+        {
+          "id": "artifact-ta-7d2e90b4",
+          "type": "document",
+          "name": "target-architecture.md",
+          "format": "markdown",
+          "storage": {
+            "provider": "s3",
+            "location": "s3://adlc-artifacts/harvestlink/wf-hl-step1-4b7e21c9/target-architecture.md"
+          },
+          "description": "HarvestLink target architecture v1.0, APPROVED by the Enterprise Architect 2026-10-22. Full text: L0-design-target-architect/examples/artifacts/target-architecture.md (status line reads DRAFT there; approved copy is identical apart from front matter).",
+          "produced_by": "L0-design-target-architect"
+        }
+      ],
+      "execution_summary": "• Produced target-architecture.md v1.0 (DRAFT, gate_ready: true): 5 contexts, 8 components, 10 edges, 10 aggregates, 8 invariants, 12 constraints, 30 demands (8 DAT, 12 INT, 10 PLT), 7 controls, 3 OPEN triggers.\n• Non-obvious boundaries: FBO registration in Identity rather than Catalogue (different regulator; two consumers); Payouts kept in Billing (same regulator; splitting creates a second financial SoR); Search kept inside Catalogue (no language of its own).\n• Collisions: INV-03 (order keeps price shown) vs CON-03/CON-07 (identifier only) — resolved by CON-09 transactional snapshot, ADR-006 proposed. Request-path needs vs async default — DEV-01 under PREC-02.\n• PENDING budgets: REQ-INT-05 identity latency (OQ-01); REQ-INT-11 supplier-master latency and failure behaviour (OQ-02).\n• Principles: PROVISIONAL from the kb-L0-enterprise-architecture catalogue — binding-principles.json absent. DEV-01 against PRIN-03 (DIRECTIONAL).\n• KBs: kb-L0-enterprise-architecture — PRIN-01..08 hooks, PREC-02, EA2/EA3 (employee-only group identity, no ledger posting, read-only supplier master). kb-L0-enterprise-security — ES1 external identity, ES2 classes, ES3 6-year regulated evidence, ES9 residency, ES10 encryption and attribution.\n• Guardrails: gr-L0-output-schema-validator pass; gr-L0-hallucination-check pass; gr-L0-consistency-check pass; gr-L0-pii-detection pass.\n• Tools: tool-L0-azure-blob-reader (1 call; prd.md found, binding-principles.json and vision.md absent); tool-L0-azure-blob-writer wrote s3://adlc-artifacts/harvestlink/wf-hl-step1-4b7e21c9/target-architecture.md."
+    }
+  }
+}
