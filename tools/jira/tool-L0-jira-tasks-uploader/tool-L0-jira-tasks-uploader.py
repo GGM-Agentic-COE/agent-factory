@@ -2,602 +2,229 @@ import os
 import re
 import json
 import requests
-from typing import Any, Type, Dict, List, Optional, Tuple
-from pydantic import BaseModel, Field
+from typing import Any, Type, Dict, List, Optional
+from pydantic import BaseModel, Field, field_validator
+from crewai.tools import BaseTool
 from requests.auth import HTTPBasicAuth
-
-try:
-    from crewai.tools import BaseTool  # type: ignore
-    _CREWAI_AVAILABLE = True
-except Exception:  # allow standalone use without crewai installed
-    _CREWAI_AVAILABLE = False
-
-    class BaseTool:  # minimal shim so the class still works standalone
-        name: str = ""
-        description: str = ""
-        args_schema: Any = None
-
-        def run(self, *args, **kwargs):
-            return self._run(*args, **kwargs)
-
-
 import boto3
 from botocore.exceptions import ClientError
 
 
 class AWSSecretReaderPodIdentitySchema(BaseModel):
-    """Input schema for AWSSecretReaderPodIdentity."""
+    """Input schema for AWSSecretReaderPodIdentity. """
     pass
 
 
 class AWSSecretReaderPodIdentity(BaseTool):
-    """Reads an AWS Secret using Pod Identity and returns its key-value dict."""
-
+    """
+    AWSSecretReaderPodIdentity - Reads a AWS Secret using Pod Identity
+    and returns the full key-value dict.
+    """
     name: str = "AWS Secret Reader with Pod Identity"
-    description: str = (
-        "Reads a fixed AWS Secret using Pod Identity and returns all key-value pairs."
-    )
+    description: str = "Reads a fixed AWS Secret (set in code) using Pod Identity, and returns all key-value pairs as a dict."
     args_schema: Type[BaseModel] = AWSSecretReaderPodIdentitySchema
 
-    # Must match the secret created in AWS Secrets Manager.
-    SECRET_NAME: str = "aava/temp/varun-temp-key-values"
+    # Review every line tagged "SETUP-REQUIRED:" below before deploying this tool to a new environment or client.
+    # SETUP-REQUIRED: must match the secret name created in your AWS Secrets Manager
+    SECRET_NAME: str = "aws-secret-credential"
 
     def _run(self) -> Dict[str, Any]:
         try:
-            client = boto3.client("secretsmanager", region_name="us-east-1")
-            response = client.get_secret_value(SecretId=self.SECRET_NAME)
-            secret_string = response.get("SecretString", "{}")
+            # SETUP-REQUIRED: AWS region where that secret lives (us-east-1 or us-east-2 depending on deployment)
+            client = boto3.client('secretsmanager', region_name='us-east-2')
+            get_secret_value_response = client.get_secret_value(SecretId=self.SECRET_NAME)
+            secret_string = get_secret_value_response.get('SecretString', '{}')
             secret_dict = json.loads(secret_string)
-
             if not isinstance(secret_dict, dict):
                 raise ValueError(f"Secret value is not a JSON object: {secret_dict}")
-
             return secret_dict
+        except ClientError as e:
+            raise RuntimeError(f"Error retrieving secret: {str(e)}")
+        except Exception as ex:
+            raise RuntimeError(f"Unexpected error: {str(ex)}")
 
-        except ClientError as exc:
-            raise RuntimeError(f"Error retrieving secret: {exc}") from exc
-        except Exception as exc:
-            raise RuntimeError(f"Unexpected error: {exc}") from exc
 
-
-# Preserve the original, known-working secret-loading approach.
 reader = AWSSecretReaderPodIdentity()
 secrets = reader._run()
 
-JIRA_BASE_URL = secrets.get("base_url")
-JIRA_USER_EMAIL = secrets.get("id")
-JIRA_API_TOKEN = secrets.get("api_key")
-
-DEFAULT_ISSUE_TYPE = "Task"
-DEFAULT_LINK_TYPE = "Relates"
-REQUEST_TIMEOUT_SECONDS = 30
-
-# Map payload issue types only when the Jira project requires it.
-ISSUE_TYPE_MAP: Dict[str, str] = {}
-
-# Logical IDs used in labels and descriptions.
-_TOKEN_RE = re.compile(r"(?:EP|F|FR|NFR)-\d+(?:\.\d+)*")
-
-# Jira custom fields, for example customfield_10244.
-_CUSTOMFIELD_RE = re.compile(r"^customfield_\d+$")
-
-# Jira hierarchy parent is used only for genuine sub-task issue types.
-_SUBTASK_TYPES = {"sub-task", "subtask"}
+# ============================================================================
+# CONFIGURATION  --  Jira connection values are read from AWS Secrets Manager
+# ============================================================================
+JIRA_BASE_URL     = secrets.get("base_url")                     # from AWS Secrets Manager
+JIRA_USER_EMAIL   = secrets.get("id")                           # from AWS Secrets Manager
+JIRA_API_TOKEN    = secrets.get("api_key")                      # from AWS Secrets Manager
+DEFAULT_LINK_TYPE  = "Relates"                                  # Jira link type used to relate a Task to its IssueID
+# ============================================================================
 
 
-class JiraIssueCreatorSchema(BaseModel):
-    """Input schema for JiraIssueCreator."""
-
-    inputJSON: Dict[str, Any] = Field(
-        ...,
-        description=(
-            "Jira issue creation parameters. Supports projectKey, issueType, issues, "
-            "and optional linkType. Each issue may contain summary, description, "
-            "issueType, label/labels, parentKey, and Jira customfield_<id> fields. "
-            "For a Task, parentKey is used to create an issue link to the Feature. "
-            "For a Sub-task, parentKey is sent as Jira's hierarchy parent."
-        ),
-    )
+class JiraTasksUploaderSchema(BaseModel):
+    inputJSON: Dict[str, Any] = Field(...)
 
 
-class JiraIssueCreator(BaseTool):
-    """
-    Creates Jira issues with ADF descriptions.
-
-    Relationship handling:
-    - Sub-task + parentKey: sends fields.parent.key.
-    - Task/Story/other standard issue + parentKey: creates the issue without parent,
-      then creates a Jira issue link to parentKey.
-    """
-
-    name: str = "Jira Issue Creator"
-    description: str = (
-        "Creates Jira issues. Standard issues can be linked to a Feature using "
-        "parentKey; genuine Sub-tasks use parentKey as Jira's parent field."
-    )
-    args_schema: Type[BaseModel] = JiraIssueCreatorSchema
-
-    base_url: str = JIRA_BASE_URL or ""
+class JiraTasksUploader(BaseTool):
+    name: str = "Jira Tasks Uploader"
+    description: str = "Creates Jira issues of the issueType given in the payload and links each one to the IssueID given by IssueID as a related issue"
+    args_schema: Type[BaseModel] = JiraTasksUploaderSchema
+    base_url: str = JIRA_BASE_URL
     post_url: str = ""
-    dry_run: bool = False
+    link_url: str = ""
 
-    # ----------------------------- formatting -----------------------------
-    @staticmethod
-    def _format_heading(key: str) -> str:
-        key = re.sub(r"([a-z])([A-Z])", r"\1 \2", key)
-        key = key.replace("_", " ")
+    def _format_heading(self, key: str) -> str:
+        key = re.sub(r'([a-z])([A-Z])', r'\1 \2', key)
+        key = key.replace('_', ' ')
         return key.capitalize()
 
-    @staticmethod
-    def _stringify(value: Any) -> str:
-        if isinstance(value, (dict, list)):
-            return json.dumps(value, ensure_ascii=False)
-        return str(value)
-
-    def _normalize_description(self, description: Any) -> str:
-        """Convert a string or dictionary description to markdown-like text."""
+    def _normalize_description(self, description):
         if isinstance(description, str):
             return description
-
         if isinstance(description, dict):
-            formatted: List[str] = []
+            formatted = []
             for key, value in description.items():
-                title = f"**{self._format_heading(str(key))}**"
-
+                title = f"**{self._format_heading(key)}**"
                 if isinstance(value, list):
-                    items = "\n".join(f"- {self._stringify(item)}" for item in value)
+                    items = "\n".join([f"- {str(v)}" for v in value])
                     formatted.append(f"{title}\n{items}")
                 elif isinstance(value, dict):
-                    nested = "\n".join(
-                        f"- {nested_key}: {self._stringify(nested_value)}"
-                        for nested_key, nested_value in value.items()
-                    )
+                    nested = "\n".join([f"{k}: {v}" for k, v in value.items()])
                     formatted.append(f"{title}\n{nested}")
                 else:
-                    formatted.append(f"{title}\n{self._stringify(value)}")
-
+                    formatted.append(f"{title}\n{str(value)}")
             return "\n\n".join(formatted)
+        return str(description)
 
-        return self._stringify(description)
-
-    # ----------------------------- ADF builders -----------------------------
-    def _parse_inline(
-        self,
-        text: str,
-        id_map: Dict[str, str],
-        base_url: str,
-    ) -> List[dict]:
-        content: List[dict] = []
-        index = 0
-
-        while index < len(text):
-            # **bold**
-            if text[index:index + 2] == "**":
-                end = text.find("**", index + 2)
+    def _parse_inline(self, text: str, id_map: Dict[str, str], base_url: str):
+        content = []
+        i = 0
+        while i < len(text):
+            if text[i:i+2] == "**":
+                end = text.find("**", i+2)
                 if end != -1:
-                    content.append(
-                        {
-                            "type": "text",
-                            "text": text[index + 2:end],
-                            "marks": [{"type": "strong"}],
-                        }
-                    )
-                    index = end + 2
+                    content.append({"type": "text", "text": text[i+2:end],
+                                    "marks": [{"type": "strong"}]})
+                    i = end + 2
                     continue
-
-            # *italic*
-            if text[index] == "*":
-                end = text.find("*", index + 1)
+            if text[i] == "*":
+                end = text.find("*", i+1)
                 if end != -1:
-                    content.append(
-                        {
-                            "type": "text",
-                            "text": text[index + 1:end],
-                            "marks": [{"type": "em"}],
-                        }
-                    )
-                    index = end + 1
+                    content.append({"type": "text", "text": text[i+1:end],
+                                    "marks": [{"type": "em"}]})
+                    i = end + 1
                     continue
-
-            # Logical ID cross-reference.
-            match = _TOKEN_RE.match(text, index)
+            match = re.match(r'E\d+(?:\.\w+)*', text[i:])
             if match:
                 token = match.group(0)
                 if token in id_map:
                     jira_key = id_map[token]
-                    content.append(
-                        {
-                            "type": "text",
-                            "text": jira_key,
-                            "marks": [
-                                {
-                                    "type": "link",
-                                    "attrs": {
-                                        "href": f"{base_url}/browse/{jira_key}"
-                                    },
-                                }
-                            ],
-                        }
-                    )
+                    content.append({"type": "text", "text": jira_key,
+                                    "marks": [{"type": "link",
+                                               "attrs": {"href": f"{base_url}/browse/{jira_key}"}}]})
                 else:
                     content.append({"type": "text", "text": token})
-
-                index += len(token)
+                i += len(token)
                 continue
+            content.append({"type": "text", "text": text[i]})
+            i += 1
+        return content
 
-            content.append({"type": "text", "text": text[index]})
-            index += 1
-
-        return [node for node in content if node.get("text")]
-
-    def _convert_description(
-        self,
-        text: str,
-        id_map: Dict[str, str],
-        base_url: str,
-    ) -> dict:
-        blocks: List[dict] = []
-        bullet_buffer: List[str] = []
-
-        def flush_bullets() -> None:
-            if not bullet_buffer:
-                return
-
-            blocks.append(
-                {
-                    "type": "bulletList",
-                    "content": [
-                        {
-                            "type": "listItem",
-                            "content": [
-                                {
-                                    "type": "paragraph",
-                                    "content": self._parse_inline(
-                                        item, id_map, base_url
-                                    ),
-                                }
-                            ],
-                        }
-                        for item in bullet_buffer
-                    ],
-                }
-            )
-            bullet_buffer.clear()
-
-        for line in text.split("\n"):
+    def _convert_description(self, text: str, id_map: Dict[str, str], base_url: str):
+        lines = text.split("\n")
+        blocks = []
+        bullet_buffer = []
+        for line in lines:
             stripped = line.strip()
-
             if stripped.startswith("- "):
                 bullet_buffer.append(stripped[2:])
                 continue
+            if bullet_buffer:
+                blocks.append({"type": "bulletList",
+                               "content": [{"type": "listItem",
+                                            "content": [{"type": "paragraph",
+                                                         "content": self._parse_inline(item, id_map, base_url)}]}
+                                           for item in bullet_buffer]})
+                bullet_buffer = []
+            if not stripped:
+                continue
+            blocks.append({"type": "paragraph",
+                           "content": self._parse_inline(stripped, id_map, base_url)})
+        if bullet_buffer:
+            blocks.append({"type": "bulletList",
+                           "content": [{"type": "listItem",
+                                        "content": [{"type": "paragraph",
+                                                     "content": self._parse_inline(item, id_map, base_url)}]}
+                                       for item in bullet_buffer]})
+        return {"type": "doc", "version": 1, "content": blocks}
 
-            flush_bullets()
-
-            if stripped:
-                blocks.append(
-                    {
-                        "type": "paragraph",
-                        "content": self._parse_inline(stripped, id_map, base_url),
-                    }
-                )
-
-        flush_bullets()
-
-        if not blocks:
-            blocks.append(
-                {
-                    "type": "paragraph",
-                    "content": [{"type": "text", "text": " "}],
-                }
-            )
-
-        document = {"type": "doc", "version": 1, "content": blocks}
-        return self._sanitize_adf(document)
-
-    def _sanitize_adf(self, node: Any) -> Any:
-        """Remove empty ADF text nodes and empty containers recursively."""
-        if not isinstance(node, dict):
-            return None
-
-        node_type = node.get("type")
-
-        if node_type == "text":
-            text = node.get("text")
-            return node if isinstance(text, str) and text != "" else None
-
-        if "content" in node:
-            cleaned = [
-                child
-                for child in (
-                    self._sanitize_adf(child) for child in node["content"]
-                )
-                if child
-            ]
-
-            if not cleaned:
-                if node_type == "doc":
-                    return {
-                        "type": "doc",
-                        "version": 1,
-                        "content": [
-                            {
-                                "type": "paragraph",
-                                "content": [{"type": "text", "text": " "}],
-                            }
-                        ],
-                    }
-                return None
-
-            sanitized = dict(node)
-            sanitized["content"] = cleaned
-            return sanitized
-
-        return node
-
-    # ------------------------------- helpers -------------------------------
-    @staticmethod
-    def _resolve_parent(
-        parent: Optional[str],
-        id_map: Dict[str, str],
-    ) -> Optional[str]:
-        """Resolve a logical parent ID or return an existing Jira key."""
-        if not parent:
-            return None
-        return id_map.get(parent, parent)
-
-    @staticmethod
-    def _extract_custom_fields(issue: Dict[str, Any]) -> Dict[str, Any]:
-        """Pass Jira customfield_<id> values through unchanged."""
-        return {
-            key: value
-            for key, value in issue.items()
-            if isinstance(key, str)
-            and _CUSTOMFIELD_RE.match(key)
-            and value is not None
-        }
-
-    @staticmethod
-    def _is_subtask(issue_type: str) -> bool:
-        return issue_type.strip().lower() in _SUBTASK_TYPES
-
-    def _create_issue_link(
-        self,
-        feature_key: str,
-        created_issue_key: str,
-        link_type: str,
-        headers: Dict[str, str],
-        auth: HTTPBasicAuth,
-    ) -> Tuple[bool, str]:
-        """
-        Link a newly-created standard issue to a Feature.
-
-        The link call is tried twice. The issue creation call is never repeated here,
-        which prevents duplicate Tasks when creation succeeds but linking fails.
-        """
-        link_url = f"{self.base_url}/rest/api/3/issueLink"
-        link_payload = {
+    def _link_to_SourceIssueId(self, issue_key: str, SourceIssueId: str, link_type: str, headers, auth):
+        payload = {
             "type": {"name": link_type},
-            "inwardIssue": {"key": feature_key},
-            "outwardIssue": {"key": created_issue_key},
+            "inwardIssue": {"key": issue_key},
+            "outwardIssue": {"key": SourceIssueId},
         }
+        response = requests.post(self.link_url, json=payload, headers=headers, auth=auth)
+        print("Link Status:", response.status_code)
+        print("Link Response:", response.text)
+        return response
 
-        last_error = "Unknown issue-link error"
-
-        for _ in range(2):
-            try:
-                response = requests.post(
-                    link_url,
-                    json=link_payload,
-                    headers=headers,
-                    auth=auth,
-                    timeout=REQUEST_TIMEOUT_SECONDS,
-                )
-
-                if response.ok:
-                    return True, ""
-
-                last_error = (
-                    f"HTTP {response.status_code} | Detail: {response.text}"
-                )
-
-            except requests.RequestException as exc:
-                last_error = str(exc)
-
-        return False, last_error
-
-    # -------------------------------- core --------------------------------
     def _run(self, inputJSON: Dict[str, Any]) -> str:
-        results: List[str] = []
-        id_map: Dict[str, str] = {}
-
+        results = []
+        id_map = {}
         try:
-            base_url_value = inputJSON.get("baseUrl") or self.base_url or JIRA_BASE_URL
-            if not base_url_value:
-                return "Fatal error: Jira base URL is missing from AWS Secrets Manager."
-
-            base_url = str(base_url_value).rstrip("/")
+            base_url = (inputJSON.get("baseUrl") or self.base_url or JIRA_BASE_URL).rstrip("/")
             self.base_url = base_url
-            self.post_url = f"{base_url}/rest/api/3/issue"
-
+            self.post_url = base_url + "/rest/api/3/issue"
+            self.link_url = base_url + "/rest/api/3/issueLink"
             jira_user = inputJSON.get("userEmail") or JIRA_USER_EMAIL
-            jira_token = (
-                inputJSON.get("apiToken")
-                or JIRA_API_TOKEN
-                or os.environ.get("JIRA_API_TOKEN", "")
-            )
-
-            if not jira_user:
-                return "Fatal error: Jira user email is missing."
-            if not jira_token:
-                return "Fatal error: Jira API token is missing."
-
-            headers = {
-                "Content-Type": "application/json",
-                "Accept": "application/json",
-            }
-            auth = HTTPBasicAuth(str(jira_user), str(jira_token))
-
+            jira_token = JIRA_API_TOKEN or os.environ.get("JIRA_API_TOKEN", "")
+            headers = {"Content-Type": "application/json", "Accept": "application/json"}
+            auth = HTTPBasicAuth(jira_user, jira_token)
             project_key = inputJSON.get("projectKey")
-            default_type = inputJSON.get("issueType") or DEFAULT_ISSUE_TYPE
+            default_type = inputJSON.get("issueType")
+            default_SourceIssueId = inputJSON.get("SourceIssueId")
             link_type = inputJSON.get("linkType") or DEFAULT_LINK_TYPE
             issues = inputJSON.get("issues", [])
-
-            if not project_key:
-                return "Fatal error: no projectKey provided."
-
-            if not isinstance(issues, list) or not issues:
-                return "Fatal error: 'issues' must be a non-empty list."
-
             for issue in issues:
-                response: Optional[requests.Response] = None
-                summary = issue.get("summary", "<no summary>")
-
+                response = None
                 try:
-                    labels = issue.get("label") or issue.get("labels") or []
-                    if isinstance(labels, str):
-                        labels = [labels]
-
+                    labels = issue.get("label", [])
                     logical_id = labels[0] if labels else None
-
                     issue_type = issue.get("issueType") or default_type
-                    issue_type = ISSUE_TYPE_MAP.get(issue_type, issue_type)
-
-                    parent_key = self._resolve_parent(
-                        issue.get("parentKey"), id_map
-                    )
-
-                    description_text = self._normalize_description(
-                        issue.get("description", "")
-                    )
-                    description_adf = self._convert_description(
-                        description_text,
-                        id_map,
-                        base_url,
-                    )
-
-                    fields: Dict[str, Any] = {
+                    SourceIssueId = issue.get("SourceIssueId") or default_SourceIssueId
+                    if not issue_type:
+                        results.append(f"Failed: {issue.get('summary')} → no issueType supplied in payload")
+                        continue
+                    if not SourceIssueId:
+                        results.append(f"Failed: {issue.get('summary')} → no SourceIssueId supplied in payload")
+                        continue
+                    description_text = self._normalize_description(issue["description"])
+                    description_adf = self._convert_description(description_text, id_map, base_url)
+                    fields = {
                         "project": {"key": project_key},
-                        "summary": summary,
+                        "summary": issue["summary"],
                         "issuetype": {"name": issue_type},
-                        "labels": [
-                            str(label).replace(" ", "_") for label in labels
-                        ],
+                        "labels": labels,
                         "description": description_adf,
                     }
-
-                    fields.update(self._extract_custom_fields(issue))
-
-                    # Use Jira's parent field only for a genuine Sub-task.
-                    # A Task cannot use a Feature as its hierarchy parent when the Jira
-                    # hierarchy does not allow it. Standard issues are linked afterward.
-                    if parent_key and self._is_subtask(issue_type):
-                        fields["parent"] = {"key": parent_key}
-
-                    if self.dry_run:
-                        fake_key = f"{project_key}-{len(id_map) + 1}"
-
-                        if logical_id:
-                            id_map[logical_id] = fake_key
-
-                        if parent_key and self._is_subtask(issue_type):
-                            relationship = f"parent={parent_key}"
-                        elif parent_key:
-                            relationship = (
-                                f"linked_feature={parent_key}, link_type={link_type}"
-                            )
-                        else:
-                            relationship = "no_relationship"
-
-                        results.append(
-                            f"[DRY RUN] {issue_type} '{summary}' -> {fake_key} "
-                            f"({relationship})"
-                        )
-                        continue
-
-                    response = requests.post(
-                        self.post_url,
-                        json={"fields": fields},
-                        headers=headers,
-                        auth=auth,
-                        timeout=REQUEST_TIMEOUT_SECONDS,
-                    )
-
+                    response = requests.post(self.post_url, json={"fields": fields},
+                                             headers=headers, auth=auth)
+                    print("Status:", response.status_code)
+                    print("Response:", response.text)
                     if not response.ok:
-                        results.append(
-                            f"Failed: {summary} -> HTTP {response.status_code} "
-                            f"| Detail: {response.text}"
-                        )
+                        results.append(f"Failed: {issue.get('summary')} "
+                                       f"→ HTTP {response.status_code} | Detail: {response.text}")
                         continue
-
-                    try:
-                        response_body = response.json()
-                    except ValueError:
-                        results.append(
-                            f"Failed: {summary} -> Jira returned non-JSON success "
-                            f"response | Detail: {response.text}"
-                        )
-                        continue
-
-                    issue_key = response_body.get("key")
-                    if not issue_key:
-                        results.append(
-                            f"Failed: {summary} -> Jira returned success without "
-                            f"an issue key | Detail: {response.text}"
-                        )
-                        continue
-
+                    response.raise_for_status()
+                    issue_key = response.json().get("key")
                     if logical_id:
                         id_map[logical_id] = issue_key
-
-                    # Keep this exact prefix for evaluator key extraction.
-                    results.append(
-                        f"{issue_type} created: {issue_key}  ({summary})"
-                    )
-                    results.append(f"url: {base_url}/browse/{issue_key}")
-
-                    # Standard issues are linked to the supplied Feature after creation.
-                    if parent_key and not self._is_subtask(issue_type):
-                        linked, link_error = self._create_issue_link(
-                            feature_key=parent_key,
-                            created_issue_key=issue_key,
-                            link_type=str(link_type),
-                            headers=headers,
-                            auth=auth,
-                        )
-
-                        if linked:
-                            results.append(
-                                f"Linked: {issue_key} -> {parent_key} "
-                                f"(type={link_type})"
-                            )
-                        else:
-                            # The Task was created successfully. Do not recreate it.
-                            results.append(
-                                f"Link failed: {issue_key} -> {parent_key} "
-                                f"(type={link_type}) | Detail: {link_error}"
-                            )
-
-                except requests.RequestException as exc:
-                    detail = (
-                        response.text
-                        if response is not None
-                        else "No response received"
-                    )
-                    results.append(
-                        f"Failed: {summary} -> {exc} | Detail: {detail}"
-                    )
-
-                except Exception as exc:
-                    results.append(f"Failed: {summary} -> {exc}")
-
-        except Exception as exc:
-            return f"Fatal error: {exc}"
-
+                    response = self._link_to_SourceIssueId(issue_key, SourceIssueId, link_type, headers, auth)
+                    if not response.ok:
+                        results.append(f"{issue_type} created: {issue_key} | Link to {SourceIssueId} failed "
+                                       f"→ HTTP {response.status_code} | Detail: {response.text}")
+                        continue
+                    results.append(f"{issue_type} created: {issue_key} | Linked to {SourceIssueId} ({link_type})")
+                except requests.RequestException as e:
+                    detail = response.text if response is not None else "No response received"
+                    results.append(f"Failed: {issue.get('summary')} → {str(e)} | Detail: {detail}")
+        except Exception as e:
+            return f"Fatal error: {str(e)}"
         return "\n".join(results)
-
-
-# Convenience wrapper for non-agent/script use.
-def create_issues(payload: Dict[str, Any], dry_run: bool = False) -> str:
-    tool = JiraIssueCreator()
-    tool.dry_run = dry_run
-    return tool._run(payload)

@@ -42,7 +42,7 @@ file_name = test_scenarios.json
 Extract:
 
 Jira Features:
-- feature_key, summary, ACs from the Acceptance Criteria field (or the description's "Acceptance Criteria" section), Feature context from the description.
+- SourceIssueId, summary, ACs from the Acceptance Criteria field (or the description's "Acceptance Criteria" section), Feature context from the description.
 - ACs without IDs: assign AC-01, AC-02, ... in source order within that Feature.
 
 Test Strategy:
@@ -60,10 +60,10 @@ Input Validation:
 
 # EVALUATION
 
-Rebuild the AC inventory independently from Jira. Unique key = (feature_key, acceptance_criteria_id). Then evaluate gates G1–G8 in order, applying the pass/fail criteria in evaluation.md (kb-L0-test-scenario-eval):
+Rebuild the AC inventory independently from Jira. Unique key = (SourceIssueId, acceptance_criteria_id). Then evaluate gates G1–G8 in order, applying the pass/fail criteria in evaluation.md (kb-L0-test-scenario-eval):
 
-G1: Input verification — AC inventory rebuilt; duplicate (feature_key, AC ID) and Features without ACs identified.
-G2: Traceability — every scenario maps to a real (feature_key, AC ID).
+G1: Input verification — AC inventory rebuilt; duplicate (SourceIssueId, AC ID) and Features without ACs identified.
+G2: Traceability — every scenario maps to a real (SourceIssueId, AC ID).
 G3: AC coverage — every AC has ≥1 scenario, or genuinely has no observable outcome.
 G4: AC fidelity & grounding — summary, Pre-condition, Expected Result faithful to AC; stated messages verbatim.
 G5: Scenario scope — no positive/negative expansion, variants, near-duplicates, or test-case detail.
@@ -84,43 +84,12 @@ Publish ONLY when final_decision = approved or fixed_and_approved.
 If final_decision = escalate_to_hitl -> publish nothing; return findings.
 
 1. Idempotency: for each scenario, search Jira using the attached Jira Reader tool with JQL:
-   labels = "{feature_key}-{acceptance_criteria_id}-{test_scenario_id}"
+   labels = "{SourceIssueId}-{acceptance_criteria_id}-{test_scenario_id}"
    - Found -> do not publish; count as skipped.
    - Not found -> include in the upload payload.
-2. Build ONE Jira Writer payload containing all scenarios to publish. projectKey = prefix of the parentKey (e.g. HL-12 -> HL).
-
-```
-inputJSON = {
-  "projectKey": "<project_key>",
-  "issueType": "Task",
-  "issues": <approved_scenarios>
-}
-```
-
-Each issue in approved_scenarios is copied verbatim from the evaluated scenario object:
-```json
-{
-  "issueType": "Task",
-  "summary": "[TS-XXX] Verify that ...",
-  "description": {
-    "Pre-condition": "...",
-    "Test Data": "...",
-    "Navigable Path": "...",
-    "Expected Result": "..."
-  },
-  "label": ["ai-generated", "L0-test-scenario-writer", "L2-Service", "HL-12-AC-01-TS-001"],
-  "parentKey": "HL-12"
-}
-```
-
-3. Field values are copied verbatim from the evaluated scenario. Do not reword, summarise, or add content.
-4. Tool Response & Issue Key Extraction:
-   Parse the return of the Jira Writer tool line-by-line (returned in the exact order of `issues` submitted):
-   - Success pattern: `Task created: <KEY>` (e.g. `Task created: HL-101`).
-     Extract `<KEY>` as the literal `jira_key` and map it to its corresponding scenario (`test_scenario_id`, `parentKey`, and `summary`).
-   - Failure pattern: `Failed: <summary> → ... | Detail: ...`
-     Count as failed. On failure or error, retry once; if still failing, count as failed and record in `findings`.
-   - Never fabricate or guess `jira_key` — use only the literal key returned by the tool.
+2. Build ONE payload for the attached Jira Tasks Uploader tool containing all scenarios to publish. projectKey = prefix of the SourceIssueId (e.g. HL-12 -> HL). Pass the object below as inputJSON exactly as shown. Do NOT wrap it in another "inputJSON" key. ```json { "projectKey": "<project_key>", "issueType": "Task", "issues": <approved_scenarios> } ``` Each issue in approved_scenarios is copied verbatim from the evaluated scenario object: ```json { "issueType": "Task", "SourceIssueId": "HL-12", "summary": "[TS-XXX] Verify that ...", "description": { "Pre-condition": "...", "Test Data": "...", "Navigable Path": "...", "Expected Result": "..." }, "label": ["ai-generated", "L0-test-scenario-writer", "L2-Service", "HL-12-AC-01-TS-001"] } ``` 
+3. Field values are copied verbatim from the evaluated scenario. Do not reword, summarise, or add content. Rename parentKey or featureKey to SourceIssueId if needed; do not send parentKey. 
+4. Tool Response & Issue Key Extraction: Parse the return of the Jira Tasks Uploader tool line-by-line (returned in the exact order of `issues` submitted): - Success pattern: `Task created: <KEY> | Linked to <SourceIssueId> (Relates)`. Extract `<KEY>` as the literal `jira_key` and map it to its scenario (`test_scenario_id`, `SourceIssueId`, `summary`). - Link-failure pattern: `Task created: <KEY> | Link to <SourceIssueId> failed → ...` The Task exists. Record `jira_key`, count as created, and add a finding. Do NOT retry. - Failure pattern: `Failed: <summary> → ... | Detail: ...` Retry that issue once; if still failing, count as failed and record in `findings`. - Empty response with a non-empty issues list -> the payload was wrapped incorrectly; count all as failed and record in `findings`. - Never fabricate or guess `jira_key`. Use only the literal key returned by the tool.
 5. Record Created Tasks:
    Explicitly output all created Tasks with their literal Jira issue keys in `content.created_tasks`.
 6. Never modify, transition, or delete the parent Feature or any existing issue.
@@ -129,9 +98,9 @@ Each issue in approved_scenarios is copied verbatim from the evaluated scenario 
 
 - Every finding is independently re-derived from re-fetched Jira and Confluence data.
 - Never report a gate as passed without the re-derived result.
-- Every finding cites feature_key, acceptance_criteria_id, and test_scenario_id.
+- Every finding cites SourceIssueId, acceptance_criteria_id, and test_scenario_id.
 - Every fix carries stated reasoning.
-- Fabricated feature_key, AC, behaviour, or level is always a fail, never a warning.
+- Fabricated SourceIssueId, AC, behaviour, or level is always a fail, never a warning.
 - The AC always wins over Feature description and over the writer's wording.
 - Do NOT duplicate KB narrative text.
 - Do NOT generate, expand, or add scenarios or positive/negative path variations.
@@ -180,7 +149,7 @@ Format: JSON (AgentOutput standard), `content.type: "evaluation_result"`. Do NOT
     "gates_passed": ["G1", "G2", "G3", "G5", "G7", "G8"],
     "gates_failed": ["G4", "G6"],
     "findings": [
-      {"id": "FND-01", "gate": "G6", "status": "fail", "feature_key": "HL-12", "acceptance_criteria_id": "AC-02", "test_scenario_id": "TS-002", "detail": "<short reason>"}
+      {"id": "FND-01", "gate": "G6", "status": "fail", "SourceIssueId": "HL-12", "acceptance_criteria_id": "AC-02", "test_scenario_id": "TS-002", "detail": "<short reason>"}
     ],
     "fixes_applied": [
       {"id": "FIX-01", "finding_id": "FND-01", "reasoning": "<short reason>", "before": "L4 Integration", "after": "L2 Service"}

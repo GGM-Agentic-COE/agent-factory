@@ -16,9 +16,9 @@ HLD, LLD, API contracts, and code are out of bounds.
 to be tested. Positive/negative path expansion belongs to the downstream Test Case
 Generator and is out of scope for the writer and the evaluator.
 
-**Scenario template (exactly these fields):** test_scenario_id, feature_key,
+**Scenario template (exactly these fields):** test_scenario_id, SourceIssueId,
 acceptance_criteria_id, testing_level, issueType, summary, description (Pre-condition, Test Data,
-Navigable Path, Expected Result), label, parentKey.
+Navigable Path, Expected Result), label, SourceIssueId.
 
 `issueType` must always be exactly `Task`.
 
@@ -28,21 +28,21 @@ Navigable Path, Expected Result), label, parentKey.
 
 | Criterion | Pass | Fail |
 |---|---|---|
-| AC inventory matches Jira | Every (feature_key, AC ID) the writer used exists in the re-fetched Jira data, and every re-fetched AC is accounted for | Writer's inventory adds, drops, or alters ACs |
+| AC inventory matches Jira | Every (SourceIssueId, AC ID) the writer used exists in the re-fetched Jira data, and every re-fetched AC is accounted for | Writer's inventory adds, drops, or alters ACs |
 | AC IDs assigned correctly | IDs assigned only to ACs without Jira IDs, as AC-01, AC-02… in source order | IDs assigned to ACs that already had IDs, or wrong order |
 | AC-less Features skipped correctly | Only Features with genuinely zero ACs have no scenarios | Feature with ACs skipped |
-| Duplicate AC keys identified | Every duplicate (feature_key, AC ID) in source is identified by the evaluator | Duplicate missed |
+| Duplicate AC keys identified | Every duplicate (SourceIssueId, AC ID) in source is identified by the evaluator | Duplicate missed |
 | INSUFFICIENT_CONTEXT genuine | If writer halted, the stated reason holds against re-fetched sources | Writer halted though sources were sufficient |
 
-**Evaluation method:** Re-fetch Jira and Confluence. Rebuild the AC inventory keyed on (feature_key, AC ID). Diff against the scenarios in the blob file.
+**Evaluation method:** Re-fetch Jira and Confluence. Rebuild the AC inventory keyed on (SourceIssueId, AC ID). Diff against the scenarios in the blob file.
 
 #### Gate 2 — Traceability
 
 | Criterion | Pass | Fail |
 |---|---|---|
-| feature_key authentic | Every feature_key exists in re-fetched Jira data | Any fabricated or mistyped feature_key |
-| AC ID authentic | Every (feature_key, AC ID) pair exists, or follows the source-order AC ID assignment rule | Any fabricated pair or AC ID attached to the wrong Feature |
-| parentKey matches | parentKey equals the scenario's feature_key | parentKey missing, logical, or points to another Feature |
+| SourceIssueId authentic | Every SourceIssueId exists in re-fetched Jira data | Any fabricated or mistyped SourceIssueId |
+| AC ID authentic | Every (SourceIssueId, AC ID) pair exists, or follows the source-order AC ID assignment rule | Any fabricated pair or AC ID attached to the wrong Feature |
+| SourceIssueId matches | SourceIssueId equals the scenario's SourceIssueId | SourceIssueId missing, logical, or points to another Feature |
 | Behaviour traceable | Each scenario's behaviour is found in its referenced AC, not a different AC | Scenario cites one AC but tests another AC's behaviour |
 
 **Evaluation method:** Look up each scenario's pair in the rebuilt inventory. Compare scenario behaviour against the cited AC text.
@@ -111,7 +111,7 @@ Navigable Path, Expected Result), label, parentKey.
 | Template exact | Exactly the template fields; description has exactly the 4 keys; all non-empty; no scenario_type, jira_key, or publish_action | Missing, extra, or empty fields |
 | Issue type exact | issueType is exactly `Task` | Missing issueType or any value other than `Task` |
 | Summary format | summary starts with `[TS-XXX] Verify that` using the scenario's own test_scenario_id | Missing or mismatched prefix |
-| Label exact | label = ["ai-generated", "L0-test-scenario-writer", level label, fingerprint]; label[3] = `[feature_key]-[acceptance_criteria_id]-[test_scenario_id]` | Missing, reordered, or mismatched label |
+| Label exact | label = ["ai-generated", "L0-test-scenario-writer", level label, fingerprint]; label[3] = `[SourceIssueId]-[acceptance_criteria_id]-[test_scenario_id]` | Missing, reordered, or mismatched label |
 | TS-ID ordering | TS-001… sequential per Feature; Features in ascending key order; ACs in source order; behaviours in AC order | Gaps, duplicates, or non-deterministic order |
 | Blob file valid | test_scenarios.json parses as JSON and contains only scenario objects | Malformed or unparseable file |
 
@@ -166,7 +166,7 @@ Weights reflect downstream impact:
 | All gates pass, no fixes needed | approved | Yes |
 | All gates pass after mechanical fixes | fixed_and_approved | Yes (fixed version) |
 | Any failure needing human judgment | escalate_to_hitl | No |
-| Fabricated feature_key/AC or invented behaviour that cannot be removed mechanically | escalate_to_hitl | No |
+| Fabricated SourceIssueId/AC or invented behaviour that cannot be removed mechanically | escalate_to_hitl | No |
 | Testable AC left uncovered | escalate_to_hitl | No |
 | Writer INSUFFICIENT_CONTEXT confirmed genuine | approved | No (nothing to publish) |
 
@@ -177,7 +177,7 @@ The evaluator MAY fix the following WITHOUT escalation:
 - Correct testing_level casing/spelling to the verbatim Test Levels name, and update label[2] to match
 - Re-level a scenario when TP-04 gives one unambiguous answer from AC text
 - Correct `issueType` to `Task`
-- Correct label[0], label[1], or parentKey when the correct value is certain from the scenario's own fields
+- Correct label[0], label[1], or SourceIssueId when the correct value is certain from the scenario's own fields
 - Remove scenarios that are out of scope (path expansions or variants) when the AC remains covered by another scenario
 - Merge exact or near-duplicate scenarios for the same AC
 - Remove extra fields (scenario_type, jira_key, publish_action) from the scenario
@@ -187,10 +187,10 @@ The evaluator MAY fix the following WITHOUT escalation:
 
 The evaluator MUST escalate the following:
 - Any testable AC with no scenario (evaluator never generates scenarios)
-- Fabricated feature_key or AC ID, or scenario behaviour with no AC source
+- Fabricated SourceIssueId or AC ID, or scenario behaviour with no AC source
 - Expected Result or Pre-condition that contradicts the AC
 - Disputed skipped AC (AC may or may not be testable as written)
 - Testing level where TP-04 allows more than one reasonable answer
 - Conflict between Feature description and AC that affects behaviour
-- Duplicate (feature_key, AC ID) in source Jira data
+- Duplicate (SourceIssueId, AC ID) in source Jira data
 - Removing an out-of-scope scenario would leave its AC uncovered
