@@ -1,0 +1,82 @@
+# Agent Specification Document
+spec_version: "1.0"
+artifact_type: agent
+metadata:
+  name: L0-target-architecture-generator-evaluator
+  version: "1.0.0"
+  layer: L0
+  phase: design
+  owner: agentic-ai-coe
+  created: "2026-11-18"
+
+purpose:
+  description: "Independently re-derives L0-target-architecture-generator's document against the template, PRD, binding principles and enterprise standards — template and callout conformance, key integrity, entity ownership, requirement coverage, principle positions, context-map rules, budget sources, mandatory content, technology neutrality and baseline fidelity — fixes what is mechanically recoverable, escalates the rest, and always publishes the corrected document as a Draft to Confluence."
+  input: "{product_name}-binding-principles.json and {product_name}-target-architecture.md read from S3 under the inherited <workflow_execution_id>, the PRD and three knowledge bases from Confluence, the template and this evaluator's evaluation.md from GitHub, and optionally the baseline, reviewer notes, architecture notes and epics/features."
+  output: "Items (document id/version/status, counts, entity ownership, budgets resolved, open items added), an evaluation block (scores, overall_score, pass, findings, fixes_applied as <=150 char patches, final_decision), and an artifact pointing to the published Confluence page (null item_id/web_url when the write failed)."
+  business_value: "Solution architecture, HLDs and interface specifications cite the target architecture's keys; a dangling key, a twice-owned entity, an unsourced budget or a quietly altered verdict becomes a defect in every document that follows. This agent rebuilds ownership, the key index and budget sources independently and publishes the result with its verdict for human approval."
+
+prompt:
+  ref: "prompts/L0-target-architecture-generator-evaluator/instructions.md"
+  version: "1.0.0"
+  description: "Checks template and blockquote-callout conformance, rebuilds the key index, entity-ownership set and FR coverage by set membership, compares Section 3 against input verdicts, validates every R-NN/event/read model and every numeric target's source, checks standing CON/SEC/APP/INV/ADR content, technology neutrality and baseline fidelity; patches document and items together; always publishes the corrected Draft to Confluence."
+
+contract:
+  input_schema: "$ref: schemas/agent-input-contract-schema.json"
+  output_schema: "$ref: schemas/agent-output-schema.json"
+
+  input:
+    accepts_from_agents: [L0-target-architecture-generator]   # inherits workflow_execution_id; both documents are read from S3, not from the generator's JSON
+    accepts_direct_input: false
+    accepts_file_upload:
+      enabled: false
+    required_parameters:
+      workflow_execution_id: { type: string, description: "Inherited from L0-target-architecture-generator's output; names the S3 folder both documents are read from" }
+      prd-confluence-page-id: { type: string, description: "Confluence page ID of the PRD; product_name is read from it and document_code is its upper-case initials" }
+      architecture-patterns-confluence-page-id: { type: string, description: "Confluence page ID of kb-L0-architecture-patterns" }
+      enterprise-architecture-confluence-page-id: { type: string, description: "Confluence page ID of kb-L0-enterprise-architecture" }
+      enterprise-security-confluence-page-id: { type: string, description: "Confluence page ID of kb-L0-enterprise-security" }
+      target-architecture-template-github-folder-location: { type: string, description: "GitHub folder holding kb-L0-target-architecture-template" }
+      target-architecture-eval-github-folder-loc: { type: string, description: "GitHub folder holding this evaluator's evaluation.md" }
+      agent-github-repo-name: { type: string, description: "GitHub repository holding the template and evaluation file" }
+      agent-github-repo-branch: { type: string, description: "GitHub branch holding the template and evaluation file" }
+      target-architecture-confluence-upload-space-key: { type: string, description: "Confluence space_key the corrected document is published to via tool-L0-confluence-writer, titled {product_name}-target-architecture" }
+    optional_parameters:
+      existing_target_architecture: { type: string, default: null, description: "The baseline the document was updated from; enables the baseline-fidelity check" }
+      reviewer_notes: { type: string, default: null, description: "Human decisions the document was told to honour" }
+      architecture_notes: { type: string, default: null, description: "External systems and selection state, reviewer roles, decisions, known open items" }
+      epics_and_features: { type: object, default: null, description: "Capability map, used for the feature coverage check only" }
+
+  output:
+    $ref: "output_schema.json"   # content.type: "target-architecture-evaluation" + evaluation block + artifacts[].storage (provider: confluence) — schema file not yet created
+
+context:
+  knowledge_bases:
+    - ref: "evaluation.md"                  # THIS evaluator's meta-quality bar, retrieved from GitHub at runtime
+    - kb-L0-target-architecture-template    # section, callout and column conformance (read from GitHub)
+    - kb-L0-architecture-patterns           # PAT and RULE keys the checks apply
+    - kb-L0-enterprise-architecture         # EA keys for dereferencing citations
+    - kb-L0-enterprise-security             # ES2/ES3/ES4 classification, retention and tier checks
+  guardrails:
+    - gr-L0-output-schema-validator
+    - gr-L0-pii-detection
+    - gr-L3-hallucination-detector          # no fix may invent a requirement, entity, budget, system, principle, pattern, ADR or approver
+    - gr-L3-citation-validator              # re-checked independently, not by trusting the generator's own claim
+    - gr-L3-consistency-checker             # published document, items and patches must describe the same final text
+    - gr-L1-tool-permissions                # holds a write tool — publishes only to the configured Confluence space; never writes to S3
+    - gr-L3-agent-rate-limit
+  tools:
+    - tool-L0-s3-files-reader               # reads both documents from <workflow_execution_id>/ in one call — never lists the folder
+    - tool-L0-confluence-reader             # reads the PRD and the three Confluence KBs
+    - tool-L0-github-reader-using-app       # reads the template and evaluation.md; tool-L0-github-reader-using-PAT takes the same parameters if that variant is deployed instead
+    - tool-L0-confluence-writer             # publishes the corrected document as Draft, always, whatever final_decision is
+
+quality:
+  evaluation_ref: "evaluation.md"   # THIS evaluator's own meta-quality bar, not the generator's rubric
+  min_score: 8.0   # evaluators are held to a higher bar than generators — a wrong finding is worse than a wrong section
+  hallucination_check: true
+  consistency_check: true
+
+versioning:
+  input_version: "1.0"
+  output_version: "1.0"
+  instruction_hash: "sha256:pending"

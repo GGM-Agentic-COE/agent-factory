@@ -1,0 +1,79 @@
+# Agent Specification Document
+spec_version: "1.0"
+artifact_type: agent
+metadata:
+  name: L0-target-architecture-generator
+  version: "1.0.0"
+  layer: L0
+  phase: design
+  owner: agentic-ai-coe
+  created: "2026-11-18"
+
+purpose:
+  description: "Turns the PRD and its evaluated binding principles into one normative, technology-free target architecture ({document_code}-ARC-001): drivers, principle positions, bounded contexts and entity ownership, context map, components and invariants, constraints, data/integration/platform demands, quality attributes, security controls, decisions and governance, every statement keyed and traced. Writes it to S3 as {product_name}-target-architecture.md."
+  input: "The PRD and three knowledge bases from Confluence, the target-architecture template from GitHub, the evaluated {product_name}-binding-principles.json from S3 under the inherited <workflow_execution_id>, and optionally an existing target architecture, reviewer notes, architecture notes and epics/features."
+  output: "{product_name}-target-architecture.md written to S3 under <workflow_execution_id>/, plus items carrying meta points only (keys, names, counts, cross-references, <=150 char summaries) and the S3 location in artifacts[0].storage."
+  business_value: "A PRD says what the product must do and binding principles say what the enterprise permits; neither says how the system is divided or who owns each fact. This document is the bridge that solution architecture, HLDs and interface specifications are written against and that conformance is assessed against at every release."
+
+prompt:
+  ref: "prompts/L0-target-architecture-generator/instructions.md"
+  version: "1.0.0"
+  description: "Fills kb-L0-target-architecture-template section by section: decomposes by reason-for-change (PAT-01) into bounded contexts with single ownership (PAT-06), decides request vs event per interaction (RULE-01) with DEV cover, budget and failure mode, derives invariants, standing constraints, demands, PRD/KB-sourced quality targets (else 'Requires validation' + OI), security controls and ADRs; maps every principle verdict unchanged; carries a baseline verbatim with an Appendix B change register; writes the markdown to S3."
+
+contract:
+  input_schema: "$ref: schemas/agent-input-contract-schema.json"
+  output_schema: "$ref: schemas/agent-output-schema.json"
+
+  input:
+    accepts_from_agents: [L0-binding-principles-generator-evaluator]   # inherits workflow_execution_id; the evaluated binding principles are read from S3
+    accepts_direct_input: false
+    accepts_file_upload:
+      enabled: false
+    required_parameters:
+      workflow_execution_id: { type: string, description: "Inherited from L0-binding-principles-generator-evaluator's output; names the S3 folder read from and written to" }
+      prd-confluence-page-id: { type: string, description: "Confluence page ID of the PRD; product_name is read from it and document_code is its upper-case initials" }
+      architecture-patterns-confluence-page-id: { type: string, description: "Confluence page ID of kb-L0-architecture-patterns (PAT-NN patterns, RULE-01 to RULE-05)" }
+      enterprise-architecture-confluence-page-id: { type: string, description: "Confluence page ID of kb-L0-enterprise-architecture (EA3 existing systems)" }
+      enterprise-security-confluence-page-id: { type: string, description: "Confluence page ID of kb-L0-enterprise-security (ES1 identity, ES2/ES3 classification and retention, ES4 availability tiers)" }
+      target-architecture-template-github-folder-location: { type: string, description: "GitHub folder holding kb-L0-target-architecture-template" }
+      agent-github-repo-name: { type: string, description: "GitHub repository holding the template" }
+      agent-github-repo-branch: { type: string, description: "GitHub branch holding the template" }
+    optional_parameters:
+      existing_target_architecture: { type: string, default: null, description: "A previously approved target architecture (markdown); turns the run into an update with an Appendix B change register" }
+      reviewer_notes: { type: string, default: null, description: "Human decisions to honour" }
+      architecture_notes: { type: string, default: null, description: "External systems and selection state, reviewer roles, decisions taken, known open items" }
+      epics_and_features: { type: object, default: null, description: "Capability map, used for the feature coverage check only" }
+
+  output:
+    $ref: "output_schema.json"   # content.type: "target-architecture" with items + artifacts[].storage (provider: s3) — schema file not yet created
+
+context:
+  knowledge_bases:
+    - kb-L0-architecture-patterns           # PAT-01..PAT-18 and RULE-01..RULE-05 applied to decomposition, context map and constraints
+    - kb-L0-target-architecture-template    # fixed section numbering, callout titles and table columns (read from GitHub)
+    - kb-L0-enterprise-architecture         # EA3 existing enterprise systems and their stated relationships
+    - kb-L0-enterprise-security             # ES1–ES4 identity, classification, retention and availability standards
+  guardrails:
+    - gr-L0-output-schema-validator
+    - gr-L0-pii-detection
+    - gr-L3-hallucination-detector          # no invented requirement, budget, external system, actor, principle, pattern or ADR
+    - gr-L3-citation-validator              # every prd: and KB key cited must exist
+    - gr-L3-consistency-checker             # items must agree with the document written to S3
+    - gr-L1-tool-permissions                # holds a write tool — writes only <workflow_execution_id>/{product_name}-target-architecture.md
+    - gr-L3-agent-rate-limit
+  tools:
+    - tool-L0-s3-files-reader               # reads <workflow_execution_id>/{product_name}-binding-principles.json — never lists the folder
+    - tool-L0-confluence-reader             # reads the PRD and the three Confluence KBs
+    - tool-L0-github-reader-using-app       # reads the template; tool-L0-github-reader-using-PAT takes the same parameters if that variant is deployed instead
+    - tool-L0-s3-writer                     # writes the document once, after it is final
+
+quality:
+  evaluation_ref: "evaluation.md"   # generator rubric loaded by L0-target-architecture-generator-evaluator (S6) — not yet present in this folder
+  min_score: 7.0
+  hallucination_check: true
+  consistency_check: true
+
+versioning:
+  input_version: "1.0"
+  output_version: "1.0"
+  instruction_hash: "sha256:pending"

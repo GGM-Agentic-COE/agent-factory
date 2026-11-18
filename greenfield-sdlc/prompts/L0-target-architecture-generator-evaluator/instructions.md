@@ -53,7 +53,7 @@ Processing Rules:
 11. Items: build `items` (document id, version, status, counts, entity ownership) from the corrected document; every `summary` is ≤150 characters and none holds document text.
 12. Apply every fix to the in-memory document AND to `items`, so they never diverge. Record each change in `evaluation.fixes_applied` as a patch: `key` (the document key or section touched), `before` and `after` as excerpts of at most 150 characters each, reasoning. The output JSON carries summaries and patches; it never carries the document or any of its narrative.
 13. Scores and `final_decision` per the standard rule: `approved` when no fail finding; `fixed_and_approved` when every fail finding was fixed; `escalate_to_hitl` when any could not be fixed without architectural judgment.
-14. Publish, always, whatever `final_decision` is. The document's status line stays **Draft**; if it reads anything else, set it to Draft and record the patch. Publish the document exactly as held in memory, with no banner, note or verdict added to it; the verdict, findings and unfixed items live only in this output's `evaluation` block and `execution_summary`, and the human approves or rejects the page where it is published. Call the Work IQ OneDrive writer as described under Tools and record the returned item identifier and web link in `artifacts[0].storage`. The only case with nothing to publish is a failed read, where no document exists.
+14. Publish, always, whatever `final_decision` is. The document's status line stays **Draft**; if it reads anything else, set it to Draft and record the patch. Publish the document exactly as held in memory, with no banner, note or verdict added to it; the verdict, findings and unfixed items live only in this output's `evaluation` block and `execution_summary`, and the human approves or rejects the page where it is published. Call the confluence writer as described under Tools and record the returned item identifier and web link in `artifacts[0].storage`. The only case with nothing to publish is a failed read, where no document exists.
 Rules:
 - A dangling key, an entity with no or two owners, an unsourced budget, a changed verdict or a named technology is always at least a fail finding.
 - Every finding names the specific document key or section and the specific rule it fails (a template section, a PAT or RULE key, a `prd:` key, a principle ID, an ES or EA key).
@@ -66,7 +66,7 @@ Don'ts:
 - Do NOT draw or move a boundary; a decomposition the evaluator disagrees with is a finding to escalate, not a fix.
 - Do NOT record `fixed_and_approved` while the published document still holds pre-fix text, and do NOT skip publishing because of the verdict; an `escalate_to_hitl` document is published as a Draft like any other, with its open findings in this output only.
 - Do NOT put the document or any of its narrative in the output JSON; it is published by the tool and described by the patches and the file reference.
-- Do NOT write to blob storage; this evaluator reads from blob and publishes to OneDrive only.
+- Do NOT write to blob storage; this evaluator reads from blob and publishes to confluence only.
 - Do NOT list the blob folder, guess among files or read a file under a different workflow identifier.
 - Do NOT print interim reflection output; deliver the final result only.
 Examples:
@@ -116,7 +116,7 @@ content.type: "target-architecture-evaluation" — the evaluation block with the
       "final_decision": "approved | fixed_and_approved | escalate_to_hitl"
     },
     "artifacts": [
-      { "id": "artifact-<uuid>", "type": "document", "name": "{product_name}-target-architecture.md", "format": "markdown", "storage": { "provider": "confluence", "item_id": "<as returned> | null", "web_url": "<as returned> | null", "source_blob": "<workflow_execution_id>/{product_name}-target-architecture.md" }, "description": "Final (corrected) target architecture, status Draft, always published for human approval in OneDrive; null item_id only when the write failed", "produced_by": "L0-target-architecture-generator-evaluator" }
+      { "id": "artifact-<uuid>", "type": "document", "name": "{product_name}-target-architecture.md", "format": "markdown", "storage": { "provider": "confluence", "item_id": "<as returned> | null", "web_url": "<as returned> | null", "source_blob": "<workflow_execution_id>/{product_name}-target-architecture.md" }, "description": "Final (corrected) target architecture, status Draft, always published for human approval in Confluence; null item_id only when the write failed", "produced_by": "L0-target-architecture-generator-evaluator" }
     ],
     "execution_summary": "• plain text bullets"
   }
