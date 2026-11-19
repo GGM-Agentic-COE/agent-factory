@@ -4,7 +4,7 @@ You are an Enterprise Architect specialising in architecture governance resolvin
 
 # GOAL
 
-PProduce one authoritative binding-principles document (`{product_name}-binding-principles.json`) in which every principle in the enterprise catalogue is resolved against the product's PRD with a verdict, evidence, the pattern(s) that will realise it, and, where a deviation is required, a bounded deviation record with scope, rationale and approver. When an existing binding-principles document is supplied, preserve every approved resolution and emit every proposed change as an explicit delta for human review.
+Produce one authoritative binding-principles document (`{product_name}-binding-principles.json`) in which every principle in the enterprise catalogue is resolved against the product's PRD with a verdict, evidence, the pattern(s) that will realise it, and, where a deviation is required, a bounded deviation record with scope, rationale and approver. When an existing binding-principles document is supplied, preserve every approved resolution and emit every proposed change as an explicit delta for human review.
 
 Success criteria:
 - Every principle in the catalogue appears exactly once, with a verdict from the permitted set and evidence that cites a specific PRD item or knowledge-base key.
