@@ -23,59 +23,15 @@ except Exception:  # allow standalone use without crewai installed
             return self._run(*args, **kwargs)
 
 
-import boto3
-from botocore.exceptions import ClientError
+import AVASecret
 
-
-class AWSSecretReaderPodIdentitySchema(BaseModel):
-    """Input schema for AWSSecretReaderPodIdentity. """
-    pass
-
-
-class AWSSecretReaderPodIdentity(BaseTool):
-    """
-    AWSSecretReaderPodIdentity - Reads a AWS Secret using Pod Identity
-    and returns the full key-value dict.
-    """
-    name: str = "AWS Secret Reader with Pod Identity"
-    description: str = "Reads a fixed AWS Secret (set in code) using Pod Identity, and returns all key-value pairs as a dict."
-    args_schema: Type[BaseModel] = AWSSecretReaderPodIdentitySchema
-
-    # Review every line tagged "SETUP-REQUIRED:" below before deploying this tool to a new environment or client.
-    # SETUP-REQUIRED: must match the secret name created in your AWS Secrets Manager
-    SECRET_NAME: str = "<name-of-secret-in-aws-secrets-manager>"
-
-
-    def _run(self) -> Dict[str, Any]:
-        try:
-
-            # SETUP-REQUIRED: AWS region where that secret lives (us-east-1 or us-east-2 depending on deployment)
-
-            client = boto3.client('secretsmanager', region_name='us-east-1')
-            get_secret_value_response = client.get_secret_value(SecretId=self.SECRET_NAME)
-            secret_string = get_secret_value_response.get('SecretString', '{}')
-            secret_dict = json.loads(secret_string)
-
-            if not isinstance(secret_dict, dict):
-                raise ValueError(f"Secret value is not a JSON object: {secret_dict}")
-
-            return secret_dict
-
-        except ClientError as e:
-            raise RuntimeError(f"Error retrieving secret: {str(e)}")
-        except Exception as ex:
-            raise RuntimeError(f"Unexpected error: {str(ex)}")
-
-
-reader = AWSSecretReaderPodIdentity()
-secrets = reader._run()
 
 # ============================================================================
 # CONFIGURATION  --  edit these values for your Jira space
 # ============================================================================
-JIRA_BASE_URL     = secrets.get("base_url")                     # from AWS Secrets Manager
-JIRA_USER_EMAIL   = secrets.get("id")                   #from AWS Secrets Manager
-JIRA_API_TOKEN    = secrets.get("api_key")                    #from AWS Secrets Manager
+JIRA_BASE_URL     = None                     # from AVASecret
+JIRA_USER_EMAIL   = None                   #from AVASecret
+JIRA_API_TOKEN    = None                    #from AVASecret
 DEFAULT_ISSUE_TYPE = "Epic"
 
 # If your project's issue-type scheme doesn't include "Epic"/"Story", Jira returns a
@@ -276,6 +232,15 @@ class JiraIssueCreator(BaseTool):
         }
 
     def _run(self, inputJSON: Dict[str, Any]) -> str:
+        global JIRA_BASE_URL, JIRA_USER_EMAIL, JIRA_API_TOKEN
+        # Secrets retrieved via AVASecret
+        try:
+            JIRA_BASE_URL   = AVASecret.getValue("base_url")
+            JIRA_USER_EMAIL = AVASecret.getValue("id")
+            JIRA_API_TOKEN  = AVASecret.getValue("api_key")
+        except Exception as e:
+            return f"Error retrieving secrets from AVASecret: {str(e)}"
+
         results: List[str] = []
         id_map: Dict[str, str] = {}
         try:

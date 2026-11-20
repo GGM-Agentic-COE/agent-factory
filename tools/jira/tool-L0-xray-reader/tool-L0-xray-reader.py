@@ -63,13 +63,11 @@ class XrayJiraReaderTool(BaseTool):
         "Reads one or more Jira issues and recursively walks their child work "
         "items, retrieving Xray Tests for each supported issue. Accepts inputJSON "
         "as a dict, list, JSON string, comma-separated string, or single key. "
-        "Read-only; Jira and Xray credentials are loaded from AWS Secrets Manager."
+        "Read-only; Jira and Xray credentials are loaded from AVASecret."
     )
     args_schema: Type[BaseModel] = XrayJiraReaderSchema
 
-    # Deployment configuration. Keep aligned with the existing deployment secret.
-    SECRET_NAME: str = "aava-secret-manager-sfi-credentials"
-    AWS_REGION: str = "us-east-2"
+    # Deployment configuration.
     DEFAULT_XRAY_BASE_URL: str = "https://eu.xray.cloud.getxray.app"
     DEFAULT_MAX_DEPTH: int = 5
     PAGE_SIZE: int = 100
@@ -225,31 +223,29 @@ class XrayJiraReaderTool(BaseTool):
     # ------------------------------------------------------------------
     def _load_credentials(self) -> Dict[str, str]:
         """Load Jira and Xray credentials at runtime, not module import."""
-        import boto3
-        from botocore.exceptions import ClientError
+        import AVASecret
 
         try:
-            client = boto3.client("secretsmanager", region_name=self.AWS_REGION)
-            response = client.get_secret_value(SecretId=self.SECRET_NAME)
-            secrets = json.loads(response.get("SecretString", "{}"))
-
-            if not isinstance(secrets, dict):
-                raise ValueError("AWS secret must contain a JSON object.")
-
             credentials = {
-                "jira_api_token": secrets.get("api_key"),
-                "jira_user": secrets.get("id"),
-                "jira_base_url": secrets.get("base_url") or secrets.get("jira_base_url"),
-                "xray_client_id": secrets.get("xray_client_id"),
-                "xray_client_secret": secrets.get("xray_client_secret"),
+                "jira_api_token": AVASecret.getValue("api_key"),
+                "jira_user": AVASecret.getValue("id"),
+                "jira_base_url": AVASecret.getValue("base_url") or AVASecret.getValue("jira_base_url"),
+                "xray_client_id": AVASecret.getValue("xray_client_id"),
+                "xray_client_secret": AVASecret.getValue("xray_client_secret"),
                 "xray_base_url": (
-                    secrets.get("xray_base_url") or self.DEFAULT_XRAY_BASE_URL
+                    AVASecret.getValue("xray_base_url") or self.DEFAULT_XRAY_BASE_URL
                 ),
             }
+        except Exception as exc:
+            raise RuntimeError(
+                f"Unable to read secrets from AVASecret: {exc}"
+            ) from exc
+
+        try:
             missing = [key for key, value in credentials.items() if not value]
             if missing:
                 raise ValueError(
-                    "AWS secret is missing required keys: " + ", ".join(missing)
+                    "AVASecret is missing required keys: " + ", ".join(missing)
                 )
 
             credentials["jira_base_url"] = (
@@ -266,10 +262,6 @@ class XrayJiraReaderTool(BaseTool):
 
             return credentials
 
-        except ClientError as exc:
-            raise RuntimeError(
-                f"Unable to read AWS Secrets Manager secret '{self.SECRET_NAME}': {exc}"
-            ) from exc
         except Exception as exc:
             raise RuntimeError(f"Credential loading failed: {exc}") from exc
 

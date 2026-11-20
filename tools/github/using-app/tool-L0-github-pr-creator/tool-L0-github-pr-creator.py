@@ -1,62 +1,15 @@
-import json
 import threading
 import time
 from typing import Any, Dict, Tuple, Type
 from urllib.parse import quote
 
-import boto3
 import jwt  # PyJWT -- install with the [crypto] extra for RS256 support
 import requests
-from botocore.exceptions import ClientError
 from crewai.tools import BaseTool
 from pydantic import BaseModel, Field
 
 
-# ═════════════════════════════════════════════════════════════════════════════
-#  CREDENTIALS
-# ═════════════════════════════════════════════════════════════════════════════
-
-class AWSSecretReaderPodIdentitySchema(BaseModel):
-    """Input schema for AWSSecretReaderPodIdentity. """
-    pass
-
-
-class AWSSecretReaderPodIdentity(BaseTool):
-    """
-    AWSSecretReaderPodIdentity - Reads a AWS Secret using Pod Identity
-    and returns the full key-value dict.
-    """
-    name: str = "AWS Secret Reader with Pod Identity"
-    description: str = "Reads a fixed AWS Secret (set in code) using Pod Identity, and returns all key-value pairs as a dict."
-    args_schema: Type[BaseModel] = AWSSecretReaderPodIdentitySchema
-
-    # Review every line tagged "SETUP-REQUIRED:" below before deploying this tool to a new environment or client.
-    # SETUP-REQUIRED: must match the secret name created in your AWS Secrets Manager
-    SECRET_NAME: str = "<name-of-secret-in-aws-secrets-manager>"
-
-    def _run(self) -> Dict[str, Any]:
-        try:
-
-            # SETUP-REQUIRED: AWS region where that secret lives (us-east-1 or us-east-2 depending on deployment)
-
-            client = boto3.client('secretsmanager', region_name='us-east-1')
-            get_secret_value_response = client.get_secret_value(SecretId=self.SECRET_NAME)
-            secret_string = get_secret_value_response.get('SecretString', '{}')
-            secret_dict = json.loads(secret_string)
-
-            if not isinstance(secret_dict, dict):
-                raise ValueError(f"Secret value is not a JSON object: {secret_dict}")
-
-            return secret_dict
-
-        except ClientError as e:
-            raise RuntimeError(f"Error retrieving secret: {str(e)}")
-        except Exception as ex:
-            raise RuntimeError(f"Unexpected error: {str(ex)}")
-
-
-reader = AWSSecretReaderPodIdentity()
-secrets = reader._run()
+import AVASecret
 
 # ─────────────────────────────────────────────────────────────────────────────
 # CONFIGURATION
@@ -65,7 +18,7 @@ secrets = reader._run()
 GITHUB_API = "https://api.github.com"
 
 # ═════════════════════════════════════════════════════════════════════════════
-#  GITHUB APP CREDENTIALS (from AWS Secrets Manager)
+#  GITHUB APP CREDENTIALS (from AVASecret)
 # ═════════════════════════════════════════════════════════════════════════════
 #
 # Only ONE of APP_ID / CLIENT_ID is needed -- both work as the JWT issuer, and
@@ -75,15 +28,15 @@ GITHUB_API = "https://api.github.com"
 # user-authorization, which this tool does not do.
 
 # App ID -- the numeric id from Settings -> Developer settings -> GitHub Apps
-APP_ID = secrets.get("app_id")                       # from AWS Secrets Manager
+APP_ID = None                                        # from AVASecret (fetched in _run)
 
 # Client ID -- the "Iv23li..." string on the same page. GitHub's currently
 # recommended issuer value.
-CLIENT_ID = secrets.get("client_id")                 # from AWS Secrets Manager
+CLIENT_ID = None                                     # from AVASecret (fetched in _run)
 
 # Private key (PEM), either PKCS#1 ("BEGIN RSA PRIVATE KEY") or PKCS#8
 # ("BEGIN PRIVATE KEY") -- both are accepted.
-PRIVATE_KEY = secrets.get("private_key")             # from AWS Secrets Manager
+PRIVATE_KEY = None                                   # from AVASecret (fetched in _run)
 
 # ═════════════════════════════════════════════════════════════════════════════
 
@@ -449,6 +402,15 @@ class GithubPullRequestTool(BaseTool):
         pull_request_title: str,
         destination_branch: str = "main",
     ) -> Any:
+        # GitHub App credentials retrieved via AVASecret
+        global APP_ID, CLIENT_ID, PRIVATE_KEY
+        try:
+            APP_ID = AVASecret.getValue("app_id")
+            CLIENT_ID = AVASecret.getValue("client_id")
+            PRIVATE_KEY = AVASecret.getValue("private_key")
+        except Exception as e:
+            return {"status": "failure", "message": f"Error retrieving secrets from AVASecret: {str(e)}"}
+
         try:
             source_branch = (source_branch or "").strip()
             destination_branch = (destination_branch or "").strip()

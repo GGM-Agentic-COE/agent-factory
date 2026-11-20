@@ -1,53 +1,14 @@
 import json
-import boto3
 import logging
-from typing import Type, Dict, Any, List
+from typing import Type, List
 from pydantic import BaseModel, Field, field_validator
 from crewai.tools import BaseTool
 from azure.storage.blob import BlobServiceClient, BlobClient, ContainerClient
-from botocore.exceptions import ClientError
+import AVASecret
 
 
-class AWSSecretReaderPodIdentitySchema(BaseModel):
-    """Input schema for AWSSecretReaderPodIdentity."""
-    pass
-
-
-class AWSSecretReaderPodIdentity(BaseTool):
-    """
-    AWSSecretReaderPodIdentity - Reads a AWS Secret using Pod Identity
-    and returns the full key-value dict.
-    """
-    name: str = "AWS Secret Reader with Pod Identity"
-    description: str = "Reads a fixed AWS Secret (set in code) using Pod Identity, and returns all key-value pairs as a dict."
-    args_schema: Type[BaseModel] = AWSSecretReaderPodIdentitySchema
-    # Review every line tagged "SETUP-REQUIRED:" below before deploying this tool to a new environment or client.
-    # SETUP-REQUIRED: must match the secret name created in your AWS Secrets Manager
-    SECRET_NAME: str = "<name-of-secret-in-aws-secrets-manager>"
-
-    def _run(self) -> Dict[str, Any]:
-        try:
-            # SETUP-REQUIRED: AWS region where that secret lives
-            client = boto3.client('secretsmanager', region_name='us-east-1')
-            get_secret_value_response = client.get_secret_value(SecretId=self.SECRET_NAME)
-            secret_string = get_secret_value_response.get('SecretString', '{}')
-            secret_dict = json.loads(secret_string)
-
-            if not isinstance(secret_dict, dict):
-                raise ValueError(f"Secret value is not a JSON object: {secret_dict}")
-
-            return secret_dict
-
-        except ClientError as e:
-            raise RuntimeError(f"Error retrieving secret: {str(e)}")
-        except Exception as ex:
-            raise RuntimeError(f"Unexpected error: {str(ex)}")
-
-
-reader = AWSSecretReaderPodIdentity()
-secrets = reader._run()
-# Secret retrieved from AWS Secrets Manager
-connection_string = secrets.get("azure_connection_string")
+# Secret retrieved via AVASecret
+connection_string = None
 # SETUP-REQUIRED: set to your organization's Azure Blob Storage container name
 container_name = "<your-azure-container-name>"
 
@@ -194,4 +155,10 @@ class AzureBlobReaderTool(BaseTool):
         """
         Run method required by CrewAI BaseTool.
         """
+        global connection_string
+        try:
+            connection_string = AVASecret.getValue("azure_connection_string")
+        except Exception as e:
+            return f"Error retrieving secrets from AVASecret: {str(e)}"
+
         return self.read_files_in_folder(folder_name, file_names)

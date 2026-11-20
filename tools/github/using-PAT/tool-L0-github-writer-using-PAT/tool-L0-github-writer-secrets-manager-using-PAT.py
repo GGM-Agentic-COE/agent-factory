@@ -15,57 +15,7 @@ from pydantic import BaseModel, Field
 from crewai.tools import BaseTool
 
 
-import json
-import boto3
-from botocore.exceptions import ClientError
-from typing import Dict
-
-
-class AWSSecretReaderPodIdentitySchema(BaseModel):
-    """Input schema for AWSSecretReaderPodIdentity. """
-    pass
-
-
-class AWSSecretReaderPodIdentity(BaseTool):
-    """
-    AWSSecretReaderPodIdentity - Reads a AWS Secret using Pod Identity
-    and returns the full key-value dict.
-    """
-    name: str = "AWS Secret Reader with Pod Identity"
-    description: str = "Reads a fixed AWS Secret (set in code) using Pod Identity, and returns all key-value pairs as a dict."
-    args_schema: Type[BaseModel] = AWSSecretReaderPodIdentitySchema
-
-    # Review every line tagged "SETUP-REQUIRED:" below before deploying this tool to a new environment or client.
-    # SETUP-REQUIRED: must match the secret name created in your AWS Secrets Manager
-    SECRET_NAME: str = "<name-of-secret-in-aws-secrets-manager>"
-
-
-    def _run(self) -> Dict[str, Any]:
-        try:
-
-            # SETUP-REQUIRED: AWS region where that secret lives (us-east-1 or us-east-2 depending on deployment)
-
-            client = boto3.client('secretsmanager', region_name='us-east-1')
-            get_secret_value_response = client.get_secret_value(SecretId=self.SECRET_NAME)
-            secret_string = get_secret_value_response.get('SecretString', '{}')
-            secret_dict = json.loads(secret_string)
-
-            if not isinstance(secret_dict, dict):
-                raise ValueError(f"Secret value is not a JSON object: {secret_dict}")
-
-            return secret_dict
-
-        except ClientError as e:
-            raise RuntimeError(f"Error retrieving secret: {str(e)}")
-        except Exception as ex:
-            raise RuntimeError(f"Unexpected error: {str(ex)}")
-
-
-reader = AWSSecretReaderPodIdentity()
-secrets = reader._run()
-
-# Secret retrieved from AWS Secrets Manager
-github_token = secrets.get("github_token")
+import AVASecret
 
 # SETUP-REQUIRED: set to your GitHub organization or username
 repo_owner = "<your-github-org>"
@@ -88,6 +38,12 @@ class GithubCommitterTool(BaseTool):
     args_schema: Type[BaseModel] = GithubCommitSchema
 
     def _run(self, files: List[dict], repo_name: str, new_branch: str, source_branch: str = "main") -> Any:
+        # Secret retrieved via AVASecret
+        try:
+            github_token = AVASecret.getValue("github_token")
+        except Exception as e:
+            return {"status": "failure", "message": f"Error retrieving secrets from AVASecret: {str(e)}"}
+
         try:
 
             headers = {
