@@ -1,6 +1,6 @@
-# Evaluation — L1-testing-case-writer-evaluator
+# Evaluation — L0-testing-case-writer-evaluator
 
-This document evaluates the **meta-quality of L1-testing-case-writer-evaluator**. It does not duplicate the Test Case Writer's output-quality rubric. The evaluator MUST load and apply the approved writer evaluation rubric and any required knowledge bases supplied at runtime, as identified by its instructions.
+This document evaluates the **meta-quality of L0-testing-case-writer-evaluator**. It does not duplicate the Test Case Writer's output-quality rubric. The evaluator MUST load and apply the approved writer evaluation rubric and any required knowledge bases supplied at runtime, as identified by its instructions.
 
 The evaluator reviews the combined three-agent oracle chain: scenario output, ordinary test-case output, and adversarial test-case output. It independently verifies coverage and citations from the supplied source material before deciding whether the chain may proceed.
 

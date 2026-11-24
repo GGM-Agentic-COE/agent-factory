@@ -15,8 +15,8 @@ GOAL:
     security, nfr, compliance) appear only as negative test cases derived from documented sources.
   - Every compliance-tagged AC is covered.
   - Every case has exactly one test_representation decided by this agent under KB §12.3.
-  - test-case.json holds every canonical case; test-case.feature holds only cucumber cases;
-    both follow canonical order.
+  - test-case.json holds every canonical case; each <FeatureID>-test-cases.feature holds only
+    the cucumber cases for that Feature; all follow canonical order.
   - Regression testing is out of scope.
 
 
@@ -52,10 +52,12 @@ INSTRUCTIONS:
 
 
   1. Tool Calls:
-     - extract the Jira Scenario using the attached Jira reader tool with
-       { issue_key = {{test_scenario_issue_key_string_true}} }
-     - extract the Jira Feature using the attached Jira reader tool with
-       { issue_key = {{feature_issue_key_string_true}} }
+     - extract all Jira Features using the attached Jira reader tool with
+       { issue_key = {{feature_issue_keys_list_true}} }
+       The tool accepts a list of keys; fetch all supplied Feature keys in one call.
+     - extract all Jira Test Scenarios using the attached Jira reader tool with
+       { issue_key = {{test_scenario_issue_keys_list_true}} }
+       The tool accepts a list of keys; fetch all supplied Scenario keys in one call.
      - extract the Test Strategy using the attached Confluence reader tool with
        { page_id = {{test_strategy_confluence_page_id_string_true}} }
      - extract the Test Case Best Practices using the attached GitHub reader tool with
@@ -66,7 +68,20 @@ INSTRUCTIONS:
        failed; never substitute a local, cached, inferred or guessed copy.
 
 
-  2. Extraction & Section Detection:
+  2. Scenario-to-Feature Mapping:
+  - After fetching, build an in-memory Feature map keyed by Jira Feature key.
+  - For each fetched Scenario, locate its source-<FeatureID> label:
+    - No source-<FeatureID> label found → block that Scenario; add to blocked_or_omitted
+      with reason = "no_source_label"; continue processing remaining Scenarios.
+    - source-<FeatureID> key does not match any key in the fetched Feature map → block that
+      Scenario; add to blocked_or_omitted with reason = "source_feature_not_supplied";
+      continue processing remaining Scenarios.
+    - Match found → bind that Scenario to its Feature for all downstream processing.
+  - Never infer a Scenario–Feature relationship from the Scenario's parent field, Jira
+    hierarchy, or any other source.
+
+
+  3. Extraction & Section Detection:
   - Preserve exactly as retrieved: issue keys, AC IDs, AC text, pre_condition, test_data,
     navigable_path, requirement references, rules, roles, constraints, dependencies,
     integrations, risks, security conditions, compliance tags.
@@ -76,14 +91,14 @@ INSTRUCTIONS:
     test_strategy, best_practices_kb. Allowed statuses: retrieved | supplied | failed.
 
 
-  3. Validate:
+  4. Validate:
   - Any required source (Scenario, Feature, Test Strategy, Best Practices KB) not retrievable
     after any required retry → return INSUFFICIENT_CONTEXT: status = "failed", generate and
     store nothing, begin execution_summary with INSUFFICIENT_CONTEXT.
-  - Scenario usable only when it contains at least one AC with ID and text, or a description
-    stating testable behaviour; otherwise return INSUFFICIENT_CONTEXT.
-  - Never substitute the Scenario parent field for {{feature_issue_key_string_true}}.
-    Scenario parent ≠ supplied Feature key → set coverage_summary.parent_mismatch = true; do not halt.
+  - All fetched Scenarios blocked (no_source_label or source_feature_not_supplied) → return
+    INSUFFICIENT_CONTEXT: no processable Scenario input remains.
+  - Individual Scenario usable only when it contains at least one AC with ID and text, or a
+    description stating testable behaviour; otherwise block it and add to blocked_or_omitted.
 
 
   <workflow_execution_id>: GENERATE A NEW wf-<uuid> for phase 1 agents. This is the first step
@@ -257,21 +272,25 @@ INSTRUCTIONS:
   or reinterpret it.
 
 
-  14. Render test-case.feature only from canonical cases with test_representation = "cucumber",
-  in canonical order (see ARTIFACT TEMPLATE). Each Gherkin scenario states the same
-  preconditions, action, data and expected result as its JSON case. No cucumber cases → write
-  the Feature line only and report it in execution_summary.
+  14. Render one <FeatureID>-test-cases.feature per Jira Feature using only canonical cases
+  for that Feature with test_representation = "cucumber", in canonical order (see ARTIFACT
+  TEMPLATE). Each Gherkin scenario states the same preconditions, action, data and expected
+  result as its JSON case. A Feature with no cucumber cases → write its Feature line only and
+  report it in execution_summary. Never mix cases from different Jira Features in the same
+  .feature file.
 
 
-  15. Write both artifacts to S3 only after rules 1–14 complete, using the attached S3 (ie blob
+  15. Write all artifacts to S3 only after rules 1–14 complete, using the attached S3 (ie blob
   storage) writer tool with parameters:
      { folder_name = "<workflow_execution_id>",
        file_name = "test-case.json",
        content = <full generated content of test-case.json> }
-     { folder_name = <workflow_execution_id>,
-       file_name = 'test-case.feature',
-       content = <full generated content of test-case.feature> }
-  - Multi-file writer → one call; otherwise test-case.json then test-case.feature, same folder_name.
+     For each Jira Feature (ascending Feature key order), one additional call:
+     { folder_name = "<workflow_execution_id>",
+       file_name = "<FeatureID>-test-cases.feature",
+       content = <full generated content of that Feature's .feature file> }
+  - Write test-case.json first, then each <FeatureID>-test-cases.feature in ascending Feature
+    key order. Multi-file writer → one call if supported; otherwise sequential, same folder_name.
   - Downstream agents read these exact file names from the same folder_name; never rename them.
   - Preserve the exact confirmed storage information returned in artifacts[].storage.
   - Write failure → retry once with the same folder_name, file_name and exact content. Retry
@@ -286,7 +305,9 @@ INSTRUCTIONS:
   === ARTIFACT TEMPLATE (test-case.feature) ===
 
 
-  Feature: <retrieved Jira Feature issue summary>        # exactly one Feature
+  File name: <FeatureID>-test-cases.feature            # one file per Jira Feature
+
+  Feature: <retrieved Jira Feature issue summary>        # exactly one Feature per file
 
     Rule: <rule_reference>                              # one per rule_reference group with ≥ 1 cucumber case, canonical order
       Source (<IssueId or document> <rule_reference>): <exact source text>
@@ -299,7 +320,9 @@ INSTRUCTIONS:
         # Cleanup: <text>                               # one per cleanup entry
 
   Template filling notes:
+  - Each .feature file contains only the cucumber cases for its named Jira Feature.
   - Only cucumber cases appear; manual and review cases never appear.
+  - Cases from different Jira Features must never appear in the same .feature file.
   - The Source line appears once under each Rule and never begins with a Gherkin keyword.
   - Tags in the order shown; Scenario key, AC ID, NFR ID and IssueId only when applicable.
     Normalise source-derived tags minimally for valid Gherkin; never alter semantic identity.
@@ -314,9 +337,11 @@ INSTRUCTIONS:
   - Every case cites retrieved content; every source_phrase exists verbatim in a source.
   - Product behaviour is grounded only in the Jira Scenario and Jira Feature.
   - test_representation is decided only by this agent, once per case, under rule 11.
-  - test-case.json holds all canonical cases; test-case.feature holds only cucumber cases;
-    both in canonical order, both derived from the same canonical collection.
-  - artifacts contains exactly two entries in order: test-case.feature, then test-case.json.
+  - test-case.json holds all canonical cases; each <FeatureID>-test-cases.feature holds only
+    the cucumber cases for that Feature; all in canonical order, all derived from the same
+    canonical collection.
+  - artifacts contains one entry for test-case.json followed by one entry per Feature for its
+    <FeatureID>-test-cases.feature, in ascending Feature key order.
   - Confirmed success → storage { provider: s3, location: <exact returned location> };
     failed or unattempted write → storage = null.
   - workflow_execution_id generated exactly once; execution_id once per execution.
@@ -363,8 +388,9 @@ INSTRUCTIONS:
      JSON case; Feature tags and Rule groups match the canonical collection.
   9. test-case.json matches the canonical data exactly; AC coverage counts match.
   10. Scenario IDs, AC IDs, NFR IDs and Issue IDs match their sources.
-  11. artifacts holds exactly test-case.feature and test-case.json, both under folder_name =
-      generated workflow_execution_id, written only after validation, reported stored only when confirmed.
+  11. artifacts holds test-case.json and one <FeatureID>-test-cases.feature per Feature, all
+      under folder_name = generated workflow_execution_id, written only after validation,
+      reported stored only when confirmed.
   12. No PRD dependency; product behaviour grounded only in Jira Scenario and Feature.
 
   Fix silently before delivery. Do NOT print reflection logs.
@@ -391,8 +417,8 @@ EXPECTED OUTPUT:
     "status": "success | partial | failed",
     "input_summary": {
       "source": "workflow",
-      "scenario_issue_key": "<key>",
-      "feature_issue_key": "<key>",
+      "scenario_issue_keys": ["<key>", "<key>"],
+      "feature_issue_keys": ["<key>", "<key>"],
       "test_strategy_page_id": "<id>",
       "best_practices_source": "<repo>/<branch>/<folder>"
     },
@@ -422,7 +448,7 @@ EXPECTED OUTPUT:
           "cucumber_case_count": 0,
           "review_representation_count": 0,
           "compliance_clause_count": 0,
-          "parent_mismatch": false,
+
           "source_conflicts": 0,
           "coverage_complete": true,
           "acceptance_criteria_coverage": [],
@@ -434,19 +460,19 @@ EXPECTED OUTPUT:
         {
           "id": "artifact-<uuid>",
           "type": "test_specification",
-          "name": "test-case.feature",
-          "format": "gherkin",
+          "name": "test-case.json",
+          "format": "json",
           "storage": { "provider": "s3", "location": "<returned location>" },
-          "description": "Gherkin specification of cucumber cases only",
+          "description": "Canonical structured specification of all cases with test_representation",
           "produced_by": "L0-testing-case-writer"
         },
         {
           "id": "artifact-<uuid>",
           "type": "test_specification",
-          "name": "test-case.json",
-          "format": "json",
+          "name": "<FeatureID>-test-cases.feature",
+          "format": "gherkin",
           "storage": { "provider": "s3", "location": "<returned location>" },
-          "description": "Canonical structured specification of all cases with test_representation",
+          "description": "Gherkin specification of cucumber cases for <FeatureID>; one entry per Feature in ascending key order",
           "produced_by": "L0-testing-case-writer"
         }
       ],
