@@ -14,6 +14,7 @@ Success criteria:
 
 - Every scenario is independently verified against the re-fetched Epic, valid Features, Feature ACs, and Test Strategy.
 - Every Feature AC with an observable outcome is covered by at least one valid scenario.
+- Every scenario carries all six required labels: the trace-ID fingerprint, `source-<SourceIssueId>`, exactly one level label (`level-feature`, `level-task`, or `level-e2e`), the hyphenated testing-level layer label, the writer agent label, and `ai-generated`.
 - Only `approved` or `fixed_and_approved` scenarios are published, with no duplicate Jira issues.
 - Every created `jira_key` is the literal value returned by the Jira Tasks Uploader tool.
 
@@ -283,6 +284,8 @@ Unique AC key:
 
 Evaluate gates G1–G8 in order using the full pass/fail criteria, scoring model, final-decision rules, and Mechanical Fix Policy defined in `evaluation.md` (`kb-L0-test-scenario-eval`).
 
+The label checks are part of G8. For every scenario, verify the label rules as specified in `evaluation.md`: the trace-ID fingerprint is present; the `source-<KEY>` label is present and its key matches the key at the start of the trace ID; exactly one level label is present and is one of `level-feature`, `level-task`, or `level-e2e`; `level-api` and `level-nfr` are reserved and must be flagged as failures if they appear. Independently re-fetch the source issue from Jira and confirm its issue type matches the level label (Feature → `level-feature`, Task → `level-task`, Epic → `level-e2e`). For any scenario carrying `level-e2e`, additionally verify the checks specified in `evaluation.md` for end-to-end scope, multi-Feature coverage, business-result grounding, absence of step duplication from Feature scenarios, and the per-Epic cap.
+
 ---
 
 # FIX
@@ -298,6 +301,14 @@ Evaluate gates G1–G8 in order using the full pass/fail criteria, scoring model
 - Never invent a missing Feature or AC.
 - Never invent behaviour not present in the Feature AC.
 - Never convert Epic-level information into new expected behaviour.
+- Permitted label mechanical fixes:
+  - Missing `source-<KEY>` label: may be added only when the correct key can be taken directly and unambiguously from the trace-ID fingerprint already present in the scenario.
+  - Missing level label: may be added only when the correct value can be taken directly and unambiguously from the Jira issue type of the re-fetched source issue.
+- Label failures that must NOT be mechanically fixed and must `escalate_to_hitl`:
+  - Missing trace-ID fingerprint.
+  - Level label that conflicts with the re-fetched source issue type.
+  - `level-api` or `level-nfr` present in the label list.
+  - Multiple level labels present.
 - Anything outside the Mechanical Fix Policy -> `escalate_to_hitl`.
 
 ---
@@ -378,7 +389,9 @@ Each issue is copied from the evaluated scenario:
     "ai-generated",
     "L0-test-scenario-writer",
     "L2-Service",
-    "E2ESFI-27-AC-F-01.7-01-TS-001"
+    "E2ESFI-27-AC-F-01.7-01-TS-001",
+    "source-E2ESFI-27",
+    "level-feature"
   ]
 }
 ```
@@ -486,6 +499,7 @@ Never modify, transition, or delete:
 - Fabricated Feature, SourceIssueId, AC, behaviour, dependency, or level is always a fail, never a warning.
 - The Feature AC always wins over Epic context, Feature description, and writer wording.
 - Epic Acceptance Criteria do not independently require Test Scenarios.
+- Do NOT fabricate or guess `source-<KEY>` or level label values; derive them only from the trace-ID fingerprint or the re-fetched Jira issue type.
 - Do NOT duplicate KB narrative text.
 - Do NOT generate, expand, or add scenarios or positive/negative path variations.
 - Do NOT rewrite, weaken, extend, or reinterpret a Feature AC.

@@ -176,11 +176,33 @@ Never infer Integration solely from Epic membership, shared pillar, conceptual s
 | Issue type exact | `issueType` is exactly `Task` | Missing `issueType` or any other value |
 | SourceIssueId exact | `SourceIssueId` is the real Jira key of the source Feature | Epic key, logical Feature ID, `parentKey`, or unrelated key used |
 | Summary format | Summary starts with `[TS-XXX] Verify that` using its own `test_scenario_id` | Missing or mismatched prefix |
-| Label exact | `label = ["ai-generated", "L0-test-scenario-writer", level label, fingerprint]` and `label[3] = [SourceIssueId]-[acceptance_criteria_id]-[test_scenario_id]` | Missing, reordered, or mismatched label |
+| Label exact | `label` contains exactly `ai-generated`, the agent label (`L0-test-scenario-writer` or `L0-e2e-scenario-writer`), the hyphenated layer label (e.g. `L2-Service`), and the trace-ID fingerprint `[SourceIssueId]-[acceptance_criteria_id]-[test_scenario_id]` | Missing, reordered, or mismatched label; `source-*` or level labels evaluated in G9 |
 | TS-ID ordering | `TS-001...` sequential per Feature; Features ascending by Jira key; ACs source order; behaviours AC order | Gaps, duplicates, cross-Feature numbering, or nondeterministic ordering |
 | Blob file valid | `test_scenarios.json` parses as JSON and contains only scenario objects | Malformed/unparseable file or unrelated content |
 
 **Evaluation method:** Schema-check every scenario. Verify `issueType = Task`, Feature `SourceIssueId`, absence of `parentKey`, deterministic ordering, labels, and fingerprints.
+
+---
+
+#### Gate 9 — Scenario Labels
+
+| Criterion | Pass | Fail |
+|---|---|---|
+| Trace-ID fingerprint present | `label` contains exactly one entry matching `[SourceIssueId]-[acceptance_criteria_id]-[test_scenario_id]` | Fingerprint absent, malformed, or duplicated |
+| Source label present | `label` contains exactly one `source-<KEY>` entry | `source-*` label absent or more than one present |
+| Source key consistent | The `<KEY>` in the `source-*` label is identical to the Jira key at the start of the trace-ID fingerprint | Key in `source-*` differs from the leading key in the fingerprint |
+| Source issue exists | The key in `source-*` resolves to a real Jira issue when re-fetched | Key does not resolve or Jira returns no issue |
+| Level label present | `label` contains exactly one level label | No level label present, or more than one level label present |
+| Level label allowed | The level label is one of `level-feature`, `level-task`, `level-e2e` | `level-api`, `level-nfr`, or any other value used as a level label |
+| Level matches source issue type | `level-feature` ↔ source issue type is Feature; `level-task` ↔ source issue type is Task; `level-e2e` ↔ source issue type is Epic | Level label does not match the re-fetched source issue type |
+| E2E multi-Feature coverage | `level-e2e` scenarios only: the scenario demonstrably covers at least two distinct valid Features of the Epic | Fewer than two Features covered |
+| E2E business-result end | `level-e2e` scenarios only: the Expected Result is a complete business outcome, not an intermediate system state | Expected Result is a partial or technical state |
+| E2E no step duplication | `level-e2e` scenarios only: the Navigable Path and Expected Result are not copied or trivially paraphrased from an existing Feature-level scenario | Steps or result duplicated from a Feature scenario |
+| E2E per-Epic cap | `level-e2e` scenarios only: no Epic has more than five `level-e2e` scenarios in the evaluated set | More than five `level-e2e` scenarios present for a single Epic |
+
+**Evaluation method:** For every scenario, extract the `label` array from the Blob file. Locate the trace-ID fingerprint, the `source-*` entry, and the level label. Re-fetch the source issue from Jira using the key from the `source-*` label and record its issue type. Compare the level label against the issue type mapping. For `level-e2e` scenarios, additionally cross-check the scenario's Navigable Path and SourceIssueId against the valid Feature inventory and existing Feature-level scenarios.
+
+The trace-ID fingerprint must already be present before any source or level label check is performed. Checks for source key consistency, source existence, and level-type match are always derived from freshly fetched Jira data, never from the writer's metadata.
 
 ---
 
@@ -205,6 +227,7 @@ Never infer Integration solely from Epic membership, shared pillar, conceptual s
 | testing_level_accuracy | G6 | 1.0 |
 | abstraction_and_data_safety | G7 | 1.0 |
 | format_and_determinism | G8 | 1.0 |
+| scenario_labels | G9 | 1.0 |
 
 #### Overall Score Computation
 
@@ -217,19 +240,20 @@ overall_score = (
     scope_compliance × 1.5 +
     testing_level_accuracy × 1.0 +
     abstraction_and_data_safety × 1.0 +
-    format_and_determinism × 1.0
-) / 11.0 × 10.0
+    format_and_determinism × 1.0 +
+    scenario_labels × 1.0
+) / 12.0 × 10.0
 ```
 
 Weights reflect downstream impact:
 
 - **2.0x** — Traceability and AC fidelity. Fabricated or distorted behaviour becomes false truth for downstream Test Cases.
 - **1.5x** — Coverage and scope. Missing AC behaviour or scenario expansion corrupts Test Case Generator input.
-- **1.0x** — Input verification, testing level, abstraction/data safety, and format.
+- **1.0x** — Input verification, testing level, abstraction/data safety, format, and scenario labels.
 
 #### Pass/Fail Threshold
 
-- **Pass:** `overall_score >= 7.0` AND zero fabrication findings in G2/G4 AND zero testable Feature ACs left uncovered in G3 AND zero PII/credentials in G7.
+- **Pass:** `overall_score >= 7.0` AND zero fabrication findings in G2/G4 AND zero testable Feature ACs left uncovered in G3 AND zero PII/credentials in G7 AND zero blocking label failures in G9.
 - **Fail:** Any of the above conditions is not met.
 
 ---
@@ -279,3 +303,13 @@ The evaluator MUST escalate the following:
 - Conflict between Epic context, Feature description, and Feature AC that affects required behaviour.
 - Duplicate `(SourceIssueId, AC ID)` in the source Jira Feature inventory.
 - Removing an out-of-scope or duplicate scenario would leave its Feature AC uncovered.
+- Missing trace-ID fingerprint in `label` (G9). The fingerprint is a prerequisite; without it, source and level checks cannot proceed.
+- Level label that conflicts with the re-fetched source issue type (G9).
+- `level-api` or `level-nfr` present in `label` (G9).
+- Multiple level labels present in `label` (G9).
+- `level-e2e` scenario that fails any of the multi-Feature, business-result, step-duplication, or per-Epic-cap checks (G9).
+
+The evaluator MAY fix the following label issues WITHOUT escalation (G9):
+
+- **Missing `source-<KEY>` label:** Add it only when the correct key can be taken directly and unambiguously from the trace-ID fingerprint already present in the scenario's `label`. The added entry is `source-<KEY>` where `<KEY>` is the leading Jira key in the fingerprint.
+- **Missing level label:** Add it only when the correct value can be taken directly and unambiguously from the Jira issue type of the re-fetched source issue (`level-feature` for Feature, `level-task` for Task, `level-e2e` for Epic). If the source issue type is ambiguous or unavailable, escalate.

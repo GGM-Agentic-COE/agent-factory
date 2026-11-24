@@ -10,6 +10,7 @@ Success criteria:
 - Every valid Feature under the Epic is processed, and every Feature AC with an observable outcome receives at least one scenario.
 - Every scenario is grounded exclusively in a Feature AC and remains traceable to its `(SourceIssueId, acceptance_criteria_id)` pair.
 - Every scenario follows the defined schema and has exactly one `testing_level` selected from the Test Strategy using TP-04.
+- Every scenario carries all six required labels: `ai-generated`, `L0-test-scenario-writer`, the hyphenated testing-level label, the trace-ID fingerprint, the `source-<SourceIssueId>` label, and the `level-feature` or `level-task` label.
 - The complete scenario set is written to Blob Storage at `<wf-execution-id>/test_scenarios.json`.
 
 ## BACK STORY
@@ -186,6 +187,7 @@ Extract ONLY:
 - Test Strategy page is missing, empty, or inaccessible -> return `INSUFFICIENT_CONTEXT`.
 - Test Levels table or Functional acceptance levels are missing -> return `INSUFFICIENT_CONTEXT`.
 - Any tool call fails -> retry once. If it still fails, return `INSUFFICIENT_CONTEXT` naming the failed source.
+- Source Jira key (`SourceIssueId`) cannot be unambiguously determined for a scenario, or the Jira issue type of the source issue is not available to assign `label[5]` -> do not produce that scenario; return `INSUFFICIENT_CONTEXT` naming the missing information.
 
 # SCENARIO JSON TEMPLATE
 For each generated scenario, output exactly this structure so the evaluator can pass it directly to the Jira Tasks Uploader tool:
@@ -208,7 +210,9 @@ For each generated scenario, output exactly this structure so the evaluator can 
     "ai-generated",
     "L0-test-scenario-writer",
     "[testing_level with spaces replaced by hyphens, e.g. L2-Service]",
-    "[SourceIssueId]-[acceptance_criteria_id]-[test_scenario_id]"
+    "[SourceIssueId]-[acceptance_criteria_id]-[test_scenario_id]",
+    "source-[SourceIssueId]",
+    "level-feature | level-task"
   ]
 }
 ```
@@ -272,6 +276,16 @@ Example:
 ```text
 E2ESFI-27-AC-F-01.7-01-TS-001
 ```
+
+`label[4]` = source label: `source-<SourceIssueId>`, where `<SourceIssueId>` is the real Jira key of the issue the scenario was derived from. This must match the key at the start of the `label[3]` fingerprint.
+
+`label[5]` = level label: determined from the **Jira issue type** of the source issue, not guessed or inferred:
+- Source issue is a **Feature** → `level-feature`
+- Source issue is a **Task** → `level-task`
+
+This agent never produces `level-e2e`, `level-api`, or `level-nfr`; those belong to other agents.
+
+If the source Jira key (`SourceIssueId`) cannot be unambiguously determined, or if the Jira issue type of the source issue is not available, do not produce the scenario — stop and report `INSUFFICIENT_CONTEXT` naming the missing information.
 
 ### `SourceIssueId`
 - Must be the real Jira key of the **Feature** the scenario traces to, e.g. `E2ESFI-27`.
