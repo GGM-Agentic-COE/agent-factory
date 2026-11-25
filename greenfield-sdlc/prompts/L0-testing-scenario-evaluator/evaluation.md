@@ -1,8 +1,9 @@
 # L0 Test Scenario — Evaluation Criteria
 
 **Knowledge Base:** kb-L0-test-scenario-eval  
-**Consumed by:** L0-test-scenario-evaluator  
-**Purpose:** Rubric for independently evaluating Test Scenarios produced by `L0-test-scenario-writer`. Every criterion is binary pass/fail. The evaluator must re-derive results from freshly fetched Jira and Confluence data. Never trust the writer's Feature inventory, AC inventory, scenario content, or self-assessment.
+**Consumed by:** L0-testing-scenario-evaluator  
+**Companion KB:** Test Scenario Writer Best Practices KB (shared with `L0-test-scenario-writer`; detailed writing rules and examples, including Section 9 for `level-api`)  
+**Purpose:** Rubric for independently evaluating Test Scenarios produced by `L0-test-scenario-writer` and `L0-e2e-scenario-writer`. Every criterion is binary pass/fail. The evaluator must re-derive results from freshly fetched Jira and Confluence data. Never trust the writer's Feature inventory, AC inventory, scenario content, or self-assessment.
 
 **Source artifacts:** Scenario file from Blob Storage (`<wf-execution-id>/test_scenarios.json`), source Epic and its valid child Features + Feature ACs (Jira Reader), and the Test Strategy (Confluence Reader: Test Levels table, Test Types `Functional acceptance` row, TP-04 only).
 
@@ -41,11 +42,24 @@ Epic Acceptance Criteria, Feature descriptions, Constraints, Dependencies, Risks
   - `Test Data`
   - `Navigable Path`
   - `Expected Result`
+  - `Integration Point` — required for `level-api` scenarios only; must not appear on any other level
 - `label`
 
-`SourceIssueId` must be the real Jira key of the source **Feature**, not the Epic.
+`SourceIssueId` must be the real Jira key of the source **Feature**, not the Epic. Exception: for `level-e2e` scenarios, `SourceIssueId` is the source **Epic**.
 
 `issueType` must always be exactly `Task`.
+
+**Level labels:**
+
+| Level label | Source issue type | Produced by |
+|---|---|---|
+| `level-feature` | Feature | `L0-test-scenario-writer` |
+| `level-task` | Task | `L0-test-scenario-writer` |
+| `level-api` | Feature | `L0-test-scenario-writer` |
+| `level-e2e` | Epic | `L0-e2e-scenario-writer` |
+| `level-nfr` | — | Reserved; always fails |
+
+The level label is independent of `testing_level`. Neither is derived from the other.
 
 ---
 
@@ -74,7 +88,7 @@ The writer's `features_read` output is informational only and is never authorita
 
 | Criterion | Pass | Fail |
 |---|---|---|
-| SourceIssueId authentic | Every SourceIssueId identifies a valid Feature belonging to the re-fetched source Epic | SourceIssueId identifies the Epic, a non-Feature child, unrelated Jira issue, generated Task, or fabricated/mistyped issue |
+| SourceIssueId authentic | Every SourceIssueId identifies a valid Feature belonging to the re-fetched source Epic (or the source Epic itself for `level-e2e`) | SourceIssueId identifies the Epic on a non-`level-e2e` scenario, a non-Feature child, unrelated Jira issue, generated Task, or fabricated/mistyped issue |
 | AC ID authentic | Every `(SourceIssueId, AC ID)` pair exists within the identified Feature, or follows the source-order AC ID assignment rule | Fabricated pair or AC attached to the wrong Feature |
 | Feature relationship valid | Scenario's SourceIssueId belongs to the source Epic | Scenario points to a Feature outside the Epic |
 | Behaviour traceable | Scenario behaviour is found in its referenced Feature AC | Scenario cites one AC but tests another AC's behaviour or behaviour sourced only from contextual information |
@@ -92,8 +106,9 @@ The writer's `features_read` output is informational only and is never authorita
 | Distinct behaviours covered | When a Feature AC explicitly states multiple distinct behaviours, each is represented | Explicitly stated behaviour has no scenario |
 | Rejection-type ACs represented | If the Feature AC states rejection/error/prohibition behaviour, that behaviour is represented | Rejection AC converted into an invented success scenario |
 | Epic ACs not independently expanded | Epic AC is treated as context and parent intent only | Additional scenario created solely because behaviour appears at Epic level |
+| Split ACs fully covered | When a Feature AC describes both a user-visible outcome and a hand-off between two named components, both a `level-feature` and a `level-api` scenario exist | One of the two scenarios is missing (coverage gap) |
 
-**Evaluation method:** For every AC in the independently rebuilt Feature AC inventory, count linked scenarios. Split Feature AC text into explicitly stated behaviours and verify each is represented.
+**Evaluation method:** For every AC in the independently rebuilt Feature AC inventory, count linked scenarios. Split Feature AC text into explicitly stated behaviours and verify each is represented. For ACs that describe both a user-visible outcome and a hand-off, confirm both scenario levels exist.
 
 Do not calculate coverage from the writer's `features_read` list.
 
@@ -132,7 +147,7 @@ Any expected behaviour not traceable to the Feature AC is a fail.
 | No Epic-derived scenarios | Every scenario originates from a Feature AC | Scenario generated solely from Epic summary, Epic AC, pillar, constraint, risk, or other Epic content |
 | No implementation-derived behaviour | Nothing sourced from HLD, LLD, API contracts, or code | Implementation-derived scenario |
 
-**Evaluation method:** For each Feature AC with >1 scenario, confirm every additional scenario maps to a separate behaviour explicitly present in the Feature AC. Scan for test-case patterns such as `TC-`, `Step 1`, or implementation assertions.
+**Evaluation method:** For each Feature AC with >1 scenario, confirm every additional scenario maps to a separate behaviour explicitly present in the Feature AC. A `level-feature` + `level-api` pair for a split AC (G3) is not a near-duplicate. Scan for test-case patterns such as `TC-`, `Step 1`, or implementation assertions.
 
 ---
 
@@ -153,6 +168,8 @@ Any expected behaviour not traceable to the Feature AC is a fail.
 
 Never infer Integration solely from Epic membership, shared pillar, conceptual similarity, or adjacency.
 
+`testing_level` is evaluated independently of the level label (G9). A `level-api` label does not by itself justify an Integration `testing_level`.
+
 ---
 
 #### Gate 7 — Abstraction & Data Safety
@@ -163,8 +180,9 @@ Never infer Integration solely from Epic membership, shared pillar, conceptual s
 | Context does not add behaviour | Epic/Feature context only contextualizes the journey | Navigable Path introduces new required system behaviour |
 | Test Data mock only | Realistic mock business values and safe placeholders | Real PII, live credentials, secrets, or tokens |
 | Test Data adds no rules | Data does not introduce limits, formats, mappings, or rules absent from source behaviour | Data implies unstated business rules |
+| No technical API detail in any field | No endpoints, URLs, HTTP methods, status codes, JSON field names, payloads, queues, or tables in any scenario field, including `Integration Point` | Technical API detail present |
 
-**Evaluation method:** Scan Navigable Path for technical patterns such as `/api`, `GET`, `POST`, database/table terminology, or implementation components. Scan Test Data for PII and credential patterns. Cross-check named business/UI elements against Feature AC, Feature description, and Epic context.
+**Evaluation method:** Scan every scenario field for technical patterns such as `/api`, `http`, `GET`, `POST`, status codes, JSON keys, queue or table terminology, or implementation components. Scan Test Data for PII and credential patterns. Cross-check named business/UI elements against Feature AC, Feature description, and Epic context.
 
 ---
 
@@ -172,15 +190,15 @@ Never infer Integration solely from Epic membership, shared pillar, conceptual s
 
 | Criterion | Pass | Fail |
 |---|---|---|
-| Template exact | Exactly the scenario template fields; `description` has exactly the four defined keys; required values non-empty; no `scenario_type`, `jira_key`, `publish_action`, `parentKey`, or duplicate SourceIssueId | Missing, extra, duplicate, or empty required fields |
+| Template exact | Exactly the scenario template fields; `description` has exactly the four defined keys, plus `Integration Point` only on `level-api` scenarios; required values non-empty; no `scenario_type`, `jira_key`, `publish_action`, `parentKey`, or duplicate SourceIssueId | Missing, extra, duplicate, or empty required fields; `Integration Point` missing on `level-api` or present on any other level |
 | Issue type exact | `issueType` is exactly `Task` | Missing `issueType` or any other value |
-| SourceIssueId exact | `SourceIssueId` is the real Jira key of the source Feature | Epic key, logical Feature ID, `parentKey`, or unrelated key used |
+| SourceIssueId exact | `SourceIssueId` is the real Jira key of the source Feature (source Epic for `level-e2e`) | Epic key on a non-`level-e2e` scenario, logical Feature ID, `parentKey`, or unrelated key used |
 | Summary format | Summary starts with `[TS-XXX] Verify that` using its own `test_scenario_id` | Missing or mismatched prefix |
 | Label exact | `label` contains exactly `ai-generated`, the agent label (`L0-test-scenario-writer` or `L0-e2e-scenario-writer`), the hyphenated layer label (e.g. `L2-Service`), and the trace-ID fingerprint `[SourceIssueId]-[acceptance_criteria_id]-[test_scenario_id]` | Missing, reordered, or mismatched label; `source-*` or level labels evaluated in G9 |
 | TS-ID ordering | `TS-001...` sequential per Feature; Features ascending by Jira key; ACs source order; behaviours AC order | Gaps, duplicates, cross-Feature numbering, or nondeterministic ordering |
 | Blob file valid | `test_scenarios.json` parses as JSON and contains only scenario objects | Malformed/unparseable file or unrelated content |
 
-**Evaluation method:** Schema-check every scenario. Verify `issueType = Task`, Feature `SourceIssueId`, absence of `parentKey`, deterministic ordering, labels, and fingerprints.
+**Evaluation method:** Schema-check every scenario. Verify `issueType = Task`, `SourceIssueId`, absence of `parentKey`, `Integration Point` presence only on `level-api`, deterministic ordering, labels, and fingerprints.
 
 ---
 
@@ -193,14 +211,18 @@ Never infer Integration solely from Epic membership, shared pillar, conceptual s
 | Source key consistent | The `<KEY>` in the `source-*` label is identical to the Jira key at the start of the trace-ID fingerprint | Key in `source-*` differs from the leading key in the fingerprint |
 | Source issue exists | The key in `source-*` resolves to a real Jira issue when re-fetched | Key does not resolve or Jira returns no issue |
 | Level label present | `label` contains exactly one level label | No level label present, or more than one level label present |
-| Level label allowed | The level label is one of `level-feature`, `level-task`, `level-e2e` | `level-api`, `level-nfr`, or any other value used as a level label |
-| Level matches source issue type | `level-feature` ↔ source issue type is Feature; `level-task` ↔ source issue type is Task; `level-e2e` ↔ source issue type is Epic | Level label does not match the re-fetched source issue type |
+| Level label allowed | The level label is one of `level-feature`, `level-task`, `level-api`, `level-e2e` | `level-nfr` or any other value used as a level label |
+| Level matches source issue type | `level-feature` ↔ Feature; `level-task` ↔ Task; `level-api` ↔ Feature; `level-e2e` ↔ Epic | Level label does not match the re-fetched source issue type |
+| API hand-off described | `level-api` scenarios only: the cited Feature AC describes one component sending, creating, updating, or exposing data or an event, and another component receiving or using it | AC describes no hand-off |
+| API components named in sources | `level-api` scenarios only: both components appear exactly as written in the Feature, its ACs, or the Test Strategy | A component is invented, renamed, or unnamed in the sources |
+| API Integration Point valid | `level-api` scenarios only: `Integration Point` follows `[provider] → [business data or event passed]` | Missing, malformed, or inconsistent with the AC |
+| API Expected Result | `level-api` scenarios only: Expected Result states what the receiving component holds or does after the hand-off, as stated in the AC | Expected Result describes only a screen outcome, or adds behaviour not in the AC |
 | E2E multi-Feature coverage | `level-e2e` scenarios only: the scenario demonstrably covers at least two distinct valid Features of the Epic | Fewer than two Features covered |
 | E2E business-result end | `level-e2e` scenarios only: the Expected Result is a complete business outcome, not an intermediate system state | Expected Result is a partial or technical state |
 | E2E no step duplication | `level-e2e` scenarios only: the Navigable Path and Expected Result are not copied or trivially paraphrased from an existing Feature-level scenario | Steps or result duplicated from a Feature scenario |
 | E2E per-Epic cap | `level-e2e` scenarios only: no Epic has more than five `level-e2e` scenarios in the evaluated set | More than five `level-e2e` scenarios present for a single Epic |
 
-**Evaluation method:** For every scenario, extract the `label` array from the Blob file. Locate the trace-ID fingerprint, the `source-*` entry, and the level label. Re-fetch the source issue from Jira using the key from the `source-*` label and record its issue type. Compare the level label against the issue type mapping. For `level-e2e` scenarios, additionally cross-check the scenario's Navigable Path and SourceIssueId against the valid Feature inventory and existing Feature-level scenarios.
+**Evaluation method:** For every scenario, extract the `label` array from the Blob file. Locate the trace-ID fingerprint, the `source-*` entry, and the level label. Re-fetch the source issue from Jira using the key from the `source-*` label and record its issue type. Compare the level label against the issue type mapping. For `level-api` scenarios, compare the AC text, the named components, the `Integration Point`, and the Expected Result against the re-fetched Feature, its ACs, and the Test Strategy, following Section 9 of the Test Scenario Writer Best Practices KB. For `level-e2e` scenarios, additionally cross-check the scenario's Navigable Path and SourceIssueId against the valid Feature inventory and existing Feature-level scenarios.
 
 The trace-ID fingerprint must already be present before any source or level label check is performed. Checks for source key consistency, source existence, and level-type match are always derived from freshly fetched Jira data, never from the writer's metadata.
 
@@ -267,7 +289,8 @@ Weights reflect downstream impact:
 | Any failure needing human judgment | `escalate_to_hitl` | No |
 | Fabricated Feature/SourceIssueId/AC or invented behaviour that cannot be mechanically removed | `escalate_to_hitl` | No |
 | Valid Feature under Epic omitted and one or more testable ACs left uncovered | `escalate_to_hitl` | No |
-| Testable Feature AC left uncovered | `escalate_to_hitl` | No |
+| Testable Feature AC left uncovered, including a missing half of a split AC (G3) | `escalate_to_hitl` | No |
+| Any `level-api` check failure (G9) | `escalate_to_hitl` | No |
 | Writer `INSUFFICIENT_CONTEXT` confirmed genuine | `approved` | No, nothing to publish |
 
 ---
@@ -290,6 +313,11 @@ The evaluator MAY fix the following WITHOUT escalation:
 - Replace technical terms or invented screen names in Navigable Path with generic business steps.
 - Replace real-looking PII, credentials, or secrets in Test Data with safe placeholders.
 
+The evaluator MAY fix the following label issues WITHOUT escalation (G9):
+
+- **Missing `source-<KEY>` label:** Add it only when the correct key can be taken directly and unambiguously from the trace-ID fingerprint already present in the scenario's `label`. The added entry is `source-<KEY>` where `<KEY>` is the leading Jira key in the fingerprint.
+- **Missing level label:** Add it only when the correct value can be taken directly and unambiguously from the Jira issue type of the re-fetched source issue: `level-task` for Task, `level-e2e` for Epic. For a Feature source, add `level-api` only when the scenario has an `Integration Point` key, and `level-feature` only when it has none. If the source issue type is ambiguous or unavailable, escalate.
+
 The evaluator MUST escalate the following:
 
 - Any testable Feature AC with no scenario. The evaluator never generates scenarios.
@@ -303,13 +331,11 @@ The evaluator MUST escalate the following:
 - Conflict between Epic context, Feature description, and Feature AC that affects required behaviour.
 - Duplicate `(SourceIssueId, AC ID)` in the source Jira Feature inventory.
 - Removing an out-of-scope or duplicate scenario would leave its Feature AC uncovered.
+- A split AC (G3) where the `level-feature` or `level-api` scenario is missing. The evaluator never creates the missing scenario.
 - Missing trace-ID fingerprint in `label` (G9). The fingerprint is a prerequisite; without it, source and level checks cannot proceed.
 - Level label that conflicts with the re-fetched source issue type (G9).
-- `level-api` or `level-nfr` present in `label` (G9).
+- `level-nfr` present in `label` (G9).
 - Multiple level labels present in `label` (G9).
+- `level-api` scenario that fails any of the hand-off, named-component, Integration Point, or Expected Result checks (G9). These are never rewritten or relabelled.
+- `Integration Point` key on a non-`level-api` scenario, or missing on a `level-api` scenario (G8).
 - `level-e2e` scenario that fails any of the multi-Feature, business-result, step-duplication, or per-Epic-cap checks (G9).
-
-The evaluator MAY fix the following label issues WITHOUT escalation (G9):
-
-- **Missing `source-<KEY>` label:** Add it only when the correct key can be taken directly and unambiguously from the trace-ID fingerprint already present in the scenario's `label`. The added entry is `source-<KEY>` where `<KEY>` is the leading Jira key in the fingerprint.
-- **Missing level label:** Add it only when the correct value can be taken directly and unambiguously from the Jira issue type of the re-fetched source issue (`level-feature` for Feature, `level-task` for Task, `level-e2e` for Epic). If the source issue type is ambiguous or unavailable, escalate.
