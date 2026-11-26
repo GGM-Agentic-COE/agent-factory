@@ -61,6 +61,8 @@ All applicable gates must pass. If required input is unavailable, apply the eval
 - [ ] Reuse of a retired case ID is checked only when retired-ID information is supplied; unavailable retirement data is reported as a limitation, not guessed.
 - [ ] Orphan, missing, duplicate, or mismatched IDs are identified with concrete evidence.
 - [ ] Carried citations and source IDs remain exact; the evaluator does not normalize or replace them.
+- [ ] Every test case is checked for exactly one level tag (`@feature`, `@task`, or `@api`) matching its source scenario's `level-*` label, placed immediately after `@<positive|negative>`.
+- [ ] Every case from a `level-api` scenario is checked against the test case writer best-practices KB and evaluator contract: its representation must be `cucumber` (never `manual`), and it must satisfy `level-api` authoring checks (`Integration Point` component names preserved verbatim, sending/receiving `Given`/`When`/`Then`, business-level steps without technical details, and negative cases only for explicit AC hand-off rejection/failure).
 
 ### 7. Finding Quality
 
@@ -74,18 +76,20 @@ All applicable gates must pass. If required input is unavailable, apply the eval
 
 ### 8. Correction Boundaries
 
-- [ ] Only mechanical corrections are applied: coverage miscounts, policy-inconsistent tier labels, or a missing carried citation that can be resolved from supplied sources.
+- [ ] Only mechanical corrections are applied: coverage miscounts, policy-inconsistent tier labels, a missing carried citation that can be resolved from supplied sources, adding or correcting a level tag directly from the source scenario's `level-*` label, or moving a misplaced level tag.
 - [ ] Every correction maps to a genuine finding.
 - [ ] Every correction is supported by supplied sources and preserves correct content and identifiers.
 - [ ] The evaluator does not write a missing test case, rewrite a substantive assertion, or make a judgment-call tier change.
 - [ ] A compliance gap is never marked fixed by this evaluator; it is recorded under `not_fixed` and routed to the responsible adversarial writer.
+- [ ] Any other `level-api` failure (including non-Cucumber representation or `level-api` authoring failures) is never fixed by this evaluator and escalates to a human (`requires_stakeholder_input = true`).
 - [ ] Corrections do not silently resolve ambiguity or contradiction.
 - [ ] Any corrected output is rechecked for consistency and source support.
 
 ### 9. Verdict and Scores
 
-- [ ] The evaluator uses only the permitted decisions: `approved`, `fixed_and_approved`, or `rejected`.
+- [ ] The evaluator uses only the permitted decisions: `approved`, `fixed_and_approved`, `needs_clarification`, or `rejected`.
 - [ ] A blocking issue, including uncovered compliance adversarial coverage or a downgraded invariant, prevents approval.
+- [ ] Unresolved `level-api` failures that escalate to human review prevent approval and result in `needs_clarification` (or `rejected` when a blocking condition applies).
 - [ ] `fixed_and_approved` is used only when permitted mechanical fixes were applied and the final chain passes all blocking checks.
 - [ ] Scores are within the defined range and supported by findings/evidence.
 - [ ] Scores and verdict are consistent; unresolved blockers cannot coexist with an approval decision.
@@ -140,6 +144,7 @@ Before final delivery, silently verify:
 - [ ] Adversarial coverage was counted separately for each compliance-tagged clause.
 - [ ] Every citation was re-resolved and checked for claim support.
 - [ ] Invariant-derived cases were checked for state assertion and supported failure path.
+- [ ] Level tags were checked against source scenario `level-*` labels, and `level-api` cases were checked for `cucumber` representation and `level-api` rules (escalating non-tag `level-api` failures to human review without fixing).
 - [ ] Every finding has evidence, a valid criterion, stage, and existing affected ID.
 - [ ] No unsupported finding or correction was introduced.
 - [ ] Only permitted mechanical fixes were made; unfixed issues were routed.
