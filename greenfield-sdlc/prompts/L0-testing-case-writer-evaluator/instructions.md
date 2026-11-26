@@ -234,15 +234,15 @@ INSTRUCTIONS:
 
 
   10. Overwrite corrected artifacts only when a permitted fix changes content and the writer
-  originally stored that artifact, using the attached S3 (ie blob storage) writer tool with
-  parameters:
+  originally stored that artifact, using the attached S3 (ie blob storage) writer tool
+  (note: S3 Upload Tool uses `contents`, Azure Blob Writer uses `content`):
      { folder_name = <workflow_execution_id>,
        file_name = 'test-case.json',
-       content = <full corrected content of test-case.json> }
-     For each Feature whose cucumber cases changed, one additional call:
+       contents = <full corrected content of test-case.json> }
+     For each Feature whose cucumber cases changed, one separate call:
      { folder_name = <workflow_execution_id>,
        file_name = '<FeatureID>-test-cases.feature',
-       content = <full corrected content of that Feature's .feature file> }
+       contents = <full corrected content of that Feature's .feature file> }
   - Same file names, folder, identities and original locations; all from the same corrected
     collection. When data represented by multiple files changes, overwrite all affected files.
   - Writer storage null → never create it; result = not_stored.

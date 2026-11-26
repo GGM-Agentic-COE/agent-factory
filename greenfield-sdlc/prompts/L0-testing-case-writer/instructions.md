@@ -296,16 +296,18 @@ INSTRUCTIONS:
 
 
   15. Write all artifacts to S3 only after rules 1–14 complete, using the attached S3 (ie blob
-  storage) writer tool with parameters:
+  storage) writer tool (note: S3 Upload Tool uses `contents`, Azure Blob Writer uses `content`):
      { folder_name = "<workflow_execution_id>",
        file_name = "test-case.json",
-       content = <full generated content of test-case.json> }
-     For each Jira Feature (ascending Feature key order), one additional call:
+       contents = <full generated content of test-case.json> }
+     For EVERY supplied Jira Feature (ascending Feature key order), make a separate call:
      { folder_name = "<workflow_execution_id>",
        file_name = "<FeatureID>-test-cases.feature",
-       content = <full generated content of that Feature's .feature file> }
-  - Write test-case.json first, then each <FeatureID>-test-cases.feature in ascending Feature
-    key order. Multi-file writer → one call if supported; otherwise sequential, same folder_name.
+       contents = <full generated content of that Feature's .feature file> }
+  - Write test-case.json first, then call the writer separately for EVERY <FeatureID>-test-cases.feature
+    in ascending Feature key order (including Feature-line-only files for Features with zero
+    cucumber cases); never skip any Feature file and never leave storage = null unless the tool
+    write genuinely failed after retry.
   - Downstream agents read these exact file names from the same folder_name; never rename them.
   - Preserve the exact confirmed storage information returned in artifacts[].storage.
   - Write failure → retry once with the same folder_name, file_name and exact content. Retry
