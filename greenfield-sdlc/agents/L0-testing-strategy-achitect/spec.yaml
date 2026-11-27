@@ -1,0 +1,75 @@
+spec_version: '1.0'
+artifact_type: agent
+metadata:
+  name: L0-testing-strategy-architect
+  version: 1.0.0
+  layer: L0
+  phase: testing
+  owner: agentic-ai-coe
+  created: '2026-11-27'
+purpose:
+  description: Establish the Programme Increment (PI) architecture-level testing strategy
+    (test-strategy.md) from Target and Solution Architecture documents, optional PRD,
+    and a GitHub-hosted document template.
+  input: Target Architecture document and Solution Architecture document (Confluence), optional
+    PRD (Confluence), and Test Strategy document template (GitHub).
+  output: AgentOutput content.type=test_strategy referencing test-strategy.md in blob storage.
+  business_value: Ensures every testing threshold, tier, stub, environment, data rule,
+    and pack policy is grounded in the approved architecture without invented numbers
+    or roadmap coupling.
+prompt:
+  ref: prompts/L0-testing-strategy-architect/instructions.md
+  version: 1.0.0
+  description: Establish the PI architecture-level testing strategy from architecture
+    documents and GitHub template, writing test-strategy.md to blob storage.
+contract:
+  input_schema: '$ref: schemas/agent-input-contract-schema.json'
+  output_schema: '$ref: schemas/agent-output-schema.json'
+  input:
+    accepts_from_agents:
+    - any
+    accepts_direct_input: true
+    accepts_file_upload:
+      enabled: false
+      formats: []
+    required_parameters:
+      confluence-target-architecture-page-id:
+        type: string
+        description: Confluence page ID of the Target Architecture document.
+      confluence-solution-architecture-pageid:
+        type: string
+        description: Confluence page ID of the Solution Architecture document.
+      github-test-strategy-template-folder-location:
+        type: string
+        description: GitHub folder location of the Test Strategy document template.
+      github-test-strategy-template-repo:
+        type: string
+        description: GitHub repository containing the Test Strategy document template.
+      github-test-strategy-template-branch:
+        type: string
+        description: GitHub branch containing the Test Strategy document template.
+    optional_parameters:
+      confluence-prd-page_id:
+        type: string
+        description: Optional Confluence page ID of the PRD.
+  output:
+    type: test_strategy
+    artifact:
+      name: test-strategy.md
+      provider: blob_storage
+      folder_name: <workflow_execution_id>
+context:
+  knowledge_bases: []
+  tools:
+  - tool-L0-confluence-reader
+  - tool-L0-github-reader-using-PAT
+  - tool-L0-s3-writer
+quality:
+  evaluation_ref: evaluation.md
+  min_score: 7.0
+  hallucination_check: true
+  consistency_check: true
+versioning:
+  input_version: '1.0'
+  output_version: '1.0'
+  instruction_hash: sha256:59d2bfb7be26772608e902e2dd3442e63ca9da410eff63b4f4f55db5be5af222

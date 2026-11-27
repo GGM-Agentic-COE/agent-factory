@@ -1,0 +1,95 @@
+spec_version: '1.0'
+artifact_type: agent
+metadata:
+  name: L0-testing-strategy-evaluator
+  version: 1.0.0
+  layer: L0
+  phase: testing
+  owner: agentic-ai-coe
+  created: '2026-11-27'
+purpose:
+  description: Independently verify every section of the 12-section Test Strategy
+    document (test-strategy.md) against freshly fetched architecture documents and optional
+    PRD, evaluate gates G1-G10 per evaluation.md, fix mechanically-recoverable gaps,
+    and publish the evaluated document to Confluence.
+  input: generator_output from L0-testing-strategy-architect, test-strategy.md (blob
+    storage), Target and Solution Architecture documents and optional PRD (Confluence),
+    and evaluation.md rubric and Test Strategy template (GitHub).
+  output: AgentOutput content.type=evaluation_result with scores, findings, fixes_applied,
+    final_decision, and literal confluence_page_url.
+  business_value: Acts as the sole quality gate for the PI testing strategy, preventing
+    ungrounded thresholds, missed architecture obligations, or hallucinations from
+    propagating across downstream test cycles.
+prompt:
+  ref: prompts/L0-testing-strategy-evaluator/instructions.md
+  version: 1.0.0
+  description: Independently evaluate gates G1-G10 against evaluation.md, fix mechanical
+    gaps, and unconditionally write the evaluated test-strategy.md to Confluence.
+contract:
+  input_schema: '$ref: schemas/agent-input-contract-schema.json'
+  output_schema: '$ref: schemas/agent-output-schema.json'
+  input:
+    accepts_from_agents:
+    - L0-testing-strategy-architect
+    accepts_direct_input: false
+    accepts_file_upload:
+      enabled: false
+      formats: []
+    required_parameters:
+      generator_output:
+        type: object
+        description: AgentOutput from L0-testing-strategy-architect containing workflow_execution_id,
+          input_summary, pending_decisions_open, and content.artifact.
+      confluence-target-architecture-page-id:
+        type: string
+        description: Confluence page ID of the Target Architecture document.
+      confluence-solution-architecture-pageid:
+        type: string
+        description: Confluence page ID of the Solution Architecture document.
+      confluence-test-strategy-space-key:
+        type: string
+        description: Confluence space key where the evaluated Test Strategy page is written.
+      github-test-strategy-evaluation-folder-location:
+        type: string
+        description: GitHub folder location containing evaluation.md.
+      github-test-strategy-evaluation-repo:
+        type: string
+        description: GitHub repository containing evaluation.md.
+      github-test-strategy-evaluation-branch:
+        type: string
+        description: GitHub branch containing evaluation.md.
+      github-test-strategy-template-folder-location:
+        type: string
+        description: GitHub folder location of the Test Strategy document template.
+      github-test-strategy-template-repo:
+        type: string
+        description: GitHub repository containing the Test Strategy document template.
+      github-test-strategy-template-branch:
+        type: string
+        description: GitHub branch containing the Test Strategy document template.
+    optional_parameters:
+      confluence-prd-page_id:
+        type: string
+        description: Optional Confluence page ID of the PRD.
+  output:
+    type: evaluation_result
+    confluence_target:
+      title: "Test Strategy: <project_name>"
+      space_key: '{{confluence-test-strategy-space-key}}'
+context:
+  knowledge_bases:
+  - kb-L0-testing-strategy-eval
+  tools:
+  - tool-L0-confluence-reader
+  - tool-L0-confluence-writer
+  - tool-L0-github-reader-using-PAT
+  - tool-L0-s3-reader
+quality:
+  evaluation_ref: evaluation.md
+  min_score: 8.0
+  hallucination_check: true
+  consistency_check: true
+versioning:
+  input_version: '1.0'
+  output_version: '1.0'
+  instruction_hash: sha256:797e4ef3a0e6d11d3be20dcd4b265b47152e8614679e4442c0be1ab4e6fcef1f
