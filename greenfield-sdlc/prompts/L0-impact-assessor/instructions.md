@@ -36,19 +36,19 @@ Input Ingestion:
       the <workflow_execution_id> but a NEW RANDOM FRESH UUID per every agent run. The format to
       follow is "exec-" then 32 lowercase hex digits in 8-4-4-4-12 groups.
     Source:
-    INPUT PROTOCOL
-    Read supplied files and structured inputs in full. Use the attached Confluence reader only
-    for configured source/page IDs. Record unavailable inputs; never invent an ID or a tool call.
-    Keep each claim traceable to its source, section/key and role (requirement, target, baseline
-    or policy). Cross-reference sources; do not silently merge conflicting statements.
+    Read all supplied files and structured inputs in full. Keep each claim traceable to its
+    source, section/key and role (requirement, target, baseline or policy). Cross-reference
+    sources; do not silently merge conflicting statements. Record unavailable inputs; never
+    invent an ID or a tool call.
     Extract: all FRs and applicable NFR, data, regulatory, release and open-decision keys;
     target component names, responsibilities and relationships; supplied service/CI records,
     statuses, export metadata and relationships. Retain the source's identifiers.
     Validate:
-    - Use a successful prd_output or a readable supplied PRD with identifiable requirements.
-      If neither is usable, return status "failed" with INSUFFICIENT_CONTEXT and the missing
-      input in execution_summary. Do not fabricate an assessment. If target design is missing,
-      use requirement-derived logical components labelled as candidates, not design decisions.
+    - Use the Confluence-retrieved PRD with identifiable requirements. If none is usable, return
+      status "failed" with INSUFFICIENT_CONTEXT and the missing input in execution_summary. Do not
+      fabricate an assessment. Use the Confluence-retrieved target architecture; if target design
+      is missing, use requirement-derived logical components labelled as candidates, not design
+      decisions.
     - Select and record one baseline for the assessed application boundary:
       (a) Confirmed greenfield: named source/owner confirms a new application. Treat its
           in-scope planned builds as new; verify shared services and external interfaces separately.
@@ -65,63 +65,21 @@ Input Ingestion:
       threshold if any; otherwise give the export date and flag unknown freshness. Record
       gaps or contamination under Assumptions & Out of Scope. Partial coverage is not zero impact.
   Tools (attached at runtime):
+    - Confluence reader (make two separate tool calls for PRD and target architecture):
+      1. Extract PRD from Confluence using the attached Confluence reader tool with parameter:
+         page_id = {{confluence-prd-page-id}}
+      2. Extract target architecture from Confluence using the attached Confluence reader tool with parameter:
+         page_id = {{confluence-target-architecture-page-id}}
+    - GitHub reader (for document template): call the tool with the parameters:
+        folder_location = {{github-impact-assessor-template}}
+        repo_name = {{github-repo-name}}
+        branch_name = {{github-branch-name}}
+      Use the retrieved template as the document structure for <product_name>-impact-assessment.md.
+      If absent or unreadable, report a template/configuration issue and do not fabricate a structure.
     - S3 (ie blob storage) writer: call the tool with the parameters: `folder_name` =
       <workflow_execution_id>, `file_name` = "<product_name>-impact-assessment.md", `contents` =
       <full markdown text of <product_name>-impact-assessment.md verbatim>, using the
       <workflow_execution_id> generated in Input Ingestion.
-    - Confluence reader: used only for configured source/page IDs (e.g., kb-L0-architecture-principles).
-  === DOCUMENT TEMPLATE ===
-  Document Template (render headings, tables and fences as Markdown without instruction indentation; upload to S3 as <product_name>-impact-assessment.md):
-    # Impact Assessment: {product_name}
-## Legend
-| Field | Value |
-|---|---|
-| Sources | {actual PRD, target, baseline and policy references; identify missing inputs} |
-| Assessment basis | {application boundary; baseline mode, source/owner and limitations} |
-| Status (*Draft / In-Review / Approved*) | Draft |
-| Approved by (Human Name) | *Human Name* |
-| Date of Approval | *Date* |
-| Human Approval Comments | *Comments* |
-    ## Executive Summary & Overview
-    {Overview of the product's purpose and its role in the broader ecosystem/lifecycle}
-    {2-4 sentence synthesis of impact; every claim must trace to a finding below — no new analysis here}
-    - **Overall impact level:** {Low|Medium|High} — {one-line rationale tied to blast-radius
-      distribution in Components Identified}
-    - **Existing systems:** {confirmed findings, scope and coverage; actual total TBD if unchecked};
-      duplicate-build risk: {overlap found | none found in checked scope | not assessed}
-    - **External dependencies:** {N total, K newly surfaced by this assessment}
-    - **Flags:** {"None" | CMDB/KB mismatches, stale/contaminated exports — see relevant section}
-    ## Non-Functional & Regulatory Impact
-    {Map NFRs and obligations to affected components, measures, release gates and sources.
-    Separate sample/proposed constraints from approved policy; unknown values are TBD.}
-    ## Existing-System Impact
-    **Capability check (service catalog, service grain):** {overlap or closest checked service
-    and why; if unavailable, say "Not assessed" and why.}
-    **Technical impact check (CMDB, configuration-item grain):** {report sourced changes,
-    integrations without modification and exclusions; distinguish unknowns from checked negatives.}
-    | Existing System (CI) | impacted? | How / Why Not | Component(s) |
-    |---|---|---|---|
-    | {evidenced CI} | {Yes / No / Unverified} | {change, read-only dependency, exclusion or gap; evidence} | {related components} |
-    {If none can be checked, state the scoped finding in prose. Do not invent a CI row.}
-    ## Components Identified
-    | Requirement | Component (new/existing) | Blast Radius | Rationale |
-    |---|---|---|---|
-    | {source key} | {name; new / existing / undetermined} | {Low / Medium / High} | {failure → affected journey, dependent or obligation; evidence} |
-    {Cover every FR. Qualify new-under-scenario, modified, reused unchanged or planned with
-    deployment unverified; include release if known. Count distinct components, not FR rows.}
-    ## Data Model & Schema Impact
-    {Identify affected records, owners, handling and retention constraints. Separate proposed
-    logical data from verified schema changes. Say "None" only when checked; otherwise TBD.}
-    ## Integration Landscape & External Dependencies
-    {Categorize dependencies (e.g., Upstream Data Sources, Downstream Consumers, Third-party services), INCLUDING anything newly surfaced by the
-    Existing-System Impact check above}
-    ## Assumptions & Out of Scope
-    {List explicitly what is intentionally excluded from the change impact (e.g., downstream systems that do not require changes) and any assumptions made regarding data availability or constraints based on the PRD.}
-    {List source gaps, validation owner or TBD, and the finding to revisit if an assumption fails.}
-    ## Dependency Graph
-    ```mermaid
-    {mermaid dependency graph rendered here in Phase B}
-    ```
   === PROCESSING RULES ===
   Part 1: Impact Assessment Analysis
     1. Compare proposed capabilities with every supplied in-scope service and relevant CI.
@@ -188,7 +146,8 @@ Input Ingestion:
           "integrates-with" → {from} -.->|integrates with| {to} (dashed)
         - FAIL: add `classDef cycleNode` + `class {ids} cycleNode` + `%% CYCLE: a -> b -> a` per cycle
         - PASS: one `%% CRITICAL PATH: ...` comment per tied chain
-    14. Append mermaid to <product_name>-impact-assessment.md under ## Dependency Graph.
+    14. Populate the fetched document template with all findings from Parts 1 and 2.
+        Append mermaid to <product_name>-impact-assessment.md under ## Dependency Graph.
         Upload the completed document verbatim to S3 (ie blob storage) using the attached S3
         writer tool with `folder_name` = <workflow_execution_id>, `file_name` =
         "<product_name>-impact-assessment.md", and `contents` = the full markdown text.
@@ -232,7 +191,7 @@ Input Ingestion:
   • Assessment: services/CIs checked, components mapped, overall impact level, any CMDB/KB mismatch
   • Graph: node/edge counts, cycle_check (DFS), critical_path + ties, mermaid 1:1 confirmed
   • Sources consulted (baseline mode, target versus deployment evidence, KBs and material gaps)
-  • Tools invoked (names, outcome — including S3 writer)
+  • Tools invoked (names, outcome)
   • Artifact (<product_name>-impact-assessment.md) confirmed uploaded to S3 under folder <workflow_execution_id> (bucket, key) for downstream evaluator
   • Gaps flagged
 
