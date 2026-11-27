@@ -49,8 +49,8 @@ generator JSON (artifacts[0].content) ──► this evaluator (evaluate + fix) 
 ```
 
 1. Takes `solution-architecture.md` from **S3** with `tool-L0-s3-files-reader`
-   (`s3_folder_name`, or the folder in the generator JSON's
-   `artifacts[0].storage`), else from the generator JSON's
+   (the run folder `<Product>/<workflow_execution_id>`, from the generator
+   JSON's `artifacts[0].storage`; never an input), else from the generator JSON's
    `artifacts[0].content`, else from an upload,
    and `target-architecture.md` / `prd.md` from an upload or by Confluence
    page id
@@ -79,14 +79,15 @@ generator JSON (artifacts[0].content) ──► this evaluator (evaluate + fix) 
 
 ## Input
 
-- **Source:** `solution-architecture.md` from S3 (`s3_folder_name`, the
+- **Source:** `solution-architecture.md` from S3 (the run folder in the
+  generator JSON's `artifacts[0].storage`, the
   same folder the generator saved to), else `L0-solution-architect`'s JSON
   output (`artifacts[0].content`), else an upload
 - **Required:** `rubric_repo`, `rubric_branch`,
   `solution_architect_rubric_folder`, `confluence_space_key`,
   `enterprise_architecture_kb_page_id`, `enterprise_security_kb_page_id`,
   and the target as an upload or `target_architecture_page_id`
-- **Optional:** `s3_folder_name`, `prd_page_id`, `domain_api_patterns_kb_page_id`
+- **Optional:** `prd_page_id`, `domain_api_patterns_kb_page_id`
 
 ## Output
 
@@ -94,7 +95,7 @@ generator JSON (artifacts[0].content) ──► this evaluator (evaluate + fix) 
   with the evaluation under `items.evaluation`
 - **Items:** the generator's full item sections, plus `evaluation` carrying
   `scores`, `overall_score`, `findings[]`, `fixes_applied[]`,
-  `coverage_check`, `final_decision` — see `output_schema.json`
+  `coverage_check`, `final_decision` — see EXPECTED OUTPUT in the prompt
 - **Artifacts:** the Confluence page `<product>-solution-architecture`,
   always published, in chunks of whole sections (one writer call each, about
   12,000 characters of markdown) so no single call times out
@@ -106,20 +107,13 @@ generator JSON (artifacts[0].content) ──► this evaluator (evaluate + fix) 
 ```
 agents/L0-solution-architect-evaluator/
 ├── spec.yaml
-├── evaluation.md
-├── output_schema.json
-├── README.md
-├── examples/
-│   ├── input-01-missing-entity.json
-│   ├── output-01-missing-entity.json
-│   ├── input-02-decided-without-ea11.json
-│   └── output-02-decided-without-ea11.json
-└── golden/v1.0.0/
-    ├── input-golden-01-harvestlink.json
-    ├── golden-01-harvestlink.json
-    ├── input-golden-02-edge-dropped.json
-    └── golden-02-edge-dropped.json
+└── README.md
 
 prompts/L0-solution-architect-evaluator/
-└── instructions.md
+└── instructions.md        # the prompt; EXPECTED OUTPUT defines the output
 ```
+
+The rubric it scores against, L0-solution-architect's `evaluation.md`,
+lives only in `agentic-sdlc-knowledge-bases`, under
+`3. design-and-architecture/solution-architecture/L0-solution-architecture/`.
+This evaluator has no rubric of its own.

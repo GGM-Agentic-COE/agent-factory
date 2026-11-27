@@ -8,12 +8,12 @@ metadata:
   phase: vision
   owner: agentic-ai-coe
   created: "2026-08-02"
-  updated: "2026-10-05"
+  updated: "2026-11-25"
 
 purpose:
   description: "Classifies regulatory feasibility (licensing, data protection, consumer, sector and cross-cutting regimes) for a proposed idea as Green/Amber/Red per constraint, with citation and mitigation — and derives the viability_score that gates the pipeline at qg-L0-viability-score."
   input: "idea-brief.json (problem statement, target geography/product category, target users, value proposition) from L0-idea-intake."
-  output: "regulatory-feasibility.md artifact plus structured constraint items and the viability score with its component breakdown and caps."
+  output: "regulatory-feasibility.md saved to S3 (filled from the GitHub template) plus structured constraint items and the viability score with its component breakdown and caps."
   business_value: "A viable-looking idea can be dead on arrival for regulatory reasons — this must surface before roadmap commitment, not after. Zero tolerance for omitting a Red-classified constraint: a false negative here is a compliance risk, not a quality nuance. Owning the viability score here keeps the gate with the agent that holds the blocking evidence, and out of the agent whose auto-publish depends on it."
 
 prompt:
@@ -26,7 +26,7 @@ contract:
   output_schema: "$ref: schemas/agent-output-schema.json"
 
   input:
-    accepts_from_agents: [L0-idea-intake]
+    accepts_from_agents: [L0-idea-intake, L0-idea-intake-evaluator]   # their output carries workflow_execution_id and document_reference.folder — copied, never regenerated
     accepts_direct_input: false
     accepts_file_upload:
       enabled: true
@@ -34,7 +34,11 @@ contract:
     required_parameters:
       problem_statement: { type: string, description: "From L0-idea-intake's idea-brief.json" }
       target_geography: { type: string, description: "Target geography for the idea — a country, or a country plus sub-national regions. Resolved at runtime against the jurisdiction the attached KBs declare; a country they do not cover fails with JURISDICTION_MISMATCH rather than being translated" }
+      template_repo: { type: string, description: "GitHub repository holding the Document Template, e.g. agentic-sdlc-knowledge-bases" }
+      template_branch: { type: string, description: "Branch of template_repo, e.g. main" }
+      regulatory_feasibility_template_folder: { type: string, description: "Folder holding regulatory-feasibility-template.md, e.g. '0. planning/vision-regulatory-feasibility/templates'. Unreadable -> REFERENCE_UNAVAILABLE" }
     optional_parameters:
+      folder_name: { type: string, default: null, description: "STANDALONE runs only. After L0-idea-intake, the folder and the workflow_execution_id are copied from the intake's output (document_reference.folder, workflow_execution_id) and this is ignored; regulatory-feasibility.md is saved into the intake's folder next to the brief. Standalone: the S3 folder holding idea-brief.json — a bare name ('HarvestLink'), a path ('HarvestLink/wf-<earlier id>'), only a workflow id ('wf-1a2b') or a full location; normalized once into source_folder and never written to. The checker generates a workflow id and saves to a new run folder <product>/<new id>. No intake output and no folder -> ARTIFACT_WRITE_FAILED" }
       # No date parameter is required. The run date comes from tool-L0-system-current-date,
       # because the agent has no clock and an unaided model fills a date slot with a
       # confident guess. generated_date below is only the fallback for a tool failure.
@@ -68,7 +72,7 @@ context:
     confluence_page_ids: ["518422550", "519012353"]   # one reader call per page; which page holds which KB is worked out from content
     content:
       - kb-L0-regulatory-frameworks-index-ind   # #jurisdiction, #cross-domain-index, #coverage-categories (sweep list)
-      - kb-L1-domain-regulatory-ind             # #jurisdiction + food production & distribution regulatory facts
+      - kb-L0-domain-regulatory-ind             # #jurisdiction + food production & distribution regulatory facts
   guardrails:
     - gr-L0-output-schema-validator
     - gr-L0-pii-detection
@@ -78,8 +82,9 @@ context:
     - tool-L0-confluence-reader        # reads BOTH regulatory KBs — page ids 518422550 and 519012353, fixed in the prompt; read-only
     - tool-L0-regulatory-db-lookup   # read-only; invoked directly, per the Core/Utility split
     - tool-L0-system-current-date    # reads the host clock — the only way this agent can date the artifact without guessing
-    - tool-L0-azure-blob-reader      # reads idea-brief.json from blob storage
-    - tool-L0-azure-blob-writer      # writes regulatory-feasibility.md to blob storage
+    - tool-L0-github-reader-using-app  # reads the Document Template (regulatory-feasibility-template.md) ONLY — template_repo / template_branch / regulatory_feasibility_template_folder; one call
+    - tool-L0-s3-files-reader        # reads idea-brief.json from the source folder
+    - tool-L0-s3-writer              # writes regulatory-feasibility.md to the run folder <product>/<workflow_execution_id>/ — one call; the evaluator and the vision generator read it from there
 
 quality:
   evaluation_ref: "evaluation.md"

@@ -8,12 +8,12 @@ metadata:
   phase: vision
   owner: agentic-ai-coe
   created: "2026-08-02"
-  updated: "2026-10-05"
+  updated: "2026-11-25"
 
 purpose:
-  description: "Synthesizes idea, market, and regulatory findings into one reconciled vision statement and roadmap outline, and returns the full vision.md inside its JSON output (nothing is written to blob storage). L0-vision-statement-generator-evaluator evaluates it and publishes it to Confluence; Product Lead sign-off is still required before Phase 1."
+  description: "Synthesizes idea, market, and regulatory findings into one reconciled vision statement and roadmap outline, fills the vision-template.md read from GitHub, and saves vision.md to S3. L0-vision-statement-generator-evaluator reads it from S3, evaluates it and publishes it to Confluence; Product Lead sign-off is still required before Phase 1."
   input: "idea-brief.json items, regulatory_feasibility items, and the viability_score owned by L0-regulatory-feasibility-checker at qg-L0-viability-score; market_analysis items optionally, when the market analyzer ran; product_name optionally, from the user."
-  output: "vision.md (markdown, as the content of an artifact in the JSON output) plus structured items reconciling the upstream inputs."
+  output: "vision.md (markdown) saved to S3 <run folder>/vision.md — carried in the JSON artifact's content only when the write failed — plus structured items reconciling the upstream inputs."
   business_value: "Three separate analyses aren't a decision — the Product Lead needs one document with a north-star metric and roadmap outline to approve or reject. This agent is also the last chance to catch a dropped regulatory finding before it reaches a human."
 
 prompt:
@@ -34,6 +34,14 @@ contract:
       idea_brief_items: { type: object, description: "Full items object from L0-idea-intake, sourced from idea-brief.json (JSON, parsed by key path — never scanned as markdown). Its generated_date, where present, is only the fallback run date: the agent has no clock and takes the run date from tool-L0-system-current-date (timezone UTC). With neither available it writes \"not available\" in the header and completes the vision — a missing date never halts the run, and is never filled from an example, a fixture, or training data" }
       regulatory_feasibility_items: { type: object, description: "Full items object from L0-regulatory-feasibility-checker as corrected by its evaluator, including its viability object" }
       viability_score: { type: number, description: "Owned by L0-regulatory-feasibility-checker and re-derived by its evaluator at qg-L0-viability-score. Carried here as a parameter and reported exactly as received — this agent may not compute, re-derive, round, or adjust it" }
+      # No folder input. Both folders come from the checker evaluator's artifacts[0].storage:
+      #   folder (run folder <product name>/<workflow_execution_id>: regulatory-feasibility.md; vision.md is saved here)
+      #   source_folder (idea-brief.json and any market-analysis.md). The run folder's first segment is the product name.
+      # Run on its own, the agent takes the folders from the request text. No run folder -> the document is
+      # returned in artifacts[0].content instead (write_mode not_saved).
+      template_repo: { type: string, description: "GitHub repository holding the Document Template, e.g. agentic-sdlc-knowledge-bases" }
+      template_branch: { type: string, description: "Branch of template_repo, e.g. main" }
+      vision_statement_template_folder: { type: string, description: "Folder holding vision-template.md, e.g. '0. planning/vision-statement-generator/template'. Unreadable -> REFERENCE_UNAVAILABLE" }
     optional_parameters:
       market_analysis_items: { type: object, description: "Full items object from L0-vision-market-analyzer. OPTIONAL — the market analyzer may not have run. When absent, vision.md's Market Context reads 'Not assessed', items.market_context is emitted with confidence 0 and traced_to 'none', and no market-sourced open risks are carried. The viability score is unaffected: it carries no market component" }
 
@@ -41,14 +49,16 @@ contract:
     $ref: "output_schema.json"
 
 context:
-  knowledge_bases: []   # vision structure is embedded in instructions.md per S4 — this agent synthesizes purely from upstream artifacts.
+  knowledge_bases: []   # this agent synthesizes purely from upstream artifacts; the vision layout is vision-template.md, read from GitHub each run.
   guardrails:
     - gr-L0-output-schema-validator
     - gr-L0-pii-detection
     - gr-L0-hallucination-check
     - gr-L0-consistency-check   # checks reconciliation: no upstream Amber/Red item silently dropped
   tools:
-    - tool-L0-azure-blob-reader      # reads idea-brief.json/regulatory-feasibility.md/market-analysis.md from blob storage in one call
+    - tool-L0-github-reader-using-app  # reads the Document Template (vision-template.md) ONLY — template_repo / template_branch / vision_statement_template_folder; one call
+    - tool-L0-s3-files-reader        # reads regulatory-feasibility.md from the run folder, idea-brief.json/market-analysis.md from the source folder — both folders from the checker evaluator's artifacts[0].storage
+    - tool-L0-s3-writer              # writes vision.md to the S3 run folder — the evaluator reads it from there
 
 quality:
   evaluation_ref: "evaluation.md"

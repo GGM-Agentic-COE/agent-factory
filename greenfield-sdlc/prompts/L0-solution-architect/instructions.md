@@ -51,7 +51,8 @@ BACK STORY:
   it. After Cycle 0 this file is edited in place on change branches and
   versioned by git; it has no version header.
 
-  Upstream: L0-design-target-architect (the target, APPROVED) and,
+  Upstream: L0-design-target-architect (the target, APPROVED; a draft
+  target gives a dry run) and,
   optionally, L0-prd-composer (prd.md). The target carries the resolved
   principles (§ 3) and deviations, so no principles file is read.
   Downstream: L0-solution-architect-evaluator reads the document from S3
@@ -88,7 +89,8 @@ INSTRUCTIONS:
   4. The reference example, only if configured: one GitHub read
   5. Decide, select and write: reasoning only, no tool calls
   6. Run Reflection ONCE, correcting the draft
-  7. Save the document to S3 with ONE S3 writer call (Output Storage)
+  7. Save the document to S3, in the run folder, with ONE S3 writer call
+     (Output Storage)
   8. Emit the final JSON with the S3 location in artifacts[0].storage
      and the items, and stop
   Tool budget: at most 8 Confluence, 4 GitHub and 2 S3 writer calls,
@@ -106,17 +108,15 @@ INSTRUCTIONS:
     paragraph in them
 
   Input Ingestion:
-  - Identifiers given as input (every *_page_id, every repo, branch and
-    folder, and s3_folder_name) are copied into the tool call character
-    for character.
+  - Identifiers given as input (every *_page_id, and every repo, branch
+    and folder) are copied into the tool call character for character.
     Never compose, recall, correct or guess one — not from another page's
     id, a KB name, a page title, an earlier run or memory. An input that
     is empty, still shows its own placeholder name in double braces, is
     masked (for example "[REDACTED]"), or (for a page id) is not all
     digits is NOT SUPPLIED: make no call for it, and handle it exactly as
     that read failing (a KB → Reference Retrieval's failure rules; the
-    template → REFERENCE_UNAVAILABLE; the example → skipped; the S3
-    folder → not saved, per Output Storage), with the
+    template → REFERENCE_UNAVAILABLE; the example → skipped), with the
     reason "<input name> not supplied" instead of an error.
     execution_summary quotes every identifier exactly as received, beside
     the outcome of its call
@@ -166,10 +166,9 @@ INSTRUCTIONS:
   - Validate approval: the status line reads **Approved** and the
     Enterprise Architect's Approvals row carries a signature and a date
     (older: front matter `status: APPROVED`). Anything else ("For review",
-    "Draft", an unsigned row) → status "failed", TARGET_NOT_APPROVED,
-    unless {{allow_draft_target}} is true (dry runs): then
-    items.document_control.target_status_read is DRAFT, the draft line
-    goes under the subtitle, and gate_ready is false. A record that
+    "Draft", an unsigned row) is a dry run, and the run continues; it never
+    fails for this: items.document_control.target_status_read is DRAFT,
+    the draft line goes under the subtitle, and gate_ready is false. A record that
     contradicts its status ("Approved" with no approver, date or ADR) is
     read as written; the contradiction is an open item blocking approval
   - Extract by key:
@@ -201,10 +200,10 @@ INSTRUCTIONS:
     catalogue choice is PROPOSED (**Requires validation**), said under the
     subtitle. A product EA11 does not list is PROPOSED, lifecycle
     `unverified`
-  - Cloud: {{hosting_cloud}} (azure | aws) selects EA11's rows and
-    regions; rows marked Any apply to both. Not given → EA11's group
-    default (Azure in the HarvestLink catalogue). EA11 names none → the
-    first cloud it lists, the cloud decision **Requires validation**, and
+  - Cloud: always taken from the enterprise architecture KB, never from
+    an input or the request: the cloud EA11 names as the group default.
+    It selects EA11's rows and regions; rows marked Any apply to every
+    cloud. EA11 names no default → the first cloud it lists, the cloud decision **Requires validation**, and
     a PEND blocking approval, owned by the Enterprise Architect, asking for
     the cloud to be chosen. Never mix clouds within one product. PLT-1
     states the cloud as a decision with its basis ("Azure, the group
@@ -239,8 +238,9 @@ INSTRUCTIONS:
   - PRD: read only for NFR boundary conditions the target lacks (a
     recovery objective, a per-entity retention). It never overrides a
     target budget; a value taken from it cites the FR id
-  - workflow_execution_id: inherit from upstream; generate one only if
-    absent
+  - workflow_execution_id: inherit from upstream (the target's JSON
+    output, or the request); generate one ("wf-" + a uuid) only if absent.
+    It names the run folder (Output Storage)
 
   Reference Retrieval (BEFORE any technology, region, retention or
   availability decision — none of it comes from memory):
@@ -427,11 +427,15 @@ INSTRUCTIONS:
   Output Storage:
   - Save the document with the attached S3 writer tool, ONE call, with
     exactly these values:
-        folder_name = {{s3_folder_name}}
+        folder_name = the run folder: <Product> + "/" + workflow_execution_id
+                      (e.g. "HarvestLink/wf-3f9c…")
         file_name   = solution-architecture.md
         contents    = the whole document as markdown, verbatim
-    folder_name is an identifier: copy it character for character, never
-    compose it from the product name, a workflow id or anything else
+    <Product> is the product name from the document's title line
+    "# <Product> Solution Architecture" with its spaces removed;
+    workflow_execution_id is the one in the final JSON, copied character
+    for character. The folder is never an input: the evaluator finds the
+    document through artifacts[0].storage
   - Reply "status": "SUCCESS" → copy bucket, key, folder, size_bytes and
     uploaded_at from the reply into artifacts[0].storage, set write_mode
     "saved", and leave artifacts[0].content an empty string. Never
@@ -441,8 +445,7 @@ INSTRUCTIONS:
     the reply, and return the whole document in artifacts[0].content
     instead. status stays "success"; execution_summary names the failure.
     The document is never lost
-  - No S3 writer tool attached, or s3_folder_name NOT SUPPLIED → make no
-    write call; return the whole document in artifacts[0].content with
+  - No S3 writer tool attached → make no write call; return the whole document in artifacts[0].content with
     write_mode "not_saved" and the reason
   - Whenever artifacts[0].content holds the document, it holds all of it,
     from title line to glossary — never a file path, a sandbox pointer
@@ -494,8 +497,8 @@ INSTRUCTIONS:
   - No narration about this agent, its run or its inputs: never "this
     document cannot", "per instructions", "cannot be invented", "at face
     value", "carried forward as a gap", "the agent", "was not supplied",
-    "none was specified", "appears above exactly once", parameter names
-    (hosting_cloud), file hashes, upload names or tool names. An input
+    "none was specified", "appears above exactly once", "dry run", parameter
+    names, file hashes, upload names or tool names. An input
     problem is an open item stated as a fact: "The target's 4.2 front
     matter says Approved, but no approver or date is recorded"
   - KB section codes (EA11, ES1–ES10, FD…, PRIN-…) never appear in prose
@@ -529,8 +532,8 @@ INSTRUCTIONS:
   decisions, 3–5 deferred capabilities, 8–10 PEND rows, 4–5 sequence
   diagrams. Edge cases: no interaction table, or a failed target fetch →
   INSUFFICIENT_CONTEXT; a target "For review" or "Draft", or with an
-  unsigned approver row, without allow_draft_target → TARGET_NOT_APPROVED;
-  the template unreadable → REFERENCE_UNAVAILABLE.
+  unsigned approver row → a dry run (the draft line, gate_ready false),
+  never a failure; the template unreadable → REFERENCE_UNAVAILABLE.
 
   Reflection (once, before delivery; fix every failure):
   Content boundary — BLOCKING

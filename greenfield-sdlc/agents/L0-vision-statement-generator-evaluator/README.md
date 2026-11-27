@@ -11,8 +11,8 @@ claimed in the generator's own execution_summary.
 
 ## What does it do?
 
-Reads the vision document `L0-vision-statement-generator` saved to blob
-storage (`vision.md`), and produces:
+Reads the vision document `L0-vision-statement-generator` saved to S3
+(`vision.md`), and produces:
 - A reconciliation coverage check: every Amber/Red regulatory constraint_id
   must appear in at least one `open_risks` entry's `related_ids` — checked
   by set membership, not by trusting a count
@@ -23,7 +23,7 @@ storage (`vision.md`), and produces:
   against the sections below it
 - A viability_score consistency check across `regulatory-feasibility.md`,
   `items` and `vision.md` — plus a narrative check that a
-  capped score is matched by an executive summary naming the constraint that
+  capped score is matched by a Bottom line and Section 12 naming the constraint that
   caused the cap
 - Fixes for mechanically-recoverable gaps (built from the constraint's own
   mitigation_summary); escalation for anything requiring new judgment
@@ -31,14 +31,19 @@ storage (`vision.md`), and produces:
 ## How does it work?
 
 ```
-generator ──► blob: <folder_name>/vision.md ──► this evaluator (evaluate + fix) ──► Confluence: <Product Name>-vision.md
+generator ──► S3: <product>/<wf id>/vision.md ──► this evaluator (evaluate + fix) ──► Confluence: <Product Name>-vision
 ```
 
 1. Reads `vision.md` (written by the generator), `regulatory-feasibility.md`,
-   `idea-brief.json` and (optionally) `market-analysis.md` from **blob
-   storage** in a single call, from the request's `folder_name`. No agent
-   output is passed in; everything checked is built from `vision.md`. The
-   brief is **JSON**, parsed by key path
+   `idea-brief.json` and (optionally) `market-analysis.md` from **S3** with
+   `tool-L0-s3-files-reader`: `vision.md` and `regulatory-feasibility.md`
+   from the run folder, `idea-brief.json` and `market-analysis.md` from the
+   brief's original folder. Both folders come from the generator's
+   `artifacts[0].storage` (`run_folder`, `source_folder`); there is no folder
+   input. Everything checked is built from `vision.md`; the
+   generator's JSON output supplies only `workflow_execution_id`, plus the
+   document itself when the generator could not save it to S3. The brief is
+   **JSON**, parsed by key path
 2. Reads the scoring rubric (`evaluation.md`) from GitHub with
    `tool-L0-github-reader-using-app` — one call, fixed in the prompt: repo
    `agentic-sdlc-knowledge-bases`, branch `main`, folder
@@ -52,23 +57,23 @@ generator ──► blob: <folder_name>/vision.md ──► this evaluator (eval
    re-derived here**: that already happened in
    `L0-regulatory-feasibility-checker-evaluator`, and a discrepancy at
    this point is a finding to report, not arithmetic to redo
-6. Checks the Product Name: the H1 and the Product Name row carry the same
+6. Checks the Product Name: the H1 and the Document Control Product row carry the same
    name, and an agent-proposed name is labelled as proposed. It aligns or
    labels a name, and never picks one of its own
 7. Fixes what's mechanically recoverable in its working copy of the
    document; escalates anything requiring new analysis rather than
-   inventing content. Nothing is written back to blob storage — the blob
+   inventing content. Nothing is written back to S3 — the S3
    `vision.md` stays as the generator's draft
 8. **Publishes** the corrected document to Confluence with
-   `tool-L0-confluence-writer` — `title = <Product Name>-vision.md`, content
+   `tool-L0-confluence-writer` — `title = <Product Name>-vision`, content
    converted to XHTML, `space_key = 514162689` — for **every** decision,
    including `escalate_to_hitl`. The human reviews it in Confluence; issues
    that couldn't be fixed are listed in the findings
 
 ## Input
 
-- **Source:** `vision.md` in blob storage, written by `L0-vision-statement-generator`
-- **Required:** `folder_name`
+- **Source:** `vision.md` in S3, written by `L0-vision-statement-generator`
+- **Required:** none — both S3 folders come from `L0-vision-statement-generator`'s output
 - **Fixed in the prompt:** the rubric's GitHub repo, branch and folder
 
 ## Output
@@ -79,7 +84,7 @@ generator ──► blob: <folder_name>/vision.md ──► this evaluator (eval
 - **Items:** the generator's full item sections, plus `evaluation` carrying
   `scores`, `overall_score`, `findings[]`, `fixes_applied[]`,
   `reconciliation_check`, `final_decision` — see `output_schema.json`
-- **Artifacts:** the Confluence page `<Product Name>-vision.md`, always published
+- **Artifacts:** the Confluence page `<Product Name>-vision`, always published
 - **Summary:** overall score, coverage-gap result, executive-summary
   integrity result, viability_score consistency, guardrail results
 

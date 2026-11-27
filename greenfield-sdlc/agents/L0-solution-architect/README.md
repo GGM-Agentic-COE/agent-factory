@@ -1,12 +1,12 @@
 # L0-solution-architect
 
-> **Status: built (Cycle 0 invocation).** `spec.yaml`, `output_schema.json`,
-> `evaluation.md`, `prompts/L0-solution-architect/instructions.md`
-> and two examples (happy path + `TARGET_NOT_APPROVED`) exist. The happy-path
-> output validates against `output_schema.json`, and a script checked it
-> against the target it was built from (entity set, owners, classes, edges,
-> demands, constraints, security rows, PEND references). `golden/` is not
-> built. **Read "Relationship to the three viewpoint architects" before wiring
+> **Status: built (Cycle 0 invocation).** This folder holds only
+> `spec.yaml` and this README; the prompt is
+> `prompts/L0-solution-architect/instructions.md`, and its EXPECTED OUTPUT
+> section defines the output (there is no separate `output_schema.json`).
+> The rubric (`evaluation.md`) and the reference example live only in the
+> `agentic-sdlc-knowledge-bases` repo, under
+> `3. design-and-architecture/solution-architecture/`. **Read "Relationship to the three viewpoint architects" before wiring
 > this into a workflow.**
 
 ## Purpose
@@ -20,8 +20,8 @@ does.
 The document follows a fixed twelve-section shape (overview, drivers,
 application, data, integration, flows, platform, security, traceability,
 open items, decisions, glossary), written in an architect's voice with
-Mermaid figures. The reference rendering is
-[examples/artifacts/solution-architecture.md](examples/artifacts/solution-architecture.md).
+Mermaid figures. The reference rendering is `examples/artifacts/solution-architecture.md`
+in the `agentic-sdlc-knowledge-bases` repo.
 
 | Part | Sections | What it decides | Read by |
 |---|---|---|---|
@@ -33,8 +33,12 @@ Mermaid figures. The reference rendering is
 | Index | Section 10 traceability, "Constraints honoured" | Every target REQ-* → **Met** or **Not yet built** with a reason; every CON-* → its realising rule | gr-L0-architecture-conformance |
 | Open items | Section 11 PEND rows | Every decision not yet made, with its owner, the condition that resolves it, and what it blocks | Impact assessor, approvers |
 
-It runs after the Enterprise Architect approves the target. It refuses a
-DRAFT target unless `allow_draft_target` is set for a dry run.
+It runs after the Enterprise Architect approves the target. A target that
+is not yet approved always gives a dry run: the document carries the
+draft-target line and `gate_ready` is false. There is no switch for it.
+
+The cloud always comes from the enterprise architecture KB's group
+default (EA11); there is no hosting input.
 
 ## Decisions worth knowing
 
@@ -149,13 +153,14 @@ their text. A copy supplied directly (`target_architecture_output`) or
 uploaded takes precedence and skips the target call.
 
 **Output.** The full document is saved to S3 with `tool-L0-s3-writer`
-(one call: `folder_name = s3_folder_name`, `file_name =
-solution-architecture.md`), and the final JSON carries the S3 location in
+(one call: `folder_name = <Product>/<workflow_execution_id>`, the run
+folder, `file_name = solution-architecture.md`). The folder is never an
+input: the evaluator takes it from `artifacts[0].storage`, and the final JSON carries the S3 location in
 `artifacts[0].storage` (`bucket`, `key`, `write_mode: saved`) with an empty
 `content`. The document is written once, into the tool call, so the long
 output is split over two model turns (document ~20k tokens, then items
 ~8k) instead of one ~27k-token answer. When the S3 writer is not
-attached, `s3_folder_name` is not supplied, or the save fails after one
+attached, or the save fails after one
 retry, the full document is returned in `artifacts[0].content` instead
 (`write_mode: not_saved | failed`), never as a file path.
 `L0-solution-architect-evaluator` reads it from S3 (or from the JSON),
@@ -165,24 +170,18 @@ evaluates it, corrects it and publishes it to Confluence as
 ## Composition
 
 ```
-greenfield/agents/L0-solution-architect/
+greenfield-sdlc/agents/L0-solution-architect/
 ├── spec.yaml
-├── output_schema.json
-├── evaluation.md
-├── README.md                                   # this file
-└── examples/
-    ├── input-01-harvestlink-cycle0.json        # Confluence page ids + target supplied directly (approved)
-    ├── output-01-harvestlink-cycle0.json       # items + the artifact below embedded in artifacts[0].content
-    ├── artifacts/solution-architecture.md      # full Cycle 0 document, DRAFT
-    ├── input-02-draft-target.json              # target still DRAFT
-    └── output-02-draft-target.json             # TARGET_NOT_APPROVED, nothing derived
+└── README.md                                   # this file
 
-greenfield/prompts/L0-solution-architect/
-└── instructions.md                             # embedded solution-architecture.md template (S4)
+greenfield-sdlc/prompts/L0-solution-architect/
+└── instructions.md                             # the prompt; EXPECTED OUTPUT defines the output
+
+agentic-sdlc-knowledge-bases/3. design-and-architecture/solution-architecture/
+├── L0-solution-architecture/evaluation.md      # the rubric, read at runtime
+├── templates/solution-architecture-template.md # the Document Template, read at runtime
+└── examples/artifacts/solution-architecture.md # the reference example
 ```
-
-`input-01` is generated from `L0-design-target-architect/examples/output-01`
-with the approval applied, so the two agents' examples chain exactly.
 
 ## Open items
 
@@ -202,7 +201,7 @@ with the approval applied, so the two agents' examples chain exactly.
    then the Solution Architect and Platform Lead HITL gates, then
    `L0-arch-baseline-generator`. The workflow must pass the target page id
    (unless the target is uploaded), the three KB page ids, the S3 folder
-   (`s3_folder_name`, the same for both agents), the rubric repo,
+   (none: the run folder comes from `workflow_execution_id`), the rubric repo,
    branch and folder, and the Confluence space key. Page ids only, no base
    URL.
 9. **The target architect still writes to blob** and still reads
@@ -216,6 +215,7 @@ with the approval applied, so the two agents' examples chain exactly.
    built.** The check script used on the example (entity, edge, demand,
    constraint and PEND cross-references against the target) could seed the
    conformance guardrail's mechanical half.
-7. **Rubric copy.** Evaluators read `evaluation.md` from
-   `agentic-sdlc-knowledge-bases` at runtime, so copy it there.
-8. **`golden/` is not built.**
+7. **Rubric location.** The rubric exists only in
+   `agentic-sdlc-knowledge-bases`; edit it there.
+8. **No examples or golden set in this repo.** They were removed; the
+   reference example is in the knowledge-bases repo.
