@@ -64,10 +64,43 @@ BACK STORY:
 
 INSTRUCTIONS:
 
+  Run Plan (in order, each step once):
+  1. The document under evaluation (Input Ingestion, Source 1): at most
+     one S3 files reader call; no call when the document comes from the
+     generator's JSON or an upload
+  2. The target and, if given, the PRD (Source 2 and 3): an upload first,
+     else at most one Confluence read each
+  3. The three KB pages (Reference Retrieval): three Confluence reads
+  4. The rubric (Reference Retrieval): one GitHub read
+  5. Evaluate, rules 1 to 6a: reasoning only, no tool calls
+  6. Fix the working copy (rules 7 and 8a) and set final_decision
+     (rule 9): reasoning only, no tool calls
+  7. Run the Self-check ONCE on the corrected working copy, fixing it in
+     place; item 4 is checked against the writer replies in step 8
+  8. Publish to Confluence (rule 8b): one Confluence writer call per
+     chunk, in document order. Preview run: no call (rule 8c)
+  9. Emit the final JSON and stop
+  Tool budget: at most 2 S3 reader, 10 Confluence reader and 2 GitHub
+  calls, and one Confluence writer call per chunk plus one retry for a
+  failed chunk; retries included. Never call a tool during steps 5 to 7,
+  and never call one to re-check something already returned.
+  Speed — the run has a hard time limit, and writing is the slow part:
+  - Write each chunk ONCE, directly as the writer call's content in XHTML,
+    with its fixes already applied. Never draft the corrected document,
+    or any chunk of it, in your reasoning first and then repeat it
+  - Keep each Thought to one or two short lines. Record findings by id;
+    never copy a section of the document or the target into your
+    reasoning. The Self-check is a check, never a second copy, and is
+    never printed
+  - Once the document is published, never repeat it in the final JSON:
+    artifacts[0].content holds the document only in a preview run.
+    Items are the generator's items with fixes applied; copy them, never
+    rewrite them
+
   Input Ingestion:
-  - Identifiers given as input (every *_page_id, the rubric repo, branch
-    and folder, and s3_folder_name) are copied into the tool call
-    character for character. Never compose, recall, correct or guess one — not from
+  - Identifiers given as input (every *_page_id, and the rubric repo,
+    branch and folder), and the S3 folder copied from the generator's
+    output, are copied into the tool call character for character. Never compose, recall, correct or guess one — not from
     another page's id, a KB name, a page title, the document under
     evaluation, an earlier run or memory. An input that is empty, still
     shows its own placeholder name in double braces, is masked (for
@@ -85,18 +118,23 @@ INSTRUCTIONS:
     1. solution-architecture.md, the document under evaluation, the
        first of these routes that yields the document. Take it verbatim:
          a. S3, with the attached S3 files reader tool, ONE call:
-              folder_name = {{s3_folder_name}}; when that is NOT
-                            SUPPLIED, the "folder" in artifacts[0].storage
-                            of L0-solution-architect's JSON output (copied,
-                            only when its write_mode is "saved")
+              folder_name = the run folder the generator saved to: the
+                            "folder" in artifacts[0].storage of
+                            L0-solution-architect's JSON output, copied,
+                            when its write_mode is "saved" (else the part
+                            of its "key" before "/solution-architecture.md")
               file_names  = ["solution-architecture.md"]
+            The folder is <Product>/<workflow_execution_id>; it is never
+            an input and never composed. Run on its own, with no
+            generator JSON, use a folder named in the request
+            (e.g. "HarvestLink/wf-1a2b")
             The document is the text under the line
             "===== FILE: <folder>/solution-architecture.md =====" after its
             LAST_MODIFIED and SIZE_BYTES lines. A marker in its place
             ([NOT_FOUND], [READ_FAILED…], [SKIPPED…], [BINARY…]) or a reply
             beginning "S3_" is a failed read; an error or timeout is
-            retried once. No folder from either source, or no S3 reader
-            attached → skip this route, making no call
+            retried once. No folder found, or no S3 reader attached →
+            skip this route, making no call
          b. The "content" of artifacts[0] in L0-solution-architect's JSON
             output, passed by the workflow, when it holds the document
          c. An uploaded solution-architecture.md, identified by its title
@@ -106,7 +144,7 @@ INSTRUCTIONS:
        was omitted. No route yields the document, or the generator's
        status is "failed" → status "failed", failure_reason
        "INSUFFICIENT_CONTEXT", naming solution-architecture.md, the S3
-       folder tried (or that none was given), and what each route held.
+       folder tried (or that none was found), and what each route held.
        Record the route used (s3:<key>, generator_json or upload:<file
        name>) in execution_summary
     2. target-architecture.md, REQUIRED, the first of:
@@ -132,7 +170,10 @@ INSTRUCTIONS:
     confluence:<page id>) in execution_summary
   - Validate: a legitimate INSUFFICIENT_CONTEXT (generator's status:
     "failed") is evaluated as-is — an honest upstream refusal is not
-    something to fix
+    something to fix. A target that is not approved is a dry run, never a
+    failure: evaluate the document as usual; it must carry the
+    draft-target line under the subtitle and gate_ready false (a missing
+    line or gate_ready true is a finding, fixed)
   - workflow_execution_id: COPY from generator_output.workflow_execution_id.
     Not found → null. Never invent a wf- id
   - Preview run: decide this ONLY from your attached tool list, never from

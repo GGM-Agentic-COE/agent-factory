@@ -43,8 +43,13 @@ Accepts the original input and draft output from
 ## How does it work?
 
 1. Ingests the generator's original input and draft output
-2. Reads `regulatory-feasibility.md` and `idea-brief.json` from blob storage
-   — the brief is **JSON**, parsed by key path, not scanned as markdown
+2. Reads `regulatory-feasibility.md` from the run folder
+   (`artifacts[0].storage.folder` of the generator's output,
+   `<product>/<workflow_execution_id>`) and `idea-brief.json` from its
+   original folder (`storage.source_folder`) with `tool-L0-s3-files-reader` —
+   two calls, or one when the folders match. There is no folder input — the
+   brief is **JSON**, parsed by key path, not scanned as markdown. A correction is written back to the same S3 key with
+   `tool-L0-s3-writer`
 3. Reads both regulatory KBs from **Confluence** with `tool-L0-confluence-reader`
    — `page_id = 518422550` and `page_id = 519012353`, fixed in the prompt, the same pages the
    generator reads — to sanity-check citations and re-run the category sweep.
@@ -55,7 +60,7 @@ Accepts the original input and draft output from
    `agentic-sdlc-knowledge-bases`, branch `main`, folder
    `planning/vision-regulatory-feasiblity/L0-regulatory-feasibility-checker`.
    No examples are read. An unreadable rubric, or no KB carrying `#coverage-categories`, fails with
-   `REFERENCE_UNAVAILABLE`. Corrections still go back to blob storage, never
+   `REFERENCE_UNAVAILABLE`. Corrections still go back to S3, never
    to the repository or Confluence
 5. Checks every constraint's citation, mitigation/legal-review status, and
    whether its severity label actually matches its rationale
@@ -67,7 +72,7 @@ Accepts the original input and draft output from
    fail finding and an automatic `escalate_to_hitl`
 8. Fixes mechanical issues and writes any content change back into
    `regulatory-feasibility.md` — a viability correction touches **both** the
-   header table and the Viability Score section; escalates anything
+   Document Control table, Section 2 and the Viability Score section; escalates anything
    requiring a mitigation this evaluator can't independently justify
 
 ## Input

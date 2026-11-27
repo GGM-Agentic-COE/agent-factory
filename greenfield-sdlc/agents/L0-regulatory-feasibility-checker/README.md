@@ -15,7 +15,7 @@ mandatory, structured, and impossible to silently drop a serious finding.
 names a country. Both KBs are **read from Confluence** with
 `tool-L0-confluence-reader`, two calls, `page_id = 518422550` and `page_id = 519012353`, fixed in the
 prompt. The pages hold the content of `kb-L0-regulatory-frameworks-index-ind`
-and `kb-L1-domain-regulatory-ind`. They are not attached at runtime and not read
+and `kb-L0-domain-regulatory-ind`. They are not attached at runtime and not read
 from GitHub. This agent reads nothing from GitHub. The two KBs are told apart
 by their anchors, never by name, and are kept separate so their jurisdiction
 declarations can be compared. Each regulatory KB declares the jurisdiction it
@@ -99,7 +99,30 @@ be the agent that sets it.
 
 ## How does it work?
 
-1. Reads and parses `idea-brief.json` — by key path, never scanned as markdown
+1. Decides its mode, then the workflow id and folders:
+   - **After `L0-idea-intake`** (the normal combined run): the intake turns
+     the idea text into `idea-brief.json`, saves it to
+     `<product>/wf-<id>/` and owns the workflow id. The checker **copies**
+     `workflow_execution_id` and `document_reference.folder` from the
+     intake's output — one id for the whole run, never a second — and saves
+     `regulatory-feasibility.md` in that same folder, next to the brief. A
+     brief that reaches the checker is already approved, so its status is
+     not checked.
+   - **Standalone** (no intake output): normalizes the optional `folder_name`
+     input into **source_folder** — a bare name (`HarvestLink`), a path
+     (`HarvestLink/wf-<earlier id>`), only a workflow id (`wf-1a2b`) or a full
+     location (`s3://<bucket>/…/idea-brief.json`). It generates a workflow id
+     and writes to a new run folder `<product>/<new id>`, never to the
+     earlier folder.
+   Either way it reads and parses `idea-brief.json` from source_folder
+   (`tool-L0-s3-files-reader`) — by key path, never scanned as markdown
+1b. Reads the Document Template, `regulatory-feasibility-template.md`, from
+   GitHub with `tool-L0-github-reader-using-app` — `template_repo` /
+   `template_branch` / `regulatory_feasibility_template_folder`, in this
+   deployment `agentic-sdlc-knowledge-bases`, `main`,
+   `0. planning/vision-regulatory-feasibility/templates`. The template is not
+   embedded in the prompt; changing the document layout means editing that
+   file. Unreadable → `REFERENCE_UNAVAILABLE`
 1a. Reads the two knowledge bases (the frameworks index and the domain
    regulatory facts) from **Confluence** — `tool-L0-confluence-reader`,
    `page_id = 518422550` and `page_id = 519012353`, one call per page, each retried once on failure. The return is
@@ -111,7 +134,7 @@ be the agent that sets it.
    or `#jurisdiction` fails the run with `REFERENCE_UNAVAILABLE` rather than
    falling back on remembered categories; the index KB alone is a degraded run,
    with `requires_legal_review: true` on every affected constraint.
-   Confluence is read-only here: `regulatory-feasibility.md` goes to blob storage
+   Confluence is read-only here: `regulatory-feasibility.md` goes to S3
 2. Uses the regulatory frameworks index KB to identify which regulator
    categories apply at all
 3. Walks the **sweep list** in that KB's `#coverage-categories` section —
@@ -144,11 +167,17 @@ be the agent that sets it.
 9. Self-checks that no Red item was silently dropped and that the score
    derivation is arithmetically sound before returning (full scoring
    delegated to `L0-regulatory-feasibility-checker-evaluator`, per S6)
+10. Saves `regulatory-feasibility.md` to the run folder with
+   `tool-L0-s3-writer` — one call, one retry. `idea-brief.json` is never
+   copied. `artifacts[0].storage` carries both `folder` (the run folder) and
+   `source_folder`; the evaluator and the vision generator take both from
+   there, reading the document from the run folder and the brief from its
+   original folder
 
 ## Input
 
 - **Source:** `idea-brief.json` from `L0-idea-intake` — uploaded with
-  the request, or read from blob storage. **JSON, not markdown:** it is
+  the request, or read from S3. **JSON, not markdown:** it is
   parsed and read by key path
 - **Required:** `problem_statement`, `target_geography`
 - **Optional:** `product_category`, `target_users`, `value_proposition` —
@@ -162,7 +191,7 @@ be the agent that sets it.
   `viability` (score, recommendation, derivation, components, caps),
   `open_items[]` — see `output_schema.json`
 - **Artifacts:** `regulatory-feasibility.md` — now carrying a Viability Score
-  section and the score in its header table
+  section and the score in its Document Control table and Section 2
 - **Metadata:** every constraint carries `citation` (BLOCKER guardrail
   `gr-L0-citation-verifier`, 100% required, not just scored) and `reasoning`
 - **Summary:** constraint counts by status, overall verdict rationale, the
