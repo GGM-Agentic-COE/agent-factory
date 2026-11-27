@@ -1,4 +1,3 @@
-# Agent Specification Document
 spec_version: "1.0"
 artifact_type: agent
 metadata:
@@ -8,51 +7,74 @@ metadata:
   phase: planning
   owner: agentic-ai-coe
   created: 2026-10-28
+
 purpose:
-  description: "Assesses PRD components against the enterprise estate (service catalog + CMDB) and builds a traversal-verified dependency graph from the same findings in one run."
-  input: "prd_output from L0-requirements-prd-composer, plus raw service_catalog and cmdb_export; kb-L0-architecture-principles read via Confluence (page_id 524091393)."
-  output: "AgentOutput (content.type impact_assesment) with impact_assessment + dependency_graph meta-point items and the full <Product name>-impact-assessment.md inlined in artifacts[0].content."
-  business_value: "Prevents duplicate builds and wrong build sequencing by grounding every FR in the real estate and proving cycle_check / critical_path by traversal before backlog prioritisation."
+  description: >
+    Assesses PRD requirements against the enterprise estate and builds a traversal-verified
+    dependency graph from the same findings in one run. Fetches PRD and target architecture
+    from Confluence and document template from GitHub; uploads the completed assessment to S3.
+  input: >
+    PRD from Confluence ({{confluence-prd-page-id}}),
+    target architecture from Confluence ({{confluence-target-architecture-page-id}}),
+    document template from GitHub ({{github-impact-assessor-template}}, {{github-repo-name}}, {{github-branch-name}}).
+  output: >
+    AgentOutput (content.type: impact_assesment) with impact_assessment + dependency_graph items
+    and <product_name>-impact-assessment.md uploaded to S3 under <workflow_execution_id>/.
+  business_value: >
+    Prevents duplicate builds and wrong build sequencing by grounding every FR in the real estate
+    and proving cycle_check / critical_path by traversal before backlog prioritisation.
+
 prompt:
   ref: "prompts/L0-impact-assessor/instructions.md"
   version: "1.0.0"
-  description: "Two-part prompt: Part 1 impact assessment against catalog/CMDB/KB; Part 2 dependency graph (DFS cycle check, longest-path critical path, 1:1 mermaid) built from Part 1, inlined as artifact."
+  description: >
+    Two-part prompt: Part 1 impact assessment (capability check, technical impact, FR→component
+    mapping, blast radius); Part 2 dependency graph (DFS cycle check, longest-path critical path,
+    1:1 mermaid). Template fetched from GitHub; output uploaded to S3.
+
 contract:
-  input_schema: "$ref: schemas/agent-input-contract-schema.json"
-  output_schema: "$ref: schemas/agent-output-schema.json"
   input:
-    accepts_from_agents: [L0-requirements-prd-composer]
+    accepts_from_agents: []
     accepts_direct_input: true
-    accepts_file_upload:
-      enabled: true
-      formats: [".json", ".md"]
-    required_parameters:
-      prd_output: {type: object, description: "AgentOutput from L0-requirements-prd-composer; status must be success; content.items holds FR-NNN and constraints"}
-      service_catalog: {type: object, description: "Service catalog export; services[] (may be empty)"}
-      cmdb_export: {type: object, description: "CMDB export; configuration_items[], relationships[], export_metadata.exported_at (may be empty)"}
-    optional_parameters:
-      run_date: {type: string, default: "execution date (UTC)", description: "Reference date for export staleness check"}
-      kb_page_id: {type: string, default: "524091393", description: "Confluence page id of kb-L0-architecture-principles"}
+    runtime_variables:
+      confluence-prd-page-id:
+        type: string
+        description: "Confluence page ID of the PRD"
+      confluence-target-architecture-page-id:
+        type: string
+        description: "Confluence page ID of the target architecture"
+      github-impact-assessor-template:
+        type: string
+        description: "GitHub folder location of the impact assessment document template"
+      github-repo-name:
+        type: string
+        description: "GitHub repository name"
+      github-branch-name:
+        type: string
+        description: "GitHub branch name"
   output:
-    $ref: "output_schema.json"
+    type: impact_assesment
+    schema_ref: "output_schema.json"
+    artifacts:
+      - name: "<product_name>-impact-assessment.md"
+        storage: s3
+        folder: "<workflow_execution_id>"
+
 context:
-  knowledge_bases:
-    - kb-L0-architecture-principles   # fetched at runtime via tool-L0-confluence-fetch-page (page_id 524091393)
-  guardrails:
-    - gr-L0-output-schema-validator
-    - gr-L0-pii-detection
-    - gr-L3-hallucination-detector
-    - gr-L3-citation-validator
-    - gr-L3-consistency-checker
-    - gr-L1-tool-permissions
-    - gr-L3-agent-rate-limit
   tools:
-    - tool-L0-confluence-fetch-page   # read-only; KB + input page retrieval. No write tool — blob persistence is owned by the paired evaluator.
+    - name: confluence-reader
+      usage: "Read-only. Two calls: PRD ({{confluence-prd-page-id}}) and target architecture ({{confluence-target-architecture-page-id}})."
+    - name: github-reader
+      usage: "Read-only. Fetch document template from {{github-impact-assessor-template}} on {{github-repo-name}}@{{github-branch-name}}."
+    - name: s3-writer
+      usage: "Write <product_name>-impact-assessment.md to folder_name=<workflow_execution_id>."
+
 quality:
   evaluation_ref: "evaluation.md"
   min_score: 7.0
   hallucination_check: true
   consistency_check: true
+
 versioning:
   input_version: "1.0"
   output_version: "1.0"

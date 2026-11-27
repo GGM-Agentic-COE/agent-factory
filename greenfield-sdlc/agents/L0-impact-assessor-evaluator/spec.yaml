@@ -1,4 +1,3 @@
-# Agent Specification Document
 spec_version: "1.0"
 artifact_type: agent
 metadata:
@@ -8,55 +7,87 @@ metadata:
   phase: planning
   owner: agentic-ai-coe
   created: 2026-10-28
+
 purpose:
-  description: "Independently re-derives L0-impact-assessor's impact findings, cycle_check, critical_path and mermaid from source data; fixes mechanically-recoverable gaps, escalates ambiguity, and persists the evaluated impact-assessment.md to Confluence."
-  input: "original_input (prd_output, service_catalog, cmdb_export) and generator_output from L0-impact-assessor; freshly-fetched service_catalog/cmdb_export; kb-L0-architecture-principles; generator's evaluation.md from GitHub."
-  output: "AgentOutput (content.type evaluation_result) with scores, findings, fixes_applied, final_decision, and the evaluated impact-assessment.md as artifact-001 with storage.location = literal Confluence URL returned by the writer tool."
-  business_value: "Sole quality gate before L0-backlog-prioritizer — a wrong impact finding or unproven graph becomes a wrong build sequence; this agent proves or corrects it before anything is topologically sorted."
+  description: >
+    Independently re-derives L0-impact-assessor's impact findings, cycle_check, critical_path
+    and mermaid from freshly-fetched source data; fixes mechanically-recoverable gaps, escalates
+    ambiguity, and persists the evaluated impact-assessment.md to Confluence.
+  input: >
+    generator_output (inline JSON from L0-impact-assessor);
+    <product_name>-impact-assessment.md from S3 (folder=<workflow_execution_id>);
+    PRD from Confluence ({{confluence-prd-page-id}});
+    target architecture from Confluence ({{confluence-target-architecture-page-id}});
+    evaluation rubric from GitHub ({{github-impact-assessor-evaluation}}, {{github-repo-name}}, {{github-branch-name}}).
+  output: >
+    AgentOutput (content.type: evaluation_result) with scores, findings, fixes_applied,
+    final_decision, and evaluated <product_name>-impact-assessment.md as artifact-001
+    with storage.confluence_page_id (literal return from Confluence writer) and blob_storage_location.
+  business_value: >
+    Sole quality gate before L0-backlog-prioritizer — a wrong impact finding or unproven graph
+    becomes a wrong build sequence; this agent proves or corrects it before anything is
+    topologically sorted.
+
 prompt:
   ref: "prompts/L0-impact-assessor-evaluator/instructions.md"
   version: "1.0.0"
-  description: "Re-derives capability/technical-impact checks, DFS cycle_check, longest-path critical_path and mermaid 1:1; fixes or escalates; unconditional Confluence write of the evaluated document."
+  description: >
+    Re-derives capability/technical-impact checks, DFS cycle_check, longest-path critical_path
+    and mermaid 1:1; fixes or escalates; unconditional Confluence write of the evaluated document.
+
 contract:
-  input_schema: "$ref: schemas/agent-input-contract-schema.json"
-  output_schema: "$ref: schemas/agent-output-schema.json"
   input:
     accepts_from_agents: [L0-impact-assessor]
     accepts_direct_input: false
-    accepts_file_upload:
-      enabled: false
     required_parameters:
-      generator_output: {type: object, description: "AgentOutput from L0-impact-assessor (content.items + artifacts[0].content inline markdown)"}
-      original_input: {type: object, description: "Generator's input: prd_output, service_catalog, cmdb_export, run_date"}
-      service_catalog: {type: object, description: "Freshly-fetched service catalog export at evaluation time"}
-      cmdb_export: {type: object, description: "Freshly-fetched CMDB export (configuration_items[], relationships[], export_metadata)"}
-    optional_parameters:
-      space_key: {type: string, default: "", description: "Confluence space for the writer tool (blank in instructions — supply at deployment)"}
+      generator_output:
+        type: object
+        description: "AgentOutput from L0-impact-assessor; workflow_execution_id is inherited from this field."
+    runtime_variables:
+      confluence-prd-page-id:
+        type: string
+        description: "Confluence page ID of the PRD (fetched independently)"
+      confluence-target-architecture-page-id:
+        type: string
+        description: "Confluence page ID of the target architecture (fetched independently)"
+      confluence-impact-assessment-space-key:
+        type: string
+        description: "Confluence space key for writing the evaluated impact assessment"
+      github-impact-assessor-evaluation:
+        type: string
+        description: "GitHub folder location of the evaluation rubric (evaluation.md)"
+      github-repo-name:
+        type: string
+        description: "GitHub repository name"
+      github-branch-name:
+        type: string
+        description: "GitHub branch name"
   output:
-    $ref: "output_schema.json"
+    type: evaluation_result
+    schema_ref: "output_schema.json"
+    artifacts:
+      - name: "<product_name>-impact-assessment.md"
+        storage:
+          blob_storage_location: "s3://<bucket>/<workflow_execution_id>/<product_name>-impact-assessment.md"
+          confluence_page_id: "<literal return from Confluence writer>"
+
 context:
-  knowledge_bases:
-    - ref: "../L0-impact-assessor/evaluation.md"   # source of truth for scoring; fetched via tool-L0-github-fetch-file — never duplicated into this prompt
-    - kb-L0-architecture-principles                       # cross-check source data; fetched via tool-L0-confluence-fetch-page (page_id 524091393)
-  guardrails:
-    - gr-L0-output-schema-validator
-    - gr-L0-pii-detection
-    - gr-L0-impact-assessment-quality-gate   # fires on final iteration only
-    - gr-L3-hallucination-detector           # re-checked independently, not trusted from generator
-    - gr-L3-consistency-checker
-    - gr-L1-tool-permissions
-    - gr-L3-agent-rate-limit
   tools:
-    # Deviation from the skill's evaluator default (tools: []) — the instructions explicitly attach these;
-    # this evaluator is the designated sole writer of the final artifact.
-    - tool-L0-confluence-fetch-page    # read: kb-L0-architecture-principles (page_id 524091393)
-    - tool-L0-github-fetch-file        # read: evaluation.md from agentic-sdlc-knowledge-bases@main
-    - tool-L0-confluence-create-page   # write: evaluated impact-assessment.md (unconditional); returns confluence_page_url
+    - name: confluence-reader
+      usage: "Read-only. Two calls: PRD ({{confluence-prd-page-id}}) and target architecture ({{confluence-target-architecture-page-id}})."
+    - name: s3-reader
+      usage: "Read <product_name>-impact-assessment.md from folder_name=<workflow_execution_id>."
+    - name: github-reader
+      usage: "Read evaluation rubric from {{github-impact-assessor-evaluation}} on {{github-repo-name}}@{{github-branch-name}}."
+    - name: confluence-writer
+      usage: "Write evaluated impact-assessment.md. title=<product_name> Impact Assessment, space_key={{confluence-impact-assessment-space-key}}."
+
 quality:
-  evaluation_ref: "evaluation.md"   # this agent's own meta-quality bar (are findings genuine? fixes correct?)
+  evaluation_ref: "evaluation.md"
   min_score: 8.0
   hallucination_check: true
   consistency_check: true
+
 versioning:
   input_version: "1.0"
   output_version: "1.0"
