@@ -10,15 +10,15 @@ metadata:
   created: "2026-10-26"
 
 purpose:
-  description: "Independently verifies L0-prd-composer's PRD for zero-drop FR/NFR composition, citable assumptions/constraints/risks, correct table structure and absence of success metrics, fixes grounded gaps in both the JSON and the PRD markdown, and publishes the approved PRD to Confluence."
+  description: "Independently verifies L0-prd-composer's PRD for zero-drop FR/NFR composition, traceable release tags, citable assumptions/obligations/dependencies/risks, success metrics carried only from the vision, and conformance to kb-L0-prd-template, fixes grounded gaps in both the JSON and the PRD markdown, and publishes the approved PRD to Confluence."
   input: "L0-prd-composer's output held in memory (items plus the full PRD markdown in artifacts[0].content) and its original input (evaluated requirements and evaluated NFR set)."
   output: "The corrected PRD items in the same structure the composer emits, an evaluation block (scores, findings, fixes_applied, final_decision), and an artifact pointing to the published Confluence page (null location when not published)."
   business_value: "The PRD is the single source of truth for the planning agents, so a dropped or misattached requirement here propagates everywhere. This is the only agent permitted to publish the PRD, and nothing is published until it has been independently verified."
 
 prompt:
-  ref: "agents/L0-prd-composer-evaluator/L0-prd-composer-evaluator-prompt.md"
+  ref: "prompts/L0-prd-composer-evaluator/instructions.md"
   version: "1.0.0"
-  description: "Checks zero-drop FRs and per-FR NFRs by set membership, citation of every assumption/constraint/risk, ID-tagged table structure, success-metrics absence and verbatim compound splits; fixes in JSON and markdown; uploads to Confluence unless escalating."
+  description: "Checks zero-drop FRs and per-FR NFRs (NFR/NQ rows) by set membership, release-tag basis, citation of every AS/CON/DP/OR row and NSM/LI metric, template structure and keys, and verbatim compound splits; fixes in JSON and markdown; uploads to Confluence unless escalating."
 
 contract:
   input_schema: "$ref: schemas/agent-input-contract-schema.json"
@@ -35,6 +35,9 @@ contract:
       github-prd-evaluator-folder-location: { type: string, description: "GitHub folder holding the composer's evaluation file" }
       github-prd-evaluator-repo-name: { type: string, description: "GitHub repository holding the composer's evaluation file" }
       github-prd-evaluator-branch: { type: string, description: "GitHub branch holding the composer's evaluation file" }
+      prd-template-github-folder-location: { type: string, description: "GitHub folder holding kb-L0-prd-template" }
+      agent-github-repo-name: { type: string, description: "GitHub repository holding the template" }
+      agent-github-repo-branch: { type: string, description: "GitHub branch holding the template" }
       prd-upload-confluence-location: { type: string, description: "Confluence space_key (or folder) the approved PRD is published to via tool-L0-confluence-writer" }
 
   output:
@@ -43,6 +46,7 @@ contract:
 context:
   knowledge_bases:
     - ref: "../L0-prd-composer/evaluation.md"   # source of truth for scoring, retrieved from GitHub at runtime — never duplicated in this agent's prompt
+    - kb-L0-prd-template                        # the template the composer filled; structure checked against it (read from GitHub)
   guardrails:
     - gr-L0-output-schema-validator
     - gr-L0-pii-detection
@@ -52,7 +56,7 @@ context:
     - gr-L1-tool-permissions        # holds a write tool — publish only on approved / fixed_and_approved
     - gr-L3-agent-rate-limit
   tools:
-    - tool-L0-github-reader-using-PAT    # reads the composer's evaluation file; tool-L0-github-reader-using-app takes the same parameters if that variant is deployed instead
+    - tool-L0-github-reader-using-PAT    # reads the composer's evaluation file and kb-L0-prd-template; tool-L0-github-reader-using-app takes the same parameters if that variant is deployed instead
     - tool-L0-confluence-writer          # publishes the final, corrected PRD; never called on escalate_to_hitl or INSUFFICIENT_CONTEXT
 
 quality:

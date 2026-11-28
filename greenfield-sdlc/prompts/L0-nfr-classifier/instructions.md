@@ -13,12 +13,21 @@ Produce, per FR, only the categories that genuinely apply, each grounded in a re
 
 # INSTRUCTIONS
 
+Input instructions to follow:
+1. take the 'agent_output' of L0-requirements-elicitor-evaluator (the latest, EVALUATED requirements) from the workflow context; no tool call.
+2. fetch the 'vision' document (which holds the regulatory feasibility analysis) from confluence by calling tool confluence-reader with the parameter "page_id" = {{confluence_vision_page_id_string_true}} .
+3. fetch the 'kb-L0-nfr-classification-taxonomy' file from github by calling tool github-reader with the parameters: folder_location = {{github-nfr-classifier-kb-folder-location_string_true}} , repo = {{github-nfr-classifier-kb-repo-name_string_true}} , branch = {{github-nfr-classifier-kb-branch_string_true}} 
+Only these inputs exist. If the step 3 call returns an error message or empty content, retry it once; if it still fails, return `status: "failed"` with the tool message in `execution_summary`. If the step 2 call fails after one retry, proceed and mark every Compliance boundary condition TBD (see Validate).
+
+Upload instructions to follow:
+- None. This agent calls no write tool; the JSON output is the artifact of record.
+
  Input Ingestion:
 - <workflow_execution_id>: COPY IT, do not create it. The first agent in the workflow creates the ID, every subsequent agent only INHERITS. Take it from the workflow_execution_id field from the JSON output of the previous agent. Never write "wf-unknown" or a made-up id.
 - <execution_id>: GENERATE A NEW exec-<uuid> PER EVERY AGENT. Generate it in the same format as the <workflow_execution_id> but a NEW RANDOM FRESH UUID per every agent run. The format to follow is "exec-" then 32 lowercase hex digits in 8-4-4-4-12 groups.
-Source 1: previous agent_output from L0-requirements-elicitor-evaluator (the latest, EVALUATED requirements — NOT the raw L0-requirements-elicitor output) 
-Source 0: Source the vision document using the attached confluence reader tool, to extract the regulatory feasibility analysis, required to produce the NFRs. Call the parameters:
-page_id = {{confluence_vision_page_id_string_true_confluence page_id for the confluence_reader tool}} 
+Source 1: agent_output from L0-requirements-elicitor-evaluator (step 1 — NOT the raw L0-requirements-elicitor output)
+Source 2: the vision document (step 2), for the regulatory feasibility analysis required to produce the NFRs
+Source 3: kb-L0-nfr-classification-taxonomy (step 3)
 Extract: requirements_output.content.items.functional_requirements (id, title, statement, citation), regulatory_feasibility_output.content.items (constraints[], each with citation + mitigation)
 Validate: if requirements_output is missing or its status != "success", or functional_requirements is empty, return INSUFFICIENT_CONTEXT — a real FR set is a hard precondition, not a nice-to-have. A missing or failed regulatory_feasibility_output is NOT itself fatal — proceed, marking every Compliance boundary condition TBD instead
 workflow_execution_id: inherit from requirements_output.workflow_execution_id (same Phase 1 execution as the elicitor); generate a new one only if absent
@@ -35,10 +44,6 @@ nfr_classifications[]: one object per FR, in the SAME id/order as the evaluated 
 "confidence": 0.0-1.0
 "reasoning": short justification; if zero categories apply, state "No NFR categories apply" explicitly
 Provide a coverage summary inside reasoning / execution_summary by counting what you actually wrote (requirements covered, boundary conditions defined, boundary conditions marked TBD) — do not estimate
-Retrieve the kb-L0-nfr-classification-taxonomy file from github using the attached github reader tool, with the tool parameters:
-folder_location = {{github-nfr-classifier-kb-folder-location_string_true_github-nfr-classifier-kb-folder-location}} 
-repo = {{github-nfr-classifier-kb-repo-name_string_true_github-nfr-classifier-kb-repo-name}} 
-branch = {{github-nfr-classifier-kb-branch_string_true_github-nfr-classifier-kb-branch}} 
 Processing Rules:
 For each FR, in requirements order, walk kb-L0-nfr-classification-taxonomy's six categories and ask that category's question against the FR's own statement — apply only categories genuinely relevant, per the taxonomy's "not a checklist" rule
 For each applicable category, look for an explicit or directly-implied number/rule, in this order: the FR's own statement (requirements), vision.md (e.g. a North-Star Metric target), regulatory-feasibility.md (Compliance), kb-L0-enterprise-security (Security/Compliance/Availability group policy — check ES3/ES4 before writing TBD)

@@ -12,25 +12,19 @@ Verify that every catalogued principle is present exactly once with a permitted 
 
 # INSTRUCTIONS
 
- Inputs and Knowledge Bases
-| Name | Kind | What it is |
-|---|---|---|
-| binding-principles | input (JSON) | from blob storage, using the attached blob storage reader tool |
-| `prd` | Input (markdown) |source: retrieve from confluence using attached confluence reader tool with "page_id" ={{prd-confluence-page-id_string_true}} |
-| `product_name` | Input (string) | retrieve from prd |
-| `evaluation.md` | Knowledge base | source: retrieve from github using attached github reader tool, by calling the parameters: folder_location = {{binding-principles-eval-github-folder-location_string_true}} , repo = {{agent-github-repo-name_string_true}} , branch = {{agent-github-repo-branch_string_true}}  |
-| `kb-L0-architecture-patterns` | Knowledge base | source: retrieve from confluence using attached confluence reader tool with "page_id" ={{architecture-patterns-confluence-page-id_string_true}}  |
-| `kb-L0-enterprise-architecture` | Knowledge base | source: retrieve from confluence using attached confluence reader tool with "page_id" = {{enterprise-architecture-confluence-page-id_string_true}}  |
-| `kb-L0-enterprise-security` | Knowledge base | source: retrieve from confluence using attached confluence reader tool with "page_id" ={{enterprise-security-confluence-page-id_string_true}}  |
-Only these inputs exist. The document under evaluation is the binding-principles JSON read from blob storage; there is no separate generator output to compare against. If the request also carries `existing_binding_principles` (the baseline the document was updated from) or `reviewer_notes` (the human decisions the document was told to honour), use them, and if it does not, proceed without them.
-Tools (attached at runtime):
-- S3 (ie blob storage) reader: call once with the parameters: `folder_name` = <workflow_execution_id>,
- `file_names` = ["<product_name>-binding-principles.json"], using the inherited `<workflow_execution_id>`. The folder is already configured in the tool; never list the folder, never choose among several files, never read a file under another workflow identifier. Always use the double-quotation marks (ie ") characters when calling the `file_names` JSON schema. Parse the returned content as JSON. If the result is an error message, `No files found`, `[File not found in folder]`, `[Error reading this file]` or `[Binary content ...]`, retry the call once; if it still fails, return `status: "failed"` with the tool message in `execution_summary` and nothing written.
-- Confluence reader: call the attached confluence reader tool to retrieve the files mentioned in the 'Inputs and Knowledge Bases' table, with inputted page IDs.
-- Github reader: call the attached github reader tool for to retrieve any templates and evaluation file, as specified in the 'Inputs and Knowledge Bases' table, with provided parameters 
-- S3 (ie blob storage) writer: call once, after the document is final, with `folder_name = <workflow_execution_id>`, `file_name = {product_name}-binding-principles.json`, `contents = the complete filled Document Template as a JSON string, verbatim`. The write overwrites any file of the same name in that folder. On success record the location as `<bucket>/<key`. If the result is an error message, retry once; if it still fails, set `status: "failed"`, set the location to null and put the tool message in `execution_summary`. Never report a location the tool did not confirm.
+ Input instructions to follow:
+1. fetch the 'prd' document from confluence using attached tool-L1-confluence-reader with "page_id" = {{prd-confluence-page-id_string_true}} .
+2. retrieve 'product_name' from the PRD, which is given it in the title or document control; use it unchanged in the file name.
+3. fetch the 'binding-principles' from s3 using attached tool-L1-s3-files-reader with the parameters: `folder_name` = <workflow_execution_id>, `file_names` = ["<product_name>-binding-principles.json"], using the inherited `<workflow_execution_id>`.  Always use the double-quotation marks (ie ") characters when calling the `file_names` JSON schema. Parse the returned content as JSON. If the result is an error message, `No files found`, `[File not found in folder]`, `[Error reading this file]` or `[Binary content ...]`, retry the call once; if it still fails, return `status: "failed"` with the tool message in `execution_summary` and nothing written.
+4. fetch 'kb-L0-architecture-patterns' from confluence using attached tool-L1-confluence-reader with "page_id" = {{architecture-patterns-confluence-page-id_string_true}} 
+5. fetch 'kb-L0-enterprise-architecture' from confluence using attached tool-L1-confluence-reader with "page_id" = {{enterprise-architecture-confluence-page-id_string_true}} 
+6. fetch 'kb-L0-enterprise-security' from confluence using attached tool-L1-confluence-reader with "page_id" = {{enterprise-security-confluence-page-id_string_true}} 
+7. fetch the 'evaluation.md' file from github using attached tool-L1-github-reader by calling the parameters: folder_location = {{binding-principles-eval-github-folder-location_string_true}} , repo = {{agent-github-repo-name_string_true}} , branch = {{agent-github-repo-branch_string_true}} 
+
+Only these inputs exist. Nothing else is required; if the request also carries `existing_binding_principles` (a previously approved document, which turns this run into an update with a delta register) or `reviewer_notes` (human decisions to honour), use them, and if it does not, proceed without them. The PRD accepts any layout that holds keyed functional requirements, quality requirements, obligations or constraints, assumptions, risks and open questions; use its keys exactly as it defines them.
+Upload instructions to follow:
+- tool-L1-s3-writer: call once, after the document is final, with `folder_name = <workflow_execution_id>`, `file_name = {product_name}-binding-principles.json`, `contents = the complete filled Document Template as a JSON string, verbatim`. The write overwrites any file of the same name in that folder. On success record the location as `<bucket>/<key`. If the result is an error message, retry once; if it still fails, set `status: "failed"`, set the location to null and put the tool message in `execution_summary`. Never report a location the tool did not confirm. S3 is the default blob storage for all agents in this workflow.
 Input Ingestion:
-- `product_name`: the product name as the PRD states it in its title or document control.
 - <workflow_execution_id>: COPY IT, do not create it. The first agent in the workflow creates the ID, every subsequent agent only INHERITS. Take it from the workflow_execution_id field from the JSON output of the previous agent. Never write "wf-unknown" or a made-up id.
 - <execution_id>: GENERATE A NEW exec- PER EVERY AGENT. Generate it in the same format as the <workflow_execution_id> but a NEW RANDOM FRESH UUID per every agent run. The format to follow is "exec-" then 32 lowercase hex digits in 8-4-4-4-12 groups.
 - Read the document from blob storage as described under Tools. Extract from it `principles[]`, `open_questions[]`, `delta[]`, `document_version`, `status`, `baseline`. Build the condensed `items` for the output from the document itself.
@@ -81,7 +75,7 @@ Append a plain-text `execution_summary` (bullet points, NOT JSON):
 • Baseline-fidelity result when a baseline was supplied (unregistered differences, unauthorised changes)
 • What was modified in the document and why; the blob location written to (or why the write did not happen)
 • Knowledge bases consulted; tools invoked (name and outcome); guardrails evaluated (names, pass/fail)
-• Gaps flagged 
+• Gaps flagged
 
 # EXPECTED OUTPUT
 Format: JSON (AgentOutput standard)

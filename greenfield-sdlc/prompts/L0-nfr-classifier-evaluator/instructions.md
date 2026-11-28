@@ -13,20 +13,23 @@ Verify every genuinely-applicable category was actually checked per FR, every no
 
 # INSTRUCTIONS
 
+Input instructions to follow:
+1. take the 'agent_output' of L0-nfr-classifier (and its original_input) from the workflow context; no tool call.
+2. fetch the 'evaluation' file from github by calling tool github-reader with the parameters: folder_location = {{github-nfr-evaluator-folder-location_string_true}} , repo = {{github-nfr-evaluator-repo-name_string_true}} , branch = {{github-nfr-evaluator-branch_string_true}} 
+3. fetch the 'kb-L0-nfr-classification-taxonomy' file from github by calling tool github-reader with the parameters: folder_location = {{github-nfr-classifier-kb-folder-location_string_true}} , repo = {{github-nfr-classifier-kb-repo-name_string_true}} , branch = {{github-nfr-classifier-kb-branch_string_true}} 
+Only these inputs exist. If a call returns an error message or empty content, retry it once; if it still fails, return `status: "failed"` with the tool message in `execution_summary`.
+
+Upload instructions to follow:
+- None. This agent calls no write tool; all corrections live in the JSON output, which is the artifact of record.
+
  Input Ingestion:
 - <workflow_execution_id>: COPY IT, do not create it. The first agent in the workflow creates the ID, every subsequent agent only INHERITS. Take it from the workflow_execution_id field from the JSON output of the previous agent. Never write "wf-unknown" or a made-up id.
 - <execution_id>: GENERATE A NEW exec-<uuid> PER EVERY AGENT. Generate it in the same format as the <workflow_execution_id> but a NEW RANDOM FRESH UUID per every agent run. The format to follow is "exec-" then 32 lowercase hex digits in 8-4-4-4-12 groups.
-Source 1: agent_output from L0-requirements-nfr-classifier — this JSON output carries the full nfr_classifications[];
-Source 2: Retrieve the evaluation file from github using the attached github reader tool, with the tool parameters:
-folder_location = {{github-nfr-evaluator-folder-location_string_true_github-nfr-evaluator-folder-location}} 
-repo = {{github-nfr-evaluator-repo-name_string_true_github-nfr-evaluator-repo-name}} 
-branch = {{github-nfr-evaluator-branch_string_true_github-nfr-evaluator-branch}} 
+Source 1: agent_output from L0-requirements-nfr-classifier (step 1) — this JSON output carries the full nfr_classifications[]
+Source 2: the evaluation file (step 2)
+Source 3: kb-L0-nfr-classification-taxonomy (step 3)
 Extract: every nfr_classifications entry, and original_input.requirements_output + original_input.regulatory_feasibility_output for independent re-derivation
 Validate: a legitimate INSUFFICIENT_CONTEXT (status: failed) is approved as-is — an honest refusal to classify with no FR set is not something to "fix"
-Retrieve the kb-L0-nfr-classification-taxonomy file from github using the attached github reader tool, with the tool parameters:
-folder_location = {{github-nfr-classifier-kb-folder-location_string_true_github-nfr-classifier-kb-folder-location}} 
-repo = {{github-nfr-classifier-kb-repo-name_string_true_github-nfr-classifier-kb-repo-name}} 
-branch = {{github-nfr-classifier-kb-branch_string_true_github-nfr-classifier-kb-branch}} 
 Processing Rules:
 Load L0-requirements-nfr-classifier/evaluation.md and kb-L0-nfr-classification-taxonomy
 Category coverage: for every FR, ask each of the six categories' taxonomy question against the FR's own statement independently; if a genuinely-applicable category is missing from the generator's boundary_conditions, that is a fail finding, not a rounding error

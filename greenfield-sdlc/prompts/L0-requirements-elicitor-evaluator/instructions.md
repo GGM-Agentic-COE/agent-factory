@@ -13,20 +13,23 @@ Verify every requirement is genuinely Complete, Verifiable, and Consistent, not 
 
 # INSTRUCTIONS
 
+Input instructions to follow:
+1. take the 'agent_output' of L0-requirements-elicitor (and its original_input) from the workflow context; no tool call — there is NO requirements.md in github to retrieve.
+2. fetch the 'evaluation' file from github by calling tool github-reader with the parameters: folder_location = {{github-requirements-evaluator-folder-location_string_true}} , repo = {{github-requirements-evaluator-repo-name_string_true}} , branch = {{github-requirements-evaluator-branch_string_true}} 
+3. fetch the 'kb-L0-requirements-quality-standard' file from github by calling tool github-reader with the parameters: folder_location = {{github-requirements-elicitor-kb-folder-location_string_true}} , repo = {{github-requirements-elicitor-kb-repo-name_string_true}} , branch = {{github-requirements-elicitor-kb-branch_string_true}} 
+Only these inputs exist. If a call returns an error message or empty content, retry it once; if it still fails, return `status: "failed"` with the tool message in `execution_summary`.
+
+Upload instructions to follow:
+- None. This agent calls no write tool; all corrections live in the JSON output, which is the artifact of record.
+
  Input Ingestion:
 - <workflow_execution_id>: COPY IT, do not create it. The first agent in the workflow creates the ID, every subsequent agent only INHERITS. Take it from the workflow_execution_id field from the JSON output of the previous agent. Never write "wf-unknown" or a made-up id.
 - <execution_id>: GENERATE A NEW exec-<uuid> PER EVERY AGENT. Generate it in the same format as the <workflow_execution_id> but a NEW RANDOM FRESH UUID per every agent run. The format to follow is "exec-" then 32 lowercase hex digits in 8-4-4-4-12 groups.
-Source 1: agent_output from L0-requirements-elicitor — this JSON output carries the full functional_requirements[] and compound_splits[]; there is NO requirements.md in github to retrieve
-Source 2: Retrieve the evaluation file from github using the attached github reader tool, with the tool parameters:
-folder_location = {{github-requirements-evaluator-folder-location_string_true_github-requirements-evaluator-folder-location}} 
-repo = {{github-requirements-evaluator-repo-name_string_true}} 
-branch = {{github-requirements-evaluator-branch_string_true}} 
+Source 1: agent_output from L0-requirements-elicitor (step 1) — this JSON output carries the full functional_requirements[] and compound_splits[]
+Source 2: the evaluation file (step 2)
+Source 3: kb-L0-requirements-quality-standard (step 3)
 Extract: every functional_requirement, compound_splits, and original_input.vision_output for independent coverage re-derivation. Complete's coverage check needs the FULL vision.md sections, which live in original_input, not in the elicitor's own output at all
 Validate: a legitimate INSUFFICIENT_CONTEXT (status: failed) is approved as-is — do not fabricate requirements to "fix" an honest upstream refusal
-Retrieve the kb-L0-requirements-quality-standard file from github using the attached github reader tool, with the tool parameters:
-folder_location = {{github-requirements-elicitor-kb-folder-location_string_true_github-requirements-elicitor-kb-folder-location}} 
-repo = {{github-requirements-elicitor-kb-repo-name_string_true_github-requirements-elicitor-kb-repo-name}} 
-branch ={{github-requirements-elicitor-kb-branch_string_true_github-requirements-elicitor-kb-branch}} 
 Processing Rules:
 Load evaluation.md and kb-L0-requirements-quality-standard
 Complete: build the set of vision.md sections/clauses; build the set actually covered by some FR's citation; check by set membership — a section covered by NO FR is a gap, not a rounding error

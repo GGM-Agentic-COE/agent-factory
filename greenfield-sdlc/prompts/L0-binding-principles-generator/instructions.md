@@ -19,18 +19,21 @@ Success criteria:
 
 # INSTRUCTIONS
 
-Inputs and Knowledge Bases
-| Name | Kind | What it is |
-|---|---|---|
-| `prd` | Input (markdown) | source: retrieve from confluence using attached confluence reader tool with "page_id" = {{prd-confluence-page-id_string_true}}  |
-| `product_name` | Input (string) | retrieve from prd |
-| `kb-L0-architecture-patterns` | Knowledge base | source: retrieve from confluence using attached confluence reader tool with "page_id" = {{architecture-patterns-confluence-page-id_string_true}}   |
-| `kb-L0-enterprise-architecture` | Knowledge base | source: retrieve from confluence using attached confluence reader tool with "page_id" ={{enterprise-architecture-confluence-page-id_string_true}}  |
-| `kb-L0-enterprise-security` | Knowledge base | source: retrieve from confluence using attached confluence reader tool with "page_id" = {{enterprise-security-confluence-page-id_string_true}}  |
+Input instructions to follow:
+
+1. fetch the 'prd' document from confluence using attached tool-L1-confluence-reader with "page_id" = {{prd-confluence-page-id_string_true}} .
+2. retrieve 'product_name' from the PRD, which is given it in the title or document control; use it unchanged in the file name.
+3. fetch 'kb-L0-architecture-patterns' from confluence using attached tool-L1-confluence-reader with "page_id" = {{architecture-patterns-confluence-page-id_string_true}} 
+4. fetch 'kb-L0-enterprise-architecture' from confluence using attached tool-L1-confluence-reader with "page_id" = {{enterprise-architecture-confluence-page-id_string_true}} 
+5. fetch 'kb-L0-enterprise-security' from confluence using attached tool-L1-confluence-reader with "page_id" = {{enterprise-security-confluence-page-id_string_true}} 
+
 Only these inputs exist. Nothing else is required; if the request also carries `existing_binding_principles` (a previously approved document, which turns this run into an update with a delta register) or `reviewer_notes` (human decisions to honour), use them, and if it does not, proceed without them. The PRD accepts any layout that holds keyed functional requirements, quality requirements, obligations or constraints, assumptions, risks and open questions; use its keys exactly as it defines them.
-Tools (attached at runtime):
-- Confluence reader: call the attached confluence reader tool to retrieve the files mentioned in the 'Inputs and Knowledge Bases' table, with inputted page IDs.
-- S3 (ie blob storage) writer: call once, after the document is final, with `folder_name = <workflow_execution_id>`, `file_name = {product_name}-binding-principles.json`, `contents = the complete filled Document Template as a JSON string, verbatim`. The write overwrites any file of the same name in that folder. On success record the location as `<bucket>/<key`. If the result is an error message, retry once; if it still fails, set `status: "failed"`, set the location to null and put the tool message in `execution_summary`. Never report a location the tool did not confirm.
+
+Upload instructions to follow:
+- tool-L1-s3-writer: call once, after the document is final, with `folder_name = <workflow_execution_id>`, `file_name = {product_name}-binding-principles.json`, `contents = the complete filled Document Template as a JSON string, verbatim`. The write overwrites any file of the same name in that folder. On success record the location as `<bucket>/<key`. If the result is an error message, retry once; if it still fails, set `status: "failed"`, set the location to null and put the tool message in `execution_summary`. Never report a location the tool did not confirm. S3 is the default blob storage for all agents in this workflow.
+
+
+
 Input Ingestion:
 - `product_name`: the product name as the PRD states it in its title or document control; use it unchanged in the file name.
 - <workflow_execution_id>: GENERATE A NEW wf- for the agents in this workflow. This is the first step of the workflow, so the id starts here. Make it a fresh random UUID: "wf-" then 32 lowercase hex digits in 8-4-4-4-12 groups. Never copy one from an example, the brief or a previous run; never all zeros; never "unknown". Generate it ONCE and put it in the workflow_execution_id field of your JSON output. Every later agent copies it from here, so it is the one id that the whole run is known by.
@@ -110,6 +113,7 @@ Reflection (self-check before delivery, mechanical only):
 Fix anything this check finds silently. Deeper evaluation is a separate step; this is a self-check only.
 Summary:
 - Append a plain-text `execution_summary` (bullets, not JSON) covering: counts by verdict; deviations recorded and their approval state; open questions raised; delta entries when a baseline was supplied, with how many were applied and how many await review; the blob location written to (or the tool error); knowledge bases consulted and what was used from each; tools invoked (name and outcome); gaps flagged. 
+
 
 # EXPECTED OUTPUT
 

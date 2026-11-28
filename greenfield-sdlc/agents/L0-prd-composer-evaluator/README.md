@@ -31,20 +31,23 @@ markdown) and its original input, and produces:
 
 1. Inherits `workflow_execution_id` from the composer's output and generates
    a fresh `execution_id`
-2. Retrieves the composer's evaluation file from GitHub
+2. Retrieves the composer's evaluation file and `kb-L0-prd-template` from
+   GitHub
 3. Approves a legitimate INSUFFICIENT_CONTEXT as-is (no upload). If the
    composer reported success but the PRD markdown is missing, records a fail
    and escalates rather than rebuilding it from condensed items
-4. **Zero-drop FRs:** every evaluated FR-id is present with its statement
-   unchanged
-5. **Zero-drop NFRs:** every boundary condition appears under the same FR it
-   belongs to — dropped or misattached both fail
-6. **Citation:** every assumption/constraint/risk names real FR-ids or
-   "program-level" and maps to the vision or a specific FR
-7. **Table structure:** Assumptions/Constraints/Risks are the templated
-   tables with sequential ASSUM-/CON-/RISK- IDs matching the items'
-   `short_title` prefixes
-8. **Success-metrics absence** and **compound splits carried verbatim**
+4. **Zero-drop FRs:** every evaluated FR-id is present in `requirements[]`
+   and Section 6 with its statement and citation unchanged
+5. **Zero-drop NFRs:** every boundary condition appears once under the same
+   FR it belongs to — as an NFR-NN row, or an NQ-NN row if TBD — dropped,
+   misattached or misfiled all fail
+6. **Release tags:** every FR and NFR/NQ row has a release with a stated basis
+7. **Citation:** every AS/CON/DP/OR row names real FR-ids or "program-level"
+   and maps to the vision or a specific FR; every vision risk is present;
+   every NSM/LI metric comes from the vision
+8. **Template structure:** every section, callout and column of
+   `kb-L0-prd-template` present, keys sequential, `short_title` prefixes
+   (AS-, CON-, OR-) matching; **compound splits carried verbatim**
 9. Fixes grounded gaps in both the JSON and the PRD markdown so they stay
    consistent; escalates anything needing new scope judgment
 10. On approved or fixed_and_approved, publishes the corrected PRD via
@@ -60,6 +63,8 @@ markdown) and its original input, and produces:
 - **Required:** `github-prd-evaluator-folder-location`,
   `github-prd-evaluator-repo-name`, `github-prd-evaluator-branch` — where the
   composer's evaluation file lives
+- **Required:** `prd-template-github-folder-location`, `agent-github-repo-name`,
+  `agent-github-repo-branch` — where `kb-L0-prd-template` lives
 - **Required:** `prd-upload-confluence-location` — Confluence space_key (or
   folder) to publish to
 
@@ -73,15 +78,15 @@ markdown) and its original input, and produces:
   `fixes_applied[]`, `final_decision`
 - **Artifacts:** `{product_name}-prd.md` with `storage.provider: confluence`
   and the page location, or null when not published
-- **Summary:** overall score and decision, zero-drop results, citation /
-  table-structure / success-metrics findings, what was modified, whether the
+- **Summary:** overall score and decision, zero-drop results, release-tag /
+  citation / success-metrics / template-structure findings, what was modified, whether the
   PRD was uploaded (and where, or why not), KBs, guardrails, gaps flagged
 
 ## Composition
 
 ```
+prompts/L0-prd-composer-evaluator/instructions.md
 agents/L0-prd-composer-evaluator/
-├── L0-prd-composer-evaluator-prompt.md
 ├── evaluation.md
 ├── spec.yaml
 └── README.md

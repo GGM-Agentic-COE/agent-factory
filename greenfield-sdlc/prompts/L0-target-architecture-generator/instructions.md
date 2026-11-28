@@ -21,25 +21,22 @@ Success criteria:
 
 # INSTRUCTIONS
 
-Inputs and Knowledge Bases
-| Name | Kind | What it is |
-|---|---|---|
-| `prd` | Input (markdown) | source: retrieve from confluence using attached confluence reader tool with "page_id" = {{prd-confluence-page-id_string_true}}|
-| `binding-principles` | Input (JSON) | Evaluated binding principles, provided to agent via attached Blob Reader tool |
-| `product_name` | Input (string) | retrieve from prd |
-| `kb-L0-architecture-patterns` | Knowledge base | source: retrieve from confluence using attached confluence reader tool with "page_id" = {{architecture-patterns-confluence-page-id_string_true}}  |
-| `kb-L0-target-architecture-template` | Knowledge base | source: source: retrieve from github using attached github reader tool, by calling the parameters: folder_location = {{target-architecture-template-github-folder-location_string_true}} , repo = {{agent-github-repo-name_string_true}}, branch = {{agent-github-repo-branch_string_true}}  |
-| `kb-L0-enterprise-architecture` | Knowledge base | source: retrieve from confluence using attached confluence reader tool with "page_id" = {{enterprise-architecture-confluence-page-id_string_true}}  |
-| `kb-L0-enterprise-security` | Knowledge base | source: retrieve from confluence using attached confluence reader tool with "page_id" =  {{enterprise-security-confluence-page-id_string_true}} |
-Only these inputs exist. If the request also carries `existing_target_architecture` (a previously approved document, which turns this run into an update with a change register), `reviewer_notes`, `architecture_notes` (external systems and selection state, reviewer roles, decisions taken, known open items) or `epics_and_features` (capability map and coverage check only), use them, and if it does not, proceed without them. The PRD accepts any layout that holds keyed functional requirements, quality requirements, obligations or constraints, assumptions, risks and open questions; use its keys exactly as it defines them. `document_code` for document IDs is the upper-case initials of `product_name` (`HL` gives `HL-ARC-001`).
-Tools (attached at runtime):
-- S3 (ie blob storage) reader: call once with the parameters: `folder_name` = <workflow_execution_id>,
-`file_names` = ["<product_name>-binding-principles.json"], using the inherited <workflow_execution_id>. The folder is already configured in the tool; never list the folder, never choose among several files, never read a file under another workflow identifier. Always use the double-quotation marks (ie ") characters when calling the `file_names` JSON schema. Parse the returned content as JSON. If the result is an error message, `No files found`, `[File not found in folder]`, `[Error reading this file]` or `[Binary content ...]`, retry the call once; if it still fails, return `status: "failed"` with the tool message in `execution_summary` and nothing written.
-- Confluence reader: call the attached confluence reader tool to retrieve the files mentioned in the 'Inputs and Knowledge Bases' table, with inputted page IDs.
-- Github reader: call the attached github reader tool for to retrieve any templates and evaluation files, as specified in the 'Inputs and Knowledge Bases' table, with provided parameters
-- S3 (ie blob storage) writer: call once, after the document is final, with `folder_name = <workflow_execution_id>`, `file_name = {product_name}-target-architecture.md`, `contents = the complete filled target architecture document as markdown, verbatim`. The write overwrites any file of the same name in that folder. On success record the location as `<bucket>/<key`. If the result is an error message, retry once; if it still fails, set `status: "failed"`, set the location to null and put the tool message in `execution_summary`. Never report a location the tool did not confirm.
+Input instructions to follow:
+1. fetch the 'prd' document from confluence using attached tool-L1-confluence-reader with "page_id" = {{prd-confluence-page-id_string_true}} .
+2. retrieve 'product_name' from the PRD, which is given it in the title or document control; use it unchanged in the file name.
+3. fetch the 'binding-principles' from s3 using attached tool-L1-s3-files-reader with the parameters: `folder_name` = <workflow_execution_id>, `file_names` = ["<product_name>-binding-principles.json"], using the inherited `<workflow_execution_id>`.  Always use the double-quotation marks (ie ") characters when calling the `file_names` JSON schema. Parse the returned content as JSON. If the result is an error message, `No files found`, `[File not found in folder]`, `[Error reading this file]` or `[Binary content ...]`, retry the call once; if it still fails, return `status: "failed"` with the tool message in `execution_summary` and nothing written.
+4. fetch 'kb-L0-architecture-patterns' from confluence using attached tool-L1-confluence-reader with "page_id" = {{architecture-patterns-confluence-page-id_string_true}} 
+5. fetch 'kb-L0-enterprise-architecture' from confluence using attached tool-L1-confluence-reader with "page_id" = {{enterprise-architecture-confluence-page-id_string_true}} 
+6. fetch 'kb-L0-enterprise-security' from confluence using attached tool-L1-confluence-reader with "page_id" = {{enterprise-security-confluence-page-id_string_true}} 
+7. fetch the 'kb-L0-target-architecture-template' file from github using attached tool-L1-github-reader by calling the parameters: folder_location = {{target-architecture-template-github-folder-location_string_true}} , repo = {{agent-github-repo-name_string_true}} , branch = {{agent-github-repo-branch_string_true}} 
+Only these inputs exist. Nothing else is required; if the request also carries `existing_binding_principles` (a previously approved document, which turns this run into an update with a delta register) or `reviewer_notes` (human decisions to honour), use them, and if it does not, proceed without them. The PRD accepts any layout that holds keyed functional requirements, quality requirements, obligations or constraints, assumptions, risks and open questions; use its keys exactly as it defines them.
+
+
+Upload instructions to follow:
+- tool-L1-s3-writer: call once, after the document is final, with `folder_name = <workflow_execution_id>`, `file_name = {product_name}-target-architecture.md`, `contents = the complete filled target architecture document as markdown, verbatim`. The write overwrites any file of the same name in that folder. On success record the location as `<bucket>/<key`. If the result is an error message, retry once; if it still fails, set `status: "failed"`, set the location to null and put the tool message in `execution_summary`. Never report a location the tool did not confirm. S3 is the default blob storage for all agents in this workflow.
+
+
 Input Ingestion:
-- `product_name`: the product name as the PRD states it in its title or document control.
 - <workflow_execution_id>: COPY IT, do not create it. The first agent in the workflow creates the ID, every subsequent agent only INHERITS. Take it from the workflow_execution_id field from the JSON output of the previous agent. Never write "wf-unknown" or a made-up id.
 - <execution_id>: GENERATE A NEW exec- PER EVERY AGENT. Generate it in the same format as the <workflow_execution_id> but a NEW RANDOM FRESH UUID per every agent run. The format to follow is "exec-" then 32 lowercase hex digits in 8-4-4-4-12 groups.
 - Read `binding_principles` from blob storage as described under Tools before anything else.

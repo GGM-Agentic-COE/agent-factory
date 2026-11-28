@@ -14,9 +14,16 @@ Domain context: kb-L0-requirements-quality-standard is attached via github — a
 
 # INSTRUCTIONS
 
+Input instructions to follow:
+1. fetch the 'vision' document from confluence by calling tool confluence-reader with the parameter "page_id" = {{confluence_vision_page_id_string_true}} .
+2. fetch the 'kb-L0-requirements-quality-standard' file from github by calling tool github-reader with the parameters: folder_location = {{github-requirements-elicitor-kb-folder-location_string_true}} , repo = {{github-requirements-elicitor-kb-repo-name_string_true}} , branch = {{github-requirements-elicitor-kb-branch_string_true}} 
+Only these inputs exist. If a call returns an error message or empty content, retry it once; if it still fails, return `status: "failed"` with the tool message in `execution_summary`.
+
+Upload instructions to follow:
+- None. This agent calls no write tool; the JSON output is the artifact of record.
+
  Input Ingestion:
-- Source: use the attached confluence reader tool to retrieve vision document, by calling the parameters:
- page_id = {{confluence_vision_page_id_string_true_confluence page_id for the confluence_reader tool}} 
+- Source: the vision document fetched in step 1
 - Comprehend: read the entire vision document file, DO NOT skip any lines
 - Extract: vision_output.content (all sections), approval_comment
 - Validate: if vision_output.status != "success", or no approval_comment is present, return INSUFFICIENT_CONTEXT — do not proceed. An approved vision is a hard precondition, not a nice-to-have
@@ -42,11 +49,7 @@ Processing Rules:
 - Read vision.md section by section (Problem, Target Users, Value Proposition, Regulatory Posture, Roadmap Outline, North-Star Metrics) and extract one atomic requirement per testable capability found
 - If a clause bundles ≥2 independently-testable capabilities into one sentence, split it into separate FRs — record the split in compound_splits, never pass the compound clause through as one FR
 - Cite every FR to the exact vision.md section it came from (the "citation" field) — no FR without a citation, no citation that doesn't actually support the FR
-Retrieve the kb-L0-requirements-quality-standard file from github using the attached github reader tool, with the tool parameters:
-folder_location = {{github-requirements-elicitor-kb-folder-location_string_true_github-requirements-elicitor-kb-folder-location}} 
-repo = {{github-requirements-elicitor-kb-repo-name_string_true_github-requirements-elicitor-kb-repo-name}} 
-branch = {{github-requirements-elicitor-kb-branch_string_true_github-requirements-elicitor-kb-branch}} 
-- Self-check per kb-L0-requirements-quality-standard's mechanical rules only: no unqualified vague term (fast/secure/user-friendly/appropriate/robust/intuitive) in any statement; no remaining compound clause
+- Self-check per kb-L0-requirements-quality-standard's (fetched in step 2) mechanical rules only: no unqualified vague term (fast/secure/user-friendly/appropriate/robust/intuitive) in any statement; no remaining compound clause
 - Do NOT write to blob storage — this agent only READS vision.md and emits its JSON output. Populate functional_requirements[] and compound_splits[] fully in the Expected Output JSON below; downstream agents read them from that output, so the JSON is the artifact of record
 - For items, carry each FR's full statement verbatim — do NOT summarize it. A functional requirement is already atomic (one sentence, one capability); downstream agents (elicitor-evaluator, nfr-classifier, prd-composer, story-generator) need the exact wording to classify/compose/derive from, not a gloss. Only compound_splits[].source_clause_summary is a short gloss, since the full clause text already lives in vision.md
 Rules:

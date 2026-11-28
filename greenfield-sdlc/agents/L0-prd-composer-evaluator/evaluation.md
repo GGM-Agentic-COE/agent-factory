@@ -11,25 +11,33 @@ at runtime, not duplicated here).
       requirements.md FR-id → present in prd.md's requirements[]), not by
       counting and assuming enough exist.
 - [ ] The zero-drop NFR check was done per-FR, per-category (every
-      nfr-spec.md boundary condition → present in the SAME FR's nfrs[] in
-      prd.md), not by a total-row-count comparison that could mask a swap
+      nfr-spec.md boundary condition → present in the SAME FR's nfrs[] and
+      exactly once in prd.md Section 7, as NFR-NN if agreed or NQ-NN if
+      TBD), not by a total-row-count comparison that could mask a swap
       between FRs.
+- [ ] Every FR's and NFR/NQ row's release tag was checked for a stated basis
+      (roadmap phase, value proposition or Priority), not accepted on trust.
 - [ ] Every carried-forward field (Statement, Traces to, Compound
       Requirements Split) was diffed word-for-word against its source
       document — verbatim means verbatim, not paraphrased.
 
 ### Narrative Section Grounding (→ Faithfulness, Hallucination)
-- [ ] Every Assumption/Constraint/Risk finding cites the specific vision.md
+- [ ] Every AS/CON/DP/OR finding cites the specific vision.md
       constraint_id/open_risk id or FR-NNN it should trace to — not a vague
       impression.
 - [ ] Every Risk present in vision.md was checked for presence in prd.md's
-      Risks section verbatim (zero-drop on risks, same rigor as FRs/NFRs).
-- [ ] Any new Assumption, Constraint, or Risk not present in vision.md was
+      OR rows verbatim (zero-drop on risks, same rigor as FRs/NFRs).
+- [ ] Any new AS, CON, DP or OR row not present in vision.md was
       checked to genuinely originate from a specific FR the composer had
       in front of it — not invented to fill out the section.
-- [ ] Success-metrics absence was actually checked (no metrics field/section
-      in items or the retrieved prd.md), not assumed from the schema's own
-      omission of a metrics field.
+- [ ] Every NSM/LI metric and target was checked against vision.md's
+      north_star_metrics and leading indicators — none accepted because it
+      "sounds like" a metric the product would track.
+
+### Template Conformance (→ Consistency)
+- [ ] Section, callout and table-column checks were made against the
+      retrieved kb-L0-prd-template, not against memory of what a PRD
+      usually contains.
 
 ### Out of Scope Verification (→ Faithfulness, Hallucination)
 - [ ] Every Out of Scope entry was checked against the actual FR set in
@@ -56,11 +64,11 @@ at runtime, not duplicated here).
 - [ ] Every Open Question tagged as a TBD boundary condition was checked
       against nfr-spec.md to confirm that boundary condition is still
       "TBD — needs stakeholder input" and hasn't since been resolved.
-- [ ] If a Traceability Matrix is present, its NFR-category and
-      open-question counts per FR were recomputed independently from the
-      Requirements section, not copied from the composer's own summary.
-- [ ] Executive Summary claims (requirement count, approval, biggest
-      constraint/risk, open-question count) were each independently
+- [ ] Appendix A's quality-attribute categories and "Targets to be set"
+      counts per FR were recomputed independently from Sections 6 and 7,
+      not copied from the composer's own summary.
+- [ ] "THE PRODUCT" callout and Bottom-line position claims (requirement
+      counts, releases, biggest obligation/risk) were each independently
       verified against the sections that follow — no claim accepted on
       trust.
 

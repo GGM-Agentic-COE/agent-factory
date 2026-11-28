@@ -16,9 +16,9 @@ purpose:
   business_value: "Requirements and NFRs in separate JSON outputs aren't a document a team can review or approve. The PRD is the Phase 1 artifact of record that the planning agents read as their single source of truth, so nothing may be lost or re-interpreted in composing it."
 
 prompt:
-  ref: "agents/L0-prd-composer/L0-prd-composer-prompt.md"
+  ref: "prompts/L0-prd-composer/instructions.md"
   version: "1.0.0"
-  description: "Fills the embedded PRD template (S4): carries every FR and NFR row verbatim, tags MVP status with a traceable basis, builds Assumptions/Constraints/Risks tables with IDs, rolls TBDs into Open Questions, and writes the executive summary last."
+  description: "Fills kb-L0-prd-template (read from GitHub): carries every FR and NFR boundary condition verbatim (TBDs as NQ rows), tags each FR's release with a traceable basis, builds the compliance (CON), metrics (NSM/LI), assumption (AS), dependency (DP) and risk (OR) tables from the vision, rolls coverage gaps into OQ rows, and writes the product summary last."
 
 contract:
   input_schema: "$ref: schemas/agent-input-contract-schema.json"
@@ -33,6 +33,9 @@ contract:
       requirements_output: { type: object, description: "L0-requirements-elicitor-evaluator's JSON output (functional_requirements[], compound_splits[]); status must be success" }
       nfr_spec_output: { type: object, description: "L0-nfr-classifier-evaluator's JSON output (nfr_classifications[]); status must be success" }
       product_name: { type: string, description: "Human-supplied product name; every vision reference in the PRD is written as {product_name}-vision.md" }
+      prd-template-github-folder-location: { type: string, description: "GitHub folder holding kb-L0-prd-template" }
+      agent-github-repo-name: { type: string, description: "GitHub repository holding the template" }
+      agent-github-repo-branch: { type: string, description: "GitHub branch holding the template" }
     optional_parameters:
       OPTIONAL_vision_doc_confluence_link: { type: string, default: "link NA", description: "Confluence link to the vision document, shown in the PRD legend" }
 
@@ -40,14 +43,17 @@ contract:
     $ref: "output_schema.json"   # content.type: "prd" with items + artifacts[0].content — schema file not yet created
 
 context:
-  knowledge_bases: []   # PRD template is embedded in the prompt (S4); both upstream outputs are consumed in full
+  knowledge_bases:
+    - kb-L0-prd-template                    # fixed section numbering, callout titles and table columns (read from GitHub)
   guardrails:
     - gr-L0-output-schema-validator
     - gr-L0-pii-detection
     - gr-L3-hallucination-detector
     - gr-L3-citation-validator
     - gr-L3-consistency-checker   # zero-drop reconciliation of FRs and NFR boundary conditions
-  tools: []   # no tool access — the PRD is passed in memory; publishing to Confluence is L0-prd-composer-evaluator's job
+  tools:
+    - tool-L0-github-reader-using-app       # reads the template only; tool-L0-github-reader-using-PAT takes the same parameters if that variant is deployed instead
+    # no write tools — the PRD is passed in memory; publishing to Confluence is L0-prd-composer-evaluator's job
 
 quality:
   evaluation_ref: "evaluation.md"   # generator rubric loaded by L0-prd-composer-evaluator (S6) — not yet present in this folder
