@@ -52,7 +52,7 @@ context:
   tools:
     - tool-L0-confluence-reader          # reads the approved vision document
     - tool-L0-github-reader-using-PAT    # reads kb-L0-requirements-quality-standard; tool-L0-github-reader-using-app takes the same folder_location/repo/branch parameters if that variant is deployed instead
-    # read-only — this agent writes nothing to any store; the JSON output is the artifact of record
+    - tool-L0-s3-writer                  # writes <workflow_execution_id>/{product_name}-requirements.json once; the output JSON carries meta points and the location only
 
 quality:
   evaluation_ref: "evaluation.md"   # generator rubric loaded by L0-requirements-elicitor-evaluator (S6) — not yet present in this folder

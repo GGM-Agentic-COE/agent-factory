@@ -6,8 +6,7 @@ produce {product_name}-target-architecture.md. Headings, callouts, tables
 and the *shall* voice are kept exactly; every {placeholder} is replaced;
 table rows repeat as needed. Appendix B is emitted only when a baseline
 document was supplied. Rules for filling each section live in the agent
-prompt, not here. Illustrative structure derived from the HarvestLink
-reference target architecture (HL-ARC-001).
+prompt, not here.
 -->
 
 # Target Architecture Document Template

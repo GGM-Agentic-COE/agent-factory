@@ -5,8 +5,6 @@ The literal document template L0-prd-composer fills to produce
 {product_name}-prd.md. Headings, callouts, tables and the *shall* voice are
 kept exactly; every {placeholder} is replaced; table rows repeat as needed.
 Rules for filling each section live in the agent prompt, not here.
-Illustrative structure derived from the DairyShield reference product
-requirements (DS-PRD-001).
 -->
 
 # Product Requirements Document Template

@@ -30,8 +30,8 @@ contract:
     accepts_file_upload:
       enabled: false
     required_parameters:
-      original_input: { type: object, description: "The input L0-requirements-elicitor received, including vision_output — needed for the full vision.md sections used in the coverage check" }
-      generator_output: { type: object, description: "L0-requirements-elicitor's JSON output (functional_requirements[], compound_splits[])" }
+      generator_output: { type: object, description: "L0-requirements-elicitor's JSON output — supplies workflow_execution_id, status and product_name; the requirement set itself is read from S3" }
+      confluence_vision_page_id: { type: string, description: "Confluence page_id of the approved vision document, passed to tool-L0-confluence-reader" }
       github-requirements-evaluator-folder-location: { type: string, description: "GitHub folder holding the elicitor's evaluation file" }
       github-requirements-evaluator-repo-name: { type: string, description: "GitHub repository holding the elicitor's evaluation file" }
       github-requirements-evaluator-branch: { type: string, description: "GitHub branch holding the elicitor's evaluation file" }
@@ -55,8 +55,10 @@ context:
     - gr-L1-tool-permissions
     - gr-L3-agent-rate-limit
   tools:
+    - tool-L0-s3-files-reader            # reads <workflow_execution_id>/{product_name}-requirements.json — never lists the folder
+    - tool-L0-confluence-reader          # reads the vision document for the coverage check
     - tool-L0-github-reader-using-PAT    # reads the evaluation file and the KB; tool-L0-github-reader-using-app takes the same parameters if that variant is deployed instead
-    # read-only — all corrections live in the JSON output; nothing is written to GitHub or blob storage
+    - tool-L0-s3-writer                  # overwrites <workflow_execution_id>/{product_name}-requirements.json once with the corrected version
 
 quality:
   evaluation_ref: "evaluation.md"   # THIS evaluator's own meta-quality bar, not the elicitor's rubric

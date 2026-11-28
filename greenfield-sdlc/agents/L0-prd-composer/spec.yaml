@@ -10,9 +10,9 @@ metadata:
   created: "2026-10-26"
 
 purpose:
-  description: "Composes the evaluated functional requirements and evaluated NFR set into one Product Requirements Document, with zero requirements or boundary conditions dropped, and passes it in memory to its evaluator."
+  description: "Composes the evaluated functional requirements and evaluated NFR set into one Product Requirements Document, with zero requirements or boundary conditions dropped, and writes it to S3 under <workflow_execution_id>/ for its evaluator."
   input: "Evaluated requirements from L0-requirements-elicitor-evaluator, the evaluated NFR set from L0-nfr-classifier-evaluator, the human-supplied product_name, and an optional Confluence link to the vision document."
-  output: "{product_name}-prd.md in full in artifacts[0].content, plus items restating requirements[] and compound_splits[] in full and condensed (<=150 char) summaries of the executive summary, assumptions, constraints, risks, and open questions."
+  output: "{product_name}-prd.md written to S3 under <workflow_execution_id>/, plus items carrying meta points only (keys, counts, per-FR release and NFR/NQ ids, <=150 char summaries) and the S3 location in artifacts[0].storage."
   business_value: "Requirements and NFRs in separate JSON outputs aren't a document a team can review or approve. The PRD is the Phase 1 artifact of record that the planning agents read as their single source of truth, so nothing may be lost or re-interpreted in composing it."
 
 prompt:
@@ -30,9 +30,8 @@ contract:
     accepts_file_upload:
       enabled: false
     required_parameters:
-      requirements_output: { type: object, description: "L0-requirements-elicitor-evaluator's JSON output (functional_requirements[], compound_splits[]); status must be success" }
-      nfr_spec_output: { type: object, description: "L0-nfr-classifier-evaluator's JSON output (nfr_classifications[]); status must be success" }
-      product_name: { type: string, description: "Human-supplied product name; every vision reference in the PRD is written as {product_name}-vision.md" }
+      nfr_spec_output: { type: object, description: "L0-nfr-classifier-evaluator's JSON output — supplies workflow_execution_id, status (must be success) and product_name; both evaluated files are read from S3" }
+      confluence_vision_page_id: { type: string, description: "Confluence page_id of the approved vision document, passed to tool-L0-confluence-reader" }
       prd-template-github-folder-location: { type: string, description: "GitHub folder holding kb-L0-prd-template" }
       agent-github-repo-name: { type: string, description: "GitHub repository holding the template" }
       agent-github-repo-branch: { type: string, description: "GitHub branch holding the template" }
@@ -40,7 +39,7 @@ contract:
       OPTIONAL_vision_doc_confluence_link: { type: string, default: "link NA", description: "Confluence link to the vision document, shown in the PRD legend" }
 
   output:
-    $ref: "output_schema.json"   # content.type: "prd" with items + artifacts[0].content — schema file not yet created
+    $ref: "output_schema.json"   # content.type: "prd" with items + artifacts[].storage (provider: s3) — schema file not yet created
 
 context:
   knowledge_bases:
@@ -52,8 +51,10 @@ context:
     - gr-L3-citation-validator
     - gr-L3-consistency-checker   # zero-drop reconciliation of FRs and NFR boundary conditions
   tools:
-    - tool-L0-github-reader-using-app       # reads the template only; tool-L0-github-reader-using-PAT takes the same parameters if that variant is deployed instead
-    # no write tools — the PRD is passed in memory; publishing to Confluence is L0-prd-composer-evaluator's job
+    - tool-L0-s3-files-reader               # reads both evaluated files from <workflow_execution_id>/ in one call — never lists the folder
+    - tool-L0-confluence-reader             # reads the vision document
+    - tool-L0-github-reader-using-app       # reads the template; tool-L0-github-reader-using-PAT takes the same parameters if that variant is deployed instead
+    - tool-L0-s3-writer                     # writes <workflow_execution_id>/{product_name}-prd.md once; publishing to Confluence is L0-prd-composer-evaluator's job
 
 quality:
   evaluation_ref: "evaluation.md"   # generator rubric loaded by L0-prd-composer-evaluator (S6) — not yet present in this folder

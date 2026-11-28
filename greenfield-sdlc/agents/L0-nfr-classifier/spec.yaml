@@ -30,7 +30,8 @@ contract:
     accepts_file_upload:
       enabled: false
     required_parameters:
-      requirements_output: { type: object, description: "L0-requirements-elicitor-evaluator's JSON output; status must be success and functional_requirements non-empty" }
+      requirements_output: { type: object, description: "L0-requirements-elicitor-evaluator's JSON output — supplies workflow_execution_id, status (must be success) and product_name; the evaluated requirements are read from S3" }
+      confluence_vision_page_id: { type: string, description: "Confluence page_id of the approved vision document, passed to tool-L0-confluence-reader" }
       confluence_vision_page_id: { type: string, description: "Confluence page_id of the vision document, read for its regulatory feasibility analysis" }
       github-nfr-classifier-kb-folder-location: { type: string, description: "GitHub folder holding kb-L0-nfr-classification-taxonomy" }
       github-nfr-classifier-kb-repo-name: { type: string, description: "GitHub repository holding kb-L0-nfr-classification-taxonomy" }
@@ -55,9 +56,10 @@ context:
     - gr-L1-tool-permissions
     - gr-L3-agent-rate-limit
   tools:
+    - tool-L0-s3-files-reader            # reads <workflow_execution_id>/{product_name}-requirements.json — never lists the folder
     - tool-L0-confluence-reader          # reads the vision document's regulatory feasibility analysis
     - tool-L0-github-reader-using-PAT    # reads kb-L0-nfr-classification-taxonomy; tool-L0-github-reader-using-app takes the same parameters if that variant is deployed instead
-    # read-only — this agent writes nothing to any store; the JSON output is the artifact of record
+    - tool-L0-s3-writer                  # writes <workflow_execution_id>/{product_name}-nfr-classification.json once; the output JSON carries meta points and the location only
 
 quality:
   evaluation_ref: "evaluation.md"   # generator rubric loaded by L0-nfr-classifier-evaluator (S6) — not yet present in this folder

@@ -30,8 +30,8 @@ contract:
     accepts_file_upload:
       enabled: false
     required_parameters:
-      original_input: { type: object, description: "The input L0-nfr-classifier received — requirements_output and regulatory_feasibility_output, used for independent re-derivation" }
-      generator_output: { type: object, description: "L0-nfr-classifier's JSON output (nfr_classifications[])" }
+      generator_output: { type: object, description: "L0-nfr-classifier's JSON output — supplies workflow_execution_id, status and product_name; the classification and evaluated requirements are read from S3" }
+      confluence_vision_page_id: { type: string, description: "Confluence page_id of the approved vision document, passed to tool-L0-confluence-reader" }
       github-nfr-evaluator-folder-location: { type: string, description: "GitHub folder holding the classifier's evaluation file" }
       github-nfr-evaluator-repo-name: { type: string, description: "GitHub repository holding the classifier's evaluation file" }
       github-nfr-evaluator-branch: { type: string, description: "GitHub branch holding the classifier's evaluation file" }
@@ -55,8 +55,10 @@ context:
     - gr-L1-tool-permissions
     - gr-L3-agent-rate-limit
   tools:
+    - tool-L0-s3-files-reader            # reads the classification and evaluated requirements files from <workflow_execution_id>/ in one call — never lists the folder
+    - tool-L0-confluence-reader          # reads the vision document's regulatory feasibility analysis
     - tool-L0-github-reader-using-PAT    # reads the evaluation file and the taxonomy KB; tool-L0-github-reader-using-app takes the same parameters if that variant is deployed instead
-    # read-only — all corrections live in the JSON output; nothing is written to any external store
+    - tool-L0-s3-writer                  # overwrites <workflow_execution_id>/{product_name}-nfr-classification.json once with the corrected version
 
 quality:
   evaluation_ref: "evaluation.md"   # THIS evaluator's own meta-quality bar, not the classifier's rubric

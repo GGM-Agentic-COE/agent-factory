@@ -11,7 +11,7 @@ metadata:
 
 purpose:
   description: "Independently verifies L0-prd-composer's PRD for zero-drop FR/NFR composition, traceable release tags, citable assumptions/obligations/dependencies/risks, success metrics carried only from the vision, and conformance to kb-L0-prd-template, fixes grounded gaps in both the JSON and the PRD markdown, and publishes the approved PRD to Confluence."
-  input: "L0-prd-composer's output held in memory (items plus the full PRD markdown in artifacts[0].content) and its original input (evaluated requirements and evaluated NFR set)."
+  input: "L0-prd-composer's output JSON (meta points and status), the draft PRD and both evaluated files read from S3 under <workflow_execution_id>/, the vision document from Confluence, and the evaluation file and PRD template from GitHub."
   output: "The corrected PRD items in the same structure the composer emits, an evaluation block (scores, findings, fixes_applied, final_decision), and an artifact pointing to the published Confluence page (null location when not published)."
   business_value: "The PRD is the single source of truth for the planning agents, so a dropped or misattached requirement here propagates everywhere. This is the only agent permitted to publish the PRD, and nothing is published until it has been independently verified."
 
@@ -30,8 +30,8 @@ contract:
     accepts_file_upload:
       enabled: false
     required_parameters:
-      original_input: { type: object, description: "The input L0-prd-composer received — requirements_output and nfr_spec_output, used for zero-drop re-derivation" }
-      generator_output: { type: object, description: "L0-prd-composer's JSON output, including the full PRD markdown in artifacts[0].content" }
+      generator_output: { type: object, description: "L0-prd-composer's JSON output — supplies workflow_execution_id, status, product_name and items meta points; the PRD and both evaluated files are read from S3" }
+      confluence_vision_page_id: { type: string, description: "Confluence page_id of the approved vision document, passed to tool-L0-confluence-reader" }
       github-prd-evaluator-folder-location: { type: string, description: "GitHub folder holding the composer's evaluation file" }
       github-prd-evaluator-repo-name: { type: string, description: "GitHub repository holding the composer's evaluation file" }
       github-prd-evaluator-branch: { type: string, description: "GitHub branch holding the composer's evaluation file" }
@@ -56,6 +56,8 @@ context:
     - gr-L1-tool-permissions        # holds a write tool — publish only on approved / fixed_and_approved
     - gr-L3-agent-rate-limit
   tools:
+    - tool-L0-s3-files-reader            # reads the draft PRD and both evaluated files from <workflow_execution_id>/ in one call — never lists the folder; never writes to S3
+    - tool-L0-confluence-reader          # reads the vision document for risk and metric citation checks
     - tool-L0-github-reader-using-PAT    # reads the composer's evaluation file and kb-L0-prd-template; tool-L0-github-reader-using-app takes the same parameters if that variant is deployed instead
     - tool-L0-confluence-writer          # publishes the final, corrected PRD; never called on escalate_to_hitl or INSUFFICIENT_CONTEXT
 
